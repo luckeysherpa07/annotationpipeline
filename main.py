@@ -1,10 +1,25 @@
-from pathlib import Path
+from annotation_feature import pipeline
 
-dataset_folder = Path("dataset")
-video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
+def main():
+    options = {
+        "1": ("Run Pipeline", pipeline.run),
+    }
 
-for file in dataset_folder.rglob("*"):
-    if file.is_file() and file.suffix.lower() in video_extensions:
-        name = file.name.lower()
-        if "rgb" in name and "night" in name:
-            print(file.name)
+    while True:
+        print("\nChoose an option:")
+        for key, (description, _) in options.items():
+            print(f"{key}. {description}")
+        print("0. Exit")
+
+        choice = input("Enter the number: ").strip()
+        if choice == "0":
+            print("Exiting...")
+            break
+        elif choice in options:
+            print(f"\nRunning {options[choice][0]}...\n")
+            options[choice][1]()  # Call the function
+        else:
+            print("Invalid choice!")
+
+if __name__ == "__main__":
+    main()
