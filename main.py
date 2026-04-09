@@ -5,5 +5,6 @@ video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".m
 
 for file in dataset_folder.rglob("*"):
     if file.is_file() and file.suffix.lower() in video_extensions:
-        if "rgb" in file.name.lower():
+        name = file.name.lower()
+        if "rgb" in name and "night" in name:
             print(file.name)
