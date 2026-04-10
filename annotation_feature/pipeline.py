@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 from openai import OpenAI
 from prompts import PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
@@ -142,6 +143,12 @@ def run():
             results[str(file)] = f"ERROR: {e}"
             print(f"Failed: {file.name} -> {e}")
 
+    # Save results to JSON file
+    output_file = Path("dataset") / "results.json"
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+    
+    print(f"\nResults saved to: {output_file}")
     print(results)
     return results
 
