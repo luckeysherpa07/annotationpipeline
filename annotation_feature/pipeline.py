@@ -107,13 +107,31 @@ def run():
     video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
 
     results = {}
+    
+    # First, collect night and day files
+    night_file = None
+    day_file = None
+    
+    for file in dataset_folder.rglob("*"):
+        if not file.is_file() or file.suffix.lower() not in video_extensions:
+            continue
+        
+        name = file.name.lower()
+        if "rgb" not in name:
+            continue
+        
+        if "night" in name:
+            night_file = file
+        elif "day" in name:
+            day_file = file
 
+    # Process all RGB files
     for file in dataset_folder.rglob("*"):
         if not file.is_file() or file.suffix.lower() not in video_extensions:
             continue
 
         name = file.name.lower()
-        if "rgb" not in name or "night" not in name:
+        if "rgb" not in name:
             continue
 
         try:
@@ -127,15 +145,27 @@ def run():
                 question_prompt = PROMPTS[annotation_type]["question_prompt"]
                 answering_prompt = PROMPTS[annotation_type]["answering_prompt"]
 
-                #### Uncomment for OpenAI version #####
-                # caption = get_caption_from_openai(client, file, caption_prompt)
-                # question = get_question_from_openai(client, caption, question_prompt)
-                # answer = get_answer_from_openai(client, file, question, answering_prompt)
+                caption = None
+                question = None
+                answer = None
 
-                # Use DEMO_RESULT for the corresponding annotation type
-                caption = DEMO_RESULT[annotation_type]["caption"]
-                question = DEMO_RESULT[annotation_type]["question"]
-                answer = DEMO_RESULT[annotation_type]["answer"]
+                # Step 1: Get caption from night file
+                if night_file:
+                    #### Uncomment for OpenAI version #####
+                    # caption = get_caption_from_openai(client, night_file, caption_prompt)
+                    caption = DEMO_RESULT[annotation_type]["caption"]
+                
+                # Step 2: Get question from caption
+                if caption:
+                    #### Uncomment for OpenAI version #####
+                    # question = get_question_from_openai(client, caption, question_prompt)
+                    question = DEMO_RESULT[annotation_type]["question"]
+                
+                # Step 3: Get answer from day file and question
+                if day_file and question:
+                    #### Uncomment for OpenAI version #####
+                    # answer = get_answer_from_openai(client, day_file, question, answering_prompt)
+                    answer = DEMO_RESULT[annotation_type]["answer"]
 
                 file_results[annotation_type] = {
                     "caption": caption,
