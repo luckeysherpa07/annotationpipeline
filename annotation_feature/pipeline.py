@@ -1,7 +1,7 @@
 from pathlib import Path
 from openai import OpenAI
-from ..prompts import PROMPTS
-from .demo_result import DEMO_RESULT
+from prompts import PROMPTS
+from annotation_feature.demo_result import DEMO_RESULT
 
 def get_caption_from_openai(client, file, caption_prompt):
     """
