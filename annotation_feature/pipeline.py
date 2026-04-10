@@ -1,8 +1,23 @@
 from pathlib import Path
 import json
-from openai import OpenAI
 from prompts import PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+
+def get_pair_key(file: Path) -> str:
+    """
+    Build a shared key for matching day/night RGB videos from the same scene.
+    """
+    stem = file.stem.lower()
+    for token in ("_night", "_day", "night", "day"):
+        stem = stem.replace(token, "")
+    stem = stem.replace("__", "_").strip("_")
+    return str(file.parent / stem)
 
 def get_caption_from_openai(client, file, caption_prompt):
     """
@@ -107,38 +122,39 @@ def run():
     video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
 
     results = {}
-    
-    # First, collect night and day files
-    night_file = None
-    day_file = None
-    
+
+    # First, collect day/night RGB files and group them into pairs.
+    paired_files = {}
+
     for file in dataset_folder.rglob("*"):
         if not file.is_file() or file.suffix.lower() not in video_extensions:
             continue
-        
+
         name = file.name.lower()
         if "rgb" not in name:
             continue
-        
+
+        pair_key = get_pair_key(file)
+        paired_files.setdefault(pair_key, {"day": None, "night": None})
+
         if "night" in name:
-            night_file = file
+            paired_files[pair_key]["night"] = file
         elif "day" in name:
-            day_file = file
+            paired_files[pair_key]["day"] = file
 
-    # Process all RGB files
-    for file in dataset_folder.rglob("*"):
-        if not file.is_file() or file.suffix.lower() not in video_extensions:
-            continue
+    # Process one combined result for each day/night pair.
+    for pair_key, files in paired_files.items():
+        night_file = files["night"]
+        day_file = files["day"]
 
-        name = file.name.lower()
-        if "rgb" not in name:
+        if not night_file and not day_file:
             continue
 
         try:
-            print(f"Processing: {file}")
+            print(f"Processing pair: {pair_key}")
 
             file_results = {}
-            
+
             # Process each annotation type from PROMPTS
             for annotation_type in PROMPTS.keys():
                 caption_prompt = PROMPTS[annotation_type]["caption_prompt"]
@@ -173,12 +189,16 @@ def run():
                     "answer": answer
                 }
 
-            results[str(file)] = file_results
-            print(f"Done: {file.name}")
+            results[pair_key] = {
+                "night_file": str(night_file) if night_file else None,
+                "day_file": str(day_file) if day_file else None,
+                "annotations": file_results,
+            }
+            print(f"Done: {pair_key}")
 
         except Exception as e:
-            results[str(file)] = f"ERROR: {e}"
-            print(f"Failed: {file.name} -> {e}")
+            results[pair_key] = f"ERROR: {e}"
+            print(f"Failed: {pair_key} -> {e}")
 
     # Save results to JSON file
     output_file = Path("dataset") / "results.json"
