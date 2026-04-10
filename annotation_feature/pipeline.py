@@ -105,9 +105,6 @@ def run():
 
     dataset_folder = Path("dataset")
     video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
-    caption_prompt = PROMPTS["object_recognition"]["caption_prompt"]
-    question_prompt = PROMPTS["object_recognition"]["question_prompt"]
-    answering_prompt = PROMPTS["object_recognition"]["answering_prompt"]
 
     results = {}
 
@@ -122,21 +119,31 @@ def run():
         try:
             print(f"Processing: {file}")
 
-            #### Uncomment for OpenAI version #####
-            # caption = get_caption_from_openai(client, file, caption_prompt)
-            # question = get_question_from_openai(client, caption, question_prompt)
-            # answer = get_answer_from_openai(client, file, question, answering_prompt)
+            file_results = {}
+            
+            # Process each annotation type from PROMPTS
+            for annotation_type in PROMPTS.keys():
+                caption_prompt = PROMPTS[annotation_type]["caption_prompt"]
+                question_prompt = PROMPTS[annotation_type]["question_prompt"]
+                answering_prompt = PROMPTS[annotation_type]["answering_prompt"]
 
-            caption = DEMO_RESULT["caption"]
-            question = DEMO_RESULT["question"]
-            answer = DEMO_RESULT["answer"]
+                #### Uncomment for OpenAI version #####
+                # caption = get_caption_from_openai(client, file, caption_prompt)
+                # question = get_question_from_openai(client, caption, question_prompt)
+                # answer = get_answer_from_openai(client, file, question, answering_prompt)
 
-            results[str(file)] = {
-                "caption": caption,
-                "question": question,
-                "answer": answer
-            }
+                # Use DEMO_RESULT for the corresponding annotation type
+                caption = DEMO_RESULT[annotation_type]["caption"]
+                question = DEMO_RESULT[annotation_type]["question"]
+                answer = DEMO_RESULT[annotation_type]["answer"]
 
+                file_results[annotation_type] = {
+                    "caption": caption,
+                    "question": question,
+                    "answer": answer
+                }
+
+            results[str(file)] = file_results
             print(f"Done: {file.name}")
 
         except Exception as e:
