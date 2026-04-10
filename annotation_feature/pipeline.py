@@ -116,6 +116,7 @@ def get_answer_from_openai(client, file, question, answering_prompt):
 
 
 def run():
+    #### Uncomment for OpenAI version #####
     # client = OpenAI()
 
     dataset_folder = Path("dataset")
@@ -200,8 +201,8 @@ def run():
             results[pair_key] = f"ERROR: {e}"
             print(f"Failed: {pair_key} -> {e}")
 
-    # Save results to JSON file
-    output_file = Path("dataset") / "results.json"
+    # Save results to JSON file at the project root
+    output_file = Path("qa_results.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     
