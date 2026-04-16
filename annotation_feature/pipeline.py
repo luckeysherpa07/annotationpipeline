@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from prompts.rgb_prompts import PROMPTS
+from prompts.rgb_prompts import RGB_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
 try:
@@ -156,11 +156,11 @@ def run():
 
             file_results = {}
 
-            # Process each annotation type from PROMPTS
-            for annotation_type in PROMPTS.keys():
-                caption_prompt = PROMPTS[annotation_type]["caption_prompt"]
-                question_prompt = PROMPTS[annotation_type]["question_prompt"]
-                answering_prompt = PROMPTS[annotation_type]["answering_prompt"]
+            # Process each annotation type from RGB_PROMPTS
+            for annotation_type in RGB_PROMPTS.keys():
+                caption_prompt = RGB_PROMPTS[annotation_type]["caption_prompt"]
+                question_prompt = RGB_PROMPTS[annotation_type]["question_prompt"]
+                answering_prompt = RGB_PROMPTS[annotation_type]["answering_prompt"]
 
                 caption = None
                 question = None

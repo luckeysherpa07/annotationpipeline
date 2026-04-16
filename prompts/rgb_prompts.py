@@ -1,4 +1,4 @@
-PROMPTS = {
+RGB_PROMPTS = {
     "object_recognition": {
         "caption_prompt": """I am specifically focusing on visual recognition related QA type, thus can caption my input video frames paying attention to the information that is closely related to visual information, for example, scene, objects, color, texture. Please give a detailed caption that enumerate everything you can identify.""",
 
