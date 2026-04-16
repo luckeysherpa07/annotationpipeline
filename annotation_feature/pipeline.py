@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from rgb_prompts import PROMPTS
+from prompts.rgb_prompts import PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
 try:
