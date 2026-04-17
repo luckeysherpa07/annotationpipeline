@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import json
 import base64
 from prompts.rgb_prompts import RGB_PROMPTS
@@ -6,9 +7,46 @@ from annotation_feature.demo_result import DEMO_RESULT
 from annotation_feature.video_preprocessor import preprocess_videos
 
 try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+try:
     from openai import OpenAI
 except ImportError:
     OpenAI = None
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ENV_FILE = PROJECT_ROOT / ".env"
+
+
+def load_environment() -> None:
+    """
+    Load local environment variables from the project .env file when available.
+    """
+    if load_dotenv is not None:
+        load_dotenv(dotenv_path=ENV_FILE, override=True)
+
+
+def create_openai_client():
+    """
+    Build an OpenAI client after confirming the SDK and API key are available.
+    """
+    load_environment()
+
+    if OpenAI is None:
+        raise ImportError(
+            "The OpenAI SDK is not installed. Install dependencies from requirements.txt first."
+        )
+
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError(
+            f"Missing OPENAI_API_KEY. Set it in your environment or add it to {ENV_FILE}."
+        )
+
+    return OpenAI()
 
 
 def get_pair_key(file: Path) -> str:
@@ -171,7 +209,12 @@ def get_answer_from_openai(client, frame_paths: list, question: str, answering_p
     return response.choices[0].message.content
 
 
-def run(test_mode: bool = False, test_pair_index: int = 0, skip_api: bool = False):
+def run(
+    test_mode: bool = False,
+    test_pair_index: int = 0,
+    skip_api: bool = False,
+    dataset_folder: Path | str = "dataset",
+):
     """
     Run the annotation pipeline.
     
@@ -179,6 +222,7 @@ def run(test_mode: bool = False, test_pair_index: int = 0, skip_api: bool = Fals
         test_mode: If True, only process one video pair for testing
         test_pair_index: Which video pair to process in test mode (0 = first)
         skip_api: If True, skip OpenAI API calls and use DEMO_RESULT instead
+        dataset_folder: Dataset directory containing the source videos
     """
     if test_mode:
         print("=" * 50)
@@ -187,13 +231,20 @@ def run(test_mode: bool = False, test_pair_index: int = 0, skip_api: bool = Fals
         if skip_api:
             print("API calls disabled - using DEMO_RESULT data\n")
     
-    #### Uncomment for OpenAI version #####
-    client = OpenAI()
+    client = None
+    if not skip_api:
+        client = create_openai_client()
 
-    dataset_folder = Path("dataset")
-    video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
-
+    dataset_folder = Path(dataset_folder)
     results = {}
+
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find videos in: {dataset_folder}")
+        return results
+
+    print(f"Dataset directory listing for {dataset_folder}:")
+    print(os.listdir(dataset_folder))
 
     # Preprocess all videos and extract frames
     print("Preprocessing videos...")
