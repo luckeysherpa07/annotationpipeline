@@ -1,3 +1,68 @@
 {
-  "dataset\\make_coffee_split\\make_coffee_rgb": "ERROR: Error code: 401 - {'error': {'message': 'Incorrect API key provided: annotati***********2345. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+  "dataset\\make_coffee_split\\make_coffee_rgb": {
+    "night_file": "dataset\\make_coffee_split\\make_coffee_night_rgb.mp4",
+    "day_file": "dataset\\make_coffee_split\\make_coffee_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The video frames depict a kitchen or pantry environment. Initially, a white table with water droplets on its surface is seen, with a modern white chair tucked underneath. Next to the table is a silver kitchen appliance. In the background, there is a white door and a silver drying rack leaning against the wall. The camera then moves to a white built-in shelf system containing various grocery items including a blue bag of 'HOME BARISTA' coffee, a white paper bag, jars of Tahina, bottles of oil or sauces, and several boxes and cans.",
+        "question": "What color is the bag of 'HOME BARISTA' coffee located on the pantry shelf?",
+        "answer": "The bag of coffee is blue."
+      },
+      "spatial_reasoning": {
+        "caption": "In the scene, a white chair is tucked under a white table. A silver drying rack is positioned against the wall between a white door and the kitchen shelves. On the shelves, a blue bag of coffee is placed to the right of a white flour bag. A jar of Tahina is situated to the left of the white flour bag. The distance between the initial position at the table and the shelves is approximately 2 to 3 steps.",
+        "question": "What object is positioned directly to the right of the white bag on the middle shelf?",
+        "answer": "A blue bag of coffee."
+      },
+      "text_recognition": {
+        "caption": "On the pantry shelves, several texts are identifiable. On frame 120 and 150, a blue bag has the text 'HOME BARISTA' and 'CAFFE CREMA DOLCE' printed on it, likely for branding and product identification. On frame 120, a jar is labeled with the word 'Tahina', indicating its contents. Small numbers like '500g' can be seen on some packaging, used for weight specification.",
+        "question": "1. What is the brand name visible on the blue bag? 2. What specific type of coffee is mentioned on the blue bag? 3. What word is printed on the green and white jar? 4. In which frame is the 'HOME BARISTA' text most clearly visible? 5. What does the text 'Barista' imply about the coffee? 6. Where is the 'Tahina' text located? 7. Is there any weight measurement visible on the coffee bag? 8. What language is the primary text on the jars?",
+        "answer": "1. Home Barista. 2. Caffe Crema Dolce. 3. Tahina. 4. Frame 150. 5. It implies professional-grade coffee. 6. On a jar on the middle shelf. 7. Yes, '500g' is partially visible. 8. English."
+      },
+      "scene_sequence": {
+        "caption": "The video starts with a close-up of a white table surface with water droplets, moving past a white chair. It then transitions past a silver drying rack and a white door to reach a set of white pantry shelves. Finally, the camera focuses on the middle shelf where hands reach out to interact with a blue coffee bag.",
+        "question": "1. What’s the sequence of scenes I just passed? 2. What did I pass immediately before reaching the shelves? 3. Which room appears to connect the dining table area and the pantry? 4. What was the first object seen in the video? 5. What was on the surface of the table? 6. Where was the chair located relative to the table? 7. What silver object was leaning against the wall? 8. What was the final destination of my movement? 9. Did I pass a door during the sequence? 10. What did I do once I reached the shelves?",
+        "answer": "1. White table, drying rack/door, pantry shelves. 2. A silver drying rack and a white door. 3. A kitchen or hallway area. 4. A white table. 5. Water droplets and a kitchen appliance. 6. Tucked underneath it. 7. A drying rack. 8. The pantry shelves. 9. Yes, a white door. 10. Reached for a bag of coffee."
+      },
+      "light_recongnition": {
+        "caption": "The scene is lit by interior artificial lighting, likely coming from a ceiling fixture above the kitchen area. The light is white and provides even illumination across the table and shelves in the day frames, while it is extremely dim in the night frames, making objects appear as dark silhouettes.",
+        "question": "From which direction is the main light source illuminating the pantry shelves?",
+        "answer": "The light source is coming from above."
+      },
+      "light_change": {
+        "caption": "The video exhibits a significant transition from extremely low light conditions in the beginning to a brightly lit environment as the camera moves towards the kitchen shelves. The illumination becomes much stronger, allowing for clear visibility of colors and labels.",
+        "question": "1. Did the lights appear to turn on during the video? 2. Is the environment getting brighter as I move? 3. Is the light source approaching me? 4. Are there any shadows visible on the shelves? 5. Does the light color change from warm to cool? 6. Is the table surface reflective under the light? 7. Does the camera lens flare occur? 8. Is the light inside the pantry cabinet as bright as the rest of the room?",
+        "answer": "1. Yes, the scene transitions from very dark to bright. 2. Yes. 3. No, the light source is fixed. 4. Yes, there are shadows cast by items on the shelves. 5. No, it remains a consistent white light. 6. Yes, the water droplets on the white table show reflections. 7. No. 8. No, the back of the shelves is slightly darker."
+      },
+      "counting": {
+        "caption": "Several household and pantry items are visible: 1 white table, 1 white chair, 1 silver drying rack, 1 blue coffee bag, 1 white flour bag, 1 jar of Tahina, at least 4 bottles of various liquids, and several cans/boxes on multiple shelves.",
+        "question": "1. How many white tables are visible? 2. How many chairs are tucked under the table? 3. How many blue coffee bags are on the shelf? 4. How many jars of Tahina do you see? 5. How many silver drying racks are in the scene? 6. How many levels of shelves are visible in the pantry? 7. How many hands reach for the coffee? 8. How many white doors are passed? 9. How many white bags are on the middle shelf? 10. How many kitchen appliances are on the table?",
+        "answer": "1. One. 2. One. 3. One. 4. One. 5. One. 6. Three main levels are visible. 7. Two hands. 8. One. 9. One. 10. One (silver pot)."
+      },
+      "dynamic_counting": {
+        "caption": "The primary movement involves two hands entering the frame to interact with objects. One hand reaches for and adjusts the blue coffee bag on the shelf starting at frame 120 and ending at frame 150. No other dynamic objects like cars or other people are present.",
+        "question": "1. How many hands enter the frame to touch the shelf items? 2. Are any objects seen falling from the shelf? 3. Do any people walk past me in the background? 4. How many bags are picked up or moved? 5. Is a cabinet door being opened or closed? 6. Are there any moving pets in the kitchen? 7. How many objects on the table are moved? 8. Is any liquid seen splashing from the table?",
+        "answer": "1. Two hands. 2. No. 3. No. 4. One (the blue coffee bag). 5. No. 6. No. 7. Zero. 8. No."
+      },
+      "non_common": {
+        "caption": "The layout appears logical and follows common household organization. The table, chair, drying rack, and pantry items are all in appropriate locations for a kitchen area. There is no evidence of floating objects or mesh clipping in the day frames.",
+        "question": "Are there any objects in the video that appear to be floating or clipping through furniture?",
+        "answer": "No, all objects are placed naturally."
+      },
+      "navigation": {
+        "caption": "To navigate from the starting point at the table to the pantry, I must move forward and slightly to the right, taking approximately 3 steps. The path leads past a drying rack on the right and a white door on the left before reaching the pantry cabinet.",
+        "question": "1. Which way should I turn from the table to face the pantry? 2. How many steps does it take to reach the shelves? 3. Is the drying rack to my left or right as I approach the pantry? 4. Where is the white door located relative to the pantry? 5. What is the fastest way to get to the coffee bag? 6. Do I need to turn left at any point? 7. Is there any obstacle on the floor? 8. Where is the chair in relation to my starting path? 9. Is the pantry located in a separate room? 10. How do I get back to the table from the shelves?",
+        "answer": "1. Turn slightly right. 2. About 3 steps. 3. To the right. 4. It is to the left of the pantry shelves. 5. Walk straight past the drying rack. 6. No, mostly straight or a slight right. 7. No. 8. It is behind the starting point, tucked under the table. 9. No, it is in the same kitchen area. 10. Turn around and walk 3 steps back."
+      },
+      "dynamic_recognition": {
+        "caption": "My hands appear in the frame starting at frame 120, reaching towards the middle shelf. By frame 150, both hands are firmly grasping and adjusting the blue 'HOME BARISTA' coffee bag. The interaction is deliberate and controlled.",
+        "question": "Did a person's hands appear and interact with an object on the shelf?",
+        "answer": "Yes, two hands appeared and grasped a blue bag of coffee between frame 120 and 150."
+      },
+      "action": {
+        "caption": "I moved from the table towards the pantry shelves to retrieve or check an item. Upon reaching the shelves, I used both hands to reach for and hold the blue 'HOME BARISTA' coffee bag. The purpose was likely to check the contents or prepare to make coffee. The consequence was that the bag was moved and shifted from its original position on the shelf.",
+        "question": "1. What action am I performing with the blue bag? 2. Which shelf level am I interacting with? 3. Did I use one or two hands to grab the bag? 4. What was the likely purpose of my action? 5. Did I move any other items besides the coffee? 6. What happened to the bag after I touched it? 7. Did I open the pantry door first? 8. Am I holding the bag by the top or the sides?",
+        "answer": "1. Reaching for and grasping it. 2. The middle shelf. 3. Two hands. 4. To retrieve or inspect the coffee. 5. No. 6. It was shifted and lifted slightly. 7. No, the shelves were already open. 8. By the sides near the bottom."
+      }
+    }
+  }
 }
