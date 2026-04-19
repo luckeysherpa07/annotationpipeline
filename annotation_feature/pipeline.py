@@ -1,10 +1,18 @@
 from pathlib import Path
 import os
+import sys
+
+# Add project root to path for imports
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import json
 import base64
 from prompts.rgb_prompts import RGB_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 from annotation_feature.video_preprocessor import preprocess_videos
+
+video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
 
 try:
     from dotenv import load_dotenv
@@ -12,9 +20,11 @@ except ImportError:
     load_dotenv = None
 
 try:
-    from openai import OpenAI
+    from google import genai
+    from google.genai import types
 except ImportError:
-    OpenAI = None
+    genai = None
+    types = None
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -29,24 +39,24 @@ def load_environment() -> None:
         load_dotenv(dotenv_path=ENV_FILE, override=True)
 
 
-def create_openai_client():
+def create_gemini_client():
     """
-    Build an OpenAI client after confirming the SDK and API key are available.
+    Build a Gemini client after confirming the SDK and API key are available.
     """
     load_environment()
 
-    if OpenAI is None:
+    if genai is None:
         raise ImportError(
-            "The OpenAI SDK is not installed. Install dependencies from requirements.txt first."
+            "The Google GenAI SDK is not installed. Install dependencies from requirements.txt first."
         )
 
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError(
-            f"Missing OPENAI_API_KEY. Set it in your environment or add it to {ENV_FILE}."
+            f"Missing GEMINI_API_KEY. Set it in your environment or add it to {ENV_FILE}."
         )
 
-    return OpenAI()
+    return genai.Client()
 
 
 def get_pair_key(file: Path) -> str:
@@ -80,12 +90,12 @@ def encode_frames_to_base64(frame_paths: list) -> list:
     return encoded_frames
 
 
-def get_caption_from_openai(client, frame_paths: list, caption_prompt: str) -> str:
+def get_caption_from_gemini(client, frame_paths: list, caption_prompt: str) -> str:
     """
-    Call OpenAI API to generate a caption for video frames.
+    Call Gemini API to generate a caption for video frames.
     
     Args:
-        client: OpenAI client instance
+        client: Gemini client instance
         frame_paths: List of Path objects to frame images
         caption_prompt: The prompt to send to the API
         
@@ -99,70 +109,49 @@ def get_caption_from_openai(client, frame_paths: list, caption_prompt: str) -> s
     frames_to_use = frame_paths[:10]
     encoded_frames = encode_frames_to_base64(frames_to_use)
     
-    image_content = [
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/png",
-                "data": encoded_frame,
-            },
-        }
-        for encoded_frame in encoded_frames
+    image_parts = [
+        types.Part.from_bytes(data=base64.b64decode(encoded), mime_type="image/png")
+        for encoded in encoded_frames
     ]
     
-    # Add the text prompt
-    image_content.append({
-        "type": "text",
-        "text": caption_prompt,
-    })
+    contents = image_parts + [caption_prompt]
     
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "user",
-                "content": image_content,
-            }
-        ],
-        max_tokens=1000,
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=contents,
     )
     
-    return response.choices[0].message.content
+    return response.text
 
 
-def get_question_from_openai(client, caption: str, question_prompt: str) -> str:
+def get_question_from_gemini(client, caption: str, question_prompt: str) -> str:
     """
-    Call OpenAI API to generate a question from a caption.
+    Call Gemini API to generate a question from a caption.
     
     Args:
-        client: OpenAI client instance
+        client: Gemini client instance
         caption: The caption text to generate a question from
         question_prompt: The prompt to send to the API
         
     Returns:
         The question text from the API response
     """
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "user",
-                "content": f"{caption}\n\n{question_prompt}",
-            }
-        ],
-        max_tokens=500,
+    contents = [f"{caption}\n\n{question_prompt}"]
+    
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=contents,
     )
     
-    return response.choices[0].message.content
+    return response.text
 
 
-def get_answer_from_openai(client, frame_paths: list, question: str, answering_prompt: str) -> str:
+def get_answer_from_gemini(client, frame_paths: list, question: str, answering_prompt: str) -> str:
     """
-    Call OpenAI API to generate an answer for a question based on video frames.
+    Call Gemini API to generate an answer for a question based on video frames.
     
     Args:
-        client: OpenAI client instance
+        client: Gemini client instance
         frame_paths: List of Path objects to frame images
         question: The question to answer
         answering_prompt: The prompt to send to the API
@@ -177,36 +166,19 @@ def get_answer_from_openai(client, frame_paths: list, question: str, answering_p
     frames_to_use = frame_paths[:10]
     encoded_frames = encode_frames_to_base64(frames_to_use)
     
-    image_content = [
-        {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/png",
-                "data": encoded_frame,
-            },
-        }
-        for encoded_frame in encoded_frames
+    image_parts = [
+        types.Part.from_bytes(data=base64.b64decode(encoded), mime_type="image/png")
+        for encoded in encoded_frames
     ]
     
-    # Add the question and answering prompt
-    image_content.append({
-        "type": "text",
-        "text": f"Question: {question}\n\n{answering_prompt}",
-    })
+    contents = image_parts + [f"Question: {question}\n\n{answering_prompt}"]
     
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "user",
-                "content": image_content,
-            }
-        ],
-        max_tokens=1000,
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=contents,
     )
     
-    return response.choices[0].message.content
+    return response.text
 
 
 def run(
@@ -221,7 +193,7 @@ def run(
     Args:
         test_mode: If True, only process one video pair for testing
         test_pair_index: Which video pair to process in test mode (0 = first)
-        skip_api: If True, skip OpenAI API calls and use DEMO_RESULT instead
+        skip_api: If True, skip Gemini API calls and use DEMO_RESULT instead
         dataset_folder: Dataset directory containing the source videos
     """
     if test_mode:
@@ -229,11 +201,11 @@ def run(
         print("TEST MODE: Processing only one video pair")
         print("=" * 50)
         if skip_api:
-            print("API calls disabled - using DEMO_RESULT data\n")
+            print("Gemini API calls disabled - using DEMO_RESULT data\n")
     
     client = None
     if not skip_api:
-        client = create_openai_client()
+        client = create_gemini_client()
 
     dataset_folder = Path(dataset_folder)
     results = {}
@@ -297,8 +269,8 @@ def run(
                         caption = DEMO_RESULT[annotation_type]["caption"]
                         print(f"    Caption (DEMO): {caption[:50]}...")
                     else:
-                        caption = get_caption_from_openai(client, night_frames, caption_prompt)
-                        print(f"    Caption (API): {caption[:50]}...")
+                        caption = get_caption_from_gemini(client, night_frames, caption_prompt)
+                        print(f"    Caption (GEMINI): {caption[:50]}...")
                 
                 # Step 2: Get question from caption
                 if caption:
@@ -306,8 +278,8 @@ def run(
                         question = DEMO_RESULT[annotation_type]["question"]
                         print(f"    Question (DEMO): {question[:50]}...")
                     else:
-                        question = get_question_from_openai(client, caption, question_prompt)
-                        print(f"    Question (API): {question[:50]}...")
+                        question = get_question_from_gemini(client, caption, question_prompt)
+                        print(f"    Question (GEMINI): {question[:50]}...")
                 
                 # Step 3: Get answer from day frames and question
                 if day_frames and question:
@@ -315,8 +287,8 @@ def run(
                         answer = DEMO_RESULT[annotation_type]["answer"]
                         print(f"    Answer (DEMO): {answer[:50]}...")
                     else:
-                        answer = get_answer_from_openai(client, day_frames, question, answering_prompt)
-                        print(f"    Answer (API): {answer[:50]}...")
+                        answer = get_answer_from_gemini(client, day_frames, question, answering_prompt)
+                        print(f"    Answer (GEMINI): {answer[:50]}...")
 
                 file_results[annotation_type] = {
                     "caption": caption,
