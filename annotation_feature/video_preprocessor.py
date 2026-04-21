@@ -56,19 +56,21 @@ def extract_frames(video_path: Path, fps: int = 1, output_dir: Path = None) -> L
     return extracted_frames
 
 
-def preprocess_videos(dataset_folder: Path, fps: int = 1) -> Dict[str, Dict[str, List[Path]]]:
+def preprocess_videos(dataset_folder: Path, fps: int = 1, video_type: str = "rgb") -> Dict[str, Dict[str, List[Path]]]:
     """
     Preprocess all videos in the dataset, extracting frames and caching them.
     
     Args:
         dataset_folder: Path to the dataset folder containing videos
         fps: Frames per second to extract
+        video_type: Type of video to process ("rgb" or "event")
         
     Returns:
         Dictionary mapping pair keys to their night/day frame lists
     """
     video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
-    cache_dir = dataset_folder / ".frames_cache"
+    cache_subdir = f".frames_cache_{video_type}" if video_type != "rgb" else ".frames_cache"
+    cache_dir = dataset_folder / cache_subdir
     
     # Track which videos have been processed
     processed_videos = {}
@@ -79,7 +81,7 @@ def preprocess_videos(dataset_folder: Path, fps: int = 1) -> Dict[str, Dict[str,
             continue
         
         name = file.name.lower()
-        if "rgb" not in name:
+        if video_type not in name:
             continue
         
         # Build pair key (same logic as in pipeline.py)

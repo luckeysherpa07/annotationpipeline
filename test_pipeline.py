@@ -10,28 +10,34 @@ import sys
 # Add parent directory to path so we can import annotation_feature
 sys.path.insert(0, str(Path(__file__).parent))
 
-from annotation_feature.pipeline import run
+from annotation_feature.pipeline import run, run_event
 
 
 def main():
     print("\n" + "=" * 60)
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
     print("=" * 60)
-    print("NEW: Single mega-prompt per pair, concurrent execution (3 pairs max)")
+    print("RGB: Single mega-prompt per pair with QA generation")
+    print("EVENT: Single mega-prompt per pair with captions only")
     print("=" * 60)
     
     while True:
         print("\nChoose a test to run:\n")
-        print("1. Test preprocessing + batch pipeline (no API calls, using DEMO data)")
-        print("2. Test batch pipeline on 1 pair (with real Gemini API calls)")
-        print("3. Run batch pipeline on all videos (production)")
-        print("4. Exit")
+        print("--- RGB PIPELINE ---")
+        print("1. Test RGB preprocessing + batch pipeline (no API calls, using DEMO data)")
+        print("2. Test RGB batch pipeline on 1 pair (with real Gemini API calls)")
+        print("3. Run RGB batch pipeline on all videos (production)")
+        print("\n--- EVENT PIPELINE ---")
+        print("4. Test EVENT preprocessing + batch pipeline (no API calls, demo captions)")
+        print("5. Test EVENT batch pipeline on 1 pair (with real Gemini API calls)")
+        print("6. Run EVENT batch pipeline on all videos (production)")
+        print("\n7. Exit")
         
-        choice = input("\nEnter choice (1-4): ").strip()
+        choice = input("\nEnter choice (1-7): ").strip()
         
         if choice == "1":
             print("\n" + "-" * 60)
-            print("Running: Batch pipeline test (using DEMO data)")
+            print("Running: RGB Batch pipeline test (using DEMO data)")
             print("-" * 60)
             print("✓ 1 Gemini call per pair (all 12 types in single request)")
             print("✓ skip_api=True → results from DEMO_RESULT\n")
@@ -39,9 +45,9 @@ def main():
             
         elif choice == "2":
             print("\n" + "-" * 60)
-            print("Running: Batch pipeline on 1 pair (REAL GEMINI API CALLS)")
+            print("Running: RGB Batch pipeline on 1 pair (REAL GEMINI API CALLS)")
             print("⚠️  WARNING: This will use Gemini API quota!")
-            print("ℹ️  Uses gemini-1.5-flash with max 6 frames per call")
+            print("ℹ️  Uses gemini-3-flash-preview with max 6 frames per call")
             print("-" * 60)
             confirm = input("Continue? (yes/no): ").strip().lower()
             if confirm == "yes":
@@ -51,7 +57,7 @@ def main():
             
         elif choice == "3":
             print("\n" + "-" * 60)
-            print("Running: Batch pipeline on ALL videos (PRODUCTION)")
+            print("Running: RGB Batch pipeline on ALL videos (PRODUCTION)")
             print("⚠️  WARNING: This will use Gemini API quota for each video!")
             print("ℹ️  Parallel execution: up to 3 pairs concurrently, 4-sec spacing")
             print("-" * 60)
@@ -62,6 +68,38 @@ def main():
                 print("Cancelled.")
             
         elif choice == "4":
+            print("\n" + "-" * 60)
+            print("Running: EVENT Batch pipeline test (demo captions)")
+            print("-" * 60)
+            print("✓ 1 Gemini call per event pair (caption generation only)")
+            print("✓ skip_api=True → demo captions\n")
+            run_event(test_mode=True, skip_api=True)
+            
+        elif choice == "5":
+            print("\n" + "-" * 60)
+            print("Running: EVENT Batch pipeline on 1 pair (REAL GEMINI API CALLS)")
+            print("⚠️  WARNING: This will use Gemini API quota!")
+            print("ℹ️  Uses gemini-3-flash-preview with max 6 frames per call")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_event(test_mode=True, skip_api=False)
+            else:
+                print("Cancelled.")
+            
+        elif choice == "6":
+            print("\n" + "-" * 60)
+            print("Running: EVENT Batch pipeline on ALL videos (PRODUCTION)")
+            print("⚠️  WARNING: This will use Gemini API quota for each video!")
+            print("ℹ️  Parallel execution: up to 3 pairs concurrently, 4-sec spacing")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_event(test_mode=False)
+            else:
+                print("Cancelled.")
+            
+        elif choice == "7":
             print("\nExiting.")
             break
         else:

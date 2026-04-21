@@ -1,2 +1,2 @@
 # Pipeline package for video annotation
-from .main import run
+from .main import run, run_event

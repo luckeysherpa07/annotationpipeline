@@ -1,0 +1,35 @@
+{
+  "dataset\\cut_carrot_split\\cut_carrot_event": {
+    "night_file": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+    "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+    "captions": {
+      "event_object_recognition": {
+        "caption": "The event stream captures a kitchen workspace sequence. Initially, the scene shows the distinct boundaries of a rectangular cutting board, a elongated carrot, a Y-shaped peeler, and a large chef's knife resting on a flat counter surface. As the video progresses, temporal changes are dominated by the entry of a person's hand and arm from the bottom left, which generates a dense trail of event activity. The hand moves toward the center, where its boundaries merge with the carrot and peeler. Between frame 000090 and 000150, the motion activity shifts upward as the hand lifts the carrot and peeler, and the subsequent peeling action creates rapid, repetitive event clusters along the length of the carrot."
+      },
+      "event_spatial_reasoning": {
+        "caption": "In the initial layout, the peeler and carrot are positioned centrally on the cutting board, with the knife to their right and a bowl farther to the upper right. The hand enters from the bottom, appearing closer to the camera initially before overlapping with the carrot and peeler on the board. As the hand grasps the objects, the carrot and peeler move from the board's surface toward the bowl, which is situated behind the initial work area. The knife remains stationary, defining the right-side boundary of the spatial setup throughout the sequence. The movement creates clear occlusion boundaries as the hand passes over the cutting board's handle and the objects."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence begins with a static view of a prepared workspace (frames 000000-000030). A slight camera zoom increases the event density around the edges of the cutting board and tools. Around frame 000060, a sudden burst of motion signals the hand entering the frame. From frame 000090, the event activity transitions from horizontal movement across the board to upward movement as the carrot and peeler are lifted. The final segment (frames 000120-000150) shows the most intense event activity localized around the carrot's surface as the peeling motion begins over a bowl."
+      },
+      "event_counting": {
+        "caption": "From the motion and event boundaries, at least six distinct entities can be identified: one rectangular cutting board, one elongated carrot, one Y-shaped peeler, one large knife, one circular bowl edge, and one moving hand/arm. These objects are clearly separable as the camera moves or the hand interacts with them."
+      },
+      "event_dynamic_counting": {
+        "caption": "There are three primary moving entities after the initial camera adjustment. One hand enters the frame at approximately frame 000060 and remains active until the end. One carrot is picked up and moved starting at frame 000090. One peeler is also picked up and moved starting at frame 000090. All three moving entities converge in the center-right of the frame for the peeling action starting at frame 000120."
+      },
+      "event_navigation": {
+        "caption": "The camera performs a steady forward motion (dolly-in) towards the cutting board, increasing the size of the objects in the frame and focusing the viewpoint on the central work area. This forward progression guides the viewer's attention from the general countertop to the specific site of the upcoming action. There are no major lateral turns or significant direction changes."
+      },
+      "event_dynamic_recognition": {
+        "caption": "A hand and arm appear from the bottom left at frame 000060, moving toward the center. The hand reaches the carrot and peeler at frame 000090, initiating their movement away from the static cutting board. The combined unit of hand, carrot, and peeler then moves toward the upper right of the frame, settling into a peeling motion starting at frame 000120."
+      },
+      "event_action": {
+        "caption": "The camera holder reaches out to grasp a carrot and a peeler from a cutting board. After picking them up, the subject moves them into position over a bowl. The final frames show the subject actively peeling the carrot, a task indicated by the rapid, oscillating vertical motion of the peeler against the carrot's surface."
+      },
+      "event_non_common": {
+        "caption": "No unusual or physically implausible situations are detected in the event stream. The motion of the hand, the interaction with the kitchen tools, and the resulting peeling activity follow standard physical laws and common kitchen procedures."
+      }
+    }
+  }
+}

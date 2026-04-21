@@ -15,6 +15,7 @@ from annotation_feature.video_preprocessor import preprocess_videos
 from .client import create_gemini_client
 from .utils import get_pair_key, video_extensions
 from .qa_pipeline import run_parallel_pipeline
+from .event_pipeline import run_event_parallel_pipeline
 
 
 def run(
@@ -24,7 +25,7 @@ def run(
     dataset_folder: Path | str = "dataset",
 ):
     """
-    Run the annotation pipeline.
+    Run the RGB annotation pipeline.
 
     Args:
         test_mode: If True, only process one video pair for testing
@@ -34,7 +35,7 @@ def run(
     """
     if test_mode:
         print("=" * 50)
-        print("TEST MODE: Processing only one video pair")
+        print("TEST MODE: Processing only one RGB video pair")
         print("=" * 50)
         if skip_api:
             print("Gemini API calls disabled - using DEMO_RESULT data\n")
@@ -55,8 +56,8 @@ def run(
     print(os.listdir(dataset_folder))
 
     # Preprocess all videos and extract frames
-    print("Preprocessing videos...")
-    paired_frames = preprocess_videos(dataset_folder, fps=1)
+    print("Preprocessing RGB videos...")
+    paired_frames = preprocess_videos(dataset_folder, fps=1, video_type="rgb")
     print(f"Found {len(paired_frames)} video pairs\n")
 
     if len(paired_frames) == 0:
@@ -142,31 +143,27 @@ def run(
     return results
 
 
-if __name__ == "__main__":
-    run()
-
-
-def run(
+def run_event(
     test_mode: bool = False,
     test_pair_index: int = 0,
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
 ):
     """
-    Run the annotation pipeline.
+    Run the EVENT annotation pipeline.
 
     Args:
         test_mode: If True, only process one video pair for testing
         test_pair_index: Which video pair to process in test mode (0 = first)
-        skip_api: If True, skip Gemini API calls and use DEMO_RESULT instead
+        skip_api: If True, skip Gemini API calls and return empty captions
         dataset_folder: Dataset directory containing the source videos
     """
     if test_mode:
         print("=" * 50)
-        print("TEST MODE: Processing only one video pair")
+        print("TEST MODE: Processing only one EVENT video pair")
         print("=" * 50)
         if skip_api:
-            print("Gemini API calls disabled - using DEMO_RESULT data\n")
+            print("Gemini API calls disabled - using demo captions\n")
 
     client = None
     if not skip_api:
@@ -183,14 +180,14 @@ def run(
     print(f"Dataset directory listing for {dataset_folder}:")
     print(os.listdir(dataset_folder))
 
-    # Preprocess all videos and extract frames
-    print("Preprocessing videos...")
-    paired_frames = preprocess_videos(dataset_folder, fps=1)
-    print(f"Found {len(paired_frames)} video pairs\n")
+    # Preprocess all EVENT videos and extract frames
+    print("Preprocessing EVENT videos...")
+    paired_frames = preprocess_videos(dataset_folder, fps=1, video_type="event")
+    print(f"Found {len(paired_frames)} event video pairs\n")
 
     if len(paired_frames) == 0:
-        print("ERROR: No video pairs found in dataset folder!")
-        print(f"Expected to find videos in: {dataset_folder}")
+        print("ERROR: No event video pairs found in dataset folder!")
+        print(f"Expected to find videos with 'event' in filename in: {dataset_folder}")
         return results
 
     # In test mode, only process one pair
@@ -211,11 +208,11 @@ def run(
         return results
 
     print(
-        f"Processing {len(available_pairs)} batch pairs with up to 3 concurrent tasks and 4-second spacing..."
+        f"Processing {len(available_pairs)} event pairs with up to 3 concurrent tasks and 4-second spacing..."
     )
 
     batch_results = asyncio.run(
-        run_parallel_pipeline(
+        run_event_parallel_pipeline(
             client,
             available_pairs,
             max_concurrent=3,
@@ -234,8 +231,9 @@ def run(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No batch output for pair {pair_key}. Falling back to DEMO_RESULT.")
-            file_results = copy.deepcopy(DEMO_RESULT)
+            print(f"WARNING: No batch output for pair {pair_key}. Using empty captions.")
+            from prompts.event_prompts import EVENT_PROMPTS
+            file_results = {anno_type: {"caption": ""} for anno_type in EVENT_PROMPTS.keys()}
 
         night_file = None
         day_file = None
@@ -243,7 +241,7 @@ def run(
             if not file.is_file() or file.suffix.lower() not in video_extensions:
                 continue
             name = file.name.lower()
-            if "rgb" not in name:
+            if "event" not in name:
                 continue
             if get_pair_key(file) == pair_key:
                 if "night" in name:
@@ -254,17 +252,17 @@ def run(
         results[pair_key] = {
             "night_file": str(night_file) if night_file else None,
             "day_file": str(day_file) if day_file else None,
-            "annotations": file_results,
+            "captions": file_results,
         }
         print(f"✓ Done: {pair_key}")
 
     # Save results to JSON file at the project root
-    output_file = Path("qa_results.json")
+    output_file = Path("event_captions.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     print(f"\n" + "=" * 50)
-    print(f"Results saved to: {output_file}")
+    print(f"Event captions saved to: {output_file}")
     if test_mode:
         print("TEST MODE COMPLETE")
     print("=" * 50)
