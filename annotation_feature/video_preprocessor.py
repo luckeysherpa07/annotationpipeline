@@ -83,7 +83,7 @@ def preprocess_videos(dataset_folder: Path, fps: int = 1) -> Dict[str, Dict[str,
             continue
         
         # Build pair key (same logic as in pipeline.py)
-        from annotation_feature.pipeline import get_pair_key
+        from annotation_feature.pipeline.utils import get_pair_key
         pair_key = get_pair_key(file)
         
         # Check if frames already cached
