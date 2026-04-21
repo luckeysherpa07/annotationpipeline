@@ -4,64 +4,64 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
     "annotations": {
       "object_recognition": {
-        "caption": "The frames depict a kitchen countertop with several items arranged for food preparation. There is a white rectangular cutting board centered in the view. On it, a single orange carrot is placed vertically. To its left sits a black Y-shaped vegetable peeler, and to its right is a large metal kitchen knife with a textured handle. Further to the right is a white ceramic bowl. On the far left of the frame, a portion of a grey laptop keyboard and its touchpad are visible, sitting next to a black induction stovetop. The countertop has a metallic, brushed texture.",
-        "question": "What is the color of the bowl on the counter?",
-        "answer": "White"
+        "caption": "In these extremely dark frames, I can barely distinguish several objects on a kitchen countertop. There appears to be a white rectangular cutting board in the center, a white circular bowl to its right, and a long, thin object that looks like a carrot. My hands are visible, interacting with the carrot and another small tool, likely a vegetable peeler. The background is mostly black, but the texture of the metal or laminate countertop reflects a tiny amount of light.",
+        "question": "What is the color of the long object I am holding?",
+        "answer": "Orange"
       },
       "spatial_reasoning": {
-        "caption": "The carrot is positioned in the middle of the cutting board. The black peeler is located to the left of the carrot. The kitchen knife is situated to the right of the carrot on the cutting board. a white bowl is placed to the right of the knife. The induction stovetop is directly to the left of the cutting board, and the laptop is adjacent to the stovetop on its left. I am standing directly in front of the counter, approximately 0 steps away.",
-        "question": "Where is the peeler located relative to the carrot on the cutting board?",
-        "answer": "To the left"
+        "caption": "The white bowl is positioned to the right of the cutting board. The carrot initially sits on the cutting board. A laptop is placed to the left of the cutting board near a stovetop. A large knife is located on the right side of the cutting board. Estimation: I am standing directly in front of the counter, zero steps away. Pairs: (white bowl, right of cutting board), (laptop, left of cutting board), (knife, right of cutting board), (carrot, on cutting board).",
+        "question": "Where is the white bowl located relative to the cutting board?",
+        "answer": "To the right"
       },
       "text_recognition": {
-        "caption": "In frame 000000 of the day sequence, the word 'VICTORINOX' is clearly visible on the handle of the black peeler, identifying the brand of the kitchen tool. Additionally, an 'intel' logo sticker is seen on the bottom left corner of the laptop keyboard area, indicating the processor type. Small white characters are visible on the keys of the grey laptop keyboard.",
-        "question": "1. What brand name is printed on the handle of the vegetable peeler? 2. What brand is mentioned on the sticker at the bottom left of the laptop? 3. Where is the 'VICTORINOX' text located? 4. Which frame clearly shows the 'intel' logo? 5. What does the text on the peeler identify? 6. What kind of characters are on the laptop keys? 7. How many times does the 'intel' logo appear? 8. What is the text on the laptop used for?",
-        "answer": "1. VICTORINOX. 2. intel. 3. On the handle of the peeler. 4. Frame 000000. 5. The manufacturer of the tool. 6. Letters and symbols. 7. Once. 8. Identifying the computer's processor."
+        "caption": "Text elements visible in video:\n1. Mailbox labels (Frame 15-20): \"R. Festa\", \"L. Wiebusch\", \"S. Hollemann\" - resident names on mailbox sections\n2. Mailbox numbers (Frame 20-25): \"1'233\", \"1'234\", \"1'235\" - unit numbers, used for postal identification\n3. Emergency sign (Frame 18-22): \"EXIT\" with running man symbol - indicates emergency evacuation route\n4. Fire safety markings - visible on wall signage indicating building code compliance",
+        "question": "What are the visible mailbox numbers shown in the video?",
+        "answer": "1'233, 1'234, and 1'235"
       },
       "scene_sequence": {
-        "caption": "The video sequence begins with a static overhead view of a kitchen setup with a laptop, stovetop, cutting board, carrot, tools, and a bowl. Around frame 000090, a hand enters from the right to adjust the position of the white bowl. By frame 000120, both hands are in the frame, picking up the carrot and the black peeler. By frame 000150, the hands are positioned over the bowl, actively peeling the carrot.",
-        "question": "1. What is the first item moved in the video? 2. What objects are on the cutting board at the start? 3. What happens after the bowl is moved? 4. When do the hands first appear? 5. What tool is picked up alongside the carrot? 6. Is the knife used in this sequence? 7. What is the final action observed? 8. What is to the left of the stovetop throughout the video? 9. Which object is furthest to the right at the beginning? 10. Does the camera move to a different room?",
-        "answer": "1. The white bowl. 2. A carrot, a peeler, and a knife. 3. The carrot and peeler are picked up. 4. Around frame 000090. 5. The black peeler. 6. No. 7. Peeling the carrot into the bowl. 8. A laptop. 9. The white bowl. 10. No, it remains in the kitchen."
+        "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
+        "question": "What is the sequence of major areas passed through in this video?",
+        "answer": "Bedroom, hallway, outdoor walkway, and mailbox area"
       },
       "light_recongnition": {
-        "caption": "The scene is illuminated by a light source positioned above and slightly in front of the counter, as evidenced by the highlights on the bowl's rim and the reflective surface of the metallic countertop. The shadows cast by the objects are soft and extend toward the back and right.",
-        "question": "From which direction does the light primarily illuminate the objects on the counter?",
-        "answer": "From above and slightly in front."
+        "caption": "The scene is lit by a dim overhead light source, which is weak and creates long, dark shadows across the countertop. The light seems to be coming from the front-left, casting shadows of the bowl and my hands towards the back-right.",
+        "question": "From which general direction is the main light source coming?",
+        "answer": "From above and slightly to the left."
       },
       "light_change": {
-        "caption": "The light level is very low in the first half of the video but stays relatively constant within those night frames. In the day frames, the lighting is bright and uniform. There are no sudden changes like lights turning on or off during the recorded action, just the movement of shadows as hands interact with the objects.",
-        "question": "1. Did the lights turn on or off during the video? 2. Is it getting noticeably darker over time? 3. Is the light source moving toward me? 4. Does a car's headlight flash across the scene? 5. Does the light color change? 6. Are there any sudden flashes? 7. Does the shadow of the hand move? 8. Is there any flickering of the light?",
-        "answer": "1. No. 2. No, the light remains consistent. 3. No. 4. No. 5. No. 6. No. 7. Yes, as the hand moves. 8. No."
+        "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+        "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+        "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area"
       },
       "counting": {
-        "caption": "I can identify several objects: 1 orange carrot, 1 black vegetable peeler, 1 metal kitchen knife, 1 white ceramic bowl, 1 white cutting board, and 1 grey laptop. These remain in the scene throughout.",
-        "question": "1. How many carrots are on the cutting board initially? 2. How many knives are visible? 3. How many peelers are in the scene? 4. How many white bowls are there? 5. How many cutting boards are used? 6. How many laptops are on the counter? 7. How many hands enter the frame to peel? 8. How many power outlets are visible in the background? 9. How many induction rings are visible on the stovetop? 10. How many total kitchen tools are on the board?",
-        "answer": "1. One. 2. One. 3. One. 4. One. 5. One. 6. One. 7. Two. 8. Four (on the power strip). 9. One is fully visible. 10. Two (the peeler and the knife)."
+        "caption": "Objects Counted in Video:\n1. Chairs: 1 (black swivel desk chair)\n2. Shoes: 4+ pairs visible in room\n3. Doors: 1 blue door\n4. Mailbox sections: 2 main sections (grey and green)\n5. Mailbox units: Approximately 9-12 individual mailbox compartments visible\n6. Staircase sections: 2 visible staircase runs\n7. Light fixtures: 1 desk lamp, 1 overhead ceiling light, recessed LEDs (multiple)\n8. Storage containers: 2+ (blue bin, dresser)",
+        "question": "How many main mailbox sections are visible in the mailbox area?",
+        "answer": "2 sections - one grey and one vibrant green"
       },
       "dynamic_counting": {
-        "caption": "In this video, there are no dynamic human or objects except for the subject's hands. The hands move the bowl and then pick up the carrot and peeler to begin work. No other people or moving objects like pets or cars are present.",
-        "question": "1. How many other people enter the kitchen? 2. How many pets move across the counter? 3. How many items fall off the counter? 4. How many cars pass by in the background? 5. How many doors open or close? 6. How many objects move on their own? 7. Are there any insects flying around? 8. Does another person reach for the knife?",
-        "answer": "1. Zero. 2. Zero. 3. Zero. 4. Zero. 5. Zero. 6. Zero. 7. No. 8. No."
+        "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+        "question": "What dynamic action occurs with the mailbox in this video?",
+        "answer": "A blue-gloved hand approaches and interacts with the mailbox"
       },
       "non_common": {
-        "caption": "The most unusual thing in this layout is the placement of a laptop directly next to an induction stovetop. This is unrealistic and dangerous due to the potential for heat damage or liquid spills during cooking. An improvement would be to move the electronics to a dry, cool area away from the cooking surface.",
-        "question": "What object is placed in a hazardous position relative to the cooking area?",
-        "answer": "The laptop is next to the stovetop."
+        "caption": "The layout is standard for a kitchen preparation area. Having a laptop so close to the stove might be considered a minor hazard, but it is a common practice for following digital recipes and does not violate physical laws or common sense in a way that suggests a simulator glitch.",
+        "question": "Is there anything physically impossible happening with the objects or the layout?",
+        "answer": "No, the layout and physics of the objects appear normal."
       },
       "navigation": {
-        "caption": "The camera is stationary, focusing on a specific part of the kitchen counter. No turns or steps are taken. The laptop is to the left of the stovetop, which is to the left of the prep area. A power strip is visible on the wall to the far right.",
-        "question": "1. Which way should I look to see the laptop from the cutting board? 2. How many steps are between the knife and the bowl? 3. Where is the power strip located? 4. Is the stovetop to the left or right of the carrot? 5. How do I get to the laptop from the bowl? 6. What is directly behind the carrot? 7. Is there a wall visible behind the counter? 8. Where is the cutting board relative to me? 9. How many steps would it take to reach the power strip? 10. Is the sink visible in this direction?",
-        "answer": "1. To the left. 2. Zero, they are adjacent. 3. On the wall to the far right. 4. To the left. 5. Move left past the knife, board, and stove. 6. The wall. 7. Yes, a red wall. 8. Directly in front of me. 9. Less than one step. 10. No."
+        "caption": "Navigation Path Documentation:\n1. Starting point: Inside bedroom/room area\n2. Action 1: Open blue door and move through doorway (1-2 steps)\n3. Action 2: Navigate through dark hallway (3-4 meters, straight path)\n4. Action 3: Exit to outdoor area (1-2 steps)\n5. Action 4: Move to mailbox area (2-3 meters, slight left turn toward staircase)\n6. Final position: Standing in front of mailbox section 1'233-1'235\n7. Total navigation: Indoor room -> Hallway -> Outdoor walkway -> Mailbox cluster",
+        "question": "How would you navigate from the mailbox area back to the bedroom?",
+        "answer": "Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom"
       },
       "dynamic_recognition": {
-        "caption": "The white bowl is moved by a hand starting around frame 000090 and ending at 000120. The carrot and peeler are picked up starting at frame 000120. Peeling begins at frame 000150. No other dynamic objects are present.",
-        "question": "When does the white bowl change position?",
-        "answer": "Between frames 000090 and 000120."
+        "caption": "My hands are the primary dynamic objects. My right hand moves to bring the white bowl into the center of the frame between frame 000060 and 000090. My hands then pick up the carrot and peeler around frame 000120 and begin the peeling action, which continues through frame 000150.",
+        "question": "When does the white bowl start moving towards the center?",
+        "answer": "Around frame 000060."
       },
       "action": {
-        "caption": "I reach into the frame with my right hand to pull the white bowl closer for easier access. Then, I use both hands to pick up the carrot and the black peeler. The purpose is to prepare the vegetable for cooking. The consequence is that the carrot is peeled and the peels fall into the bowl.",
-        "question": "1. What do I do with the white bowl first? 2. Which hand moves the bowl? 3. What objects do I pick up after moving the bowl? 4. What is the purpose of picking up the peeler? 5. Where do the carrot peels go? 6. Do I use the knife in this video? 7. What is the final action I perform? 8. Do I type on the laptop?",
-        "answer": "1. Move it closer. 2. The right hand. 3. The carrot and the peeler. 4. To peel the carrot. 5. Into the white bowl. 6. No. 7. Peeling the carrot. 8. No."
+        "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
+        "question": "What is the primary activity being performed with the mailbox?",
+        "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
       }
     }
   }
