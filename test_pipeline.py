@@ -10,7 +10,7 @@ import sys
 # Add parent directory to path so we can import annotation_feature
 sys.path.insert(0, str(Path(__file__).parent))
 
-from annotation_feature.pipeline import run, run_event
+from annotation_feature.pipeline import run, run_event, run_depth
 
 
 def main():
@@ -19,6 +19,7 @@ def main():
     print("=" * 60)
     print("RGB: Single mega-prompt per pair with QA generation")
     print("EVENT: Single mega-prompt per pair with caption, question, and answer generation")
+    print("DEPTH: Single mega-prompt per pair with caption, question, and answer generation")
     print("=" * 60)
     
     while True:
@@ -31,9 +32,13 @@ def main():
         print("4. Test EVENT preprocessing + batch pipeline (no API calls, demo Q&A)")
         print("5. Test EVENT batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
         print("6. Run EVENT batch pipeline on all videos with Q&A (production)")
-        print("\n7. Exit")
+        print("\n--- DEPTH PIPELINE ---")
+        print("7. Test DEPTH preprocessing + batch pipeline (no API calls, demo Q&A)")
+        print("8. Test DEPTH batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
+        print("9. Run DEPTH batch pipeline on all videos with Q&A (production)")
+        print("\n10. Exit")
         
-        choice = input("\nEnter choice (1-7): ").strip()
+        choice = input("\nEnter choice (1-10): ").strip()
         
         if choice == "1":
             print("\n" + "-" * 60)
@@ -100,6 +105,38 @@ def main():
                 print("Cancelled.")
             
         elif choice == "7":
+            print("\n" + "-" * 60)
+            print("Running: DEPTH Batch pipeline test (demo Q&A)")
+            print("-" * 60)
+            print("✓ 1 Gemini call per depth pair (caption, question, and answer generation)")
+            print("✓ skip_api=True → demo Q&A\n")
+            run_depth(test_mode=True, skip_api=True)
+            
+        elif choice == "8":
+            print("\n" + "-" * 60)
+            print("Running: DEPTH Batch pipeline on 1 pair (REAL GEMINI API CALLS)")
+            print("⚠️  WARNING: This will use Gemini API quota!")
+            print("ℹ️  Uses gemini-3-flash-preview with max 6 frames per call")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_depth(test_mode=True, skip_api=False)
+            else:
+                print("Cancelled.")
+            
+        elif choice == "9":
+            print("\n" + "-" * 60)
+            print("Running: DEPTH Batch pipeline on ALL videos (PRODUCTION)")
+            print("⚠️  WARNING: This will use Gemini API quota for each video!")
+            print("ℹ️  Parallel execution: up to 3 pairs concurrently, 4-sec spacing")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_depth(test_mode=False)
+            else:
+                print("Cancelled.")
+            
+        elif choice == "10":
             print("\nExiting.")
             break
         else:

@@ -1,0 +1,53 @@
+{
+  "dataset\\cut_carrot_split\\cut_carrot_depth": {
+    "night_file": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+    "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The scene is an outdoor area with a predominantly deep background representing a far-off horizon. A large circular object, which could be a wheel or a round structural element, is positioned on the right side of the frame at a medium distance. On the far left edge, there are small, very close objects represented by distinct red and orange clusters. In the mid-ground on the left, several vertical structures or poles are visible as elongated depth features. The ground plane appears as a textured gradient extending from the foreground towards the dark blue far background.",
+        "question": "What large, identifiable geometric structure is present on the right side of the scene at a medium depth?",
+        "answer": "Circular object"
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The spatial layout consists of several layers. The red clusters on the far left are significantly closer to me than the circular object on the right. The dark blue background region is the farthest part of the scene. The vertical poles on the left are located between the near-field red objects and the far background. The circular object on the right partially occludes the background behind it, while the ground plane lies below all these distinct objects and provides a spatial base for the scene.",
+        "question": "Is the circular object on the right closer or farther away than the red clusters on the left?",
+        "answer": "Farther away"
+      },
+      "depth_scene_sequence": {
+        "caption": "The video starts with a relatively open, noisy outdoor scene. As the sequence progresses, the 3D boundaries of a circular structure on the right become more clearly defined in the depth map. The camera appears to be moving forward slowly, which causes the vertical poles on the left to shift their relative positions against the background. By the end of the sequence, the spatial relationships between the static landmarks and the receding background are more stable and discernible.",
+        "question": "How does the definition of the circular object's depth boundaries change over the sequence?",
+        "answer": "It becomes more defined"
+      },
+      "depth_counting": {
+        "caption": "Based on depth separation, I can identify and count several entities. There are 3 distinct vertical structures on the left side that resemble poles. On the right, there is 1 large circular object. Approximately 3 small, very close clusters are located on the far left edge. The scene also contains 1 ground plane and 1 far-field background zone. There are 3 main depth layers (near, mid, far), 4 total mid-ground objects, and about 7 distinct objects identified overall.",
+        "question": "How many circular structures are on the right? How many vertical poles are on the left? How many ground planes are visible? How many far-field background zones are there? How many red clusters are on the left edge? How many main depth layers (near, mid, far)? How many distinct objects are in the mid-ground? What is the total count of all identified objects?",
+        "answer": "1, 3, 1, 1, 3, 3, 4, 7"
+      },
+      "depth_dynamic_counting": {
+        "caption": "The video shows a few moving entities apart from the camera. One small cluster in the center background recedes further away into the distance. Two small clusters on the left edge show minor motion across depth layers as the camera moves. There are no humans or cars detected moving within the scene. Overall, there are 3 moving entities besides myself, including 2 near-range clusters and 1 receding background object.",
+        "question": "How many objects recede into the distance? How many humans pass by? How many cars approach me? How many clusters on the left show motion? How many objects cross from left to right? How many objects change depth layers significantly? How many objects are approaching on the right? What is the total number of moving entities besides myself?",
+        "answer": "1, 0, 0, 2, 0, 2, 0, 3"
+      },
+      "depth_navigation": {
+        "caption": "The depth information indicates a clear, navigable path straight ahead toward the dark blue far-field region. The path is bordered by vertical poles on the left and a large circular object on the right. The ground in the immediate center is free of large obstacles, though movement should stay clear of the very close red clusters on the far left edge. The 3D layout supports a forward movement through this outdoor corridor-like space.",
+        "question": "In which general direction does the navigable path lead based on the farthest depth values?",
+        "answer": "Straight ahead"
+      },
+      "depth_dynamic_recognition": {
+        "caption": "Dynamic recognition reveals several moving features. Small red clusters on the far left appear at the start (frame_000000) and move slightly away. A central cluster is observed receding into the background. The circular object on the right remains static relative to the background throughout the sequence. No humans, cars, or objects approaching the camera are identified. The receding object eventually merges into the farthest depth layer.",
+        "question": "Is the circular object moving toward me? When does a near cluster appear? Does the receding object reach the far background? Is any object approaching me? Has any object vanished behind a wall? Is a person visible walking? Is the circular object static relative to me? Does a red cluster move away?",
+        "answer": "No, frame_000000, Yes, No, No, No, Yes, Yes"
+      },
+      "depth_action": {
+        "caption": "My primary action is moving forward through the outdoor environment. This is inferred from the background receding and the relative static position of the circular object, which suggests it might be part of my own vehicle or platform. I am not interacting with any objects, and my distance to the poles on the left changes as I pass them, but I am not moving directly towards them or turning.",
+        "question": "Am I moving forward? Am I interacting with the circular object? Am I turning? Does the distance to the background decrease? Am I stationary? Am I moving towards the poles on the left? Am I moving away from the circular object? What is my primary action?",
+        "answer": "Yes, No, No, No, No, No, No, Moving forward"
+      },
+      "depth_non_common": {
+        "caption": "The depth stream exhibits a high level of noise, particularly in the scattered points of different depths across the frame. Despite this sensor noise, there are no physically implausible situations visible, such as floating objects, intersecting solid geometry, or unrealistic depth ordering. The overall 3D structure of the circular object, poles, and ground plane is consistent with a real-world layout.",
+        "question": "Are there any objects that appear to be floating or intersecting in an physically impossible way?",
+        "answer": "No"
+      }
+    }
+  }
+}
