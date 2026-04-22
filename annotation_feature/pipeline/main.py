@@ -14,9 +14,9 @@ from annotation_feature.demo_result import DEMO_RESULT
 from annotation_feature.video_preprocessor import preprocess_videos
 from .client import create_gemini_client
 from .utils import get_pair_key, video_extensions
-from .qa_pipeline import run_parallel_pipeline
-from .event_pipeline import run_event_parallel_pipeline
-from .depth_pipeline import run_depth_parallel_pipeline
+from .modalities.rgb import run_parallel_pipeline
+from .modalities.event import run_event_parallel_pipeline
+from .modalities.depth import run_depth_parallel_pipeline
 
 
 def run(
@@ -132,7 +132,7 @@ def run(
         print(f"✓ Done: {pair_key}")
 
     # Save results to JSON file at the project root
-    output_file = Path("qa_results.json")
+    output_file = Path("rgb_qa_results.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 

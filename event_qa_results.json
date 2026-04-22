@@ -4,49 +4,49 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "The event stream initially highlights the sharp boundaries of a rectangular cutting board, a knife, a hand peeler, and a long vegetable. As the sequence progresses, two hands enter the field of view with significant motion, picking up the vegetable and the peeler. The action culminates in a repetitive peeling motion, creating a dense cluster of event activity along the surface of the vegetable as its skin is removed.",
-        "question": "What long object do my hands pick up from the cutting board?",
-        "answer": "A cylindrical vegetable"
+        "caption": "Initial frames show a static scene with low event activity, revealing a cutting board base with a knife, a peeler, and a long cylindrical vegetable resting on it. As the sequence progresses, two hand regions enter the frame, generating significant event activity along their leading edges. One hand lifts the vegetable, causing its boundaries to produce a burst of events as it moves vertically. The other hand grasps the peeler. The video ends with concentrated event activity at the junction where the peeler contacts the vegetable, indicating the start of a peeling motion.",
+        "question": "What is the primary object I lift from the cutting board that generates a large burst of event activity?",
+        "answer": "A vegetable."
       },
       "event_spatial_reasoning": {
-        "caption": "Initially, the long vegetable is centered on the cutting board, with the peeler to its left and the knife to its right. Hands enter from the bottom and right, overlapping the cutting board's area. As the action starts, the peeler is moved closer to the vegetable and eventually overlaps its upper surface. The hands remain positioned closer to the camera than the stationary tools on the board.",
-        "question": "Where is the knife positioned relative to the vegetable at the start of the video?",
-        "answer": "To its right"
+        "caption": "A long vegetable is positioned centrally on a cutting board, with a peeler to its left and a knife to its right. Two hand regions move from the bottom edge of the field of view toward the center. The left hand overlaps and then occludes the vegetable as it lifts it away from the board. Simultaneously, the right hand moves to overlap the peeler. By the end of the sequence, the vegetable and peeler are held above the board, interacting with each other in the upper-central region of the frame.",
+        "question": "Where is the knife located relative to the vegetable at the beginning of the video?",
+        "answer": "To its right."
       },
       "event_scene_sequence": {
-        "caption": "The video begins with a static view of a kitchen workspace. Motion starts when hands appear from the bottom and side, reaching for the tools. This is followed by the hands lifting the vegetable and peeler from the board. Finally, the scene settles into a repetitive peeling action where the primary motion is concentrated in the center of the frame.",
-        "question": "What sequence of motions do I perform to prepare for peeling?",
-        "answer": "Reaching, lifting, then peeling"
+        "caption": "The sequence starts with a static shot of a kitchen workspace containing a board, tools, and a vegetable. After a brief period of inactivity, hands appear from the bottom, introducing motion-based events. The hands reach for the items on the board, lift them, and the final scene transition shows the transition from a resting state to an active preparation state where the tools are being used together in the center of the frame.",
+        "question": "What is the order of events regarding the hands and the vegetable?",
+        "answer": "Hands appear, then lift vegetable."
       },
       "event_counting": {
-        "caption": "The scene contains several countable elements distinguishable by their motion or clear boundaries: one cutting board, one long vegetable, one hand peeler, one knife, and two hands that enter the workspace. Additionally, two circular regions representing stove burners are visible to the left of the board.",
-        "question": "1. How many hands enter my workspace? 2. How many long vegetables are on the board? 3. How many peelers do I use? 4. How many knives are on the board? 5. How many cutting boards are present? 6. How many stove elements are visible on the left? 7. How many handles are on the cutting board? 8. How many total handheld kitchen tools are initially on the board?",
-        "answer": "1. Two 2. One 3. One 4. One 5. One 6. Two 7. One 8. Two"
+        "caption": "By observing distinct motion boundaries and object interactions, I can count one cutting board, one knife, one peeler, one long vegetable, and two hands entering the workspace. The total number of primary objects and interactive regions involved in the task is six.",
+        "question": "1. How many cutting boards are visible?\n2. How many knives are on the board?\n3. How many peelers am I using?\n4. How many vegetables are being prepared?\n5. How many hands enter the frame?\n6. How many total kitchen tools are on the board at the start?\n7. How many primary interactive regions are there?\n8. How many handles does the peeler have?",
+        "answer": "1. 1\n2. 1\n3. 1\n4. 1\n5. 2\n6. 2\n7. 6\n8. 1"
       },
       "event_dynamic_counting": {
-        "caption": "Dynamic activity is limited to the subject's hands and the objects they manipulate. Two hands enter and move throughout the frame. One vegetable and one peeler are lifted and moved from their original positions. Multiple downward peeling strokes are performed as the primary dynamic activity.",
-        "question": "1. How many hands move into view? 2. How many vegetables are picked up? 3. How many peelers are picked up? 4. How many tools are actively used for peeling? 5. How many knives are picked up or moved? 6. How many hands are involved in the peeling task? 7. How many objects are lifted from the board? 8. How many hands hold the vegetable?",
-        "answer": "1. Two 2. One 3. One 4. One 5. Zero 6. Two 7. Two 8. One"
+        "caption": "The event stream captures the motion of two hands entering the frame. Each hand interacts with a different object: the left hand lifts the vegetable once, and the right hand picks up the peeler once. No other moving objects or people pass through the scene during this interval.",
+        "question": "1. How many hands move into the frame?\n2. How many times is the vegetable lifted?\n3. How many people move past the workspace?\n4. How many objects do I pick up?\n5. How many dynamic tool interactions occur?\n6. How many times does the knife move?\n7. How many vegetables do I lift?\n8. How many peelers do I pick up?",
+        "answer": "1. 2\n2. 1\n3. 0\n4. 2\n5. 1\n6. 0\n7. 1\n8. 1"
       },
       "event_navigation": {
-        "caption": "The camera maintains a static position over the kitchen counter. Landmarks include the rectangular cutting board and the circular stove burners. Navigation is limited to the motion path of the hands, which travel from the frame edges toward the center to engage with the tools and the vegetable.",
-        "question": "What path do my hands take to interact with the objects?",
-        "answer": "From the edges toward center"
+        "caption": "The viewpoint remains fixed on the kitchen counter, specifically the cutting board area. Navigation cues are limited to the 'reach-and-grasp' path taken by my hands. There is no large-scale movement through an environment; the 'route' is purely the manual progression from a neutral stance to an active task within a small localized workspace.",
+        "question": "Does my camera move through different rooms or remain focused on a single workspace?",
+        "answer": "Remains at a single workspace."
       },
       "event_dynamic_recognition": {
-        "caption": "Hands enter the scene at frame 000060 and reach the central tools by frame 000090. The vegetable and peeler are lifted shortly after. The peeling action, characterized by fast, localized motion, begins at frame 000120 and continues through the end of the sequence.",
-        "question": "1. When do hands first appear? 2. Does a person walk past the background? 3. Has the knife moved from its initial spot? 4. At what point does the peeling action begin? 5. Did the vegetable roll away? 6. Did the peeler leave the field of view? 7. Are both hands visible during the peeling? 8. Has the vegetable left the frame by the end?",
-        "answer": "1. Frame 60 2. No 3. No 4. Frame 120 5. No 6. No 7. Yes 8. No"
+        "caption": "My left hand appears from the bottom around frame 60 and reaches the vegetable by frame 90. My right hand follows, reaching the peeler by frame 120. The vegetable is lifted into a vertical orientation between frames 100 and 130. The peeling motion is clearly identifiable starting at frame 150 as a repetitive downward movement against the vegetable's boundary.",
+        "question": "1. When does the first hand appear?\n2. Which hand picks up the vegetable?\n3. Did the knife move during the sequence?\n4. When is the vegetable lifted from the board?\n5. At what point does the peeling motion start?\n6. Has the vegetable been fully peeled by the end?\n7. When does the right hand reach the peeler?\n8. Did any other person enter the scene?",
+        "answer": "1. Around frame 60\n2. Left hand\n3. No\n4. Frame 90-120\n5. Frame 150\n6. No\n7. Around frame 120\n8. No"
       },
       "event_action": {
-        "caption": "I am preparing a vegetable for cooking. I move my hands into the frame, grasp the vegetable with my left hand and the peeler with my right hand, and lift them. I then begin a downward peeling motion on the vegetable, with the vegetable responding to each stroke of the tool.",
-        "question": "1. What is my main activity? 2. Which hand picks up the vegetable? 3. Which tool am I using to peel? 4. Do I use the knife in this sequence? 5. How does my right hand move to start peeling? 6. What object does my left hand hold? 7. Does my camera move significantly? 8. What specific motion am I performing on the vegetable?",
-        "answer": "1. Peeling a vegetable 2. Left hand 3. Peeler 4. No 5. It grabs the peeler 6. A vegetable 7. No 8. Downward stroke"
+        "caption": "I am initiating a vegetable peeling task. I reach out and grab a long vegetable with my left hand and a peeler with my right hand. I lift both objects off the cutting board and bring them together. I then begin the action of peeling by moving the peeler across the surface of the vegetable, which generates high-frequency event activity at the contact point.",
+        "question": "1. What action am I performing with the peeler?\n2. Which hand holds the vegetable?\n3. What object am I interacting with using my right hand?\n4. Do I move the knife?\n5. What is the intent of my motion at the end?\n6. How many hands am I using?\n7. Am I cutting or peeling?\n8. Where do I lift the vegetable from?",
+        "answer": "1. Peeling\n2. Left hand\n3. Peeler\n4. No\n5. Peeling the vegetable\n6. 2\n7. Peeling\n8. Cutting board"
       },
       "event_non_common": {
-        "caption": "The event stream depicts standard and physically realistic kitchen activity. There are no signs of floating objects, unusual motion patterns, or layout violations.",
-        "question": "Are there any floating objects in the kitchen area?",
-        "answer": "No"
+        "caption": "The event activity reflects a completely standard and plausible kitchen activity. All objects move according to gravity and manual interaction. There are no floating objects, clipping through surfaces, or unrealistic motion patterns observed in the event stream.",
+        "question": "Are there any objects floating in the air without being held by me?",
+        "answer": "No."
       }
     }
   }

@@ -1,3 +1,8 @@
+"""Shared caption generation utilities for all modalities.
+
+This module contains functions for generating captions, questions, and answers
+using the Gemini API. These functions are used by all annotation modalities (RGB, Event, Depth).
+"""
 from pathlib import Path
 from typing import List
 
@@ -6,12 +11,11 @@ try:
 except ImportError:
     types = None
 
-from .utils import encode_frames_to_base64, build_image_parts
+from ..utils import encode_frames_to_base64, build_image_parts
 
 
 def get_caption_from_gemini(client, frame_paths: list, caption_prompt: str) -> str:
-    """
-    Call Gemini API to generate a caption for video frames.
+    """Generate a caption for video frames using Gemini API.
 
     Args:
         client: Gemini client instance
@@ -20,6 +24,9 @@ def get_caption_from_gemini(client, frame_paths: list, caption_prompt: str) -> s
 
     Returns:
         The caption text from the API response
+        
+    Raises:
+        ValueError: If no frames are provided
     """
     if not frame_paths:
         raise ValueError("No frames provided for captioning")
@@ -41,8 +48,7 @@ def get_caption_from_gemini(client, frame_paths: list, caption_prompt: str) -> s
 
 
 def get_question_from_gemini(client, caption: str, question_prompt: str) -> str:
-    """
-    Call Gemini API to generate a question from a caption.
+    """Generate a question from a caption using Gemini API.
 
     Args:
         client: Gemini client instance
@@ -63,8 +69,7 @@ def get_question_from_gemini(client, caption: str, question_prompt: str) -> str:
 
 
 def get_answer_from_gemini(client, frame_paths: list, question: str, answering_prompt: str) -> str:
-    """
-    Call Gemini API to generate an answer for a question based on video frames.
+    """Generate an answer for a question based on video frames using Gemini API.
 
     Args:
         client: Gemini client instance
@@ -74,6 +79,9 @@ def get_answer_from_gemini(client, frame_paths: list, question: str, answering_p
 
     Returns:
         The answer text from the API response
+        
+    Raises:
+        ValueError: If no frames are provided
     """
     if not frame_paths:
         raise ValueError("No frames provided for answering")

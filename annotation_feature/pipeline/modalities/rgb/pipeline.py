@@ -1,13 +1,17 @@
+"""RGB modality pipeline for QA annotation.
+
+This module handles RGB video annotation using the Gemini API.
+It processes night and day frames to generate captions, questions, and answers.
+"""
 import asyncio
 import copy
 import json
 import re
 from typing import Any, Dict, List
-
-# Add project root to path for imports
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from prompts.rgb_prompts import RGB_PROMPTS
@@ -19,7 +23,17 @@ except ImportError:
     types = None
 
 
-def build_mega_prompt(annotation_types: list[str], night_frames: list[Path], day_frames: list[Path]) -> str:
+def build_rgb_mega_prompt(annotation_types: list[str], night_frames: list[Path], day_frames: list[Path]) -> str:
+    """Build mega prompt for RGB QA generation.
+    
+    Args:
+        annotation_types: List of annotation types to process
+        night_frames: List of night frame paths
+        day_frames: List of day frame paths
+        
+    Returns:
+        Formatted prompt string for the Gemini API
+    """
     prompt_parts = [
         "You are a video QA assistant. You will receive NIGHT frames and DAY frames as images.",
         "For each annotation type, follow these steps exactly:",
@@ -66,6 +80,17 @@ def build_mega_prompt(annotation_types: list[str], night_frames: list[Path], day
 
 
 def parse_json_response(text: str) -> dict:
+    """Parse JSON response from Gemini API.
+    
+    Args:
+        text: Response text from the API
+        
+    Returns:
+        Parsed JSON as a dictionary
+        
+    Raises:
+        ValueError: If JSON cannot be parsed
+    """
     if not text:
         raise ValueError("Empty response text")
 
@@ -82,6 +107,14 @@ def parse_json_response(text: str) -> dict:
 
 
 def normalize_annotation_results(raw_results: Any) -> dict:
+    """Normalize RGB annotation results to ensure consistency.
+    
+    Args:
+        raw_results: Raw results from the API
+        
+    Returns:
+        Normalized results dictionary with all annotation types
+    """
     normalized: dict = {}
     for annotation_type in RGB_PROMPTS.keys():
         fallback = DEMO_RESULT.get(annotation_type, {})
@@ -109,6 +142,19 @@ def normalize_annotation_results(raw_results: Any) -> dict:
 
 
 async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -> str:
+    """Call Gemini API with retry logic.
+    
+    Args:
+        client: Gemini client instance
+        contents: Content to send to the API
+        max_retries: Maximum number of retries
+        
+    Returns:
+        API response text
+        
+    Raises:
+        Exception: If all retries fail
+    """
     for attempt in range(1, max_retries + 1):
         try:
             response = await asyncio.to_thread(
@@ -130,6 +176,18 @@ async def process_single_pair_batch(
     day_frames: list[Path],
     skip_api: bool = False,
 ) -> dict:
+    """Process a single RGB video pair.
+    
+    Args:
+        client: Gemini client instance
+        pair_key: Identifier for the video pair
+        night_frames: List of night frame paths
+        day_frames: List of day frame paths
+        skip_api: If True, skip API calls and use demo results
+        
+    Returns:
+        Annotation results dictionary
+    """
     if skip_api:
         return copy.deepcopy(DEMO_RESULT)
 
@@ -140,7 +198,7 @@ async def process_single_pair_batch(
     selected_night = night_frames[:6]
     selected_day = day_frames[:6]
 
-    from .utils import encode_frames_to_base64, build_image_parts
+    from ...utils import encode_frames_to_base64, build_image_parts
     night_encoded = encode_frames_to_base64(selected_night)
     day_encoded = encode_frames_to_base64(selected_day)
 
@@ -149,7 +207,7 @@ async def process_single_pair_batch(
         return copy.deepcopy(DEMO_RESULT)
 
     image_parts = build_image_parts(night_encoded) + build_image_parts(day_encoded)
-    prompt = build_mega_prompt(list(RGB_PROMPTS.keys()), selected_night, selected_day)
+    prompt = build_rgb_mega_prompt(list(RGB_PROMPTS.keys()), selected_night, selected_day)
     contents = image_parts + [prompt]
 
     try:
@@ -169,6 +227,18 @@ async def run_parallel_pipeline(
     delay_between_pairs: int = 4,
     skip_api: bool = False,
 ) -> Dict[str, dict]:
+    """Run RGB annotation pipeline in parallel.
+    
+    Args:
+        client: Gemini client instance
+        paired_frames: Dictionary of video pairs and their frames
+        max_concurrent: Maximum concurrent API calls
+        delay_between_pairs: Delay between pair processing in seconds
+        skip_api: If True, skip API calls and use demo results
+        
+    Returns:
+        Dictionary of annotation results keyed by pair_key
+    """
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
 

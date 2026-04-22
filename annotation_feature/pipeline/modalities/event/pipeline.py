@@ -1,3 +1,8 @@
+"""Event modality pipeline for QA annotation.
+
+This module handles event-based video annotation using the Gemini API.
+It processes day and night frames to generate event-based captions, questions, and answers.
+"""
 import asyncio
 import copy
 import json
@@ -6,7 +11,7 @@ from typing import Any, Dict, List
 from pathlib import Path
 import sys
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from prompts.event_prompts import EVENT_PROMPTS
@@ -19,7 +24,16 @@ except ImportError:
 
 
 def build_event_mega_prompt(annotation_types: list[str], day_frames: list[Path], night_frames: list[Path]) -> str:
-    """Build prompt for event-based QA generation (caption, question, and answer)"""
+    """Build mega prompt for event-based QA generation.
+    
+    Args:
+        annotation_types: List of annotation types to process
+        day_frames: List of day frame paths
+        night_frames: List of night frame paths
+        
+    Returns:
+        Formatted prompt string for the Gemini API
+    """
     prompt_parts = [
         "You are a video QA assistant specialized in event-based visual understanding.",
         "You will receive DAY frames and NIGHT frames as images.",
@@ -67,6 +81,17 @@ def build_event_mega_prompt(annotation_types: list[str], day_frames: list[Path],
 
 
 def parse_json_response(text: str) -> dict:
+    """Parse JSON response from Gemini API.
+    
+    Args:
+        text: Response text from the API
+        
+    Returns:
+        Parsed JSON as a dictionary
+        
+    Raises:
+        ValueError: If JSON cannot be parsed
+    """
     if not text:
         raise ValueError("Empty response text")
 
@@ -83,10 +108,16 @@ def parse_json_response(text: str) -> dict:
 
 
 def normalize_event_results(raw_results: Any) -> dict:
-    """Normalize event results to ensure all annotation types have caption, question, and answer"""
+    """Normalize event annotation results to ensure consistency.
+    
+    Args:
+        raw_results: Raw results from the API
+        
+    Returns:
+        Normalized results dictionary with all annotation types
+    """
     normalized: dict = {}
     for annotation_type in EVENT_PROMPTS.keys():
-        # Create fallback with empty values for event data
         fallback = {"caption": "", "question": "", "answer": ""}
         item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
 
@@ -112,6 +143,19 @@ def normalize_event_results(raw_results: Any) -> dict:
 
 
 async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -> str:
+    """Call Gemini API with retry logic.
+    
+    Args:
+        client: Gemini client instance
+        contents: Content to send to the API
+        max_retries: Maximum number of retries
+        
+    Returns:
+        API response text
+        
+    Raises:
+        Exception: If all retries fail
+    """
     for attempt in range(1, max_retries + 1):
         try:
             response = await asyncio.to_thread(
@@ -133,9 +177,19 @@ async def process_event_pair_batch(
     night_frames: list[Path],
     skip_api: bool = False,
 ) -> dict:
-    """Process a single event pair and return captions, questions, and answers"""
+    """Process a single event video pair.
+    
+    Args:
+        client: Gemini client instance
+        pair_key: Identifier for the video pair
+        day_frames: List of day frame paths
+        night_frames: List of night frame paths
+        skip_api: If True, skip API calls and use demo results
+        
+    Returns:
+        Annotation results dictionary
+    """
     if skip_api:
-        # Return demo results with all three fields
         demo_results = {}
         for annotation_type in EVENT_PROMPTS.keys():
             demo_results[annotation_type] = {
@@ -152,7 +206,7 @@ async def process_event_pair_batch(
     selected_day = day_frames[:6]
     selected_night = night_frames[:6]
 
-    from .utils import encode_frames_to_base64, build_image_parts
+    from ...utils import encode_frames_to_base64, build_image_parts
     day_encoded = encode_frames_to_base64(selected_day)
     night_encoded = encode_frames_to_base64(selected_night)
 
@@ -181,7 +235,18 @@ async def run_event_parallel_pipeline(
     delay_between_pairs: int = 4,
     skip_api: bool = False,
 ) -> Dict[str, dict]:
-    """Run event pipeline in parallel"""
+    """Run event annotation pipeline in parallel.
+    
+    Args:
+        client: Gemini client instance
+        paired_frames: Dictionary of video pairs and their frames
+        max_concurrent: Maximum concurrent API calls
+        delay_between_pairs: Delay between pair processing in seconds
+        skip_api: If True, skip API calls and use demo results
+        
+    Returns:
+        Dictionary of annotation results keyed by pair_key
+    """
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
 

@@ -1,0 +1,68 @@
+{
+  "dataset\\cut_carrot_split\\cut_carrot_rgb": {
+    "night_file": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
+    "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The night frames show a dark kitchen setting where several objects are laid out on a metallic countertop. In the center, there is a white rectangular cutting board with an orange carrot and a black Y-shaped vegetable peeler on top. To the right of the cutting board lies a large kitchen knife with a silver blade and a textured metallic handle. Further right, a white ceramic bowl is visible. On the far left, a portion of a grey laptop is seen next to a black glass induction cooktop.",
+        "question": "What color is the vegetable peeler on the cutting board?",
+        "answer": "The vegetable peeler is black."
+      },
+      "spatial_reasoning": {
+        "caption": "The orange carrot is positioned centrally on the white cutting board, with the black peeler resting to its left. The large silver knife is placed to the immediate right of the cutting board. A white ceramic bowl sits further to the right, beyond the knife. The laptop is situated on the left side of the counter, adjacent to the black cooktop. I am standing approximately half a step away from the center of the prep area.",
+        "question": "Where is the black peeler located relative to the carrot?",
+        "answer": "The black peeler is located to the left of the carrot."
+      },
+      "text_recognition": {
+        "caption": "In the day frames, specifically frame 000090, the brand name 'VICTORINOX' is clearly visible in white text on the black handle of the vegetable peeler. On the grey laptop to the left, there are small stickers at the bottom left of the keyboard area, including an 'intel' logo and a 'CORE' badge (visible in frame 000060 and 000090).",
+        "question": "1. What brand is printed on the handle of the vegetable peeler?\n2. What does the text on the peeler indicate?\n3. Which electronic device in the video has stickers with text on it?\n4. What company logo is visible on the laptop stickers?\n5. In which frames is the text on the peeler most legible?\n6. What specific product line is mentioned on the laptop sticker next to the brand?\n7. Is there any text visible on the white bowl?\n8. Where is the branding located on the prep tools?",
+        "answer": "1. Victorinox.\n2. It indicates the brand of the kitchen tool.\n3. The laptop.\n4. Intel.\n5. Frame 000090 and frame 000120.\n6. Core.\n7. No, there is no text visible on the white bowl.\n8. The branding is located on the handle of the vegetable peeler."
+      },
+      "scene_sequence": {
+        "caption": "The entire video is filmed from a static position in a kitchen. The scene sequence begins with a close-up focus on a white cutting board holding a carrot and a peeler. As the camera captures the wider countertop, it reveals a laptop and an induction stove to the left, and a knife and a bowl to the right. There is no movement between different rooms; the subject remains in the kitchen prep area throughout.",
+        "question": "1. What is the sequence of scenes I passed in the video?\n2. Which room is the entire video set in?\n3. What object did I focus on first?\n4. What did I see to the left of the prep area?\n5. What was to the right of the cutting board?\n6. Did the scene change from the kitchen to another room?\n7. What was the final object visible on the right side of the counter?\n8. Was a laptop visible throughout the sequence?\n9. What appliance was located next to the laptop?\n10. Did the camera move away from the kitchen counter?",
+        "answer": "1. The scene remained constant, focusing on a kitchen countertop prep area.\n2. The kitchen.\n3. The white cutting board with the carrot and peeler.\n4. A laptop and an induction cooktop.\n5. A large kitchen knife and a white bowl.\n6. No, it remained in the kitchen.\n7. A white ceramic bowl.\n8. Yes, it was visible on the left side of the frame.\n9. An induction cooktop.\n10. No, the camera stayed at the counter."
+      },
+      "light_recongnition": {
+        "caption": "The video starts in very low light. A primary light source appears to be coming from above and slightly to the right, as evidenced by the soft shadows cast by the carrot and tools toward the left. The light is cool-toned and diffuse, illuminating the center of the cutting board more than the surrounding counter.",
+        "question": "From which general direction is the primary light source coming?",
+        "answer": "The primary light source is coming from above and to the right."
+      },
+      "light_change": {
+        "caption": "In the initial segment of the video, the light remains consistently dim with no major fluctuations. There are no lights being turned on or off, and no moving light sources like flashlights or headlights. The illumination only significantly changes when transitioning from the night frames to the day frames, where it becomes much brighter and clearer.",
+        "question": "1. Did the lights turn on or off during the dark segment?\n2. Is the light level getting brighter as I move?\n3. Are there any flickering light sources in the room?\n4. Does a car's headlight pass by the window?\n5. Is the light source approaching me?\n6. Does it get darker at any point in the kitchen?\n7. Is there a noticeable change in shadow intensity during the prep?\n8. Does the light color change during the dark sequence?",
+        "answer": "1. No, the light level remained constant.\n2. No, it remained static until the scene changed to daylight.\n3. No, there is no flickering.\n4. No.\n5. No, the light source is stationary.\n6. No, the darkness level is consistent.\n7. No, the shadows remain steady.\n8. No, the light color stays the same."
+      },
+      "counting": {
+        "caption": "In the video, I can identify several common kitchen items: one orange carrot, one black vegetable peeler, one large silver kitchen knife, one white ceramic bowl, one white cutting board, one laptop, one induction cooktop, and one power strip with multiple outlets.",
+        "question": "1. How many carrots are on the cutting board?\n2. How many vegetable peelers can be seen?\n3. How many large knives are on the counter?\n4. How many white bowls are present?\n5. How many laptops are on the left side?\n6. How many cutting boards are being used?\n7. How many induction cooktops are visible?\n8. How many power strips are on the counter?\n9. How many major prep tools are on the board at the start?\n10. How many electrical plugs are visible in the power strip?",
+        "answer": "1. One.\n2. One.\n3. One.\n4. One.\n5. One.\n6. One.\n7. One.\n8. One.\n9. Two (the carrot and the peeler).\n10. Four outlets are visible on the strip."
+      },
+      "dynamic_counting": {
+        "caption": "The only movement in the video comes from my hands interacting with the objects. There are no other dynamic objects, such as moving cars, pets, or other people. The carrot, peeler, and bowl are moved by me, but no other independent motion occurs.",
+        "question": "1. How many other people are moving in the kitchen?\n2. How many cars pass by in the background?\n3. How many pets are seen moving across the counter?\n4. Are there any flying insects visible in the frame?\n5. How many autonomous robots are moving in the scene?\n6. Are any other objects moving on their own?\n7. How many external moving objects enter the frame?\n8. Does anyone else walk into the scene?",
+        "answer": "1. None.\n2. None.\n3. None.\n4. None.\n5. None.\n6. No, only objects handled by me are moving.\n7. Zero.\n8. No, only I am present."
+      },
+      "non_common": {
+        "caption": "A notable observation is the placement of a laptop immediately adjacent to the induction cooktop on a kitchen counter. This is impractical and hazardous, as heat from cooking or accidental spills could easily damage the electronic device. It is recommended to move the laptop to a dedicated desk or a safer area of the kitchen away from cooking surfaces.",
+        "question": "What object is placed in an unusually risky location near a cooking surface?",
+        "answer": "The laptop is placed right next to the induction cooktop."
+      },
+      "navigation": {
+        "caption": "The camera position is fixed, facing the kitchen counter. No navigation actions like walking or turning are recorded. The layout shows the cooktop on the left, prep area in the middle, and bowl/outlets on the right. To reach the bowl, one would move right; to reach the laptop, one would move left.",
+        "question": "1. Which way should I move to reach the laptop?\n2. Which way should I move to reach the white bowl?\n3. How many steps am I from the cutting board?\n4. Where is the induction cooktop relative to my current position?\n5. To which side is the power strip located?\n6. What is the fastest way to get to the knife?\n7. If I wanted to leave the counter, which direction would I likely back up?\n8. Is the bowl closer to me than the carrot?\n9. Which way do I turn to see the power outlets?\n10. How do I get from the carrot to the laptop?",
+        "answer": "1. Move to the left.\n2. Move to the right.\n3. Approximately half a step.\n4. It is directly to the left.\n5. It is on the far right.\n6. Reaching slightly to the right of the cutting board.\n7. Directly backward.\n8. No, the carrot is closer.\n9. Turn slightly to the right.\n10. Move your hands or body to the left across the counter."
+      },
+      "dynamic_recognition": {
+        "caption": "My hands enter the frame to begin peeling the carrot at approximately frame 000030. The peeling action continues through frame 000150. Around frame 000120, a hand reaches for and picks up the white bowl on the right. No other dynamic events occur.",
+        "question": "Did a new object appear in the scene, or was an existing one moved?",
+        "answer": "Existing objects like the carrot and bowl were moved; no new objects appeared."
+      },
+      "action": {
+        "caption": "I am performing the action of peeling an orange carrot using a black Y-shaped vegetable peeler on a white cutting board. The purpose is to remove the outer skin in preparation for cooking or eating. Later, I reach out and pick up a white ceramic bowl, likely to hold the peeled carrot or its skins. These actions are typical steps in food preparation.",
+        "question": "1. What action am I performing with the carrot?\n2. What tool am I using to prep the carrot?\n3. What is the likely purpose of my actions?\n4. What object do I interact with after peeling the carrot?\n5. Where am I placing the peeler during the process?\n6. What is the consequence of my action with the peeler?\n7. Am I using the knife in the video?\n8. What part of the carrot am I focusing on?",
+        "answer": "1. Peeling.\n2. A black vegetable peeler.\n3. Food preparation.\n4. A white ceramic bowl.\n5. It is held in the hand or placed on the cutting board.\n6. The outer skin of the carrot is removed.\n7. No, the knife remains on the counter.\n8. The outer surface/skin of the carrot."
+      }
+    }
+  }
+}
