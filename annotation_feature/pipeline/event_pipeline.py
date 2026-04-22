@@ -18,18 +18,21 @@ except ImportError:
     types = None
 
 
-def build_event_caption_prompt(annotation_types: list[str], day_frames: list[Path], night_frames: list[Path]) -> str:
-    """Build prompt for event-based caption generation"""
+def build_event_mega_prompt(annotation_types: list[str], day_frames: list[Path], night_frames: list[Path]) -> str:
+    """Build prompt for event-based QA generation (caption, question, and answer)"""
     prompt_parts = [
-        "You are a video analysis assistant specialized in event-based visual understanding.",
+        "You are a video QA assistant specialized in event-based visual understanding.",
         "You will receive DAY frames and NIGHT frames as images.",
-        "For each annotation type, generate ONLY a caption based on the event stream analysis.",
+        "For each annotation type, follow these steps exactly:",
+        "1. Generate a caption based on the event stream analysis.",
+        "2. Generate a question from the caption using the question prompt.",
+        "3. Generate an answer using the answering prompt.",
         "Return ONLY valid JSON with the following structure:",
         "{",
     ]
 
     for index, annotation_type in enumerate(annotation_types):
-        line = f'  "{annotation_type}": {{"caption": "..."}}'
+        line = f'  "{annotation_type}": {{"caption": "...", "question": "...", "answer": "..."}}'
         if index < len(annotation_types) - 1:
             line += ","
         prompt_parts.append(line)
@@ -40,7 +43,7 @@ def build_event_caption_prompt(annotation_types: list[str], day_frames: list[Pat
         f"DAY frames ({len(day_frames)} images): {', '.join([path.name for path in day_frames])}",
         f"NIGHT frames ({len(night_frames)} images): {', '.join([path.name for path in night_frames])}",
         "",
-        "Use the following caption prompts for each annotation type:",
+        "Use the following prompts for each annotation type:",
     ])
 
     for annotation_type in annotation_types:
@@ -48,6 +51,12 @@ def build_event_caption_prompt(annotation_types: list[str], day_frames: list[Pat
             f"### {annotation_type}",
             "CAPTION PROMPT:",
             EVENT_PROMPTS[annotation_type]["caption_prompt"],
+            "",
+            "QUESTION PROMPT:",
+            EVENT_PROMPTS[annotation_type]["question_prompt"],
+            "",
+            "ANSWERING PROMPT:",
+            EVENT_PROMPTS[annotation_type]["answering_prompt"],
             "",
         ])
 
@@ -74,11 +83,11 @@ def parse_json_response(text: str) -> dict:
 
 
 def normalize_event_results(raw_results: Any) -> dict:
-    """Normalize event results to ensure all annotation types have captions"""
+    """Normalize event results to ensure all annotation types have caption, question, and answer"""
     normalized: dict = {}
     for annotation_type in EVENT_PROMPTS.keys():
-        # Create fallback with empty caption for event data
-        fallback = {"caption": ""}
+        # Create fallback with empty values for event data
+        fallback = {"caption": "", "question": "", "answer": ""}
         item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
 
         if not isinstance(item, dict):
@@ -86,13 +95,17 @@ def normalize_event_results(raw_results: Any) -> dict:
             continue
 
         caption = item.get("caption")
+        question = item.get("question")
+        answer = item.get("answer")
 
-        if not isinstance(caption, str):
+        if not all(isinstance(value, str) for value in (caption, question, answer)):
             normalized[annotation_type] = copy.deepcopy(fallback)
             continue
 
         normalized[annotation_type] = {
             "caption": caption,
+            "question": question,
+            "answer": answer,
         }
 
     return normalized
@@ -120,17 +133,21 @@ async def process_event_pair_batch(
     night_frames: list[Path],
     skip_api: bool = False,
 ) -> dict:
-    """Process a single event pair and return captions"""
+    """Process a single event pair and return captions, questions, and answers"""
     if skip_api:
-        # Return demo results with captions only
-        demo_captions = {}
+        # Return demo results with all three fields
+        demo_results = {}
         for annotation_type in EVENT_PROMPTS.keys():
-            demo_captions[annotation_type] = {"caption": "Demo caption"}
-        return demo_captions
+            demo_results[annotation_type] = {
+                "caption": "Demo caption",
+                "question": "Demo question?",
+                "answer": "Demo answer"
+            }
+        return demo_results
 
     if not day_frames or not night_frames:
         print(f"    WARNING: Missing day or night frames for pair {pair_key}; falling back to empty results")
-        return {anno_type: {"caption": ""} for anno_type in EVENT_PROMPTS.keys()}
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in EVENT_PROMPTS.keys()}
 
     selected_day = day_frames[:6]
     selected_night = night_frames[:6]
@@ -141,10 +158,10 @@ async def process_event_pair_batch(
 
     if not day_encoded or not night_encoded:
         print(f"    WARNING: Could not encode frames for pair {pair_key}; falling back to empty results")
-        return {anno_type: {"caption": ""} for anno_type in EVENT_PROMPTS.keys()}
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in EVENT_PROMPTS.keys()}
 
     image_parts = build_image_parts(day_encoded) + build_image_parts(night_encoded)
-    prompt = build_event_caption_prompt(list(EVENT_PROMPTS.keys()), selected_day, selected_night)
+    prompt = build_event_mega_prompt(list(EVENT_PROMPTS.keys()), selected_day, selected_night)
     contents = image_parts + [prompt]
 
     try:
@@ -153,8 +170,8 @@ async def process_event_pair_batch(
         return normalize_event_results(parsed)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
-        print(f"    Falling back to empty captions for pair {pair_key}")
-        return {anno_type: {"caption": ""} for anno_type in EVENT_PROMPTS.keys()}
+        print(f"    Falling back to empty results for pair {pair_key}")
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in EVENT_PROMPTS.keys()}
 
 
 async def run_event_parallel_pipeline(

@@ -18,7 +18,7 @@ def main():
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
     print("=" * 60)
     print("RGB: Single mega-prompt per pair with QA generation")
-    print("EVENT: Single mega-prompt per pair with captions only")
+    print("EVENT: Single mega-prompt per pair with caption, question, and answer generation")
     print("=" * 60)
     
     while True:
@@ -28,9 +28,9 @@ def main():
         print("2. Test RGB batch pipeline on 1 pair (with real Gemini API calls)")
         print("3. Run RGB batch pipeline on all videos (production)")
         print("\n--- EVENT PIPELINE ---")
-        print("4. Test EVENT preprocessing + batch pipeline (no API calls, demo captions)")
-        print("5. Test EVENT batch pipeline on 1 pair (with real Gemini API calls)")
-        print("6. Run EVENT batch pipeline on all videos (production)")
+        print("4. Test EVENT preprocessing + batch pipeline (no API calls, demo Q&A)")
+        print("5. Test EVENT batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
+        print("6. Run EVENT batch pipeline on all videos with Q&A (production)")
         print("\n7. Exit")
         
         choice = input("\nEnter choice (1-7): ").strip()
@@ -69,10 +69,10 @@ def main():
             
         elif choice == "4":
             print("\n" + "-" * 60)
-            print("Running: EVENT Batch pipeline test (demo captions)")
+            print("Running: EVENT Batch pipeline test (demo Q&A)")
             print("-" * 60)
-            print("✓ 1 Gemini call per event pair (caption generation only)")
-            print("✓ skip_api=True → demo captions\n")
+            print("✓ 1 Gemini call per event pair (caption, question, and answer generation)")
+            print("✓ skip_api=True → demo Q&A\n")
             run_event(test_mode=True, skip_api=True)
             
         elif choice == "5":

@@ -231,9 +231,9 @@ def run_event(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No batch output for pair {pair_key}. Using empty captions.")
+            print(f"WARNING: No batch output for pair {pair_key}. Using empty results.")
             from prompts.event_prompts import EVENT_PROMPTS
-            file_results = {anno_type: {"caption": ""} for anno_type in EVENT_PROMPTS.keys()}
+            file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in EVENT_PROMPTS.keys()}
 
         night_file = None
         day_file = None
@@ -252,17 +252,17 @@ def run_event(
         results[pair_key] = {
             "night_file": str(night_file) if night_file else None,
             "day_file": str(day_file) if day_file else None,
-            "captions": file_results,
+            "annotations": file_results,
         }
         print(f"✓ Done: {pair_key}")
 
     # Save results to JSON file at the project root
-    output_file = Path("event_captions.json")
+    output_file = Path("event_qa_results.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     print(f"\n" + "=" * 50)
-    print(f"Event captions saved to: {output_file}")
+    print(f"Event QA results saved to: {output_file}")
     if test_mode:
         print("TEST MODE COMPLETE")
     print("=" * 50)
