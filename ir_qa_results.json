@@ -1,0 +1,68 @@
+{
+  "dataset\\cut_carrot_split\\cut_carrot_ir": {
+    "night_file": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4",
+    "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In this kitchen scene, a laptop is positioned on the left side, exhibiting thermal warmth from its screen. A white cutting board occupies the center, holding a carrot, a peeler, and a knife. To the right of the board is a white bowl, and further right is a power strip. My hands, appearing as thermal hotspots, enter the frame to begin food preparation.",
+        "question": "What object is located to the right of the white cutting board?",
+        "answer": "A bowl."
+      },
+      "spatial_reasoning": {
+        "caption": "The laptop is to the left of the cutting board. The carrot is centrally placed on the cutting board, with a peeler to its left and a knife to its right. The bowl is situated to the right of the cutting board. All these items are roughly 0 steps away as I am standing directly in front of the counter.",
+        "question": "Where is the laptop positioned relative to the cutting board?",
+        "answer": "To the left."
+      },
+      "text_recognition": {
+        "caption": "The laptop keyboard (frame 0) displays a grid of text-like thermal patterns representing keys. The power strip on the far right (frame 0) has small markings that likely indicate labels or brand names. These patterns are essential for identifying electronic equipment in the workspace.",
+        "question": "1. What text-like pattern appears on the left side of the scene?\n2. Is there text visible on the laptop keys?\n3. Where is the pattern of keys located?\n4. How many laptops are present with text-like patterns?\n5. Does the power strip have markings?\n6. What device has a glowing screen on the left?\n7. Are there letters on the cutting board?\n8. What does the keyboard pattern imply?",
+        "answer": "1. Keyboard keys. 2. Yes. 3. On the laptop. 4. One. 5. Yes. 6. A laptop. 7. No. 8. A computing device."
+      },
+      "scene_sequence": {
+        "caption": "The sequence begins with a static view of a kitchen workspace prepared for cooking. Then, my hands move into the frame, picking up a carrot and a peeler. I proceed to peel the carrot over the board, then move the carrot skins into the bowl on the right.",
+        "question": "1. What is the first scene I encounter?\n2. What objects are on the board at the start?\n3. What action do I take after picking up the peeler?\n4. Where do I put the vegetable skins?\n5. What tool is used for peeling?\n6. What is the final state of the bowl?\n7. What was to the left of the workspace throughout?\n8. Did I leave the kitchen counter?\n9. What was the last object I touched?\n10. What sequence of tasks was performed?",
+        "answer": "1. A kitchen workspace. 2. A peeler, carrot, and knife. 3. Peeling the carrot. 4. In the bowl. 5. A peeler. 6. Filled with peels. 7. A laptop. 8. No. 9. The carrot. 10. Preparation, peeling, and disposal."
+      },
+      "light_recongnition": {
+        "caption": "The scene is lit by a strong overhead light source, presumably a kitchen under-cabinet light, which casts distinct shadows downwards onto the workspace, creating sharp contrast on the cutting board and counter.",
+        "question": "From which direction is the main light source coming?",
+        "answer": "Above."
+      },
+      "light_change": {
+        "caption": "The lighting remains constant throughout the video, though the movement of my hands causes shadows to shift across the cutting board. In the night sequence, the overall illumination drops, emphasizing the thermal contrast of the laptop and hands.",
+        "question": "1. Did the main light turn off?\n2. Is it getting significantly brighter?\n3. Does a light move across the scene?\n4. Do the shadows change as I move my hands?\n5. Is the laptop screen a light source?\n6. Does the background light flicker?\n7. Is the light approaching the camera?\n8. Did the scene transition from light to dark in the night sequence?",
+        "answer": "1. No. 2. No. 3. No. 4. Yes. 5. Yes. 6. No. 7. No. 8. Yes."
+      },
+      "counting": {
+        "caption": "The video contains 1 laptop, 1 white cutting board, 1 chef's knife, 1 vegetable peeler, 1 bowl, and 1 carrot. A single power strip with multiple outlets is also present on the right.",
+        "question": "1. How many laptops are on the counter?\n2. How many cutting boards are used?\n3. How many knives are visible?\n4. How many peelers are there?\n5. How many bowls are used for scraps?\n6. How many carrots are being peeled?\n7. How many hands are visible when working?\n8. How many power strips are on the right?\n9. How many total kitchen tools (knife and peeler) are on the board?\n10. How many main workspace zones are there?",
+        "answer": "1. One. 2. One. 3. One. 4. One. 5. One. 6. One. 7. Two. 8. One. 9. Two. 10. One."
+      },
+      "dynamic_counting": {
+        "caption": "The primary movement involves my two hands working on the carrot. The peeler is dynamically moved across the carrot's surface. No other external moving objects or humans are detected in the scene.",
+        "question": "1. How many hands are moving?\n2. How many carrots are being moved?\n3. Is the knife being moved?\n4. Is the bowl moving?\n5. How many peelers are being used?\n6. Are there any other people moving?\n7. Are there any cars outside?\n8. Is the laptop moving?",
+        "answer": "1. Two. 2. One. 3. No. 4. No. 5. One. 6. No. 7. No. 8. No."
+      },
+      "non_common": {
+        "caption": "A laptop is placed directly on the edge of the kitchen counter prep area, which is highly impractical and unsafe due to potential spills or heat from cooking. The laptop should be moved to a desk away from food preparation areas to avoid damage.",
+        "question": "What item is placed in an unsafe location near the food prep area?",
+        "answer": "A laptop."
+      },
+      "navigation": {
+        "caption": "I remain stationary at the kitchen counter for the duration of the video. No steps or navigational turns like turning left or right are performed.",
+        "question": "1. Do I turn left?\n2. Do I turn right?\n3. How many steps do I take?\n4. Do I move towards the bowl?\n5. Do I walk away from the laptop?\n6. Is the kitchen the final destination?\n7. Do I navigate to another room?\n8. How do I reach the cutting board?\n9. Do I move past the sink?\n10. Which way do I turn to leave?",
+        "answer": "1. No. 2. No. 3. Zero. 4. No. 5. No. 6. Yes. 7. No. 8. Stay stationary. 9. No. 10. Turn around."
+      },
+      "dynamic_recognition": {
+        "caption": "My hands enter the workspace at frame 30 and initiate the peeling action, which continues until frame 150. The peeler is actively used to remove the carrot skin, and the skins are then moved toward the bowl.",
+        "question": "1. Did a new object appear?\n2. Are the hands moving?\n3. When does the peeling start?\n4. Is the peeler being used?\n5. Does the bowl move?\n6. Are there any moving humans besides me?\n7. What is being peeled?\n8. When does the hand move the peel to the bowl?",
+        "answer": "1. No. 2. Yes. 3. Frame 30. 4. Yes. 5. No. 6. No. 7. A carrot. 8. Throughout the action."
+      },
+      "action": {
+        "caption": "I am peeling a carrot using a peeler. The action is performed over a cutting board, and the peeled skins are gathered and put into a bowl. The purpose is vegetable preparation, resulting in a clean carrot ready for further processing.",
+        "question": "1. What am I doing with the peeler?\n2. What object am I interacting with?\n3. Why am I peeling the vegetable?\n4. What happens to the skins?\n5. Which tool is used for the primary task?\n6. Am I using the knife?\n7. Is the laptop being used for the task?\n8. What is the end result of my actions?",
+        "answer": "1. Peeling a carrot. 2. A carrot. 3. Food preparation. 4. Put in a bowl. 5. A peeler. 6. No. 7. No. 8. A peeled carrot."
+      }
+    }
+  }
+}

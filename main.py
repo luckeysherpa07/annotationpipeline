@@ -10,7 +10,7 @@ import sys
 # Add parent directory to path so we can import annotation_feature
 sys.path.insert(0, str(Path(__file__).parent))
 
-from annotation_feature.pipeline import run, run_event, run_depth
+from annotation_feature.pipeline import run, run_event, run_depth, run_ir
 
 
 def main():
@@ -20,6 +20,7 @@ def main():
     print("RGB: Single mega-prompt per pair with QA generation")
     print("EVENT: Single mega-prompt per pair with caption, question, and answer generation")
     print("DEPTH: Single mega-prompt per pair with caption, question, and answer generation")
+    print("IR: Single mega-prompt per pair with caption, question, and answer generation")
     print("=" * 60)
     
     while True:
@@ -36,9 +37,13 @@ def main():
         print("7. Test DEPTH preprocessing + batch pipeline (no API calls, demo Q&A)")
         print("8. Test DEPTH batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
         print("9. Run DEPTH batch pipeline on all videos with Q&A (production)")
-        print("\n10. Exit")
-        
-        choice = input("\nEnter choice (1-10): ").strip()
+        print("\n--- IR PIPELINE ---")
+        print("10. Test IR preprocessing + batch pipeline (no API calls, demo Q&A)")
+        print("11. Test IR batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
+        print("12. Run IR batch pipeline on all videos with Q&A (production)")
+        print("\n13. Exit")
+
+        choice = input("\nEnter choice (1-13): ").strip()
         
         if choice == "1":
             print("\n" + "-" * 60)
@@ -135,8 +140,40 @@ def main():
                 run_depth(test_mode=False)
             else:
                 print("Cancelled.")
-            
+
         elif choice == "10":
+            print("\n" + "-" * 60)
+            print("Running: IR Batch pipeline test (demo Q&A)")
+            print("-" * 60)
+            print("âœ“ 1 Gemini call per IR pair (caption, question, and answer generation)")
+            print("âœ“ skip_api=True â†’ demo Q&A\n")
+            run_ir(test_mode=True, skip_api=True)
+
+        elif choice == "11":
+            print("\n" + "-" * 60)
+            print("Running: IR Batch pipeline on 1 pair (REAL GEMINI API CALLS)")
+            print("âš ï¸  WARNING: This will use Gemini API quota!")
+            print("â„¹ï¸  Uses gemini-3-flash-preview with max 6 frames per call")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_ir(test_mode=True, skip_api=False)
+            else:
+                print("Cancelled.")
+
+        elif choice == "12":
+            print("\n" + "-" * 60)
+            print("Running: IR Batch pipeline on ALL videos (PRODUCTION)")
+            print("âš ï¸  WARNING: This will use Gemini API quota for each video!")
+            print("â„¹ï¸  Parallel execution: up to 3 pairs concurrently, 4-sec spacing")
+            print("-" * 60)
+            confirm = input("Continue? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                run_ir(test_mode=False)
+            else:
+                print("Cancelled.")
+
+        elif choice == "13":
             print("\nExiting.")
             break
         else:
