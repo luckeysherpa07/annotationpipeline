@@ -113,6 +113,16 @@ MODALITY_LABELS = {
     "depth": "depth",
 }
 
+VISUAL_MODALITIES = ("rgb", "ir", "depth")
+FIELD_QA_SECTIONS = OUTPUT_SECTIONS
+MODALITY_SORT_ORDER = {
+    "rgb": 0,
+    "ir": 1,
+    "depth": 2,
+    "event": 3,
+    "audio": 4,
+}
+
 
 @dataclass
 class CaptionEvidence:
@@ -124,6 +134,237 @@ class CaptionEvidence:
     normalized_tokens: set[str]
     support_score: float = 0.0
     modality_reliability: float = 0.0
+
+
+def _trim_answer(text: str, max_words: int = 6) -> str:
+    text = _clean_whitespace(text.strip(" .,:;"))
+    if not text:
+        return ""
+    text = re.sub(r"^(?:a|an|the)\s+", "", text, flags=re.IGNORECASE)
+    for separator in (", followed by", ", and", ",", " and ", " while ", " as ", " because ", " which "):
+        if separator in text:
+            text = text.split(separator, 1)[0].strip()
+            break
+    words = text.split()
+    if len(words) > max_words:
+        text = " ".join(words[:max_words])
+    return text.strip(" .,:;")
+
+
+def _best_visual_modality(
+    source_entries: dict[str, str],
+    modality_reliability: dict[str, float],
+) -> str:
+    available_visual = [modality for modality in VISUAL_MODALITIES if modality in source_entries]
+    if "rgb" in available_visual:
+        return "rgb"
+    if available_visual:
+        return max(
+            available_visual,
+            key=lambda modality: (modality_reliability.get(modality, 0.0), -MODALITY_SORT_ORDER.get(modality, 99)),
+        )
+    if source_entries:
+        return max(
+            source_entries,
+            key=lambda modality: (modality_reliability.get(modality, 0.0), -MODALITY_SORT_ORDER.get(modality, 99)),
+        )
+    return "fused"
+
+
+def _primary_category_for_section(
+    section: str,
+    source_entries: dict[str, str],
+    modality_reliability: dict[str, float],
+) -> str:
+    if section in {"scene_overview", "cross_modal_details", "final_unified_caption"}:
+        return "fused"
+    if section == "visible_objects_and_layout":
+        return _best_visual_modality(source_entries, modality_reliability)
+    if section == "motion_and_event_cues":
+        if "event" in source_entries:
+            return "event"
+        return _best_visual_modality(source_entries, modality_reliability)
+    if section == "audio_cues":
+        if "audio" in source_entries:
+            return "audio"
+        if source_entries:
+            return max(
+                source_entries,
+                key=lambda modality: (modality_reliability.get(modality, 0.0), -MODALITY_SORT_ORDER.get(modality, 99)),
+            )
+    return "fused"
+
+
+def _supporting_modalities(
+    source_entries: dict[str, str],
+    modality_reliability: dict[str, float],
+) -> list[str]:
+    return sorted(
+        source_entries.keys(),
+        key=lambda modality: (-modality_reliability.get(modality, 0.0), MODALITY_SORT_ORDER.get(modality, 99), modality),
+    )
+
+
+def _extract_scene_answer(caption: str) -> str:
+    patterns = (
+        r"(?:view|shot) of the ([^.]+?)(?: prepared for| setup|\.|,)",
+        r"shows (?:a|an) ([^.]+?)(?: with|\.|,)",
+        r"shows (?:the )?([^.]+? room)(?: with|\.|,)",
+        r"shows (?:the )?([^.]+? workspace)(?: with|\.|,)",
+        r"shows (?:the )?([^.]+? counter)(?: prepared|\.|,)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, caption, flags=re.IGNORECASE)
+        if match:
+            return _trim_answer(match.group(1))
+    if "kitchen" in caption.lower():
+        return "kitchen counter"
+    if "office" in caption.lower():
+        return "office room"
+    return ""
+
+
+def _extract_layout_qa(caption: str) -> tuple[str, str]:
+    directional_patterns = (
+        r"To the (right|left) of the ([^.]+?) is (?:a|an|the) ([^.]+?)(?:[.,]|$)",
+        r"The ([^.]+?) is located to the (right|left) of the ([^.]+?)(?:[.,]|$)",
+    )
+    for pattern in directional_patterns:
+        match = re.search(pattern, caption, flags=re.IGNORECASE)
+        if not match:
+            continue
+        groups = [group.strip() for group in match.groups()]
+        if pattern.startswith("To the"):
+            direction, reference, answer = groups
+        else:
+            answer, direction, reference = groups
+        return f"What is to the {direction} of the {reference}?", _trim_answer(answer)
+
+    match = re.search(r"with (\d+) outlets", caption, flags=re.IGNORECASE)
+    if match and "power strip" in caption.lower():
+        return "How many outlets are on the power strip?", _trim_answer(match.group(1))
+
+    match = re.search(r"Resting on the cutting board are ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        items_text = match.group(1)
+        items = [item.strip() for item in re.split(r",| and ", items_text) if item.strip()]
+        if items:
+            return "What is on the cutting board?", _trim_answer(items[0])
+
+    return "What object is explicitly mentioned in the layout?", _trim_answer(caption)
+
+
+def _extract_motion_qa(caption: str) -> tuple[str, str]:
+    lower_caption = caption.lower()
+    if "no independent dynamic entities" in lower_caption:
+        return "Are any independent dynamic entities recognized?", "No"
+
+    match = re.search(r"At approximately frame ([0-9]+), ([^.]+?) enter[s]? the frame", caption, flags=re.IGNORECASE)
+    if match:
+        frame, actor = match.groups()
+        return f"What enters the frame at approximately frame {frame}?", _trim_answer(actor)
+
+    match = re.search(r"The sequence begins with ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What does the sequence begin with?", _trim_answer(match.group(1))
+
+    match = re.search(r"([^.]+?) enter[s]? the scene", caption, flags=re.IGNORECASE)
+    if match:
+        return "What enters the scene?", _trim_answer(match.group(1))
+
+    return "What motion cue is described?", _trim_answer(caption)
+
+
+def _extract_audio_qa(caption: str) -> tuple[str, str]:
+    match = re.search(r"audio changes from [^.]* to ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What does the audio change to?", _trim_answer(match.group(1))
+
+    match = re.search(r"sound of ([^.]+?)(?:,| followed by|\.|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What sound is described?", _trim_answer(match.group(1))
+
+    match = re.search(r"audio features ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What sound is featured in the audio?", _trim_answer(match.group(1))
+
+    return "What audio cue is described?", _trim_answer(caption)
+
+
+def _extract_cross_modal_qa(caption: str) -> tuple[str, str]:
+    match = re.search(r"reinforced by ([^.]+?) that make", caption, flags=re.IGNORECASE)
+    if match:
+        return "Which modality makes the scene clearer?", _trim_answer(match.group(1))
+
+    match = re.search(r"Motion-based evidence matches ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What sequence do the motion cues match?", _trim_answer(match.group(1))
+
+    match = re.search(r"sounds align with ([^.]+?)(?:[.,]|$)", caption, flags=re.IGNORECASE)
+    if match:
+        return "What activity do the sounds align with?", _trim_answer(match.group(1))
+
+    return "What cross-modal detail is stated?", _trim_answer(caption)
+
+
+def _extract_final_qa(caption: str) -> tuple[str, str]:
+    answer = _extract_scene_answer(caption)
+    if answer:
+        return "What setting is described in the unified caption?", answer
+
+    match = re.search(r"At approximately frame ([0-9]+), ([^.]+?) enter[s]? the frame", caption, flags=re.IGNORECASE)
+    if match:
+        frame, actor = match.groups()
+        return f"What enters the frame at approximately frame {frame}?", _trim_answer(actor)
+
+    return "What does the unified caption describe?", _trim_answer(caption)
+
+
+def _generate_field_qa(
+    section: str,
+    caption: str,
+    source_entries: dict[str, str],
+    modality_reliability: dict[str, float],
+) -> dict[str, Any]:
+    category = _primary_category_for_section(section, source_entries, modality_reliability)
+    qa = {
+        "caption": caption,
+        "question": "",
+        "answer": "",
+        "category": category,
+        "supporting_modalities": _supporting_modalities(source_entries, modality_reliability),
+    }
+    if not caption:
+        return qa
+
+    if section == "scene_overview":
+        answer = _extract_scene_answer(caption)
+        qa["question"] = "What setting is described in the scene overview?"
+        qa["answer"] = answer or _trim_answer(caption)
+        return qa
+
+    builders = {
+        "visible_objects_and_layout": _extract_layout_qa,
+        "motion_and_event_cues": _extract_motion_qa,
+        "audio_cues": _extract_audio_qa,
+        "cross_modal_details": _extract_cross_modal_qa,
+        "final_unified_caption": _extract_final_qa,
+    }
+    question, answer = builders.get(section, _extract_final_qa)(caption)
+    qa["question"] = _clean_whitespace(question)
+    qa["answer"] = answer or _trim_answer(caption)
+    return qa
+
+
+def _build_field_qas(
+    sections: dict[str, str],
+    source_entries: dict[str, str],
+    modality_reliability: dict[str, float],
+) -> dict[str, dict[str, Any]]:
+    return {
+        section: _generate_field_qa(section, sections.get(section, ""), source_entries, modality_reliability)
+        for section in FIELD_QA_SECTIONS
+    }
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -464,11 +705,15 @@ def fuse_sample(sample_modalities: dict[str, dict[str, Any]]) -> dict[str, Any]:
         score = modality_reliability.get(evidence.modality, 0.0)
         modality_reliability[evidence.modality] = max(score, evidence.modality_reliability)
 
+    rounded_reliability = {key: round(value, 3) for key, value in sorted(modality_reliability.items())}
+    field_qas = _build_field_qas(sections, source_entries, rounded_reliability)
+
     return {
         "source_entries": source_entries,
         "source_files": source_files,
-        "modality_reliability": {key: round(value, 3) for key, value in sorted(modality_reliability.items())},
+        "modality_reliability": rounded_reliability,
         **sections,
+        "field_qas": field_qas,
     }
 
 
