@@ -15,21 +15,21 @@
       "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4"
     },
     "modality_reliability": {
-      "audio": 0.593,
-      "depth": 0.698,
+      "audio": 0.458,
+      "depth": 0.918,
       "event": 1.0,
       "ir": 1.0,
       "rgb": 1.0
     },
-    "scene_overview": "The video starts with a static view of the kitchen counter prepared for cooking. The video starts with a static shot of the kitchen counter setup.",
-    "visible_objects_and_layout": "The video shows 1 laptop, 1 induction stovetop, 1 white cutting board, 1 orange carrot, 1 black peeler, 1 metal chef's knife, 1 white bowl, and 1 white power strip with 3 outlets. To the right of the cutting board is a white ceramic bowl. Resting on the cutting board are three items: a whole orange carrot, a black vegetable peeler, and a large chef's knife.",
-    "motion_and_event_cues": "At approximately frame 000060, two hands enter the frame. Next, my hands enter the scene to grasp the objects.",
-    "audio_cues": "The audio features the rhythmic and repeated sound of a knife hitting a wooden cutting board as it slices through a crisp vegetable, followed by the sound of the chopped pieces being swept across the board and gathered. This is followed by the sound of the knife scraping against the board to move the food.",
+    "scene_overview": "The video sequence captures a person preparing food in a kitchen. The video begins with a static shot of kitchen tools (peeler, carrot, knife) arranged on a cutting board next to a laptop and bowl.",
+    "visible_objects_and_layout": "On the cutting board lies an orange carrot and a black vegetable peeler. I can identify several objects: 1 laptop, 1 carrot, 1 vegetable peeler, 1 chef's knife, 1 white bowl, 1 white cutting board, and 1 power strip with multiple outlets. The black peeler is placed to the left of the carrot on the same board.",
+    "motion_and_event_cues": "From motion and event boundaries, I can identify: 1 cutting board, 1 chef's knife, 1 vegetable peeler, 1 carrot, and 2 hands (or two distinct hand movements). The most salient activity occurs at the end of the sequence, where the peeler's rapid motion against the carrot's surface generates dense event clusters along the contact boundary.",
+    "audio_cues": "Background ambient sound and environmental noise present. Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
     "cross_modal_details": "The dim kitchen workspace seen visually is reinforced by infrared cues that make the hands and warm laptop area clearer while preserving the same counter layout. Motion-based evidence matches the visible preparation sequence: hands enter the frame, lift the carrot and peeler, and bring them together above the work area.",
-    "final_unified_caption": "The video starts with a static view of the kitchen counter prepared for cooking. The video shows 1 laptop, 1 induction stovetop, 1 white cutting board, 1 orange carrot, 1 black peeler, 1 metal chef's knife, 1 white bowl, and 1 white power strip with 3 outlets. At approximately frame 000060, two hands enter the frame. The audio features the rhythmic and repeated sound of a knife hitting a wooden cutting board as it slices through a crisp vegetable, followed by the sound of the chopped pieces being swept across the board and gathered.",
+    "final_unified_caption": "The video sequence captures a person preparing food in a kitchen. On the cutting board lies an orange carrot and a black vegetable peeler. From motion and event boundaries, I can identify: 1 cutting board, 1 chef's knife, 1 vegetable peeler, 1 carrot, and 2 hands (or two distinct hand movements). Background ambient sound and environmental noise present.",
     "field_qas": {
       "scene_overview": {
-        "caption": "The video starts with a static view of the kitchen counter prepared for cooking. The video starts with a static shot of the kitchen counter setup.",
+        "caption": "The video sequence captures a person preparing food in a kitchen. The video begins with a static shot of kitchen tools (peeler, carrot, knife) arranged on a cutting board next to a laptop and bowl.",
         "question": "What setting is described in the scene overview?",
         "answer": "kitchen counter",
         "category": "fused",
@@ -42,9 +42,9 @@
         ]
       },
       "visible_objects_and_layout": {
-        "caption": "The video shows 1 laptop, 1 induction stovetop, 1 white cutting board, 1 orange carrot, 1 black peeler, 1 metal chef's knife, 1 white bowl, and 1 white power strip with 3 outlets. To the right of the cutting board is a white ceramic bowl. Resting on the cutting board are three items: a whole orange carrot, a black vegetable peeler, and a large chef's knife.",
-        "question": "What is to the right of the cutting board?",
-        "answer": "white ceramic bowl",
+        "caption": "On the cutting board lies an orange carrot and a black vegetable peeler. I can identify several objects: 1 laptop, 1 carrot, 1 vegetable peeler, 1 chef's knife, 1 white bowl, 1 white cutting board, and 1 power strip with multiple outlets. The black peeler is placed to the left of the carrot on the same board.",
+        "question": "What object is explicitly mentioned in the layout?",
+        "answer": "On the cutting board lies an",
         "category": "rgb",
         "supporting_modalities": [
           "rgb",
@@ -55,9 +55,9 @@
         ]
       },
       "motion_and_event_cues": {
-        "caption": "At approximately frame 000060, two hands enter the frame. Next, my hands enter the scene to grasp the objects.",
-        "question": "What enters the frame at approximately frame 000060?",
-        "answer": "two hands",
+        "caption": "From motion and event boundaries, I can identify: 1 cutting board, 1 chef's knife, 1 vegetable peeler, 1 carrot, and 2 hands (or two distinct hand movements). The most salient activity occurs at the end of the sequence, where the peeler's rapid motion against the carrot's surface generates dense event clusters along the contact boundary.",
+        "question": "What motion cue is described?",
+        "answer": "From motion and event boundaries, I",
         "category": "event",
         "supporting_modalities": [
           "rgb",
@@ -68,9 +68,9 @@
         ]
       },
       "audio_cues": {
-        "caption": "The audio features the rhythmic and repeated sound of a knife hitting a wooden cutting board as it slices through a crisp vegetable, followed by the sound of the chopped pieces being swept across the board and gathered. This is followed by the sound of the knife scraping against the board to move the food.",
-        "question": "What sound is described?",
-        "answer": "knife hitting a wooden cutting board",
+        "caption": "Background ambient sound and environmental noise present. Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
+        "question": "What audio cue is described?",
+        "answer": "Background ambient sound and environmental noise",
         "category": "audio",
         "supporting_modalities": [
           "rgb",
@@ -94,7 +94,7 @@
         ]
       },
       "final_unified_caption": {
-        "caption": "The video starts with a static view of the kitchen counter prepared for cooking. The video shows 1 laptop, 1 induction stovetop, 1 white cutting board, 1 orange carrot, 1 black peeler, 1 metal chef's knife, 1 white bowl, and 1 white power strip with 3 outlets. At approximately frame 000060, two hands enter the frame. The audio features the rhythmic and repeated sound of a knife hitting a wooden cutting board as it slices through a crisp vegetable, followed by the sound of the chopped pieces being swept across the board and gathered.",
+        "caption": "The video sequence captures a person preparing food in a kitchen. On the cutting board lies an orange carrot and a black vegetable peeler. From motion and event boundaries, I can identify: 1 cutting board, 1 chef's knife, 1 vegetable peeler, 1 carrot, and 2 hands (or two distinct hand movements). Background ambient sound and environmental noise present.",
         "question": "What setting is described in the unified caption?",
         "answer": "kitchen counter",
         "category": "fused",
@@ -124,95 +124,94 @@
       "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4"
     },
     "modality_reliability": {
-      "audio": 0.616,
+      "audio": 0.544,
       "depth": 1.0,
       "event": 1.0,
-      "ir": 1.0,
       "rgb": 1.0
     },
-    "scene_overview": "Identifiable objects include computer monitors, keyboards, mice, PC towers, office chairs, and desks. The video shows a computer lab or office room with multiple workstations.",
-    "visible_objects_and_layout": "The PC tower is located to the right of the monitor at the first workstation. There are no dynamic objects or humans moving in the video frames; the scene is static except for the camera movement. In the full sequence, I can identify: 1 blue point light, 1 vertical pink strip, 1 diagonal white strip, several monitors (at least 5), several PC towers (at least 4), and 3 blue chairs.",
-    "motion_and_event_cues": "There are no independent dynamic entities such as humans or moving machinery recognized in the event stream. The sequence begins with a close-up of a single workstation's monitor and PC.",
-    "audio_cues": "The audio changes from quiet ambient noise to footsteps. The final footsteps sound as if they are moving away from the microphone, becoming quieter and more distant.",
-    "cross_modal_details": "The dim kitchen workspace seen visually is reinforced by infrared cues that make the hands and warm laptop area clearer while preserving the same counter layout. Motion-based evidence matches the visible preparation sequence: hands enter the frame, lift the carrot and peeler, and bring them together above the work area.",
-    "final_unified_caption": "Identifiable objects include computer monitors, keyboards, mice, PC towers, office chairs, and desks. The PC tower is located to the right of the monitor at the first workstation. There are no independent dynamic entities such as humans or moving machinery recognized in the event stream. The audio changes from quiet ambient noise to footsteps.",
+    "scene_overview": "The sequence concludes with a wider shot of the office environment showing several such workstations and blue chairs. The day frames reveal a series of office desks with black monitors, black keyboards, mice, and computer towers.",
+    "visible_objects_and_layout": "Monitors are placed on top of the desks, and chairs are positioned in front of them. In the full sequence, I can identify: 4 computer monitors, 4 computer towers, 3 blue office chairs, 1 portable hard drive, and 1 cardboard box used as a stand. There are no dynamic humans or objects moving in the video sequence besides the camera itself.",
+    "motion_and_event_cues": "There are no independent moving humans or objects in the scene. Based on the event activity during the camera's movement, I can identify and count three monitors, two PC towers, two keyboards, and two office chairs.",
+    "audio_cues": "Background ambient sound and environmental noise present. Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
+    "cross_modal_details": "Motion-based evidence matches the visible preparation sequence: hands enter the frame, lift the carrot and peeler, and bring them together above the work area. The close chopping and scraping sounds align with the same kitchen food-preparation activity suggested by the visible tools and hand movements.",
+    "final_unified_caption": "The sequence concludes with a wider shot of the office environment showing several such workstations and blue chairs. Monitors are placed on top of the desks, and chairs are positioned in front of them. There are no independent moving humans or objects in the scene. Background ambient sound and environmental noise present.",
     "field_qas": {
       "scene_overview": {
-        "caption": "Identifiable objects include computer monitors, keyboards, mice, PC towers, office chairs, and desks. The video shows a computer lab or office room with multiple workstations.",
+        "caption": "The sequence concludes with a wider shot of the office environment showing several such workstations and blue chairs. The day frames reveal a series of office desks with black monitors, black keyboards, mice, and computer towers.",
         "question": "What setting is described in the scene overview?",
-        "answer": "computer lab or office room",
+        "answer": "office environment showing several such workstations",
         "category": "fused",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       },
       "visible_objects_and_layout": {
-        "caption": "The PC tower is located to the right of the monitor at the first workstation. There are no dynamic objects or humans moving in the video frames; the scene is static except for the camera movement. In the full sequence, I can identify: 1 blue point light, 1 vertical pink strip, 1 diagonal white strip, several monitors (at least 5), several PC towers (at least 4), and 3 blue chairs.",
-        "question": "What is to the right of the monitor at the first workstation?",
-        "answer": "PC tower",
+        "caption": "Monitors are placed on top of the desks, and chairs are positioned in front of them. In the full sequence, I can identify: 4 computer monitors, 4 computer towers, 3 blue office chairs, 1 portable hard drive, and 1 cardboard box used as a stand. There are no dynamic humans or objects moving in the video sequence besides the camera itself.",
+        "question": "What object is explicitly mentioned in the layout?",
+        "answer": "Monitors are placed on top of",
         "category": "rgb",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       },
       "motion_and_event_cues": {
-        "caption": "There are no independent dynamic entities such as humans or moving machinery recognized in the event stream. The sequence begins with a close-up of a single workstation's monitor and PC.",
-        "question": "Are any independent dynamic entities recognized?",
-        "answer": "No",
+        "caption": "There are no independent moving humans or objects in the scene. Based on the event activity during the camera's movement, I can identify and count three monitors, two PC towers, two keyboards, and two office chairs.",
+        "question": "What motion cue is described?",
+        "answer": "There are no independent moving humans",
         "category": "event",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       },
       "audio_cues": {
-        "caption": "The audio changes from quiet ambient noise to footsteps. The final footsteps sound as if they are moving away from the microphone, becoming quieter and more distant.",
-        "question": "What does the audio change to?",
-        "answer": "footsteps",
+        "caption": "Background ambient sound and environmental noise present. Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
+        "question": "What audio cue is described?",
+        "answer": "Background ambient sound and environmental noise",
         "category": "audio",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       },
       "cross_modal_details": {
-        "caption": "The dim kitchen workspace seen visually is reinforced by infrared cues that make the hands and warm laptop area clearer while preserving the same counter layout. Motion-based evidence matches the visible preparation sequence: hands enter the frame, lift the carrot and peeler, and bring them together above the work area.",
-        "question": "Which modality makes the scene clearer?",
-        "answer": "infrared cues",
+        "caption": "Motion-based evidence matches the visible preparation sequence: hands enter the frame, lift the carrot and peeler, and bring them together above the work area. The close chopping and scraping sounds align with the same kitchen food-preparation activity suggested by the visible tools and hand movements.",
+        "question": "What sequence do the motion cues match?",
+        "answer": "visible preparation sequence: hands enter the",
         "category": "fused",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       },
       "final_unified_caption": {
-        "caption": "Identifiable objects include computer monitors, keyboards, mice, PC towers, office chairs, and desks. The PC tower is located to the right of the monitor at the first workstation. There are no independent dynamic entities such as humans or moving machinery recognized in the event stream. The audio changes from quiet ambient noise to footsteps.",
+        "caption": "The sequence concludes with a wider shot of the office environment showing several such workstations and blue chairs. Monitors are placed on top of the desks, and chairs are positioned in front of them. There are no independent moving humans or objects in the scene. Background ambient sound and environmental noise present.",
         "question": "What setting is described in the unified caption?",
-        "answer": "office room",
+        "answer": "office environment showing several such workstations",
         "category": "fused",
         "supporting_modalities": [
           "rgb",
-          "ir",
           "depth",
           "event",
-          "audio"
+          "audio",
+          "ir"
         ]
       }
     }
