@@ -4,49 +4,100 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
     "annotations": {
       "depth_object_recognition": {
-        "caption": "The scene is an outdoor area with a predominantly deep background representing a far-off horizon. A large circular object, which could be a wheel or a round structural element, is positioned on the right side of the frame at a medium distance. On the far left edge, there are small, very close objects represented by distinct red and orange clusters. In the mid-ground on the left, several vertical structures or poles are visible as elongated depth features. The ground plane appears as a textured gradient extending from the foreground towards the dark blue far background.",
-        "question": "What large, identifiable geometric structure is present on the right side of the scene at a medium depth?",
-        "answer": "Circular object"
+        "caption": "The scene displays an expansive outdoor layout dominated by a ground plane in the foreground and mid-ground. In the far background, a horizontal structure or tree-line defines the horizon. Starting mid-sequence, a distinct, circular or rounded object emerges in the mid-range on the right side of the frame, positioned in front of the background features but further than the immediate ground. The scene is permeated by sparse depth artifacts, appearing as small, isolated 3D points near the camera.",
+        "question": "What is the depth relationship between the circular object on the right and the horizontal background line?",
+        "answer": "The circular object is closer."
       },
       "depth_spatial_reasoning": {
-        "caption": "The spatial layout consists of several layers. The red clusters on the far left are significantly closer to me than the circular object on the right. The dark blue background region is the farthest part of the scene. The vertical poles on the left are located between the near-field red objects and the far background. The circular object on the right partially occludes the background behind it, while the ground plane lies below all these distinct objects and provides a spatial base for the scene.",
-        "question": "Is the circular object on the right closer or farther away than the red clusters on the left?",
-        "answer": "Farther away"
+        "caption": "The ground plane is consistently located below all other identifiable features. The horizontal background structure is positioned behind the open field. As the sequence progresses, a circular object appears to the right and remains in front of the background horizon. Smaller depth noise clusters are seen in the immediate foreground, closer to me than the ground itself, occasionally occluding parts of the distant view.",
+        "question": "Is the circular object on the right side behind or in front of the background horizon?",
+        "answer": "In front."
       },
       "depth_scene_sequence": {
-        "caption": "The video starts with a relatively open, noisy outdoor scene. As the sequence progresses, the 3D boundaries of a circular structure on the right become more clearly defined in the depth map. The camera appears to be moving forward slowly, which causes the vertical poles on the left to shift their relative positions against the background. By the end of the sequence, the spatial relationships between the static landmarks and the receding background are more stable and discernible.",
-        "question": "How does the definition of the circular object's depth boundaries change over the sequence?",
-        "answer": "It becomes more defined"
+        "caption": "The video starts with a wide, open view of a distant landscape. As I move forward, the 3D structure reveals a more defined mid-ground area where a rounded feature on the right becomes increasingly prominent. The sequence maintains a consistent open-space layout with no transitions between rooms or through corridors, showing a steady progression through a single continuous outdoor area.",
+        "question": "Do I transition from an enclosed space into this open area during the sequence?",
+        "answer": "No, it remains open."
       },
       "depth_counting": {
-        "caption": "Based on depth separation, I can identify and count several entities. There are 3 distinct vertical structures on the left side that resemble poles. On the right, there is 1 large circular object. Approximately 3 small, very close clusters are located on the far left edge. The scene also contains 1 ground plane and 1 far-field background zone. There are 3 main depth layers (near, mid, far), 4 total mid-ground objects, and about 7 distinct objects identified overall.",
-        "question": "How many circular structures are on the right? How many vertical poles are on the left? How many ground planes are visible? How many far-field background zones are there? How many red clusters are on the left edge? How many main depth layers (near, mid, far)? How many distinct objects are in the mid-ground? What is the total count of all identified objects?",
-        "answer": "1, 3, 1, 1, 3, 3, 4, 7"
+        "caption": "Identifiable regions for counting include the main ground plane, the distant background line, the mid-range circular object, and various clusters of depth noise. Across the full sequence, I can identify 1 continuous ground plane, 1 distinct circular mid-range object, 2 main background structure clusters, and at least 4 distinct regions of dense foreground noise.",
+        "question": "1. How many main ground planes are visible? 2. How many circular objects appear on the right side? 3. How many distinct distant background clusters are there? 4. How many foreground noise clusters appear? 5. How many total depth layers are clearly distinguishable? 6. How many vertical features appear in the background? 7. How many large gaps in depth data are present? 8. How many stationary landmarks are visible?",
+        "answer": "1. One. 2. One. 3. Two. 4. Four. 5. Three. 6. Two. 7. Multiple. 8. Two."
       },
       "depth_dynamic_counting": {
-        "caption": "The video shows a few moving entities apart from the camera. One small cluster in the center background recedes further away into the distance. Two small clusters on the left edge show minor motion across depth layers as the camera moves. There are no humans or cars detected moving within the scene. Overall, there are 3 moving entities besides myself, including 2 near-range clusters and 1 receding background object.",
-        "question": "How many objects recede into the distance? How many humans pass by? How many cars approach me? How many clusters on the left show motion? How many objects cross from left to right? How many objects change depth layers significantly? How many objects are approaching on the right? What is the total number of moving entities besides myself?",
-        "answer": "1, 0, 0, 2, 0, 2, 0, 3"
+        "caption": "A single rounded object on the right side of the frame appears to approach and grow larger in the depth map as the sequence progresses, indicating relative motion between the camera and the object. There are no humans or vehicles visible. A few noise clusters move erratically in the foreground but do not represent physical entities.",
+        "question": "1. How many objects approach me from the right? 2. How many objects recede into the distance? 3. How many humans pass by? 4. How many vehicles are visible? 5. How many objects shift from far range to mid range? 6. How many objects enter from the left? 7. How many objects enter from the right? 8. How many times does the circular blob change depth significantly?",
+        "answer": "1. One. 2. Zero. 3. Zero. 4. Zero. 5. One. 6. Zero. 7. One. 8. Once."
       },
       "depth_navigation": {
-        "caption": "The depth information indicates a clear, navigable path straight ahead toward the dark blue far-field region. The path is bordered by vertical poles on the left and a large circular object on the right. The ground in the immediate center is free of large obstacles, though movement should stay clear of the very close red clusters on the far left edge. The 3D layout supports a forward movement through this outdoor corridor-like space.",
-        "question": "In which general direction does the navigable path lead based on the farthest depth values?",
-        "answer": "Straight ahead"
+        "caption": "The depth layout indicates a clear, navigable path forward across the level ground plane. The terrain is largely unobstructed except for the circular landmark on the right. The background horizon provides a distant navigation goal. There are no walls, doors, or corridor transitions present, allowing for linear movement in 3D space.",
+        "question": "Is my path forward obstructed by a solid vertical barrier?",
+        "answer": "No."
       },
       "depth_dynamic_recognition": {
-        "caption": "Dynamic recognition reveals several moving features. Small red clusters on the far left appear at the start (frame_000000) and move slightly away. A central cluster is observed receding into the background. The circular object on the right remains static relative to the background throughout the sequence. No humans, cars, or objects approaching the camera are identified. The receding object eventually merges into the farthest depth layer.",
-        "question": "Is the circular object moving toward me? When does a near cluster appear? Does the receding object reach the far background? Is any object approaching me? Has any object vanished behind a wall? Is a person visible walking? Is the circular object static relative to me? Does a red cluster move away?",
-        "answer": "No, frame_000000, Yes, No, No, No, Yes, Yes"
+        "caption": "The primary dynamic entity is a rounded object on the right that becomes more defined starting around frame 000060 and continues to approach until the end of the sequence. No other consistent moving objects are recognized except for transient depth noise points that lack coherent structure.",
+        "question": "1. Is the circular object moving toward me? 2. When does the right-side blob first appear clearly? 3. Does the circular object vanish before the end? 4. Is the background structure moving? 5. Does the ground shift vertically? 6. Is there a person moving in the scene? 7. Is the circular object moving relative to the background? 8. Does the object move from right to left?",
+        "answer": "1. Yes. 2. Frame 60. 3. No. 4. No. 5. No. 6. No. 7. Yes. 8. No."
       },
       "depth_action": {
-        "caption": "My primary action is moving forward through the outdoor environment. This is inferred from the background receding and the relative static position of the circular object, which suggests it might be part of my own vehicle or platform. I am not interacting with any objects, and my distance to the poles on the left changes as I pass them, but I am not moving directly towards them or turning.",
-        "question": "Am I moving forward? Am I interacting with the circular object? Am I turning? Does the distance to the background decrease? Am I stationary? Am I moving towards the poles on the left? Am I moving away from the circular object? What is my primary action?",
-        "answer": "Yes, No, No, No, No, No, No, Moving forward"
+        "caption": "I am moving forward through the scene, as evidenced by the gradual increase in the size of the circular object on the right and the slow approach of the background horizon. My movement intent is a steady linear traversal of the open terrain. There are no direct physical interactions with the visible objects.",
+        "question": "1. Am I moving forward? 2. Am I turning around? 3. Am I sitting down? 4. Am I interacting with the circular object? 5. Is my distance to the background decreasing? 6. Am I backing up? 7. Am I jumping? 8. Am I reaching out to touch anything?",
+        "answer": "1. Yes. 2. No. 3. No. 4. No. 5. Yes. 6. No. 7. No. 8. No."
       },
       "depth_non_common": {
-        "caption": "The depth stream exhibits a high level of noise, particularly in the scattered points of different depths across the frame. Despite this sensor noise, there are no physically implausible situations visible, such as floating objects, intersecting solid geometry, or unrealistic depth ordering. The overall 3D structure of the circular object, poles, and ground plane is consistent with a real-world layout.",
-        "question": "Are there any objects that appear to be floating or intersecting in an physically impossible way?",
-        "answer": "No"
+        "caption": "The sequence contains significant depth noise artifacts, visible as multi-colored pixels that appear to float in the air at various distances from the camera. These do not correspond to any physical objects and represent typical depth sensor limitations or processing artifacts rather than a physically plausible scene content.",
+        "question": "Are there any floating particles or depth artifacts that don't represent solid objects?",
+        "answer": "Yes, noise artifacts."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_depth": {
+    "night_file": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+    "day_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The sequence begins with a close-up of a near, flat horizontal table surface. As I move, a kitchen counter area appears in the mid-range with vertical cabinet structures and a recessed sink area. The far background consists of solid wall planes and doorways leading to other sections of the room.",
+        "question": "What is the closest horizontal structure I see at the beginning of the video?",
+        "answer": "A table surface."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The table surface is positioned closer to me than the kitchen counter. The wall-mounted cabinets are situated above the countertop. The sink is recessed within the counter plane. Multiple cabinet doors are aligned adjacently along the left wall. Structural posts are placed beside the cabinet units.",
+        "question": "Where are the cabinet units located relative to the countertop?",
+        "answer": "Above it."
+      },
+      "depth_scene_sequence": {
+        "caption": "I start near a table, then move into a kitchen workspace where cabinets line the left side. I progress through this area, panning the camera across the fixtures, and end by facing a solid wall structure at the end of the visible corridor.",
+        "question": "Which area do I traverse after passing the initial table surface?",
+        "answer": "A kitchen workspace."
+      },
+      "depth_counting": {
+        "caption": "I can identify one table, one continuous kitchen counter, approximately four distinct cabinet doors, one recessed sink, and three primary wall segments within the sequence.",
+        "question": "How many recessed sinks are visible in the kitchen counter area?",
+        "answer": "One."
+      },
+      "depth_dynamic_counting": {
+        "caption": "There are no moving humans or external objects present in the video; the only depth changes occur due to my own forward movement and camera panning.",
+        "question": "How many people walk past me in the room?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The path follows a clear route from the initial table, turning slightly left to walk alongside the kitchen cabinets, then proceeding straight toward a far wall and doorway that provides a navigable exit from the room.",
+        "question": "On which side are the kitchen cabinets located as I move through the space?",
+        "answer": "The left side."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "No dynamic entities such as people or moving objects are detected in the environment throughout the entire sequence.",
+        "question": "Is there a person moving towards me at any point?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I am walking forward and panning the camera to survey the 3D layout of the kitchen. I approach the counter and cabinets, observing their spatial arrangement relative to the walls without making physical contact.",
+        "question": "What is my primary action while moving through the kitchen?",
+        "answer": "Walking and surveying."
+      },
+      "depth_non_common": {
+        "caption": "The scene represents a standard indoor layout with no floating or intersecting objects. While the night frames contain significant depth noise artifacts, no physically implausible geometry is present.",
+        "question": "Are there any objects appearing to float in mid-air without support?",
+        "answer": "No."
       }
     }
   }

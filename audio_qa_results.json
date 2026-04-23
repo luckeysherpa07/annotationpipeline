@@ -3,54 +3,109 @@
     "audio_file": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
     "annotations": {
       "sound_recognition": {
-        "caption": "The audio features the rhythmic sounds of a knife striking a wooden cutting board, followed by the gathering and scraping of chopped pieces. The knife strikes are sharp and percussive, indicating a repetitive cutting action on a solid vegetable, such as a carrot. Occasional subtle rustling and scraping sounds between cutting sequences suggest the manipulation of the food item on the board.",
-        "question": "What primary sound source and action can be identified in this recording?",
-        "answer": "A knife cutting on a wooden board"
+        "caption": "The audio features the rhythmic and repeated sound of a knife hitting a wooden cutting board as it slices through a crisp vegetable, followed by the sound of the chopped pieces being swept across the board and gathered.",
+        "question": "What is the primary sound heard throughout this audio clip?",
+        "answer": "Chopping on a wooden board"
       },
       "sound_counting": {
-        "caption": "In this audio recording, there are multiple sequences of chopping sounds. The first sequence contains approximately 21 distinct knife strikes on the board from 0:02 to 0:18. A second, faster sequence of chopping occurs from 0:31 to 0:58, consisting of roughly 54 rapid strikes. Between these sequences, scraping sounds are heard as the food is moved.",
-        "question": "How many distinct chopping sequences are heard in the full audio?",
+        "caption": "The audio consists of two distinct segments of chopping. In the first segment, there are approximately 25 individual rhythmic chopping sounds before a pause. In the second segment, there are approximately 20 more rapid chopping sounds.",
+        "question": "How many distinct segments of chopping can be heard?",
         "answer": "2"
       },
       "sound_sequence": {
-        "caption": "The audio begins with a brief silence followed by the first sequence of percussive cutting sounds. Next, there is a scraping sound as the knife moves the chopped pieces across the board. This is followed by a second, much faster and more rhythmic sequence of cutting. Finally, the audio ends with the sound of the knife scraping the board one last time.",
-        "question": "What audible event occurs between the first and second sequences of chopping?",
-        "answer": "Scraping pieces on the board"
+        "caption": "The audio starts with a series of rhythmic chopping sounds. This is followed by the sound of the knife scraping against the board to move the food. Then, a second, more rapid sequence of chopping occurs, followed again by the sound of gathering the food.",
+        "question": "What sound immediately follows the first set of chopping strikes?",
+        "answer": "Scraping on the board"
       },
       "sound_spatial": {
-        "caption": "The chopping and scraping sounds are centrally located and sound very near to the microphone. The audio is captured in mono or has a very narrow stereo field, with no significant movement of the sound source from left to right or front to back throughout the recording.",
-        "question": "Does the sound source move across the stereo field or stay relatively stationary?",
-        "answer": "Relatively stationary"
+        "caption": "The chopping sound is centered and very close to the microphone, suggesting a first-person perspective. There is a slight variation in the stereo image as the knife moves across different parts of the board.",
+        "question": "Does the chopping sound seem to be coming from a distance or near the listener?",
+        "answer": "Near"
       },
       "speech_recognition": {
-        "caption": "There is no speech or vocalization present in this audio recording. The soundscape is composed entirely of mechanical and environmental sounds related to food preparation.",
-        "question": "Is there any human speech audible in this recording?",
+        "caption": "There is no speech or vocalization present in the audio recording.",
+        "question": "Are there any speakers heard in the audio?",
         "answer": "No"
       },
       "music_recognition": {
-        "caption": "There is no music, background or foreground, in this audio. The rhythmic nature of the chopping creates a percussive pattern, but it is not musical in intent or structure.",
-        "question": "Does the recording contain any musical instruments or background tracks?",
+        "caption": "The audio contains no music; it consists entirely of environmental and action-based sounds.",
+        "question": "Is there any background music playing?",
         "answer": "No"
       },
       "environmental_scene": {
-        "caption": "The acoustic environment is consistent with a quiet indoor kitchen. The dry, close-up sounds of the knife and cutting board suggest a hard-surfaced room with little background noise, typical of a domestic cooking space.",
-        "question": "In what type of room or environment was this audio likely recorded?",
-        "answer": "A kitchen"
+        "caption": "The sounds of a knife striking a wooden board and scraping food indicate a kitchen environment, likely during meal preparation.",
+        "question": "Based on the acoustic cues, what is the most likely setting for this audio?",
+        "answer": "Kitchen"
       },
       "audio_change": {
-        "caption": "The audio starts with moderate-paced chopping, which stops at 0:18. A scraping sound begins shortly after. At 0:31, a second sequence of chopping starts, which is significantly faster and more energetic than the first. The activity ceases around 0:58, returning to silence.",
-        "question": "How does the tempo of the chopping sound change at the 0:31 mark?",
-        "answer": "It becomes significantly faster"
+        "caption": "The audio begins with rhythmic strikes, then transitions to a scraping sound at around 0:29. It becomes silent for a brief moment before a faster chopping sequence begins around 0:38.",
+        "question": "Does the speed of the chopping sounds change during the recording?",
+        "answer": "Yes, it becomes faster"
       },
       "audio_visual_correspondence": {
-        "caption": "The percussive 'thwack' sounds match the expected audio of a knife hitting a wooden board while cutting a firm vegetable. The scraping sounds correspond to the movement of a blade against wood to gather chopped ingredients.",
-        "question": "What physical action does the scraping sound correspond to?",
-        "answer": "Moving chopped pieces across the board"
+        "caption": "The sharp, percussive sounds of the knife match the expected visual of slicing a carrot or similar hard vegetable. The scraping sounds match the action of moving chopped pieces with a knife blade.",
+        "question": "Does the sound heard match the action of slicing a vegetable?",
+        "answer": "Yes"
       },
       "action_from_sound": {
-        "caption": "The primary actions inferred from the sound are rhythmic cutting (chopping) and lateral scraping. The hardness of the impact suggests a wooden board and a metal knife being used to process a firm object like a carrot.",
-        "question": "What specific manual task is being performed based on the audible cues?",
-        "answer": "Chopping a vegetable"
+        "caption": "The audio captures the action of cutting or chopping a vegetable on a board, followed by the action of scraping or gathering the chopped pieces together.",
+        "question": "What specific action is inferred from the rhythmic striking sounds?",
+        "answer": "Chopping"
+      }
+    }
+  },
+  "wash_hands": {
+    "audio_file": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+    "annotations": {
+      "sound_recognition": {
+        "caption": "The audio features a sequence of environmental sounds: initially, there are footsteps on a hard surface, followed by the distinct sound of a door being opened and closed. Next, a faucet is turned on, and water runs continuously while the sound of hands being rubbed together is audible. The water is then turned off, followed by the rustling sound of a towel or paper towel being used. Finally, the door opens and closes again, and footsteps are heard receding into the distance.",
+        "question": "What is the primary sound heard between the door closing at the start and the door opening at the end?",
+        "answer": "Running water and hand washing"
+      },
+      "sound_counting": {
+        "caption": "In this recording, footsteps occur twice (approaching and leaving). A door is opened 2 times and closed 2 times. The water faucet is turned on 1 time and turned off 1 time. The sound of hand washing is a single continuous event while the water is running.",
+        "question": "How many times does a door open?",
+        "answer": "2"
+      },
+      "sound_sequence": {
+        "caption": "The sequence begins with footsteps, then a door opens and closes. Next, the faucet is turned on and water runs while hands are washed. Then, the faucet is turned off. After the water stops, the sound of hand drying occurs. Finally, the door opens and closes, and footsteps walk away.",
+        "question": "What sound follows the running water?",
+        "answer": "Hand drying"
+      },
+      "sound_spatial": {
+        "caption": "The footsteps at the start appear to approach the listener, sounding louder and closer over time. The door and water sounds are very near and centered. The final footsteps sound as if they are moving away from the microphone, becoming quieter and more distant.",
+        "question": "Does the source of the water sound appear to be near or far from the listener?",
+        "answer": "Near"
+      },
+      "speech_recognition": {
+        "caption": "The audio contains no speech, voices, or spoken words. It consists entirely of environmental and action-related sounds.",
+        "question": "Is there any speech in the audio?",
+        "answer": "No"
+      },
+      "music_recognition": {
+        "caption": "There is no music, melody, or instrumental sound present in this recording.",
+        "question": "Are any musical instruments heard?",
+        "answer": "No"
+      },
+      "environmental_scene": {
+        "caption": "The combination of footsteps, a door opening and closing in a small space, a faucet being turned on, the sound of running water, hand washing, and towel rustling strongly suggests a bathroom environment.",
+        "question": "What is the most likely room this recording takes place in?",
+        "answer": "Bathroom"
+      },
+      "audio_change": {
+        "caption": "The audio changes from quiet ambient noise to footsteps. There is a sharp transition when the door opens. A significant increase in volume and activity occurs when the water starts. The sound level drops when the water is turned off and eventually returns to near silence after the person walks away.",
+        "question": "What causes the sound to stop around 01:15?",
+        "answer": "The faucet is turned off"
+      },
+      "audio_visual_correspondence": {
+        "caption": "The sounds in the audio correspond perfectly to a person entering a room, washing their hands, and leaving. The footsteps, door latch sounds, splashing water, and towel rustling all match these likely visual actions.",
+        "question": "Does the sound at 00:50 correspond to water?",
+        "answer": "Yes"
+      },
+      "action_from_sound": {
+        "caption": "The audible actions include walking (footsteps), opening and closing a door, turning a faucet handle, washing hands (rubbing sounds in water), and drying hands (rustling).",
+        "question": "What action involves the person's hands and water?",
+        "answer": "Washing hands"
       }
     }
   }

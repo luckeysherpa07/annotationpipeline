@@ -4,48 +4,99 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "Initial frames show a static scene with low event activity, revealing a cutting board base with a knife, a peeler, and a long cylindrical vegetable resting on it. As the sequence progresses, two hand regions enter the frame, generating significant event activity along their leading edges. One hand lifts the vegetable, causing its boundaries to produce a burst of events as it moves vertically. The other hand grasps the peeler. The video ends with concentrated event activity at the junction where the peeler contacts the vegetable, indicating the start of a peeling motion.",
-        "question": "What is the primary object I lift from the cutting board that generates a large burst of event activity?",
-        "answer": "A vegetable."
+        "caption": "The event stream reveals a static scene initially containing a cutting board with three distinct tools: a peeler, a long vegetable, and a knife. At approximately frame 000060, two hands enter the frame. The left hand grasps the vegetable, while the right hand picks up the peeler. By frame 000150, the peeler is being moved in repetitive downward strokes against the vegetable's surface, indicating a peeling activity over a bowl located to the right.",
+        "question": "What item do I pick up with my left hand?",
+        "answer": "The vegetable."
       },
       "event_spatial_reasoning": {
-        "caption": "A long vegetable is positioned centrally on a cutting board, with a peeler to its left and a knife to its right. Two hand regions move from the bottom edge of the field of view toward the center. The left hand overlaps and then occludes the vegetable as it lifts it away from the board. Simultaneously, the right hand moves to overlap the peeler. By the end of the sequence, the vegetable and peeler are held above the board, interacting with each other in the upper-central region of the frame.",
-        "question": "Where is the knife located relative to the vegetable at the beginning of the video?",
-        "answer": "To its right."
+        "caption": "Initially, the peeler is positioned to the left of the vegetable, and the knife is to the right of the vegetable on the cutting board. As I reach for them, my hands move from the bottom edges towards the center. The vegetable is lifted and held closer to the camera, partially occluding the cutting board. The peeler interacts with the vegetable's surface while both are positioned above a bowl located on the right side of the workspace.",
+        "question": "Where is the peeler located relative to the vegetable at the start of the video?",
+        "answer": "To the left."
       },
       "event_scene_sequence": {
-        "caption": "The sequence starts with a static shot of a kitchen workspace containing a board, tools, and a vegetable. After a brief period of inactivity, hands appear from the bottom, introducing motion-based events. The hands reach for the items on the board, lift them, and the final scene transition shows the transition from a resting state to an active preparation state where the tools are being used together in the center of the frame.",
-        "question": "What is the order of events regarding the hands and the vegetable?",
-        "answer": "Hands appear, then lift vegetable."
+        "caption": "The sequence begins with the tools resting on the cutting board. Next, my hands enter the scene to grasp the objects. This is followed by the lifting of the vegetable and peeler. Finally, a rhythmic peeling motion commences, where the peeler is dragged down the vegetable, and the camera captures the small movements of the skin being removed.",
+        "question": "What is the final action observed in the video sequence?",
+        "answer": "Peeling the vegetable."
       },
       "event_counting": {
-        "caption": "By observing distinct motion boundaries and object interactions, I can count one cutting board, one knife, one peeler, one long vegetable, and two hands entering the workspace. The total number of primary objects and interactive regions involved in the task is six.",
-        "question": "1. How many cutting boards are visible?\n2. How many knives are on the board?\n3. How many peelers am I using?\n4. How many vegetables are being prepared?\n5. How many hands enter the frame?\n6. How many total kitchen tools are on the board at the start?\n7. How many primary interactive regions are there?\n8. How many handles does the peeler have?",
-        "answer": "1. 1\n2. 1\n3. 1\n4. 1\n5. 2\n6. 2\n7. 6\n8. 1"
+        "caption": "From the event activity, one can identify one cutting board, one peeler, one long vegetable, one chef's knife, two active hands, and one bowl at the edge of the frame.",
+        "question": "How many knives are on the board?",
+        "answer": "1"
       },
       "event_dynamic_counting": {
-        "caption": "The event stream captures the motion of two hands entering the frame. Each hand interacts with a different object: the left hand lifts the vegetable once, and the right hand picks up the peeler once. No other moving objects or people pass through the scene during this interval.",
-        "question": "1. How many hands move into the frame?\n2. How many times is the vegetable lifted?\n3. How many people move past the workspace?\n4. How many objects do I pick up?\n5. How many dynamic tool interactions occur?\n6. How many times does the knife move?\n7. How many vegetables do I lift?\n8. How many peelers do I pick up?",
-        "answer": "1. 2\n2. 1\n3. 0\n4. 2\n5. 1\n6. 0\n7. 1\n8. 1"
+        "caption": "The primary dynamic objects are the peeler and the vegetable as they are manipulated. One vegetable is lifted and one peeler is used. No other moving entities like people or animals enter the scene. The peeler performs multiple strokes against the vegetable.",
+        "question": "How many separate vegetables are being moved by the hands?",
+        "answer": "1"
       },
       "event_navigation": {
-        "caption": "The viewpoint remains fixed on the kitchen counter, specifically the cutting board area. Navigation cues are limited to the 'reach-and-grasp' path taken by my hands. There is no large-scale movement through an environment; the 'route' is purely the manual progression from a neutral stance to an active task within a small localized workspace.",
-        "question": "Does my camera move through different rooms or remain focused on a single workspace?",
-        "answer": "Remains at a single workspace."
+        "caption": "The camera viewpoint is stationary over a kitchen workspace. Navigation is restricted to the movement of hands within the reachable area of the cutting board and the bowl. The landmarks defining the route of the action are the board where items are picked up and the bowl where the peeling takes place.",
+        "question": "Is there any significant change in the camera's location during the task?",
+        "answer": "No, it is stationary."
       },
       "event_dynamic_recognition": {
-        "caption": "My left hand appears from the bottom around frame 60 and reaches the vegetable by frame 90. My right hand follows, reaching the peeler by frame 120. The vegetable is lifted into a vertical orientation between frames 100 and 130. The peeling motion is clearly identifiable starting at frame 150 as a repetitive downward movement against the vegetable's boundary.",
-        "question": "1. When does the first hand appear?\n2. Which hand picks up the vegetable?\n3. Did the knife move during the sequence?\n4. When is the vegetable lifted from the board?\n5. At what point does the peeling motion start?\n6. Has the vegetable been fully peeled by the end?\n7. When does the right hand reach the peeler?\n8. Did any other person enter the scene?",
-        "answer": "1. Around frame 60\n2. Left hand\n3. No\n4. Frame 90-120\n5. Frame 150\n6. No\n7. Around frame 120\n8. No"
+        "caption": "The hands enter the field of view around frame 000060. The vegetable and peeler are lifted off the board by frame 000090. The peeling motion, characterized by rapid sliding events, begins near frame 000150. No other dynamic objects appear.",
+        "question": "Did another person enter the kitchen during the process?",
+        "answer": "No."
       },
       "event_action": {
-        "caption": "I am initiating a vegetable peeling task. I reach out and grab a long vegetable with my left hand and a peeler with my right hand. I lift both objects off the cutting board and bring them together. I then begin the action of peeling by moving the peeler across the surface of the vegetable, which generates high-frequency event activity at the contact point.",
-        "question": "1. What action am I performing with the peeler?\n2. Which hand holds the vegetable?\n3. What object am I interacting with using my right hand?\n4. Do I move the knife?\n5. What is the intent of my motion at the end?\n6. How many hands am I using?\n7. Am I cutting or peeling?\n8. Where do I lift the vegetable from?",
-        "answer": "1. Peeling\n2. Left hand\n3. Peeler\n4. No\n5. Peeling the vegetable\n6. 2\n7. Peeling\n8. Cutting board"
+        "caption": "I reach into the frame to pick up a vegetable and a peeler from a cutting board. I then hold the vegetable over a bowl and begin stripping its outer layer using the peeler in downward motions. The knife on the board remains unused throughout the sequence.",
+        "question": "What tool am I using to interact with the vegetable?",
+        "answer": "The peeler."
       },
       "event_non_common": {
-        "caption": "The event activity reflects a completely standard and plausible kitchen activity. All objects move according to gravity and manual interaction. There are no floating objects, clipping through surfaces, or unrealistic motion patterns observed in the event stream.",
-        "question": "Are there any objects floating in the air without being held by me?",
+        "caption": "The video shows a standard and realistic preparation of a vegetable in a kitchen. All motions, including the picking up of tools and the peeling process, follow standard physical laws and common-sense logic. No unusual or floating objects are present.",
+        "question": "Are there any physically implausible events, such as floating objects, in the scene?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_event": {
+    "night_file": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+    "day_file": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream captures the motion of a computer lab environment as the camera moves. Visually salient boundaries define several monitors, PC towers, and keyboards on desks. As the perspective shifts, the edges of office chairs and the rectangular structure of multiple workstations become clear. The sequence shows a primary monitor and tower in the foreground, followed by a transition to a wider view of two adjacent desks, and finally a tilt towards the floor showing leg structures and surface textures.",
+        "question": "What primary computing hardware do I see in the first few frames?",
+        "answer": "Monitor and PC tower."
+      },
+      "event_spatial_reasoning": {
+        "caption": "Spatial relationships are established through the relative motion of furniture and equipment. A PC tower sits to the right of a monitor on the first desk. Keyboards are positioned in front of their respective monitors. Office chairs are located directly in front of the desk surfaces. A drawer unit is situated underneath the rightmost desk. As I move, the foreground workstation occludes parts of the background desk, and the floor appears closer as the camera tilts downward.",
+        "question": "Where is the PC tower located relative to the first monitor I see?",
+        "answer": "To the right."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence begins with a close-up of a single workstation's monitor and PC. It then transitions as the camera pans left and pulls back to reveal a second workstation with its own chair and peripherals. The camera then tilts down, moving the view away from the desks and toward the floor space between the workstations. The video concludes with a close-up of the floor texture and the base of the desk legs.",
+        "question": "How does my view change after looking at the two desks?",
+        "answer": "Tilts down to floor."
+      },
+      "event_counting": {
+        "caption": "From the motion-based exploration of the lab, multiple items can be counted. There are 3 monitors visible across the workstations, 2 PC towers, 2 office chairs, 2 keyboards, 2 distinct desk surfaces, 1 set of drawers under a desk, 2 mice, and various cable bundles along the back of the equipment.",
+        "question": "How many monitors do I see in the room?",
+        "answer": "Three."
+      },
+      "event_dynamic_counting": {
+        "caption": "The event activity is primarily driven by camera movement, as no other moving entities are present in the scene. I do not observe any humans walking, objects falling, or doors moving. The only dynamic change is the shifting perspective of the static office furniture as I move through the space.",
+        "question": "How many people walk past me?",
+        "answer": "Zero."
+      },
+      "event_navigation": {
+        "caption": "Navigation begins with a stationary view of a desk, followed by a pan to the left to survey the rest of the lab area. The movement then incorporates a downward tilt and a forward push, moving the viewpoint from eye-level at the monitors towards the floor area near the desk legs. The path indicates a shift from observing the workspace to examining the lower structure of the furniture.",
+        "question": "What is the sequence of my camera movements?",
+        "answer": "Pan left, tilt down."
+      },
+      "event_dynamic_recognition": {
+        "caption": "There are no independent dynamic entities such as humans or moving machinery recognized in the event stream. All changes in the frame correspond to my own movement. The static objects like the chairs and computers maintain their positions relative to the desks throughout the sequence.",
+        "question": "Does any furniture move on its own?",
+        "answer": "No."
+      },
+      "event_action": {
+        "caption": "I am performing a visual inspection of a computer laboratory. My actions include focusing on a specific workstation, panning across to view adjacent setups, and then tilting my gaze downward to look at the floor and the underside of the desks. The motion is deliberate, suggesting a walk-through or a check of the equipment layout.",
+        "question": "What am I doing at the end of the video?",
+        "answer": "Looking at the floor."
+      },
+      "event_non_common": {
+        "caption": "The event activity depicts a standard, realistic computer lab setting. All objects, such as monitors and chairs, remain grounded and stationary. There are no signs of floating objects, clipping through walls, or unrealistic physics in the motion patterns observed.",
+        "question": "Do I see any monitors floating in the air?",
         "answer": "No."
       }
     }
