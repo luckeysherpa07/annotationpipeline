@@ -8,6 +8,7 @@ except ImportError:
     types = None
 
 video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
+audio_extensions = {".m4a", ".mp3", ".wav", ".aac", ".flac"}
 
 
 def get_pair_key(file: Path) -> str:
@@ -46,3 +47,44 @@ def build_image_parts(encoded_frames: list[str]) -> list:
         types.Part.from_bytes(data=base64.b64decode(encoded), mime_type="image/png")
         for encoded in encoded_frames
     ]
+
+
+def encode_audio_to_base64(audio_path: Path) -> str:
+    """
+    Encode an audio file to base64 for API transmission.
+
+    Args:
+        audio_path: Path to the audio file
+
+    Returns:
+        Base64 encoded audio string, or empty string if file cannot be read
+    """
+    if not audio_path.exists():
+        return ""
+    try:
+        with open(audio_path, "rb") as f:
+            encoded = base64.standard_b64encode(f.read()).decode("utf-8")
+            return encoded
+    except Exception as e:
+        print(f"ERROR: Failed to encode audio file {audio_path}: {e}")
+        return ""
+
+
+def build_audio_part(encoded_audio: str, mime_type: str = "audio/mp4") -> list:
+    """
+    Convert base64 encoded audio to Gemini API audio part.
+
+    Args:
+        encoded_audio: Base64 encoded audio string
+        mime_type: MIME type of the audio (default: audio/mp4 for .m4a files)
+
+    Returns:
+        List containing a single audio Part for the API
+    """
+    if not encoded_audio:
+        return []
+    try:
+        return [types.Part.from_bytes(data=base64.b64decode(encoded_audio), mime_type=mime_type)]
+    except Exception as e:
+        print(f"ERROR: Failed to build audio part: {e}")
+        return []
