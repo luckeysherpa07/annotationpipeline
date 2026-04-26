@@ -399,6 +399,139 @@ def run_depth(
     return results
 
 
+def run_marigold_depth_qa(
+    test_mode: bool = False,
+    test_pair_index: int = 0,
+    skip_api: bool = False,
+    dataset_folder: Path | str = "dataset",
+):
+    """
+    Run the MARIGOLD DEPTH QA annotation pipeline.
+    
+    Uses Marigold-estimated depth frames from .frames_cache_marigold/ to generate
+    depth-based QA annotations. Outputs results to marigold_depth_qa_results.json.
+
+    Args:
+        test_mode: If True, only process one video pair for testing
+        test_pair_index: Which video pair to process in test mode (0 = first)
+        skip_api: If True, skip Gemini API calls and return demo results
+        dataset_folder: Dataset directory containing the source videos
+    """
+    if test_mode:
+        print("=" * 50)
+        print("TEST MODE: Processing one MARIGOLD DEPTH QA pair")
+        print("=" * 50)
+        if skip_api:
+            print("Gemini API calls disabled - using demo results\n")
+
+    client = None
+    if not skip_api:
+        client = create_gemini_client()
+
+    dataset_folder = Path(dataset_folder)
+    results = {}
+
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find videos in: {dataset_folder}")
+        return results
+
+    print(f"Dataset directory: {dataset_folder}")
+
+    # Load Marigold depth frames from cache
+    print("Loading Marigold depth frames from cache...")
+    cache_dir = dataset_folder / ".frames_cache_marigold"
+    
+    if not cache_dir.exists():
+        print("ERROR: Marigold depth cache not found!")
+        print(f"Expected to find depth maps at: {cache_dir}")
+        print("Please run Marigold depth estimation first.")
+        return results
+
+    paired_frames = {}
+    for frame_dir in cache_dir.iterdir():
+        if not frame_dir.is_dir():
+            continue
+        day_frames = sorted(frame_dir.glob("day/frame_*_depth.png"))
+        night_frames = sorted(frame_dir.glob("night/frame_*_depth.png"))
+        if day_frames or night_frames:
+            paired_frames[frame_dir.name] = {
+                "day": day_frames,
+                "night": night_frames,
+            }
+
+    print(f"Found {len(paired_frames)} Marigold depth video pairs\n")
+
+    if len(paired_frames) == 0:
+        print("ERROR: No Marigold depth frames found in cache!")
+        print(f"Expected to find depth maps at: {cache_dir}")
+        return results
+
+    # In test mode, only process one pair
+    if test_mode:
+        pairs_to_process = list(paired_frames.items())[test_pair_index:test_pair_index + 1]
+        print(f"Processing pair {test_pair_index} of {len(paired_frames)}:")
+    else:
+        pairs_to_process = list(paired_frames.items())
+
+    available_pairs = {
+        pair_key: frames
+        for pair_key, frames in pairs_to_process
+        if frames.get("night") or frames.get("day")
+    }
+
+    if not available_pairs:
+        print("ERROR: No usable Marigold depth frames found for selected pairs.")
+        return results
+
+    print(
+        f"Processing {len(available_pairs)} Marigold depth pairs with up to 3 concurrent tasks and 4-second spacing..."
+    )
+
+    batch_results = asyncio.run(
+        run_depth_parallel_pipeline(
+            client,
+            available_pairs,
+            max_concurrent=3,
+            delay_between_pairs=4,
+            skip_api=skip_api,
+        )
+    )
+
+    for pair_key, frames in pairs_to_process:
+        night_frames = frames.get("night") or []
+        day_frames = frames.get("day") or []
+
+        if not night_frames and not day_frames:
+            print(f"Skipping {pair_key} - no frames found")
+            continue
+
+        file_results = batch_results.get(pair_key)
+        if file_results is None:
+            print(f"WARNING: No batch output for pair {pair_key}. Using empty results.")
+            from prompts.depth_prompts import DEPTH_PROMPTS
+            file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
+
+        results[pair_key] = {
+            "day_depth_count": len(day_frames),
+            "night_depth_count": len(night_frames),
+            "annotations": file_results,
+        }
+        print(f"✓ Done: {pair_key}")
+
+    # Save results to JSON file at the project root
+    output_file = Path("marigold_depth_qa_results.json")
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+
+    print(f"\n" + "=" * 50)
+    print(f"Marigold Depth QA results saved to: {output_file}")
+    if test_mode:
+        print("TEST MODE COMPLETE")
+    print("=" * 50)
+    return results
+
+
 def run_ir(
     test_mode: bool = False,
     test_pair_index: int = 0,
