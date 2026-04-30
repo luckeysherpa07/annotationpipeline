@@ -4,100 +4,49 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
     "annotations": {
       "depth_object_recognition": {
-        "caption": "The video shows a first-person perspective moving forward through an open environment. The background is a consistent distant plane represented by a dark blue depth layer. On the far left, there are several small, localized depth clusters (red and cyan) that signify near-field objects or sensor noise at the periphery. As the camera progresses, a large, distinct circular structure with internal depth variations emerges on the right side, appearing closer than the furthest background but farther than the left-side clusters. The ground plane is a continuous medium-distance surface leading toward the horizon.",
-        "question": "What is the shape of the large structure that appears on the right side as I move forward?",
-        "answer": "Circular."
+        "caption": "The video starts with a large, rounded object on the right, positioned at a medium distance. On the far left, several thin, vertical structures, likely trees or poles, are visible at varying distances, showing a clear near-to-far progression. As I move forward, these vertical objects pass to the side. The ground is a flat surface extending into the distance. In later frames, more complex 3D structures appear on the right, suggesting a roadside with vegetation or buildings.",
+        "question": "What is the most prominent 3D shape visible on the right side in the early frames?",
+        "answer": "A large circular object."
       },
       "depth_spatial_reasoning": {
-        "caption": "The background plane is the most distant spatial layer. The small red and cyan clusters on the left are the closest identifiable points in the initial frames. The circular object on the right is located at a medium distance, positioned between the camera and the far background. As I move forward, the relative distance to the circular object on the right decreases, while the objects on the left remain at a consistent lateral offset but also decrease in distance. The ground plane is situated below the camera's line of sight, extending from the near foreground to the far background.",
-        "question": "Is the circular object on the right closer to me than the dark background behind it?",
-        "answer": "Yes."
+        "caption": "At the start, the circular object on the right is closer to me than the distant horizontal horizon line. The vertical poles on the left are arranged in a line, with the leftmost pole being the closest and subsequent poles receding into the distance. There is significant overlap between the trees as the camera moves. The ground plane is consistently below all other objects. As I advance, the objects on the left move from the foreground into the midground and then disappear as they are passed.",
+        "question": "Relative to the vertical poles on the left, where is the ground plane located?",
+        "answer": "Below them."
       },
       "depth_scene_sequence": {
-        "caption": "The sequence begins in an open area with minor peripheral objects on the left. As the camera travels forward, the scene remains relatively consistent until frame 000060, when a large circular 3D feature starts to resolve on the right. By frame 000150, this feature has become much more prominent and occupies a significant portion of the right-hand depth field. The transition is a steady forward movement through a space where a large structure is approached on the right while maintaining a clear path ahead.",
-        "question": "How does the 3D layout change as I move from frame 000000 to frame 000150?",
-        "answer": "A circular structure appears on the right."
+        "caption": "The sequence begins in an open outdoor area with a path flanked by poles on the left and a large sign-like object on the right. As the camera moves forward, it transitions into a more cluttered roadside environment. The 3D layout shifts from a relatively clear path to one with more peripheral vegetation and depth variation on both sides. The connectivity is a linear path following a road or walkway.",
+        "question": "Describe the transition of the path's 3D layout as I move through the sequence.",
+        "answer": "From open to cluttered."
       },
       "depth_counting": {
-        "caption": "In this sequence, I can count the following based on depth separation: one continuous distant background layer, one flat ground plane, approximately three distinct red clusters on the left, two distinct cyan clusters on the left, and one large circular object that appears on the right. The total number of unique depth-defined regions is around eight.",
-        "question": "How many large circular objects appear on the right side of the view throughout the sequence?",
-        "answer": "1"
+        "caption": "Based on depth separation, I can identify at least 5 distinct vertical poles on the left. There is one large circular region on the right. There are approximately 3 distinct distance layers in the background vegetation. I also see several small depth noise clusters. Total pole count is 5 or more.",
+        "question": "1. How many distinct vertical poles can be counted on the left? 2. How many large circular objects are on the right? 3. How many flat ground planes are visible? 4. How many main paths are being followed? 5. How many distinct depth layers are in the far background? 6. How many objects are passed on the right in the first half? 7. How many poles are in the immediate foreground at the start? 8. Total number of primary vertical structures on the left?",
+        "answer": "1. Five. 2. One. 3. One. 4. One. 5. Three. 6. One. 7. Two. 8. Five."
       },
       "depth_dynamic_counting": {
-        "caption": "There are no moving humans or independent vehicles visible in the depth stream. All observed changes in object size and position are consistent with the camera holder's forward motion. No entities approach or recede independently. The left-side clusters and the right-side circular structure remain static relative to the ground as the camera passes them.",
-        "question": "How many moving humans approach me at a near depth range?",
-        "answer": "0"
+        "caption": "There are few moving entities. One small object moves from left to right in the far distance around frame 1800. Another object approaches from the right midground toward the end of the DAY sequence. In the NIGHT sequence, the noise makes it hard to distinguish, but no clear humans are approaching.",
+        "question": "1. How many cars approach me from the front? 2. How many people pass by at a near range? 3. How many times does a distant object cross the path? 4. How many moving objects are in the mid-range? 5. How many humans are walking away? 6. How many animals are seen moving? 7. How many objects move between depth layers on the left? 8. Total number of moving entities excluding me?",
+        "answer": "1. Zero. 2. Zero. 3. One. 4. One. 5. Zero. 6. Zero. 7. Zero. 8. Two."
       },
       "depth_navigation": {
-        "caption": "Navigation is primarily a straight-line forward movement. The center of the scene is clear of immediate obstacles, indicating a navigable path directly ahead. The small clusters on the left and the emerging circular object on the right define the lateral boundaries of the navigable space. The steady depth of the ground plane suggests a flat, traversable surface for the entire duration of the sequence.",
-        "question": "Based on the depth layout, in which direction is it safest for me to continue moving?",
-        "answer": "Straight ahead."
+        "caption": "The path is a straight, forward-extending ground plane. Navigation is restricted by the poles on the left and the large object/clutter on the right. The 3D layout suggests a safe walking or driving lane between these boundaries. There are no steps or steep turns visible, only a gradual progression forward into the depth of the scene.",
+        "question": "In which direction does the safe navigable path extend?",
+        "answer": "Straight forward."
       },
       "depth_dynamic_recognition": {
-        "caption": "The only significant dynamic change is the camera's forward movement. The circular object on the right begins to be recognized at frame 000060 and grows in depth extent until frame 000150. No other dynamic objects appear or disappear. There is no evidence of pedestrians or traffic based on the depth profiles provided.",
-        "question": "Does a car move toward me from the distance?",
-        "answer": "No."
+        "caption": "A small dynamic object appears in the distance at frame 1800 and moves horizontally across the path until frame 2400. Later, a larger blob appears on the right edge at frame 4500 and moves slightly inward before the sequence ends. No humans are recognized with certainty.",
+        "question": "1. Does any object move toward me? 2. When did a small object appear in the distance? 3. Has the object on the right vanished behind a wall? 4. Is there a vehicle moving away from me? 5. Does the distant object cross from left to right? 6. When does the second moving blob appear? 7. Did the objects move quickly or slowly? 8. Is any moving object at a close range?",
+        "answer": "1. Yes, one later. 2. Frame 1800. 3. No. 4. No. 5. Yes. 6. Frame 4500. 7. Slowly. 8. No."
       },
       "depth_action": {
-        "caption": "I am moving forward at a constant velocity. This action causes all objects in the scene, such as the peripheral clusters on the left and the circular structure on the right, to increase in size and shift toward the edges of the frame as the distance to them decreases. There are no turns or stops, and I do not interact with any specific objects in the environment.",
-        "question": "Am I moving forward or backward based on the changes in the depth of the objects?",
-        "answer": "Forward."
+        "caption": "I am moving steadily forward at a constant rate. There are no direct interactions with objects, such as reaching out or turning. The spatial consequence is a consistent decrease in distance to the objects ahead and the passing of lateral structures like the poles. The motion is linear and continuous.",
+        "question": "1. What am I doing in the scene? 2. Am I interacting with any objects? 3. How does the distance to the poles change? 4. Am I turning left or right? 5. Am I stopping at any point? 6. Is my speed changing significantly? 7. Which direction is my primary movement intent? 8. Am I moving through a doorway?",
+        "answer": "1. Moving forward. 2. No. 3. It decreases. 4. No. 5. No. 6. No. 7. Forward. 8. No."
       },
       "depth_non_common": {
-        "caption": "The depth map exhibits some artifacts, particularly the small, brightly colored clusters on the left which appear to be floating noise rather than solid objects. However, the circular structure on the right has a geometrically consistent shape, though its internal depth values are somewhat irregular compared to typical solid objects. No physically impossible intersections are clearly visible.",
-        "question": "Are there any floating clusters of depth information on the left side of the scene?",
-        "answer": "Yes."
-      }
-    }
-  },
-  "dataset\\wash_hand_split\\wash_hands_depth": {
-    "night_file": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
-    "day_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
-    "annotations": {
-      "depth_object_recognition": {
-        "caption": "The video starts with a close-up depth view of a flat desk surface in the extreme foreground. As the camera retreats, it reveals an office layout with multiple rectangular desks arranged in rows. These desks occupy different depth layers, with two in the immediate mid-range and at least two more further back. Several chair-like structures appear as distinct blobs of medium distance between the desks. The background is defined by vertical wall surfaces at the furthest depth range.",
-        "question": "What is the relative distance of the first object I see compared to the objects that appear later in the sequence?",
-        "answer": "It is much closer."
-      },
-      "depth_spatial_reasoning": {
-        "caption": "The initial desk is in the immediate foreground, positioned closer to me than any other object. Behind it, a second row of desks and chairs is visible, partially occluding the desks further back. The chairs are adjacent to the desks in the mid-range. The floor provides a continuous depth gradient from my feet to the far walls. Vertical pillars or wall segments are located behind the furthest row of desks, forming the scene's boundary.",
-        "question": "Are the chairs located in front of or behind the initial desk surface seen at the start?",
-        "answer": "Behind."
-      },
-      "depth_scene_sequence": {
-        "caption": "The sequence begins with the camera tightly framed on a workstation. It then transitions by moving backwards, expanding the field of view to encompass a wide office space. This reveals the connectivity between individual workstations and a central navigable area. The motion continues until a full layout of desks and chairs is visible, framed by distant walls.",
-        "question": "How does the room layout change as I move throughout the video?",
-        "answer": "It expands from a desk to an open office."
-      },
-      "depth_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "depth_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "depth_navigation": {
-        "caption": "The navigation path follows a backwards trajectory from a desk into an open office area. Safe walking space is available in the corridors between the rows of desks. The 3D layout suggests a clear exit path behind the initial position, leading into the broader room where several workstations are accessible.",
-        "question": "Where is the safe walking area located in the revealed scene?",
-        "answer": "Between the desk rows."
-      },
-      "depth_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "depth_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "depth_non_common": {
-        "caption": "The night frames exhibit significant depth artifacts and noise, where solid objects like desks and walls appear fragmented with large 'holes' or missing geometry (black/dark blue areas). Additionally, there is a large, unnatural red proximity artifact in the center of the later night frames that does not correspond to a real-world object.",
-        "question": "Is there an unnatural proximity signal visible in the center of the night frames?",
-        "answer": "Yes, red artifact."
+        "caption": "The depth stream contains significant noise, appearing as floating particles or 'snow' throughout the scene, especially in the NIGHT frames. Some of these particles appear to intersect with the ground or other objects in a physically impossible way. However, no large macro-objects are floating or clipped unnaturally.",
+        "question": "What depth-based anomaly is frequently seen, especially in the night frames?",
+        "answer": "Floating noise particles."
       }
     }
   }
