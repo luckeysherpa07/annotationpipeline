@@ -159,8 +159,8 @@ async def process_ir_pair_batch(
         print(f"    WARNING: Missing day or night frames for pair {pair_key}; falling back to empty results")
         return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in IR_PROMPTS.keys()}
 
-    selected_day = day_frames[:6]
-    selected_night = night_frames[:6]
+    selected_day = day_frames
+    selected_night = night_frames
 
     from ...utils import encode_frames_to_base64, build_image_parts
     day_encoded = encode_frames_to_base64(selected_day)

@@ -4,130 +4,64 @@
     "day_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
     "annotations": {
       "object_recognition": {
-        "caption": "In these low-light frames, I am in a kitchen setting. A white cutting board is positioned centrally on a metallic countertop. On the cutting board lies an orange carrot and a black vegetable peeler. To the right of the board, a large chef's knife is visible. Further to the right, there is a white bowl. The left side of the frame shows the corner of a dark laptop sitting near a black induction stovetop.",
-        "question": "What color is the vegetable peeler on the cutting board?",
-        "answer": "Black"
+        "caption": "In a kitchen setting, a grey laptop is placed on the left over a black induction stovetop. A white cutting board occupies the center, holding a long orange carrot, a black Victorinox peeler, and a large metal chef's knife with a textured handle. To the right of the cutting board sits an empty white bowl. The wall behind the counter is painted a vibrant red.",
+        "question": "What electronic device is situated on the black stovetop to the left of the cutting board?",
+        "answer": "A grey laptop."
       },
       "spatial_reasoning": {
-        "caption": "The carrot is situated on top of the white cutting board. The black peeler is placed to the left of the carrot on the same board. The chef's knife is positioned to the right of the cutting board. A white bowl is located to the right of the knife. A laptop is placed to the left of the induction stovetop, which is adjacent to the cutting board. I am standing directly at the counter, approximately 0 steps away.",
-        "question": "Where is the peeler relative to the carrot?",
-        "answer": "To the left"
+        "caption": "The laptop is positioned about 1 step to the left of the white cutting board. The orange carrot lies centrally on the board. The white bowl is placed roughly 0.5 steps to the right of the cutting board. A power strip with three sockets is mounted on the wall above the bowl, approximately 1 step away from the center of the workspace.",
+        "question": "Where is the white bowl located in relation to the cutting board?",
+        "answer": "To the right."
       },
       "text_recognition": {
-        "caption": "In frame 0, the brand name 'VICTORINOX' is visible on the handle of the black peeler. On the laptop's palm rest, an 'intel' logo and a 'CORE' label are visible on stickers. These identify the manufacturer of the tool and the processor of the computer.",
-        "question": "1. What brand name is on the peeler's handle? 2. What word is on the laptop sticker below 'intel'? 3. Is there any text on the white bowl? 4. Where is the 'VICTORINOX' text located? 5. What brand is the laptop processor? 6. Is the text on the peeler white? 7. How many stickers with text are on the laptop's palm rest? 8. What does the 'intel' text imply?",
-        "answer": "1. Victorinox 2. CORE 3. No 4. On the peeler handle 5. Intel 6. Yes 7. Two 8. The CPU brand"
+        "caption": "In the DAY frames, specifically around frame_001350, the brand name 'VICTORINOX' is clearly visible on the black handle of the vegetable peeler, identifying its manufacturer. On the laptop, a 'Lenovo' logo is visible on the lid, and an 'intel CORE' sticker is present near the keyboard, indicating the hardware specifications.",
+        "question": "1. What brand is written on the handle of the peeler? 2. What brand of laptop is on the stove? 3. What word is visible on the laptop's processor sticker? 4. Where is the 'VICTORINOX' text located? 5. Is there any text on the white bowl? 6. What logo is seen on the lid of the computer? 7. How many brand names can be read in the scene? 8. On which object do you find the 'intel' logo?",
+        "answer": "1. Victorinox. 2. Lenovo. 3. CORE. 4. On the peeler's handle. 5. No. 6. Lenovo. 7. At least three (Victorinox, Lenovo, Intel). 8. The laptop."
       },
       "scene_sequence": {
-        "caption": "The video sequence captures a person preparing food in a kitchen. It begins with the person's hands holding a carrot above a cutting board. The tools—peeler, knife, and bowl—are already laid out. The scene transitions from a laptop on the left, past the stovetop, to the preparation area with the cutting board, and finally to the bowl and power strip on the right.",
-        "question": "1. What room is the scene in? 2. What was the first object I touched? 3. What is to the left of the stovetop? 4. What is next to the laptop? 5. What did I hold over the cutting board? 6. What was at the far right of the scene? 7. Where was the knife placed? 8. What was the carrot on? 9. What was to the right of the knife? 10. Did I move to a different room?",
-        "answer": "1. Kitchen 2. Carrot 3. Laptop 4. Stovetop 5. Carrot 6. Power strip 7. Right of the cutting board 8. Cutting board 9. White bowl 10. No"
+        "caption": "The video sequence shows a kitchen counter. Initially, a carrot, peeler, and knife are stationary on a cutting board. Then, my hands enter the frame. I pick up the carrot and peeler to remove the skin over a white bowl. After peeling, I set the peeler down, pick up the knife, and proceed to slice the carrot into segments and then into thin strips.",
+        "question": "1. What is the first tool I pick up? 2. What object is used to collect the carrot skin? 3. What action follows the peeling of the carrot? 4. What tool is used after the peeler is put down? 5. Where do I place the carrot segments before julienning them? 6. What is the sequence of tasks performed? 7. Was the bowl empty or full at the start? 8. What is the last tool I am seen holding? 9. Where is the knife located at the beginning? 10. What did I do immediately after finishing peeling?",
+        "answer": "1. The peeler. 2. A white bowl. 3. Slicing with a knife. 4. A chef's knife. 5. On the cutting board. 6. Peeling, then slicing. 7. Empty. 8. The knife. 9. On the right side of the cutting board. 10. Set down the peeler and picked up the knife."
       },
       "light_recongnition": {
-        "caption": "The nighttime frames show very poor lighting, with deep shadows and minimal contrast. The primary light seems to be a weak ambient source from the side or behind the camera. Visibility is extremely limited, and most textures are obscured.",
-        "question": "What is the direction of the main light source in the bright frames?",
-        "answer": "From above"
+        "caption": "The kitchen workspace is illuminated by an overhead room light that provides steady, even brightness across the metallic counter, the white cutting board, and the red wall, creating distinct shadows beneath my hands and the tools.",
+        "question": "From which direction is the primary light source hitting the cutting board?",
+        "answer": "From above (overhead)."
       },
       "light_change": {
-        "caption": "The initial frames are in near total darkness, with only faint silhouettes of the hands and carrot. Throughout these night frames, there is no significant change in the illumination level; it remains consistently dark.",
-        "question": "1. Did the lights turn on? 2. Is it getting brighter? 3. Was the start of the video dark? 4. Is there a sudden increase in light? 5. Did the room illumination change? 6. Is the light approaching me? 7. Did the scene stay dark throughout the first half? 8. Is artificial light visible?",
-        "answer": "1. Yes 2. Yes 3. Yes 4. Yes 5. Yes 6. No 7. Yes 8. Yes"
+        "caption": "The illumination in the room is constant throughout the video. There are no instances of lights being turned on or off, and the brightness level does not fluctuate despite the movement of my hands.",
+        "question": "1. Did the kitchen lights turn off at any point? 2. Is the scene getting darker as I work? 3. Does the light source move? 4. Does the laptop screen provide a significant change in light? 5. Is there a flickering of the overhead light? 6. Is it getting brighter towards the end? 7. Did any external light, like car headlights, pass through the scene? 8. Does the shadow intensity change significantly?",
+        "answer": "1. No. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. No."
       },
       "counting": {
-        "caption": "I can identify several objects: 1 laptop, 1 carrot, 1 vegetable peeler, 1 chef's knife, 1 white bowl, 1 white cutting board, and 1 power strip with multiple outlets. These items are consistently present in the scene.",
-        "question": "1. How many carrots are on the board? 2. How many knives are visible? 3. How many laptops are on the counter? 4. How many peelers am I using? 5. How many white bowls are there? 6. How many cutting boards are in view? 7. How many power strips are on the backsplash? 8. How many hands are interacting with objects? 9. How many stovetop burners are visible? 10. How many stickers are on the laptop?",
-        "answer": "1. One 2. One 3. One 4. One 5. One 6. One 7. One 8. Two 9. One 10. Two"
+        "caption": "In the scene, there is 1 orange carrot, 1 black peeler, 1 large chef's knife, 1 white bowl, 1 grey laptop, 1 white cutting board, 1 power strip with 3 sockets, and 1 black induction stove.",
+        "question": "1. How many carrots are on the board? 2. How many knives are visible? 3. How many peelers are in the scene? 4. How many white bowls are used? 5. How many laptops are on the stove? 6. How many cutting boards are present? 7. How many hands are interacting with the objects? 8. How many electrical sockets are seen on the power strip? 9. How many stovetop heating zones are visible? 10. How many tools total are used for the carrot preparation?",
+        "answer": "1. One. 2. One. 3. One. 4. One. 5. One. 6. One. 7. Two. 8. Three. 9. Two. 10. Two (peeler and knife)."
       },
       "dynamic_counting": {
-        "caption": "Only my hands are moving in the video as I pick up the carrot and handle the bowl. There are no other dynamic objects, such as pets, other people, or moving vehicles outside, visible in these frames.",
-        "question": "1. How many other people enter the kitchen? 2. How many pets are moving around? 3. How many cars pass by? 4. How many objects are falling? 5. How many flying insects are visible? 6. Are there any other moving items? 7. How many people are helping me? 8. How many doors are opening?",
-        "answer": "1. Zero 2. Zero 3. Zero 4. Zero 5. Zero 6. No 7. Zero 8. Zero"
+        "caption": "The peeler moves back and forth across the carrot skin. The knife moves up and down during slicing. Carrot peels fall into the bowl. Sliced carrot strips are moved to the side of the board.",
+        "question": "1. How many peelers move during the peeling process? 2. How many knives are used for slicing? 3. How many carrots are being processed? 4. Do any objects other than the tools and food move? 5. How many bowls are used to catch the movement of the peels? 6. Does the laptop move at any time? 7. How many cutting boards are shifted during the action? 8. Do any new objects enter the scene while I am cutting?",
+        "answer": "1. One. 2. One. 3. One. 4. No. 5. One. 6. No. 7. None (it remains stationary). 8. No."
       },
       "non_common": {
-        "caption": "The laptop is placed directly on the surface of the induction stovetop. This is unrealistic and hazardous in a real-world scenario as it could damage the laptop or cause a fire if the stove is accidentally turned on. The laptop should be moved to a safe counter space.",
-        "question": "What object is placed in a potentially dangerous and unrealistic location?",
-        "answer": "The laptop is on the stove."
+        "caption": "The grey laptop is sitting directly on top of the black induction stovetop. This is an unsafe layout as the stove is meant for cooking, and placing a computer there risks heat damage or fire if the appliance is activated.",
+        "question": "What is wrong with the placement of the electronic device in the kitchen?",
+        "answer": "The laptop is sitting on the stove."
       },
       "navigation": {
-        "caption": "I am standing stationary in front of the kitchen counter. There are no actions such as turning left or right, and no steps are taken as I focus on the food preparation tasks at hand.",
-        "question": "1. How many steps did I take? 2. Did I turn left at any point? 3. Did I turn right? 4. Which way should I turn to see the laptop? 5. Am I moving towards a different room? 6. How many steps to the bowl? 7. Did I walk away from the counter? 8. Where is the knife relative to my position? 9. Did I navigate to the living room? 10. How do I reach the carrot?",
-        "answer": "1. Zero 2. No 3. No 4. Turn left 5. No 6. Zero 7. No 8. In front to the right 9. No 10. Reach forward"
+        "caption": "To prepare the carrot, I reach for the peeler in the center. I move my right hand to the right to deposit peels in the bowl. I reach for the knife on the right side of the board. I move sliced pieces toward the top edge of the board to clear space.",
+        "question": "1. Where should I move my hand to reach the bowl? 2. In which direction is the laptop located? 3. Where is the knife placed relative to the carrot initially? 4. To clear the board, where do I move the cut strips? 5. Where do the peels go? 6. Where is the peeler relative to the bowl? 7. Which way do I move the knife to slice? 8. Where are my hands positioned during cutting? 9. Where is the power outlet located? 10. How do I reach the laptop from the cutting board?",
+        "answer": "1. To the right. 2. To the left. 3. To the right. 4. Towards the top of the board. 5. Into the bowl on the right. 6. To the left of it. 7. Downwards. 8. In the center of the board. 9. On the wall to the top right. 10. Move your hand to the left."
       },
       "dynamic_recognition": {
-        "caption": "My hands begin moving the carrot at frame 0 and continue to interact with it through frame 90. The bowl is being adjusted or picked up between frame 120 and frame 150. No other dynamic objects are present.",
-        "question": "Did a new object appear or move besides my hands?",
-        "answer": "The bowl was moved"
+        "caption": "My hands pick up the peeler and carrot starting around frame_001350 and finish peeling by frame_002220. I then pick up the knife and start slicing the carrot segments from frame_003270 until frame_004200.",
+        "question": "When do I begin the action of slicing the carrot segments with the knife?",
+        "answer": "At frame 003270."
       },
       "action": {
-        "caption": "I am preparing to peel a carrot. In the frames, I am picking up the carrot with my left hand and holding the peeler in my right hand. I am positioning the bowl to receive the peelings. The purpose is to clean the carrot for cooking, and the consequence will be a peeled vegetable ready for use.",
-        "question": "1. What am I doing with the carrot? 2. Which hand holds the peeler? 3. Am I using the knife? 4. What is the intended consequence of my actions? 5. What am I reaching for in the beginning? 6. Am I typing on the laptop? 7. What tool am I preparing to use? 8. Did I finish peeling the carrot?",
-        "answer": "1. Picking it up 2. Right hand 3. No 4. A peeled carrot 5. The carrot 6. No 7. Vegetable peeler 8. No"
-      }
-    }
-  },
-  "dataset\\wash_hand_split\\wash_hands_rgb": {
-    "night_file": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
-    "day_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
-    "annotations": {
-      "object_recognition": {
-        "caption": "In the dark frames, the scene is a workspace at night where the primary visible features are vertical LED light strips on computer cases. One strip is blue-white on the left, and another is pink-magenta on the right. In the distance through a window, small street or building lights are visible. The day frames reveal a series of office desks with black monitors, black keyboards, mice, and computer towers. There are also blue office chairs and a portable hard drive on one desk.",
-        "question": "What kind of office furniture is present in the workspace?",
-        "answer": "The workspace features light-colored wooden desks and blue office chairs."
-      },
-      "spatial_reasoning": {
-        "caption": "The blue LED strip is on the left side of the room, while the pink LED strip is on the right, separated by a distance of approximately 5 to 7 steps. Monitors are placed on top of the desks, and chairs are positioned in front of them. One monitor is specifically placed on top of a cardboard box. The portable hard drive is located on the desk to the right of the keyboard in the first frame.",
-        "question": "Where are the computer monitors placed in relation to the desks?",
-        "answer": "The computer monitors are placed directly on top of the desks."
-      },
-      "text_recognition": {
-        "caption": "In the low-light frames, no text is readable. In the day frames, text is visible on a cardboard box used as a monitor stand in frame 000060 and 000090. The word 'Lenovo' can be identified on this box. There might also be subtle branding on the monitors and keyboards, typical for an office environment.",
-        "question": "1. What brand name is visible on the box supporting the monitor?\n2. Is there any text visible on the portable hard drive?\n3. What brand are the keyboards in the office?\n4. Does any text appear on the wall?\n5. Is there text on the computer cases?\n6. Can any text be seen on the window panes?\n7. What brand is the monitor box likely for?\n8. Is there text on the blue chairs?",
-        "answer": "1. Lenovo.\n2. No, the portable hard drive appears to be plain.\n3. The keyboards are black Lenovo keyboards.\n4. No text is visible on the walls.\n5. No clear text is visible on the PC cases, only light strips.\n6. No text is visible on the windows.\n7. It is likely a box for a Lenovo monitor.\n8. No text is visible on the chairs."
-      },
-      "scene_sequence": {
-        "caption": "The video starts with a close-up of a desk setup featuring a monitor, keyboard, and external drive. It then pans right across an empty wall section to a second desk setup by a window, which has two monitors and two computer towers with decorative LED strips. The sequence concludes with a wider shot of the office environment showing several such workstations and blue chairs.",
-        "question": "1. What is the first object seen in the video?\n2. What do I pass after the first desk setup?\n3. What scene follows the view of the green LED PC tower?\n4. What is the sequence of LED colors I pass by?\n5. Which room connects the different desk setups?\n6. What do I see after the pink LED strip appears?\n7. What did I pass before reaching the window?\n8. What is the final scene shown in the sequence?\n9. Is there a chair at every desk I pass?\n10. What do I see outside the window after passing the PCs?",
-        "answer": "1. A computer monitor on a desk.\n2. A section of plain white wall and cables.\n3. A view of the window and the next desk.\n4. Green, then blue, then pink.\n5. It is a single open-plan office room.\n6. Another desk with a monitor and keyboard.\n7. A single workstation with one monitor.\n8. A wide view of the office with multiple workstations.\n9. Yes, there are blue chairs at each desk setup.\n10. A grassy area and a paved path."
-      },
-      "light_recongnition": {
-        "caption": "The main light sources in the dark sequence are internal LED strips from computer towers: a green/blue-white one on the left and a pink one on the right. There are also external lights from a building or street visible through the windows, appearing as soft yellow or white glows in the distance.",
-        "question": "What are the primary sources of light inside the room in the dark sequence?",
-        "answer": "The primary sources are vertical LED strips in blue and pink colors on the computer cases."
-      },
-      "light_change": {
-        "caption": "The video begins in almost total darkness. As the camera pans, the intensity of light increases as more LED sources from the computer towers come into the frame. The color shifts from predominantly dark to including green, blue, and then pink as the camera moves past different PC setups.",
-        "question": "1. Does the room get brighter as I move the camera?\n2. Did the lights in the room turn on suddenly?\n3. Is the light source approaching me?\n4. Did a car's headlights pass by the window?\n5. Does the color of the light change as I pan?\n6. Are any lights flickering?\n7. Do the monitor screens turn on at any point?\n8. Is there any natural light visible in the night sequence?",
-        "answer": "1. Yes, the frame becomes brighter as more LED strips enter the field of view.\n2. No, the ambient light remains low.\n3. No, I am moving past the stationary light sources.\n4. No.\n5. Yes, I move from a blue light to a pink light.\n6. No, the lights are steady.\n7. No, the monitors remain off.\n8. Yes, some distant outdoor lights are visible through the window."
-      },
-      "counting": {
-        "caption": "In the full sequence, I can identify: 4 computer monitors, 4 computer towers, 3 blue office chairs, 1 portable hard drive, and 1 cardboard box used as a stand. There are also 4 keyboards and 3 mice across the desks.",
-        "question": "1. How many computer monitors are in the office?\n2. How many blue office chairs are visible?\n3. How many computer towers have visible light strips?\n4. How many portable hard drives are on the desks?\n5. How many keyboards are present across all desks?\n6. How many mice are visible?\n7. How many cardboard boxes are used as monitor stands?\n8. How many large window panes are visible?\n9. How many power strips are on the desks?\n10. How many separate desks are shown?",
-        "answer": "1. Four monitors.\n2. Three chairs.\n3. Two towers have clearly visible LED strips in the dark.\n4. One.\n5. Four keyboards.\n6. Three mice.\n7. One.\n8. Three large panes.\n9. Two.\n10. Three desk surfaces."
-      },
-      "dynamic_counting": {
-        "caption": "There are no dynamic humans or objects moving in the video sequence besides the camera itself. Everything in the office remains stationary throughout the duration of the recording.",
-        "question": "1. How many people are walking in the office?\n2. How many cars approach me outside the window?\n3. How many objects fall off the desks?\n4. How many doors are seen opening or closing?\n5. How many computer screens turn on during the pan?\n6. How many chairs are being moved?\n7. How many birds fly past the window?\n8. How many animals are present in the room?",
-        "answer": "1. Zero.\n2. Zero.\n3. Zero.\n4. Zero.\n5. Zero.\n6. Zero.\n7. Zero.\n8. Zero."
-      },
-      "non_common": {
-        "caption": "The only unusual layout design is a monitor resting on a cardboard box instead of its original stand in the middle desk setup. This looks somewhat unprofessional for a standard office environment. To improve this, a proper monitor arm or adjustable stand should be used.",
-        "question": "Is there anything unusual about how the office equipment is set up?",
-        "answer": "Yes, one of the monitors is resting on a cardboard box instead of a proper stand."
-      },
-      "navigation": {
-        "caption": "To navigate the room from the start, stay at the first desk, then turn right and walk approximately 5 steps along the wall to reach the long desk by the window. To see more workstations, continue walking right for another 4 steps. The windows will always be on the left side during this path.",
-        "question": "1. Which way should I turn from the first desk to reach the windows?\n2. How many steps should I take to reach the middle desk?\n3. What is the fastest way back to the first setup?\n4. Where is the chair relative to the first desk?\n5. How do I get to the second computer tower?\n6. In which direction are the windows located relative to the desks?\n7. How can I reach the last monitor in the row?\n8. Which way should I go to find the cardboard box?\n9. Is there a clear path between the desks?\n10. How do I exit the room based on the layout?",
-        "answer": "1. Turn right.\n2. About 5 to 6 steps.\n3. Pan the camera back to the left.\n4. It is tucked under the desk.\n5. Walk right along the front of the desks.\n6. They are directly behind the monitors.\n7. Walk past the first two desks to the end of the room.\n8. Walk to the second desk setup by the window.\n9. Yes, there is a walkway in front of the desks.\n10. Turn away from the windows and walk toward the back of the room (not shown)."
-      },
-      "dynamic_recognition": {
-        "caption": "No moving objects or humans are identified in the video. The scene is static with only camera movement. 00:00 to 00:15 - stationary objects.",
-        "question": "Did any objects move or change position during the video?",
-        "answer": "No, all objects remained stationary as the camera panned."
-      },
-      "action": {
-        "caption": "I am panning the camera from left to right across a darkened office space. The action starts at one desk, moves across a wall, and stops at a longer desk setup by a window. The purpose is likely to showcase the office layout and the RGB lighting of the PC builds. The consequence is a visual sweep of the environment.",
-        "question": "1. What action am I performing with the camera?\n2. Am I interacting with any of the keyboards?\n3. Am I sitting down in any of the chairs?\n4. Am I picking up the portable hard drive?\n5. What is the purpose of my movement through the office?\n6. Am I opening any of the windows?\n7. Am I turning on any of the PC towers?\n8. Am I walking or standing stationary while panning?",
-        "answer": "1. You are panning the camera from left to right.\n2. No.\n3. No.\n4. No.\n5. To show the office setup and the LED lights.\n6. No.\n7. No, they are already on.\n8. You are moving slowly or panning while standing."
+        "caption": "I am peeling an orange carrot with a black Victorinox peeler, holding it over a bowl to collect the waste. After peeling, I use a chef's knife to slice the carrot into segments and then julienne them into thin strips, likely for use in a salad or stir-fry.",
+        "question": "1. What am I doing with the peeler? 2. What is the purpose of the knife? 3. Why am I holding the carrot over the bowl? 4. What happens to the carrot after it is peeled? 5. What kind of cut am I making with the knife? 6. Am I using a cutting board? 7. What is the intended consequence of the cutting? 8. Are my hands moving quickly or carefully?",
+        "answer": "1. Peeling a carrot. 2. To slice the carrot. 3. To catch the peels. 4. It is sliced into strips. 5. Slicing/Julienning. 6. Yes. 7. Creating thin carrot strips for cooking. 8. Carefully."
       }
     }
   }

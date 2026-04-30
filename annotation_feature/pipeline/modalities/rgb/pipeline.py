@@ -195,8 +195,8 @@ async def process_single_pair_batch(
         print(f"    WARNING: Missing night or day frames for pair {pair_key}; falling back to demo results")
         return copy.deepcopy(DEMO_RESULT)
 
-    selected_night = night_frames[:6]
-    selected_day = day_frames[:6]
+    selected_night = night_frames
+    selected_day = day_frames
 
     from ...utils import encode_frames_to_base64, build_image_parts
     night_encoded = encode_frames_to_base64(selected_night)
