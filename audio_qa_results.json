@@ -1,456 +1,69 @@
 {
-  "cut_carrot": {
-    "audio_file": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+  "dataset\\cut_carrot_split\\cut_carrot": {
+    "audio_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4",
+    "day_rgb_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+    "night_rgb_file": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
     "annotations": {
-      "sound_recognition": {
-        "caption": "Sound events detected: running water, dish clattering, hand movements, slight background noise.",
-        "question": "What are the main sound sources in this audio?",
-        "answer": "Water running, dishes, and hand movements"
-      },
-      "sound_counting": {
-        "caption": "Countable sounds: 3 distinct water bursts, 5 dish clatters, multiple hand movements.",
-        "question": [
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?"
-        ],
-        "answer": [
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences"
-        ]
-      },
-      "sound_sequence": {
-        "caption": "Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
-        "question": [
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?"
-        ],
-        "answer": [
-          "Water running",
-          "Dish movement begins",
-          "Clattering sounds",
-          "Ambient noise",
-          "Water running",
-          "Dish movement begins",
-          "Clattering sounds",
-          "Ambient noise"
-        ]
-      },
-      "sound_spatial": {
-        "caption": "Spatial audio: Water appears close, centered. Dish sounds seem to move across the stereo field.",
-        "question": "Where does the main water sound appear to come from?",
-        "answer": "Center position, close to the microphone"
-      },
-      "speech_recognition": {
-        "caption": "No clear speech detected. Background ambient sound and environmental noise present.",
-        "question": [
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?"
-        ],
-        "answer": [
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds"
-        ]
-      },
-      "music_recognition": {
-        "caption": "No music detected. Only natural environmental sounds and action-related audio.",
-        "question": [
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?"
-        ],
-        "answer": [
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds"
-        ]
-      },
-      "environmental_scene": {
-        "caption": "Environment: Indoor kitchen or wash area. Sounds suggest water, dishes, and daily activity.",
-        "question": [
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?"
-        ],
-        "answer": [
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space"
-        ]
-      },
-      "audio_change": {
-        "caption": "Changes detected: Sound starts with water, peaks with clattering, then quiets to ambient level.",
-        "question": [
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?"
-        ],
-        "answer": [
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds"
-        ]
-      },
-      "audio_visual_correspondence": {
-        "caption": "Expected visual match: Water pouring, dish handling, hand movements. All consistent with typical kitchen activity.",
-        "question": [
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?"
-        ],
-        "answer": [
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity"
-        ]
-      },
-      "action_from_sound": {
-        "caption": "Inferred actions: Water pouring or running, picking up dishes, putting items down, hand cleaning.",
-        "question": [
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?"
-        ],
-        "answer": [
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects"
-        ]
-      }
-    }
-  },
-  "wash_hands": {
-    "audio_file": "dataset\\wash_hand_split\\wash_hands_night.m4a",
-    "annotations": {
-      "sound_recognition": {
-        "caption": "Sound events detected: running water, dish clattering, hand movements, slight background noise.",
-        "question": "What are the main sound sources in this audio?",
-        "answer": "Water running, dishes, and hand movements"
-      },
-      "sound_counting": {
-        "caption": "Countable sounds: 3 distinct water bursts, 5 dish clatters, multiple hand movements.",
-        "question": [
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?",
-          "How many times do you hear distinct water bursts?",
-          "How many dish clatters are there?"
-        ],
-        "answer": [
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences",
-          "3 times",
-          "5 times",
-          "Multiple occurrences"
-        ]
-      },
-      "sound_sequence": {
-        "caption": "Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
-        "question": [
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?",
-          "What sound occurs first?",
-          "What happens after the water stops?"
-        ],
-        "answer": [
-          "Water running",
-          "Dish movement begins",
-          "Clattering sounds",
-          "Ambient noise",
-          "Water running",
-          "Dish movement begins",
-          "Clattering sounds",
-          "Ambient noise"
-        ]
-      },
-      "sound_spatial": {
-        "caption": "Spatial audio: Water appears close, centered. Dish sounds seem to move across the stereo field.",
-        "question": "Where does the main water sound appear to come from?",
-        "answer": "Center position, close to the microphone"
-      },
-      "speech_recognition": {
-        "caption": "No clear speech detected. Background ambient sound and environmental noise present.",
-        "question": [
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?",
-          "Is there speech in the audio?",
-          "How many speakers can you identify?"
-        ],
-        "answer": [
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds",
-          "No clear speech",
-          "No speakers detected",
-          "Only environmental sounds"
-        ]
-      },
-      "music_recognition": {
-        "caption": "No music detected. Only natural environmental sounds and action-related audio.",
-        "question": [
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?",
-          "Is there music in the audio?",
-          "What is the style of music?"
-        ],
-        "answer": [
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds",
-          "No music detected",
-          "Not applicable",
-          "Only natural sounds"
-        ]
-      },
-      "environmental_scene": {
-        "caption": "Environment: Indoor kitchen or wash area. Sounds suggest water, dishes, and daily activity.",
-        "question": [
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?",
-          "What environment do the sounds suggest?",
-          "What room is this likely?"
-        ],
-        "answer": [
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space",
-          "Kitchen or wash area",
-          "Kitchen/bathroom",
-          "Domestic indoor space"
-        ]
-      },
-      "audio_change": {
-        "caption": "Changes detected: Sound starts with water, peaks with clattering, then quiets to ambient level.",
-        "question": [
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?",
-          "Does the audio get louder over time?",
-          "What is the loudest event?"
-        ],
-        "answer": [
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds",
-          "Initially yes, then decreases",
-          "Dish clattering",
-          "Activity sounds"
-        ]
-      },
-      "audio_visual_correspondence": {
-        "caption": "Expected visual match: Water pouring, dish handling, hand movements. All consistent with typical kitchen activity.",
-        "question": [
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?",
-          "Could these sounds match a kitchen activity?",
-          "What action is likely?"
-        ],
-        "answer": [
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity",
-          "Yes, strongly matches",
-          "Washing dishes or hands",
-          "Kitchen activity"
-        ]
-      },
-      "action_from_sound": {
-        "caption": "Inferred actions: Water pouring or running, picking up dishes, putting items down, hand cleaning.",
-        "question": [
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?",
-          "What action is happening first?",
-          "What objects are involved?"
-        ],
-        "answer": [
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects",
-          "Water running",
-          "Dishes and hands",
-          "Water and objects"
-        ]
-      }
+      "hia": "The person took the carrot (00:00 - 00:02).\nThe person took the peeler (00:04 - 00:05).\nThe person peeled the carrot (00:05 - 00:30).\nThe person put down the peeler (00:30 - 00:31).\nThe person took the knife (00:31 - 00:32).\nThe person cut the carrot (00:33 - 00:44).",
+      "caption": "[00:00 - 00:03] The user picks up a whole carrot and slides a white ceramic bowl closer. A soft thud occurs as the bowl touches the countertop, accompanied by the rustle of the carrot being handled.\n\n[00:04 - 00:23] The person begins peeling the carrot. A series of rhythmic, crisp scraping sounds are heard as the peeler moves down the length of the carrot, with carrot skins falling into the bowl.\n\n[00:24 - 00:40] The scraping becomes faster and more frequent, creating a continuous, high-pitched scratching texture as the user peels the remaining sides and the tip of the carrot.\n\n[00:41 - 00:47] A distinct metallic clatter is heard as the user places the peeler on the metal countertop. This is followed by the sound of the bowl being pushed aside, creating a sliding friction noise.\n\n[00:48 - 01:11] Using a large kitchen knife, the person begins chopping the carrot. Sharp, resonant thuds of the blade striking the plastic cutting board are heard as the carrot is cut into manageable lengths.\n\n[01:11 - 01:16] A metallic scraping sound occurs as the user uses the side of the knife blade to gather the carrot pieces in the center of the board.\n\n[01:16 - 01:43] The chopping accelerates into a rapid-fire sequence of percussive knocks. The sound is steady and rhythmic as the user finely juliennes the carrot slices into thin strips.\n\n[01:44 - 01:51] Faint scraping and shuffling sounds are heard as the user adjusts the pile of carrot strips and repositions the knife for the next section.\n\n[01:52 - 02:14] A series of crisp, rhythmic chops resumes. The intensity of the thud against the board varies slightly depending on the force used to cut through the denser parts of the carrot.\n\n[02:14 - 02:29] The user turns the knife sideways, creating a prolonged metallic scraping sound against the textured surface of the white cutting board while sliding carrot strips to one side.\n\n[02:30 - 02:49] Rapid, brisk cutting sounds continue as the last segment of the carrot is sliced. The tempo is high, producing a quick, repetitive clicking pattern.\n\n[02:50 - 03:03] The task concludes with a few final, soft scrapes of the blade against the board to tidy up the pile of julienned carrots.",
+      "qa_pairs": [
+        {
+          "timestamp": "00:00 - 00:03",
+          "context": "[00:00] The user picks up a whole carrot and slides a white ceramic bowl closer. [00:02] A soft thud occurs as the bowl touches the countertop, accompanied by the rustle of the carrot being handled.",
+          "question_type": "Counting",
+          "question": "How many distinct environmental sound events occur between 00:00 and 00:03 as the user prepares the items?",
+          "answer": "Two distinct sounds occur: a soft thud from the ceramic bowl touching the countertop and the rustle of the carrot being handled."
+        },
+        {
+          "timestamp": "00:24 - 00:40",
+          "context": "[00:24] The scraping becomes faster and more frequent, creating a continuous, high-pitched scratching texture as the user peels the remaining sides.",
+          "question_type": "Sound Characteristics",
+          "question": "What are the acoustic qualities and texture of the peeling sound as the user's speed increases between 00:24 and 00:40?",
+          "answer": "The sound is described as having a continuous, high-pitched scratching texture."
+        },
+        {
+          "timestamp": "00:41 - 00:47",
+          "context": "[00:41] A distinct metallic clatter is heard as the user places the peeler on the metal countertop.",
+          "question_type": "Spatial Location",
+          "question": "What was the source and relative location of the metallic clatter heard at 00:41?",
+          "answer": "The sound was caused by the peeler being placed down onto the metal countertop."
+        },
+        {
+          "timestamp": "00:48 - 01:11",
+          "context": "[00:48] Using a large kitchen knife, the person begins chopping the carrot. [00:50] Sharp, resonant thuds of the blade striking the plastic cutting board are heard.",
+          "question_type": "Sound Source Identification",
+          "question": "What objects are interacting to produce the 'sharp, resonant thuds' heard starting at 00:48?",
+          "answer": "The sounds are produced by a large kitchen knife blade striking a plastic cutting board."
+        },
+        {
+          "timestamp": "01:11 - 01:16",
+          "context": "[01:11] A metallic scraping sound occurs as the user uses the side of the knife blade to gather the carrot pieces in the center of the board.",
+          "question_type": "Inferential Causality",
+          "question": "Why does a metallic scraping sound occur between 01:11 and 01:16, based on the user's actions?",
+          "answer": "The sound occurs because the user is using the side of the knife blade to gather the already chopped carrot pieces into the center of the cutting board."
+        },
+        {
+          "timestamp": "01:52 - 02:14",
+          "context": "[01:52] A series of crisp, rhythmic chops resumes. [02:00] The intensity of the thud against the board varies slightly depending on the force used to cut through the denser parts of the carrot.",
+          "question_type": "Cross-Modal Reasoning",
+          "question": "How does the physical property of the carrot being cut influence the audio characteristics of the thuds heard between 01:52 and 02:14?",
+          "answer": "The intensity of the audio thuds varies based on the force required to cut through different sections, specifically becoming more intense when cutting through the denser parts of the carrot."
+        },
+        {
+          "timestamp": "02:14 - 02:29",
+          "context": "[02:14] The user turns the knife sideways, creating a prolonged metallic scraping sound against the textured surface of the white cutting board.",
+          "question_type": "Temporal Attribute",
+          "question": "What is the duration and nature of the sound produced when the user moves the carrot strips at 02:14?",
+          "answer": "It is a prolonged metallic scraping sound that lasts until approximately 02:29."
+        },
+        {
+          "timestamp": "02:30 - 02:49",
+          "context": "[02:30] Rapid, brisk cutting sounds continue as the last segment of the carrot is sliced. [02:35] The tempo is high, producing a quick, repetitive clicking pattern.",
+          "question_type": "Cross-Modal Reasoning",
+          "question": "Based on the high-tempo clicking pattern heard starting at 02:30, what visual action is the user performing?",
+          "answer": "The user is performing rapid, brisk cutting of the final segment of the carrot."
+        }
+      ]
     }
   }
 }

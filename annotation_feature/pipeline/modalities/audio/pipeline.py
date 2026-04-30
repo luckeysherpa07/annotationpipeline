@@ -1,22 +1,27 @@
-"""Audio modality pipeline for QA annotation.
+"""Audio-visual cascade pipeline for QA annotation.
 
-This module handles audio annotation using the Gemini API.
-It processes audio files (night audio only, as day/night doesn't affect audio)
-to generate captions, questions, and answers.
+This module processes each audio/video-with-audio pair in three steps:
+1. Generate human interaction annotations from source day RGB frames.
+2. Generate a timestamped audio-visual caption from HIA and with-audio media.
+3. Generate sound-centric QA pairs from the timestamped caption.
 """
 import asyncio
 import copy
 import json
+import mimetypes
 import re
-from typing import Any, Dict
-from pathlib import Path
 import sys
+from pathlib import Path
+from typing import Any, Dict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from prompts.audio_prompts import AUDIO_PROMPTS
-from annotation_feature.demo_result import DEMO_RESULT
+from prompts.audio_prompts import (
+    AUDIO_VISUAL_CAPTION_GENERATION_PROMPT,
+    HUMAN_INTERACTION_ANNOTATION_PROMPT,
+    QNA_GENERATION_PROMPT,
+)
 
 try:
     from google.genai import types
@@ -24,203 +29,275 @@ except ImportError:
     types = None
 
 
-# Audio-specific demo result for fallback
-AUDIO_DEMO_RESULT = {
-    "sound_recognition": {
-        "caption": "Sound events detected: running water, dish clattering, hand movements, slight background noise.",
-        "question": "What are the main sound sources in this audio?",
-        "answer": "Water running, dishes, and hand movements"
+MODEL_NAME = "gemini-3-flash-preview"
+
+DEMO_HIA_CAPTION = (
+    "The egocentric video shows the camera wearer interacting with nearby "
+    "objects using their hands. The main interactions involve reaching, "
+    "grasping, moving, placing, and manipulating items on a work surface."
+)
+
+DEMO_TIMESTAMPED_CAPTION = (
+    "[00:00 - 00:04] The user begins manipulating objects near the camera; "
+    "soft handling sounds align with visible hand movement.\n"
+    "[00:04 - 00:09] A short sequence of sharper contact sounds occurs as an "
+    "object is placed or adjusted on the surface.\n"
+    "[00:09 - 00:14] The interaction continues with quieter rustling and "
+    "movement sounds, consistent with ongoing hand-object activity."
+)
+
+DEMO_QA_PAIRS = [
+    {
+        "timestamp": "00:00 - 00:04",
+        "context": "[00:00] Soft handling sounds occur while the user manipulates nearby objects.",
+        "question_type": "Sound Source Identification",
+        "question": "What action most likely produced the soft handling sounds at the start?",
+        "answer": "The user's hand-object manipulation produced the sounds.",
     },
-    "sound_counting": {
-        "caption": "Countable sounds: 3 distinct water bursts, 5 dish clatters, multiple hand movements.",
-        "question": ["How many times do you hear distinct water bursts?", "How many dish clatters are there?"] * 4,
-        "answer": ["3 times", "5 times", "Multiple occurrences"] * 4
+    {
+        "timestamp": "00:04 - 00:09",
+        "context": "[00:04] Sharper contact sounds occur as an object is placed or adjusted.",
+        "question_type": "Sound Characteristics",
+        "question": "What was the character of the contact sounds in the middle segment?",
+        "answer": "They were sharper contact sounds from placing or adjusting an object.",
     },
-    "sound_sequence": {
-        "caption": "Sequence: Initial water sound, followed by dish movement, then clattering, ending with ambient sound.",
-        "question": ["What sound occurs first?", "What happens after the water stops?"] * 4,
-        "answer": ["Water running", "Dish movement begins", "Clattering sounds", "Ambient noise"] * 2
-    },
-    "sound_spatial": {
-        "caption": "Spatial audio: Water appears close, centered. Dish sounds seem to move across the stereo field.",
-        "question": "Where does the main water sound appear to come from?",
-        "answer": "Center position, close to the microphone"
-    },
-    "speech_recognition": {
-        "caption": "No clear speech detected. Background ambient sound and environmental noise present.",
-        "question": ["Is there speech in the audio?", "How many speakers can you identify?"] * 4,
-        "answer": ["No clear speech", "No speakers detected", "Only environmental sounds"] * 4
-    },
-    "music_recognition": {
-        "caption": "No music detected. Only natural environmental sounds and action-related audio.",
-        "question": ["Is there music in the audio?", "What is the style of music?"] * 4,
-        "answer": ["No music detected", "Not applicable", "Only natural sounds"] * 4
-    },
-    "environmental_scene": {
-        "caption": "Environment: Indoor kitchen or wash area. Sounds suggest water, dishes, and daily activity.",
-        "question": ["What environment do the sounds suggest?", "What room is this likely?"] * 4,
-        "answer": ["Kitchen or wash area", "Kitchen/bathroom", "Domestic indoor space"] * 4
-    },
-    "audio_change": {
-        "caption": "Changes detected: Sound starts with water, peaks with clattering, then quiets to ambient level.",
-        "question": ["Does the audio get louder over time?", "What is the loudest event?"] * 4,
-        "answer": ["Initially yes, then decreases", "Dish clattering", "Activity sounds"] * 4
-    },
-    "audio_visual_correspondence": {
-        "caption": "Expected visual match: Water pouring, dish handling, hand movements. All consistent with typical kitchen activity.",
-        "question": ["Could these sounds match a kitchen activity?", "What action is likely?"] * 4,
-        "answer": ["Yes, strongly matches", "Washing dishes or hands", "Kitchen activity"] * 4
-    },
-    "action_from_sound": {
-        "caption": "Inferred actions: Water pouring or running, picking up dishes, putting items down, hand cleaning.",
-        "question": ["What action is happening first?", "What objects are involved?"] * 4,
-        "answer": ["Water running", "Dishes and hands", "Water and objects"] * 4
-    }
-}
+]
 
 
-def build_audio_mega_prompt(annotation_types: list[str], audio_filename: str) -> str:
-    """Build mega prompt for audio QA generation.
-    
-    Args:
-        annotation_types: List of annotation types to process
-        audio_filename: Name/path of the audio file being processed
-        
-    Returns:
-        Formatted prompt string for the Gemini API
-    """
-    prompt_parts = [
-        "You are an audio QA assistant. You will receive an audio file.",
-        "For each annotation type, follow these steps exactly:",
-        "1. Generate a caption from the audio using the caption prompt.",
-        "2. Generate a question from the caption using the question prompt.",
-        "3. Generate an answer from the audio and the question using the answering prompt.",
-        "Return ONLY valid JSON with the following structure:",
-        "{",
-    ]
-
-    for index, annotation_type in enumerate(annotation_types):
-        line = f'  "{annotation_type}": {{"caption": "...", "question": "...", "answer": "..."}}'
-        if index < len(annotation_types) - 1:
-            line += ","
-        prompt_parts.append(line)
-
-    prompt_parts.extend([
-        "}",
-        "Do not include any markdown, explanation, or additional text. Output must be parseable JSON only.",
-        f"Audio file: {audio_filename}",
-        "",
-        "Use the following prompts for each annotation type:",
-    ])
-
-    for annotation_type in annotation_types:
-        prompt_parts.extend([
-            f"### {annotation_type}",
-            "CAPTION PROMPT:",
-            AUDIO_PROMPTS[annotation_type]["caption_prompt"],
-            "",
-            "QUESTION PROMPT:",
-            AUDIO_PROMPTS[annotation_type]["question_prompt"],
-            "",
-            "ANSWERING PROMPT:",
-            AUDIO_PROMPTS[annotation_type]["answering_prompt"],
-            "",
-        ])
-
-    prompt_parts.append(
-        "Produce exactly one JSON object with all annotation types and no additional commentary."
+def build_hia_prompt() -> str:
+    prompt = HUMAN_INTERACTION_ANNOTATION_PROMPT["caption_prompt"]
+    return "\n".join(
+        [
+            "You are analyzing an egocentric RGB video.",
+            prompt,
+            "Return only the final HIA caption as plain text.",
+        ]
     )
-    return "\n".join(prompt_parts)
 
 
-def parse_json_response(text: str) -> dict:
-    """Parse JSON response from Gemini API.
-    
-    Args:
-        text: Response text from the API
-        
-    Returns:
-        Parsed JSON as a dictionary
-        
-    Raises:
-        ValueError: If JSON cannot be parsed
-    """
-    if not text:
-        raise ValueError("Empty response text")
+def build_audio_visual_prompt(hia_caption: str) -> str:
+    return "\n".join(
+        [
+            AUDIO_VISUAL_CAPTION_GENERATION_PROMPT,
+            "",
+            "Human Interaction Annotations (HIA):",
+            hia_caption,
+            "",
+            "Return only the timestamped audio-visual caption.",
+        ]
+    )
 
-    cleaned_text = text.strip()
-    cleaned_text = re.sub(r"^```(?:json)?\s*", "", cleaned_text, flags=re.I)
-    cleaned_text = re.sub(r"\s*```$", "", cleaned_text, flags=re.I)
 
-    match = re.search(r"\{.*\}", cleaned_text, flags=re.S)
+def build_qna_prompt(timestamped_caption: str) -> str:
+    return "\n".join(
+        [
+            QNA_GENERATION_PROMPT,
+            "",
+            "Detailed audiovisual caption:",
+            timestamped_caption,
+            "",
+            "Return only a valid JSON list. Do not include markdown.",
+        ]
+    )
+
+
+def _strip_markdown_fence(text: str) -> str:
+    cleaned = (text or "").strip()
+    cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.I)
+    cleaned = re.sub(r"\s*```$", "", cleaned, flags=re.I)
+    return cleaned.strip()
+
+
+def parse_hia_response(text: str) -> str:
+    cleaned = _strip_markdown_fence(text)
+    if not cleaned:
+        raise ValueError("Empty HIA response")
+    return cleaned
+
+
+def parse_caption_response(text: str) -> str:
+    cleaned = _strip_markdown_fence(text)
+    if not cleaned:
+        raise ValueError("Empty audio-visual caption response")
+    return cleaned
+
+
+def parse_qna_response(text: str) -> list[dict]:
+    cleaned = _strip_markdown_fence(text)
+    match = re.search(r"\[.*\]", cleaned, flags=re.S)
     if not match:
-        raise ValueError("No JSON object found in response")
+        raise ValueError("No JSON list found in Q&A response")
 
-    json_text = match.group(0)
-    return json.loads(json_text)
+    parsed = json.loads(match.group(0))
+    if not isinstance(parsed, list):
+        raise ValueError("Q&A response must be a JSON list")
 
-
-def normalize_annotation_results(raw_results: Any) -> dict:
-    """Normalize audio annotation results to ensure consistency.
-    
-    Args:
-        raw_results: Raw results from the API
-        
-    Returns:
-        Normalized results dictionary with all annotation types
-    """
-    normalized: dict = {}
-    for annotation_type in AUDIO_PROMPTS.keys():
-        fallback = AUDIO_DEMO_RESULT.get(annotation_type, {})
-        item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
-
-        if not isinstance(item, dict):
-            normalized[annotation_type] = copy.deepcopy(fallback)
-            continue
-
-        caption = item.get("caption")
-        question = item.get("question")
-        answer = item.get("answer")
-
-        if not all(isinstance(value, str) for value in (caption, question, answer)):
-            normalized[annotation_type] = copy.deepcopy(fallback)
-            continue
-
-        normalized[annotation_type] = {
-            "caption": caption,
-            "question": question,
-            "answer": answer,
-        }
-
+    normalized: list[dict] = []
+    for item in parsed:
+        if isinstance(item, dict):
+            normalized.append(item)
+    if not normalized:
+        raise ValueError("Q&A response did not contain any JSON objects")
     return normalized
 
 
 async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -> str:
-    """Call Gemini API with retry logic.
-    
-    Args:
-        client: Gemini client instance
-        contents: Content to send to the API
-        max_retries: Maximum number of retries
-        
-    Returns:
-        API response text
-        
-    Raises:
-        Exception: If all retries fail
-    """
     for attempt in range(1, max_retries + 1):
         try:
             response = await asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-3-flash-preview",
+                model=MODEL_NAME,
                 contents=contents,
             )
             return response.text
-        except Exception as e:
+        except Exception:
             if attempt == max_retries:
                 raise
             await asyncio.sleep(2)
+    raise RuntimeError("Gemini call failed")
+
+
+def _guess_mime_type(path: Path, fallback: str = "video/mp4") -> str:
+    mime_type, _ = mimetypes.guess_type(str(path))
+    return mime_type or fallback
+
+
+async def _wait_for_active_file(client, uploaded_file, timeout_seconds: int = 180):
+    deadline = asyncio.get_running_loop().time() + timeout_seconds
+    current_file = uploaded_file
+
+    while True:
+        state = getattr(current_file, "state", None)
+        state_value = getattr(state, "value", state)
+
+        if state_value == "ACTIVE":
+            return current_file
+        if state_value == "FAILED":
+            raise RuntimeError(f"Uploaded file failed processing: {getattr(current_file, 'name', '')}")
+        if asyncio.get_running_loop().time() >= deadline:
+            raise TimeoutError(
+                f"Timed out waiting for uploaded file to become ACTIVE: {getattr(current_file, 'name', '')}"
+            )
+
+        await asyncio.sleep(2)
+        current_file = await asyncio.to_thread(
+            client.files.get,
+            name=current_file.name,
+        )
+
+
+async def _upload_file_part(client, path: Path, mime_type: str):
+    if types is None:
+        raise ImportError("google-genai types are not available")
+
+    uploaded_file = await asyncio.to_thread(
+        client.files.upload,
+        file=str(path),
+        config={"mime_type": mime_type},
+    )
+    uploaded_file = await _wait_for_active_file(client, uploaded_file)
+    return types.Part(uploaded_file)
+
+
+async def generate_hia_caption(client, rgb_frames: list[Path] | None, skip_api: bool = False) -> str:
+    if skip_api:
+        return DEMO_HIA_CAPTION
+
+    if not rgb_frames:
+        print("    WARNING: Source day RGB frames missing; using demo HIA caption")
+        return DEMO_HIA_CAPTION
+
+    try:
+        from ...utils import build_image_parts, encode_frames_to_base64
+
+        encoded_frames = encode_frames_to_base64(rgb_frames)
+        if not encoded_frames:
+            print("    WARNING: Could not encode source day RGB frames; using demo HIA caption")
+            return DEMO_HIA_CAPTION
+
+        image_parts = build_image_parts(encoded_frames)
+        response_text = await call_gemini_with_retry(client, image_parts + [build_hia_prompt()])
+        return parse_hia_response(response_text)
+    except Exception as e:
+        print(f"    WARNING: HIA generation failed from source day RGB frames: {e}")
+        return DEMO_HIA_CAPTION
+
+
+async def generate_audiovisual_caption(
+    client,
+    hia_caption: str,
+    audio_path: Path | None,
+    skip_api: bool = False,
+) -> str:
+    if skip_api:
+        return DEMO_TIMESTAMPED_CAPTION
+
+    if not audio_path or not audio_path.exists():
+        print("    WARNING: With-audio media missing; using demo timestamped caption")
+        return DEMO_TIMESTAMPED_CAPTION
+
+    try:
+        media_part = await _upload_file_part(client, audio_path, _guess_mime_type(audio_path))
+        prompt = build_audio_visual_prompt(hia_caption)
+        response_text = await call_gemini_with_retry(client, [media_part, prompt])
+        return parse_caption_response(response_text)
+    except Exception as e:
+        print(f"    WARNING: Audio-visual caption generation failed for {audio_path}: {e}")
+        return DEMO_TIMESTAMPED_CAPTION
+
+
+async def generate_qa_pairs(
+    client,
+    timestamped_caption: str,
+    skip_api: bool = False,
+) -> list[dict]:
+    if skip_api:
+        return copy.deepcopy(DEMO_QA_PAIRS)
+
+    try:
+        response_text = await call_gemini_with_retry(
+            client,
+            [build_qna_prompt(timestamped_caption)],
+        )
+        return parse_qna_response(response_text)
+    except Exception as e:
+        print(f"    WARNING: Q&A generation failed: {e}")
+        return copy.deepcopy(DEMO_QA_PAIRS)
+
+
+async def process_single_audio_pair(
+    client,
+    pair_key: str,
+    rgb_videos: Dict[str, Any],
+    audio_path: Path | None,
+    skip_api: bool = False,
+) -> dict:
+    try:
+        day_rgb_frames = rgb_videos.get("day_frames", []) if isinstance(rgb_videos, dict) else []
+        hia_caption = await generate_hia_caption(client, day_rgb_frames, skip_api=skip_api)
+        timestamped_caption = await generate_audiovisual_caption(
+            client,
+            hia_caption,
+            audio_path,
+            skip_api=skip_api,
+        )
+        qa_pairs = await generate_qa_pairs(
+            client,
+            timestamped_caption,
+            skip_api=skip_api,
+        )
+        return {
+            "hia": hia_caption,
+            "caption": timestamped_caption,
+            "qa_pairs": qa_pairs,
+        }
+    except Exception as e:
+        print(f"    ERROR: Audio cascade failed for {pair_key}: {e}")
+        return {
+            "hia": DEMO_HIA_CAPTION,
+            "caption": DEMO_TIMESTAMPED_CAPTION,
+            "qa_pairs": copy.deepcopy(DEMO_QA_PAIRS),
+        }
 
 
 async def process_single_audio(
@@ -229,73 +306,47 @@ async def process_single_audio(
     audio_path: Path,
     skip_api: bool = False,
 ) -> dict:
-    """Process a single audio file.
-    
-    Args:
-        client: Gemini client instance
-        pair_key: Identifier for the audio pair
-        audio_path: Path to the audio file
-        skip_api: If True, skip API calls and use demo results
-        
-    Returns:
-        Annotation results dictionary
-    """
-    if skip_api:
-        return copy.deepcopy(AUDIO_DEMO_RESULT)
+    """Backward-compatible wrapper for callers that only provide audio media."""
+    return await process_single_audio_pair(
+        client,
+        pair_key,
+        {"day": None, "night": None},
+        audio_path,
+        skip_api=skip_api,
+    )
 
-    if not audio_path or not audio_path.exists():
-        print(f"    WARNING: Audio file not found for pair {pair_key}; falling back to demo results")
-        return copy.deepcopy(AUDIO_DEMO_RESULT)
 
-    from ...utils import encode_audio_to_base64, build_audio_part
-    audio_encoded = encode_audio_to_base64(audio_path)
-
-    if not audio_encoded:
-        print(f"    WARNING: Could not encode audio for pair {pair_key}; falling back to demo results")
-        return copy.deepcopy(AUDIO_DEMO_RESULT)
-
-    audio_parts = build_audio_part(audio_encoded, mime_type="audio/mp4")
-    prompt = build_audio_mega_prompt(list(AUDIO_PROMPTS.keys()), audio_path.name)
-    contents = audio_parts + [prompt]
-
-    try:
-        response_text = await call_gemini_with_retry(client, contents, max_retries=3)
-        parsed = parse_json_response(response_text)
-        return normalize_annotation_results(parsed)
-    except Exception as e:
-        print(f"    ERROR: Gemini API call failed for {pair_key}: {e}")
-        print(f"    Falling back to AUDIO_DEMO_RESULT for pair {pair_key}")
-        return copy.deepcopy(AUDIO_DEMO_RESULT)
+def normalize_annotation_results(raw_results: Any) -> dict:
+    """Backward-compatible normalizer for legacy imports."""
+    if isinstance(raw_results, dict) and {"hia", "caption", "qa_pairs"} <= set(raw_results):
+        return raw_results
+    return {
+        "hia": DEMO_HIA_CAPTION,
+        "caption": DEMO_TIMESTAMPED_CAPTION,
+        "qa_pairs": copy.deepcopy(DEMO_QA_PAIRS),
+    }
 
 
 async def run_parallel_pipeline(
     client,
     audio_pairs: Dict[str, Path],
+    rgb_frames_dict: Dict[str, Dict[str, Any]] | None = None,
     max_concurrent: int = 3,
     delay_between_pairs: int = 4,
     skip_api: bool = False,
 ) -> Dict[str, dict]:
-    """Run audio annotation pipeline in parallel.
-    
-    Args:
-        client: Gemini client instance
-        audio_pairs: Dictionary of audio pairs mapping pair_key to audio file path
-        max_concurrent: Maximum concurrent API calls
-        delay_between_pairs: Delay between pair processing in seconds
-        skip_api: If True, skip API calls and use demo results
-        
-    Returns:
-        Dictionary of annotation results keyed by pair_key
-    """
+    """Run the audio-visual cascade in parallel."""
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
+    rgb_video_dict = rgb_frames_dict or {}
 
     async def worker(pair_key: str, audio_path: Path) -> tuple[str, dict]:
         async with semaphore:
-            print(f"\nProcessing audio pair: {pair_key}")
-            return pair_key, await process_single_audio(
+            print(f"\nProcessing audio-visual pair: {pair_key}")
+            return pair_key, await process_single_audio_pair(
                 client,
                 pair_key,
+                rgb_video_dict.get(pair_key, {}),
                 audio_path,
                 skip_api=skip_api,
             )

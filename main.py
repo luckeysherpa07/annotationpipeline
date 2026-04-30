@@ -122,7 +122,7 @@ def main():
     print("EVENT: Single mega-prompt per pair with caption, question, and answer generation")
     print("DEPTH: Single mega-prompt per pair with caption, question, and answer generation")
     print("IR: Single mega-prompt per pair with caption, question, and answer generation")
-    print("AUDIO: Single mega-prompt per audio file with QA generation (night only)")
+    print("AUDIO: Cascaded HIA -> timestamped audio-visual caption -> QA generation")
     print("MARIGOLD: Estimate depth from cached RGB frames, then reuse depth QA prompts on Marigold maps")
     print("LATE FUSION: Post-process modality captions into fused scene summaries")
     print("=" * 60)
@@ -315,18 +315,17 @@ def main():
 
         elif choice == "16":
             print("\n" + "-" * 60)
-            print("Running: AUDIO pipeline test on 1 file (using demo data)")
+            print("Running: AUDIO cascade test on 1 pair (using demo data)")
             print("-" * 60)
-            print("Processes night audio only (day/night do not affect audio)")
-            print("Single mega-prompt with 10 audio annotation types")
-            print("skip_api=True -> results from AUDIO_DEMO_RESULT\n")
+            print("Uses demo HIA, timestamped caption, and Q&A")
+            print("skip_api=True -> no Gemini API calls\n")
             run_audio(test_mode=True, skip_api=True)
 
         elif choice == "17":
             print("\n" + "-" * 60)
-            print("Running: AUDIO pipeline on 1 file (real Gemini API calls)")
+            print("Running: AUDIO cascade on 1 pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
-            print("Uses gemini-2-flash with audio file input")
+            print("Uploads source RGB video for HIA, then matching with_audio media")
             print("-" * 60)
             if _confirm():
                 run_audio(test_mode=True, skip_api=False)
@@ -335,10 +334,10 @@ def main():
 
         elif choice == "18":
             print("\n" + "-" * 60)
-            print("Running: AUDIO pipeline on all files (production)")
-            print("WARNING: This will use Gemini API quota for each audio file!")
-            print("Parallel execution: up to 3 files concurrently, 4-second spacing")
-            print("Audio types: 10 (sound recognition, speech, music, etc.)")
+            print("Running: AUDIO cascade on all pairs (production)")
+            print("WARNING: This will use Gemini API quota for each pair!")
+            print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
+            print("Outputs HIA, timestamped caption, and sound-centric Q&A")
             print("-" * 60)
             if _confirm():
                 run_audio(test_mode=False)
