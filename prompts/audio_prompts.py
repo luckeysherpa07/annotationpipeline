@@ -1,81 +1,290 @@
-AUDIO_PROMPTS = {
-    "sound_recognition": {
-        "caption_prompt": """I am specifically focusing on audio event recognition, thus can caption my input audio paying attention to the sounds that are closely related to audible events, for example, voices, footsteps, doors, vehicles, machines, animals, appliances, and other environmental sounds. Please give a detailed caption that enumerate everything you can identify.""",
+################################################################################
+#                           AUDIO PROMPTS LIBRARY
+################################################################################
+# This module contains specialized prompts for comprehensive audio-visual
+# analysis of egocentric videos. Prompts guide AI models to extract and
+# structure information about:
+#   • Human-object interactions in video
+#   • Detailed audio-visual caption generation
+#   • Question-Answer pair extraction from captions
+################################################################################
 
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate a question that evaluates fine-grained understanding of sound events. Focus on what can be heard, such as sound sources, event types, materials, and audible actions. Avoid questions about visual appearance, illumination, or humans' faces. Please provide only 1 question, and make it precise, objective, and answerable with a few words.""",
+# ============================================================================
+# HUMAN_INTERACTION_ANNOTATION_PROMPT
+# ============================================================================
+# Prompt for identifying and annotating human-object interactions in video,
+# including interaction types, involved objects, and temporal boundaries.
+# ============================================================================
 
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the question, generate an answer that is consistent with the audio content and easy to evaluate. Keep the answer short, objective, and unambiguous. Avoid vague phrasing."""
-    },
-
-    "sound_counting": {
-        "caption_prompt": """Now I am focusing on counting audible events. Please identify countable sound events in the audio and count how many times each important sound appears in the full sequence. Focus on useful daily-life sounds such as knocks, beeps, claps, alarms, footsteps, door sounds, and vehicle sounds.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of counting sound events. Avoid questions that can be answered from a short fragment; instead, design questions that require understanding the full audio. Please provide 8 questions. Each question should be precise and answerable with an exact number.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are exact numbers or short count phrases. Make sure the answers are consistent with the audio and easy to evaluate. Avoid vague responses."""
-    },
-
-    "sound_sequence": {
-        "caption_prompt": """I am specifically focusing on the sequence of sounds in the audio. Please describe the order of important audible events, including what sound happened first, next, and last. Enumerate the sequence clearly.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of sound sequence. Avoid questions that can be answered from a few seconds; instead, require understanding of the full audio timeline. Ask about the order of events, transitions between sounds, and what sound came before or after another sound. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that clearly reflect the order of sounds in the audio. Keep the answers short, precise, and consistent with the timeline."""
-    },
-
-    "sound_spatial": {
-        "caption_prompt": """I am specifically focusing on spatial audio cues. Please describe where sounds seem to come from, such as left, right, front, behind, near, far, approaching, or moving away. Also mention any clear stereo or directional sound patterns.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate a question that evaluates fine-grained understanding of spatial sound. Focus on direction, distance, movement of sound, or whether the sound source feels near or far. Avoid visual questions. Please provide only 1 question, and make it precise and answerable with a few words.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the question, generate an answer that is short, objective, and based on audible spatial cues only. Avoid vague or subjective wording."""
-    },
-
-    "speech_recognition": {
-        "caption_prompt": """Now I am focusing on speech recognition. Please identify whether speech is present, how many speakers there are if possible, and any clearly audible spoken words or phrases. Also describe whether the speech is clear, overlapping, distant, or interrupted.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of speech in the audio. Ask about whether speech is present, how many speakers there are, whether the speech is overlapping, or what short words are clearly spoken. Avoid questions about faces or visual appearance. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are short and directly supported by the audio. Keep answers precise and avoid guessing unclear words."""
-    },
-
-    "music_recognition": {
-        "caption_prompt": """I am specifically focusing on music recognition. Please describe any music in the audio, including whether it is present, its style or mood, the likely instruments, tempo, rhythm, and whether it is background or foreground music.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of music. Focus on music presence, instruments, tempo, rhythm, or whether it is background music. Avoid visual questions. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are short, objective, and consistent with the music heard in the audio. Avoid vague style descriptions unless they are clearly supported."""
-    },
-
-    "environmental_scene": {
-        "caption_prompt": """Now I am focusing on environmental scene recognition from audio. Please describe the most likely place or environment suggested by the sounds, such as street, office, kitchen, classroom, station, mall, outdoors, or home. Mention the acoustic cues that support the scene.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of the environment suggested by sound. Focus on place, setting, and acoustic clues. Avoid visual questions. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are short, clear, and grounded in the audio evidence. Avoid overly broad or speculative place descriptions."""
-    },
-
-    "audio_change": {
-        "caption_prompt": """I am specifically focusing on changes in audio over time. Please describe when sound starts, stops, becomes louder, quieter, more crowded, more isolated, or changes from one event to another. Enumerate the changes clearly.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of audio change over time. Ask about whether a sound started or stopped, whether volume increased or decreased, or whether the audio became more active or quiet. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are easy to evaluate and directly reflect changes in the audio timeline. Keep the answers short and unambiguous."""
-    },
-
-    "audio_visual_correspondence": {
-        "caption_prompt": """I am specifically focusing on audio-visual correspondence. Please describe sounds that appear to match likely visible events or objects, such as a door slam, car engine, footsteps, pouring, typing, or alarm sounds. If a sound seems unrelated to the visual scene, mention that as well.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate whether the heard sound matches a likely event or object. Focus on correspondence, mismatch, and confirmation of audible actions. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are short, objective, and based on the audible evidence. Do not invent visual details that are not supported by the input."""
-    },
-
-    "action_from_sound": {
-        "caption_prompt": """Now I am specifically focusing on actions that can be inferred from sound. Please describe audible actions such as opening, closing, moving, pouring, cutting, typing, dropping, knocking, walking, or turning on/off a device. Also mention any likely objects involved in those actions.""",
-
-        "question_prompt": """Please work as an audio VQA assistant. By analyzing the audio and the corresponding caption, generate questions that evaluate fine-grained understanding of actions inferred from sound. Focus on what action happened, what object was involved, and what audible cue supports it. Please provide 8 questions.""",
-
-        "answering_prompt": """Please work as an audio VQA assistant. Given the audio and the questions, generate answers that are short, exact, and directly supported by the audible action. Avoid speculation and keep the answers easy to evaluate."""
-    }
+HUMAN_INTERACTION_ANNOTATION_PROMPT = {
+    "caption_prompt": (
+        "Identify all interactions between humans and objects in the video, "
+        "including the type of interaction, the objects involved, and the "
+        "temporal boundaries of each interaction."
+    ),
 }
+
+
+# ============================================================================
+# AUDIO_VISUAL_CAPTION_GENERATION_PROMPT
+# ============================================================================
+# Detailed prompt for generating comprehensive audio-visual captions that
+# combine auditory signals with visual context from egocentric videos.
+# ============================================================================
+
+AUDIO_VISUAL_CAPTION_GENERATION_PROMPT = """You are an expert audio-visual analyst specializing in egocentric videos.
+You will receive two inputs:
+  (1) Human Interaction Annotations (HIA)
+  (2) The corresponding video segment
+
+Your task is to generate detailed and unambiguous captions describing all
+meaningful sound events by combining auditory signals with visually grounded
+human-object interactions.
+---
+CORE EXECUTION LOGIC:
+
+Your process MUST begin by identifying all meaningful sounds, including speech
+and environmental sounds. For each sound, you must:
+  1. Locate its position in time
+  2. Link it to relevant visual actions indicated by the HIA (if available)
+  3. Describe the event in detail using the tasks listed in Your Goal below
+
+Each description must integrate:
+  • Audio perception
+  • Visual grounding
+  • Temporal alignment
+  • Causal reasoning
+---
+YOUR GOAL: DETAILED SOUND ANALYSIS
+
+Focus on all sounds (human speech and environmental sounds). Address the
+following seven tasks as much as possible:
+
+1. SOUND CHARACTERISTICS
+   Describe intrinsic acoustic properties: volume, texture, timbre
+   Example: "a sharp clink", "a soft rustle", "a loud bang"
+
+2. COUNTING
+   Number of distinct sound events or repetitions
+
+3. TEMPORAL ATTRIBUTE
+   Occurrence timing, duration, onset/offset characteristics, volume variation
+   Example: "continuous sound with gradually decreasing volume over 5 seconds"
+
+4. SPATIAL LOCATION
+   Relative location of source to camera
+   Example: "knock from the left, behind, 1m"
+           "distant siren from the right, 10m"
+           "nearby footstep from behind, 0.5m"
+
+5. SOUND SOURCE IDENTIFICATION
+   What object or action (visual event) created the sound?
+   Example: "cup hitting table", "birds chirping", "people talking",
+            "hand places mug on counter with loud thud"
+
+6. INFERENTIAL CAUSALITY
+   Why a sound/speech event occurred. Focus on underlying reason, motivation,
+   context. Leverage chronological context of surrounding events.
+   Example: "User closed window to block loud shouting from outside"
+
+7. CROSS-MODAL REASONING
+   How audio events influence visual understanding and vice versa
+   • Audio-Guided Visual Reasoning: Use audio cues to ground what is/will
+     happen visually
+   • Visual-Guided Audio Reasoning: Use visual cues to ground what is/will
+     happen in audio
+---
+PRINCIPLES: FILTERING AND COHERENCE
+
+✓ CORE RULE: Output must be strictly chronological and non-redundant
+
+✓ FOCUS ON:
+  • Interactions and human actions
+  • Clear cause-effect audio-visual relationships
+
+✗ MUST IGNORE:
+  • Silent segments
+  • Idle scenes (e.g., just standing)
+  • Repetitive actions without significant meaning
+
+✗ DO NOT:
+  • Narrate per-second; only describe meaningful audio events
+  • Hallucinate visual or audio details
+
+✓ TERMINATION: Stop generating once you have described all meaningful
+  sound events.
+---
+FINAL OUTPUT: CHRONOLOGICAL, EXCEEDINGLY DETAILED AUDIOVISUAL CAPTION
+
+Your final output must be exceedingly detailed and form a coherent caption
+combining audio and visual reasoning.
+
+STRUCTURE:
+  Use chronological timeline format: [start time – end time] event description
+  Use seconds as timestamps (e.g., 00:12 - 00:15)
+
+FORMAT:
+  Each line MUST represent one distinct, non-overlapping audio event
+
+SPEECH HANDLING:
+  If an event includes speech/dialogue, embed the transcribed text using
+  quotation marks or clear label
+  Example: "The user says: ..."
+
+STYLE:
+  • Be concise but highly informative
+  • Avoid redundancy and trivial details:
+    - "standing", "breathing", "background wall", "nothing happens"
+  • Prioritize meaningful sound events and their significance"""
+
+
+# ============================================================================
+# QNA_GENERATION_PROMPT
+# ============================================================================
+# Prompt for extracting high-quality Question–Answer pairs from audio-visual
+# captions, focusing on seven core sound-centric analysis tasks.
+# ============================================================================
+
+QNA_GENERATION_PROMPT = """You are an expert AI for sound-centric information extraction. Read the
+detailed audiovisual caption and generate high-quality Question–Answer (QA)
+pairs that cover the seven core sound-centric tasks.
+
+BASIC PRINCIPLE:
+  Base every question and answer solely on information contained in the
+  caption or on inferences that naturally follow from its context. Use the
+  accompanying video frames for double validation: confirm that each QA pair
+  is fully supported by visual evidence, correcting or discarding any detail
+  that cannot be verified.
+
+✓ Ensure all QA pairs remain factual, precise, and hallucination-free
+✗ DO NOT introduce content beyond what is grounded in caption or video frames
+---
+CORE OBJECTIVE:
+
+Every question you generate must target one of the following seven core tasks.
+---
+SEVEN CORE TASKS (Question Focus):
+
+1. SOUND CHARACTERISTICS
+   Ask about the sound's acoustic qualities: volume, texture, timbre.
+   Examples:
+   • "What is the intensity and volume of distant traffic noise?"
+   • "Was the 'tap' at 01:10 sharp, muffled, dull, or resonant?"
+
+2. COUNTING
+   Ask about count, number of repetitions, or frequency of sound events.
+   Examples:
+   • "How many types of environmental sounds (excluding speech) were
+     simultaneously present at 00:45?"
+   • "How many times did the 'clink' sound occur?"
+   • "How many distinct, quick footsteps were recorded between 02:00
+     and 02:05?"
+
+3. TEMPORAL ATTRIBUTE
+   Ask about sound's timing, duration, or volume fluctuation.
+   Examples:
+   • "When did the 'clink' sound start and how long did it last?"
+   • "What is the duration and volume change of the high-frequency
+     whining sound heard between 01:30 and 01:35?"
+
+4. SPATIAL LOCATION
+   Ask about sound's precise location (Direction & Distance) relative to
+   camera.
+   Examples:
+   • "What was the spatial location (direction and estimated distance in
+     meters) of the faint rustling sound at 00:15?"
+   • "Did the close-range speech originate from the left side, right side,
+     or directly in front of the camera?"
+
+5. SOUND SOURCE IDENTIFICATION
+   Ask what specific object, person, or action generated the sound.
+   Examples:
+   • "What object generated the 'clink' sound at 00:15?"
+   • "What was the source of the high-pitched metallic scraping sound
+     at 00:15?"
+
+6. INFERENTIAL CAUSALITY
+   Ask why a sound/speech event occurred. Focus on underlying reason,
+   motivation, or context by leveraging chronological context.
+   Examples:
+   • "What was the likely reason for the car's sudden horn honk at 01:10?"
+   • "Why did the speaker laugh at 00:45?"
+   • "Based on preceding events, why did the mom say 'I'm so proud'?"
+
+7. CROSS-MODAL REASONING
+   Ask how audio events influence visual understanding or vice versa,
+   requiring cross-modal inference.
+
+   Audio-Guided Visual Reasoning (Sound to Visual):
+   Use audio cues to ground and interpret what is/will happen visually.
+   Examples:
+   • "After the loud crash sound at 00:22, what object most likely fell?"
+   • "When the barking sound occurs, where is the dog located in scene?"
+
+   Visual-Guided Audio Reasoning (Visual to Sound):
+   Use visual cues to ground and interpret what is/will happen in audio.
+   Examples:
+   • "When the man slammed the door at 00:45, what sound followed?"
+   • "After the woman claps her hands, what sound follows and what does
+     it suggest about the environment?"
+---
+EXECUTION PRINCIPLES:
+
+✓ QUALITY FIRST
+  Emphasis on QA quality, not absolute quantity. Generate only meaningful
+  questions with clear answers within the text.
+
+✓ STRICTLY GROUNDED
+  All QA pairs must be inferred from the provided caption text.
+  ✗ DO NOT hallucinate or invent details not present in text.
+
+✓ FILTER IRRELEVANCE
+  Skip lines with no specific details related to the 7 tasks.
+  Example: "The user is walking" with no sound description → SKIP
+
+✓ NO DUPLICATION
+  Avoid generating multiple, repetitive questions about the same event detail.
+
+✓ VALIDATE AND PRUNE
+  After generating QA pairs, re-check each question and answer against
+  caption and video frames. Discard immediately if:
+  • Contains incorrect information
+  • Lacks proper support
+  • Contains ambiguous content
+---
+OUTPUT FORMAT (JSON):
+
+Return your answer as a single JSON list. Each QA pair is an object within
+this list.
+
+JSON STRUCTURE:
+{
+  "timestamp": "HH:MM - HH:MM",
+  "context": "[HH:MM] Description of relevant events from caption",
+  "question_type": "One of the 7 task types",
+  "question": "Clear, specific question grounded in caption",
+  "answer": "Precise answer based on caption/video content"
+}
+
+JSON EXAMPLE 1:
+{
+  "timestamp": "00:55 - 01:00",
+  "context": "[00:55] A man outside the window shouts loudly. [00:58] The user
+    closes the window with a definitive thud.",
+  "question_type": "Inferential Causality",
+  "question": "Based on the preceding event, what was the inferred reason for
+    the user closing the window at 00:58?",
+  "answer": "The user closed the window to block out the loud shouting man
+    outside."
+}
+
+JSON EXAMPLE 2:
+{
+  "timestamp": "00:20 - 00:25",
+  "context": "[00:20] The user's hand is seen dropping a key fob. [00:21] A loud,
+    metallic clang is heard from the floor, 0.5m directly below the camera.",
+  "question_type": "Sound Characteristics",
+  "question": "What was the quality and volume of the sound made by the
+    dropped key fob at 00:21?",
+  "answer": "The sound was a 'loud, metallic clang'."
+}"""
