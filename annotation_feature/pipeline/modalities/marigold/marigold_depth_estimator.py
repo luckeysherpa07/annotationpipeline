@@ -111,14 +111,20 @@ class MarigoldDepthEstimator:
             output_path = output_dir / output_name
 
             if save_format == "png":
-                cv2.imwrite(str(output_path), depth_map)
+                write_ok = cv2.imwrite(str(output_path), depth_map)
+                if not write_ok or not output_path.exists():
+                    print(f"    ERROR: Failed to write depth PNG: {output_path}")
+                    continue
             elif save_format == "npy":
                 np.save(str(output_path), depth_map)
+                if not output_path.exists():
+                    print(f"    ERROR: Failed to write depth NPY: {output_path}")
+                    continue
             else:
                 raise ValueError(f"Unsupported format: {save_format}")
 
             saved_paths.append(output_path)
-            print(f"    [{i}/{len(image_paths)}] Saved: {output_path.name}")
+            print(f"    [{i}/{len(image_paths)}] Saved: {output_path}")
 
         return saved_paths
 

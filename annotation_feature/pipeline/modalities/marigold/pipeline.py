@@ -16,6 +16,25 @@ from annotation_feature.marigold_preprocessor import (
 )
 
 
+def _selected_frame_output_path(
+    dataset_folder: Path,
+    rgb_frames: Dict[str, Dict[str, List[Path]]],
+) -> Path | None:
+    """Return the Marigold output path for a one-frame option 20 selection."""
+    for pair_key, frames_by_side in rgb_frames.items():
+        for side in ("day", "night"):
+            frames = frames_by_side.get(side, [])
+            if len(frames) == 1:
+                return (
+                    dataset_folder
+                    / ".frames_cache_marigold"
+                    / pair_key
+                    / side
+                    / f"{frames[0].stem}_depth.png"
+                )
+    return None
+
+
 def run_marigold_depth_estimation(
     test_mode: bool = False,
     dataset_folder: Path | str = "dataset",
@@ -68,6 +87,10 @@ def run_marigold_depth_estimation(
         print("No depth maps were generated.")
         return {}
 
+    expected_selected_output = None
+    if selected_cache_folder and selected_frame:
+        expected_selected_output = _selected_frame_output_path(dataset_folder, rgb_frames)
+
     marigold_frames = preprocess_marigold_depth(
         dataset_folder=dataset_folder,
         output_subdir=".frames_cache_marigold",
@@ -87,6 +110,9 @@ def run_marigold_depth_estimation(
     print(f"  Total day depth maps: {total_day}")
     print(f"  Total night depth maps: {total_night}")
     print(f"  Total depth maps: {total_day + total_night}")
+    if expected_selected_output:
+        print(f"  Expected selected-frame output: {expected_selected_output}")
+        print(f"  Output exists: {'yes' if expected_selected_output.exists() else 'no'}")
 
     return marigold_frames
 

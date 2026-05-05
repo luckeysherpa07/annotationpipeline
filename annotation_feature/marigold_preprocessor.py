@@ -28,6 +28,11 @@ def _get_flat_cache_side(folder_name: str) -> str | None:
     return None
 
 
+def _expected_depth_outputs(frames: List[Path], output_dir: Path) -> List[Path]:
+    """Build the expected Marigold output path for each RGB frame."""
+    return [output_dir / f"{frame.stem}_depth.png" for frame in frames]
+
+
 def list_cached_rgb_folders(
     dataset_folder: Path,
     cache_subdir: str = ".frames_cache",
@@ -230,14 +235,12 @@ def preprocess_marigold_depth(
         if frames["day"]:
             day_output_dir = pair_output_dir / "day"
             day_output_dir.mkdir(parents=True, exist_ok=True)
-            cached_day_depths = sorted(day_output_dir.glob("frame_*_depth.png"))
-            selected_day_output = day_output_dir / f"{frames['day'][0].stem}_depth.png"
-            if len(frames["day"]) == 1 and selected_day_output.exists():
-                print(f"\nReusing cached Marigold day depth map: {selected_day_output.name}")
-                marigold_frames[pair_key]["day"] = [selected_day_output]
-            elif len(cached_day_depths) == len(frames["day"]):
-                print(f"\nReusing {len(cached_day_depths)} cached Marigold day depth maps...")
-                marigold_frames[pair_key]["day"] = cached_day_depths
+            expected_day_outputs = _expected_depth_outputs(frames["day"], day_output_dir)
+            if all(output.exists() for output in expected_day_outputs):
+                print(f"\nReusing {len(expected_day_outputs)} cached Marigold day depth maps:")
+                for output in expected_day_outputs:
+                    print(f"  {output}")
+                marigold_frames[pair_key]["day"] = expected_day_outputs
             else:
                 print(f"\nEstimating depth for {len(frames['day'])} day frames...")
                 day_depths = estimator.estimate_depth_batch(
@@ -249,14 +252,12 @@ def preprocess_marigold_depth(
         if frames["night"]:
             night_output_dir = pair_output_dir / "night"
             night_output_dir.mkdir(parents=True, exist_ok=True)
-            cached_night_depths = sorted(night_output_dir.glob("frame_*_depth.png"))
-            selected_night_output = night_output_dir / f"{frames['night'][0].stem}_depth.png"
-            if len(frames["night"]) == 1 and selected_night_output.exists():
-                print(f"\nReusing cached Marigold night depth map: {selected_night_output.name}")
-                marigold_frames[pair_key]["night"] = [selected_night_output]
-            elif len(cached_night_depths) == len(frames["night"]):
-                print(f"\nReusing {len(cached_night_depths)} cached Marigold night depth maps...")
-                marigold_frames[pair_key]["night"] = cached_night_depths
+            expected_night_outputs = _expected_depth_outputs(frames["night"], night_output_dir)
+            if all(output.exists() for output in expected_night_outputs):
+                print(f"\nReusing {len(expected_night_outputs)} cached Marigold night depth maps:")
+                for output in expected_night_outputs:
+                    print(f"  {output}")
+                marigold_frames[pair_key]["night"] = expected_night_outputs
             else:
                 print(f"\nEstimating depth for {len(frames['night'])} night frames...")
                 night_depths = estimator.estimate_depth_batch(
