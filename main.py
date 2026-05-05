@@ -17,10 +17,14 @@ from annotation_feature.pipeline import (
     run_event,
     run_ir,
     run_marigold_depth_estimation,
+    run_marigold_ir_depth_estimation,
     run_marigold_depth_qa,
     run_late_fusion,
 )
-from annotation_feature.pipeline.modalities.marigold import list_cached_rgb_folders
+from annotation_feature.pipeline.modalities.marigold import (
+    list_cached_ir_night_folders,
+    list_cached_rgb_folders,
+)
 
 
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
@@ -38,6 +42,30 @@ def _select_cache_folder(dataset_folder: Path | str = "dataset") -> str | None:
         print(f"{index}. {folder.name}")
 
     raw_choice = input(f"\nChoose cache folder (1-{len(folders)}): ").strip()
+    try:
+        selected_index = int(raw_choice)
+    except ValueError:
+        print("Invalid selection.")
+        return None
+
+    if selected_index < 1 or selected_index > len(folders):
+        print("Invalid selection.")
+        return None
+
+    return folders[selected_index - 1].name
+
+
+def _select_ir_night_cache_folder(dataset_folder: Path | str = "dataset") -> str | None:
+    folders = list_cached_ir_night_folders(Path(dataset_folder))
+    if not folders:
+        print("No night IR cache folders found in dataset/.frames_cache_ir")
+        return None
+
+    print("\nAvailable night IR cache folders:\n")
+    for index, folder in enumerate(folders, start=1):
+        print(f"{index}. {folder.name}")
+
+    raw_choice = input(f"\nChoose night IR cache folder (1-{len(folders)}): ").strip()
     try:
         selected_index = int(raw_choice)
     except ValueError:
@@ -155,16 +183,17 @@ def main():
         print("18. Run AUDIO pipeline on all files (production)")
         print("\n--- MARIGOLD DEPTH ---")
         print("19. Estimate Marigold depth maps from cached RGB frames")
-        print("20. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
-        print("21. Test Marigold depth estimation on one .frames_cache folder")
-        print("22. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
-        print("23. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
-        print("24. Run Marigold depth QA on all cached pairs (production)")
+        print("20. Estimate Marigold depth maps from one selected night IR frame folder")
+        print("21. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
+        print("22. Test Marigold depth estimation on one .frames_cache folder")
+        print("23. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
+        print("24. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
+        print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
-        print("25. Run late fusion on existing modality JSON results")
-        print("\n26. Exit")
+        print("26. Run late fusion on existing modality JSON results")
+        print("\n27. Exit")
 
-        choice = input("\nEnter choice (1-26): ").strip()
+        choice = input("\nEnter choice (1-27): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -354,6 +383,20 @@ def main():
 
         elif choice == "20":
             print("\n" + "-" * 60)
+            print("Running: Marigold depth estimation on one selected night IR frame folder")
+            print("Uses cached IR frames from dataset/.frames_cache_ir")
+            print("Writes depth maps to dataset/.frames_cache_marigold_ir")
+            print("-" * 60)
+            selected_folder = _select_ir_night_cache_folder()
+            if selected_folder:
+                run_marigold_ir_depth_estimation(
+                    selected_cache_folder=selected_folder,
+                )
+            else:
+                print("Cancelled.")
+
+        elif choice == "21":
+            print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected frame from one .frames_cache folder")
             print("The selected frame will be processed on its inferred day/night side only")
             print("-" * 60)
@@ -371,7 +414,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "21":
+        elif choice == "22":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected .frames_cache folder")
             print("The selected folder will be resolved to its full day/night pair when possible")
@@ -385,7 +428,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "22":
+        elif choice == "23":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA test on 1 cached pair (demo Q&A)")
             print("Requires existing Marigold depth maps in dataset/.frames_cache_marigold")
@@ -393,7 +436,7 @@ def main():
             print("skip_api=True -> demo Q&A\n")
             run_marigold_depth_qa(test_mode=True, skip_api=True)
 
-        elif choice == "23":
+        elif choice == "24":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on 1 cached pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -404,7 +447,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "24":
+        elif choice == "25":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on all cached pairs (production)")
             print("WARNING: This will use Gemini API quota for each cached Marigold pair!")
@@ -415,7 +458,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "25":
+        elif choice == "26":
             print("\n" + "-" * 60)
             print("Running: late fusion on existing modality JSON results")
             print("-" * 60)
@@ -424,7 +467,7 @@ def main():
             fused_results = run_late_fusion()
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
 
-        elif choice == "26":
+        elif choice == "27":
             print("\nExiting.")
             break
 

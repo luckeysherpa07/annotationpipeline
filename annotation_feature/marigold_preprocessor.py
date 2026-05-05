@@ -1,4 +1,4 @@
-"""Preprocessor for reusing cached RGB frames and estimating Marigold depth."""
+"""Preprocessor for reusing cached RGB/IR frames and estimating Marigold depth."""
 
 import re
 import sys
@@ -9,28 +9,53 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 def _build_flat_cache_pair_key(folder_name: str) -> str:
-    """Build a logical pair key from a flat RGB cache folder name."""
+    """Build a logical pair key from a flat RGB/IR cache folder name."""
     stem = folder_name.lower()
-    stem = re.sub(r"_rgb$", "", stem)
+    stem = re.sub(r"_(rgb|ir)$", "", stem)
     stem = stem.replace("_day", "")
     stem = stem.replace("_night", "")
     stem = re.sub(r"__+", "_", stem).strip("_")
     return stem
 
 
-def _get_flat_cache_side(folder_name: str) -> str | None:
-    """Infer whether a flat RGB cache folder contains day or night frames."""
+def _get_flat_cache_side(folder_name: str, cache_modality: str = "rgb") -> str | None:
+    """Infer whether a flat RGB/IR cache folder contains day or night frames."""
     stem = folder_name.lower()
-    if re.search(r"_day_rgb$", stem):
+    modality_suffix = re.escape(cache_modality.lower())
+    if re.search(rf"_day_{modality_suffix}$", stem):
         return "day"
-    if re.search(r"_night\d*_rgb$", stem):
+    if re.search(rf"_night\d*_{modality_suffix}$", stem):
         return "night"
     return None
 
 
+def _is_night_ir_cache_folder(folder: Path) -> bool:
+    """Return whether a folder is a flat night IR frame cache with frame PNGs."""
+    return (
+        folder.is_dir()
+        and _get_flat_cache_side(folder.name, cache_modality="ir") == "night"
+        and any(folder.glob("frame_*.png"))
+    )
+
+
 def _expected_depth_outputs(frames: List[Path], output_dir: Path) -> List[Path]:
-    """Build the expected Marigold output path for each RGB frame."""
+    """Build the expected Marigold output path for each cached frame."""
     return [output_dir / f"{frame.stem}_depth.png" for frame in frames]
+
+
+def list_cached_frame_folders(
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache",
+    night_ir_only: bool = False,
+) -> List[Path]:
+    """List direct frame cache folders under the cache root."""
+    cache_dir = dataset_folder / cache_subdir
+    if not cache_dir.exists():
+        return []
+    folders = [item for item in cache_dir.iterdir() if item.is_dir()]
+    if night_ir_only:
+        folders = [item for item in folders if _is_night_ir_cache_folder(item)]
+    return sorted(folders, key=lambda item: item.name.lower())
 
 
 def list_cached_rgb_folders(
@@ -38,22 +63,32 @@ def list_cached_rgb_folders(
     cache_subdir: str = ".frames_cache",
 ) -> List[Path]:
     """List direct RGB cache folders under the cache root."""
-    cache_dir = dataset_folder / cache_subdir
-    if not cache_dir.exists():
-        return []
-    return sorted([item for item in cache_dir.iterdir() if item.is_dir()], key=lambda item: item.name.lower())
+    return list_cached_frame_folders(dataset_folder, cache_subdir=cache_subdir)
 
 
-def get_cached_rgb_frames(
+def list_cached_ir_night_folders(
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache_ir",
+) -> List[Path]:
+    """List direct night IR cache folders under the cache root."""
+    return list_cached_frame_folders(
+        dataset_folder,
+        cache_subdir=cache_subdir,
+        night_ir_only=True,
+    )
+
+
+def get_cached_frames(
     dataset_folder: Path,
     cache_subdir: str = ".frames_cache",
+    cache_modality: str = "rgb",
 ) -> Dict[str, Dict[str, List[Path]]]:
-    """Retrieve already-extracted RGB frames from flat or nested cache layouts."""
+    """Retrieve already-extracted frames from flat or nested cache layouts."""
     cache_dir = dataset_folder / cache_subdir
 
     if not cache_dir.exists():
         print(f"ERROR: Cache directory not found: {cache_dir}")
-        print("Please run RGB pipeline first to extract frames.")
+        print(f"Please run {cache_modality.upper()} pipeline first to extract frames.")
         return {}
 
     paired_frames: Dict[str, Dict[str, List[Path]]] = {}
@@ -75,9 +110,12 @@ def get_cached_rgb_frames(
         if not flat_frames:
             continue
 
-        side = _get_flat_cache_side(frame_dir.name)
+        side = _get_flat_cache_side(frame_dir.name, cache_modality=cache_modality)
         if side is None:
-            print(f"WARNING: Skipping unrecognized RGB cache folder: {frame_dir.name}")
+            print(
+                f"WARNING: Skipping unrecognized {cache_modality.upper()} "
+                f"cache folder: {frame_dir.name}"
+            )
             continue
 
         pair_key = _build_flat_cache_pair_key(frame_dir.name)
@@ -87,21 +125,50 @@ def get_cached_rgb_frames(
     return paired_frames
 
 
-def resolve_cached_rgb_pair_from_folder(
-    selected_folder: str | Path,
+def get_cached_rgb_frames(
     dataset_folder: Path,
     cache_subdir: str = ".frames_cache",
 ) -> Dict[str, Dict[str, List[Path]]]:
-    """Resolve one selected flat RGB cache folder into its logical day/night pair."""
+    """Retrieve already-extracted RGB frames from flat or nested cache layouts."""
+    return get_cached_frames(
+        dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality="rgb",
+    )
+
+
+def get_cached_ir_frames(
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache_ir",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Retrieve already-extracted IR frames from flat or nested cache layouts."""
+    return get_cached_frames(
+        dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality="ir",
+    )
+
+
+def resolve_cached_pair_from_folder(
+    selected_folder: str | Path,
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache",
+    cache_modality: str = "rgb",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Resolve one selected flat cache folder into its logical day/night pair."""
     cache_dir = dataset_folder / cache_subdir
     folder_name = Path(selected_folder).name
     folder_path = cache_dir / folder_name
 
     if not folder_path.exists() or not folder_path.is_dir():
-        print(f"ERROR: RGB cache folder not found: {folder_path}")
+        print(f"ERROR: {cache_modality.upper()} cache folder not found: {folder_path}")
         return {}
 
-    all_pairs = get_cached_rgb_frames(dataset_folder, cache_subdir=cache_subdir)
+    all_pairs = get_cached_frames(
+        dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality=cache_modality,
+    )
 
     nested_day_frames = sorted(folder_path.glob("day/frame_*.png"))
     nested_night_frames = sorted(folder_path.glob("night/frame_*.png"))
@@ -129,6 +196,66 @@ def resolve_cached_rgb_pair_from_folder(
         pair_key: {
             "day": selected_pair.get("day", []),
             "night": selected_pair.get("night", []),
+        }
+    }
+
+
+def resolve_cached_rgb_pair_from_folder(
+    selected_folder: str | Path,
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Resolve one selected flat RGB cache folder into its logical day/night pair."""
+    return resolve_cached_pair_from_folder(
+        selected_folder,
+        dataset_folder=dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality="rgb",
+    )
+
+
+def resolve_cached_ir_pair_from_folder(
+    selected_folder: str | Path,
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache_ir",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Resolve one selected flat IR cache folder into its logical day/night pair."""
+    return resolve_cached_pair_from_folder(
+        selected_folder,
+        dataset_folder=dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality="ir",
+    )
+
+
+def resolve_cached_ir_night_pair_from_folder(
+    selected_folder: str | Path,
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache_ir",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Resolve one selected flat night IR cache folder into a night-only pair."""
+    cache_dir = dataset_folder / cache_subdir
+    folder_name = Path(selected_folder).name
+    folder_path = cache_dir / folder_name
+
+    if not folder_path.exists() or not folder_path.is_dir():
+        print(f"ERROR: IR cache folder not found: {folder_path}")
+        return {}
+
+    if _get_flat_cache_side(folder_name, cache_modality="ir") != "night":
+        print(f"ERROR: Selected cache folder is not a night IR cache: {folder_name}")
+        return {}
+
+    night_frames = sorted(folder_path.glob("frame_*.png"))
+    if not night_frames:
+        print(f"ERROR: No frame_*.png files found in IR cache folder: {folder_path}")
+        return {}
+
+    pair_key = _build_flat_cache_pair_key(folder_name)
+    return {
+        pair_key: {
+            "day": [],
+            "night": night_frames,
         }
     }
 
@@ -204,18 +331,29 @@ def preprocess_marigold_depth(
     model_name: str = "prs-eth/marigold-depth-v1-1",
     device: str = "auto",
     rgb_frames: Dict[str, Dict[str, List[Path]]] | None = None,
+    cache_frames: Dict[str, Dict[str, List[Path]]] | None = None,
+    cache_subdir: str = ".frames_cache",
+    cache_modality: str = "rgb",
 ) -> Dict[str, Dict[str, List[Path]]]:
-    """Estimate Marigold depth maps from cached RGB frames."""
+    """Estimate Marigold depth maps from cached RGB/IR frames."""
     from annotation_feature.pipeline.modalities.marigold.marigold_depth_estimator import (
         get_depth_estimator,
     )
 
-    rgb_frames = rgb_frames or get_cached_rgb_frames(dataset_folder)
-    if not rgb_frames:
-        print("No cached RGB frames found. Exiting Marigold depth estimation.")
+    cache_frames = cache_frames if cache_frames is not None else rgb_frames
+    cache_frames = cache_frames or get_cached_frames(
+        dataset_folder,
+        cache_subdir=cache_subdir,
+        cache_modality=cache_modality,
+    )
+    if not cache_frames:
+        print(
+            f"No cached {cache_modality.upper()} frames found. "
+            "Exiting Marigold depth estimation."
+        )
         return {}
 
-    print(f"\nFound {len(rgb_frames)} video pairs with cached RGB frames")
+    print(f"\nFound {len(cache_frames)} video pairs with cached {cache_modality.upper()} frames")
     estimator = get_depth_estimator(model_name=model_name, device=device)
 
     output_dir = dataset_folder / output_subdir
@@ -223,7 +361,7 @@ def preprocess_marigold_depth(
 
     marigold_frames: Dict[str, Dict[str, List[Path]]] = {}
 
-    for pair_key, frames in rgb_frames.items():
+    for pair_key, frames in cache_frames.items():
         print(f"\n{'=' * 60}")
         print(f"Processing pair: {pair_key}")
         print(f"{'=' * 60}")

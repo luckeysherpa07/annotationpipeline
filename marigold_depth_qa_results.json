@@ -1,0 +1,257 @@
+{
+  "pour_water": {
+    "day_depth_count": 81,
+    "night_depth_count": 68,
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The video displays a 3D scene consisting of a rectangular shelf holding five identifiable cylindrical or curved containers. Among these, there are three small mugs with distinct handles, one larger pitcher-like container with a handle in the center-right, and a small handle-less tin or cup in the center-left. Two hands enter the frame to interact with the 3D geometry of the objects.",
+        "question": "What is the shape of the largest container that I lift from the shelf?",
+        "answer": "A large cylindrical pitcher."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Initially, the containers are arranged in a row on the shelf, with the pitcher positioned behind its future path. When my right hand enters, it is closer to the camera than any container. As I lift the pitcher, it moves into a closer depth layer, hovering above the mug to its right. The mugs remain stationary on the shelf, which is located below the objects and in front of the wall.",
+        "question": "Relative to the mugs, where do I position the pitcher while tilted?",
+        "answer": "Above the mug."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence starts with a steady view of a shelf at medium distance. It transitions into a dynamic interaction phase as the camera moves slightly closer and hands lift the pitcher to pour into a mug. The interaction concludes by replacing the pitcher, followed by the camera panning downwards to show the floor area and the edge of the shelf before transitioning to a total loss of depth data in the night sequence.",
+        "question": "In what order do I view the scene parts from start to finish?",
+        "answer": "Shelf objects, interaction, floor."
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "The 3D layout presents a clear workspace on a shelf. The path is forward-facing towards the countertop, which acts as a landmark. There are no navigable passages shown, but the depth indicates a clear floor area below the shelf, suggesting a standing position in a room.",
+        "question": "Based on the 3D layout, is the area past the shelf navigable?",
+        "answer": "No, it is blocked."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "While the daytime frames represent a realistic domestic interaction, the NIGHT frames show a total and abrupt loss of depth information, appearing as a uniform, featureless black or gray gradient. This is an unrealistic sensor-based anomaly where no geometry is captured.",
+        "question": "What physically implausible situation occurs in the latter half of the video?",
+        "answer": "Total loss of depth data."
+      }
+    }
+  },
+  "wash_hands2": {
+    "day_depth_count": 0,
+    "night_depth_count": 139,
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_spatial_reasoning": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_scene_sequence": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      }
+    }
+  },
+  "make_coffee": {
+    "day_depth_count": 190,
+    "night_depth_count": 183,
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In the initial depth frames, a large rectangular table occupies the mid-foreground with several chairs positioned at a greater distance behind it. To the right, a vertical shelving unit contains various cylindrical containers and tall bottles distributed across three distinct depth layers. As the camera pans and moves, my hands enter the near-field foreground, interacting with a cylindrical mug and a flexible desk lamp. Later, a coffee machine is revealed in the mid-range depth, featuring a prominent horizontal handle and a rectangular water tank.",
+        "question": "What is the shape of the object I am interacting with in the immediate foreground during the middle of the video?",
+        "answer": "Cylindrical mug"
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The table is the closest non-human object to me at the start, occluding the lower halves of the chairs behind it. The shelving unit is positioned against the back wall, making its objects the farthest in the initial scene layout. My hands appear in the very near-field, closer than any furniture. The coffee machine is placed on a counter that is further away than the dining table but closer than the wall shelves. During interaction, the desk lamp moves from the table surface toward my face, reducing its relative distance.",
+        "question": "Which is closer to me: the dining table or the shelving unit with bottles?",
+        "answer": "The dining table"
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence begins in a dining or common area with a table and chairs, then pans right to a storage shelf. The camera holder then navigates toward a kitchen or service counter area containing a coffee machine. Throughout the movement, the 3D layout transitions from a wide-room view to a constrained, close-up workspace where manual tasks are performed on objects like a lamp and espresso equipment.",
+        "question": "What is the sequence of areas visited by the camera from start to finish?",
+        "answer": "Dining area, shelf, kitchen counter"
+      },
+      "depth_counting": {
+        "caption": "Based on depth boundaries and 3D separation, I can identify one main dining table in the foreground. There are three chairs visible behind the table. The shelving unit has three distinct horizontal layers. I count four cylindrical mugs on the middle shelf and two tall bottles on the top shelf. There is one coffee machine on the counter and one desk lamp being manipulated.",
+        "question": "How many chairs are located behind the foreground table?",
+        "answer": "Three"
+      },
+      "depth_dynamic_counting": {
+        "caption": "Besides the movement of the camera holder, no other moving humans enter the scene. Dynamic objects include the desk lamp, which moves through different depth planes once as it is adjusted. My hands are visible as two moving entities in the near-range. Two mugs are lifted and moved closer to the camera during the sequence. No external moving entities like pets or other people are counted.",
+        "question": "How many other people are seen moving in the background?",
+        "answer": "Zero"
+      },
+      "depth_navigation": {
+        "caption": "The navigable path starts at the dining table, with clear floor space extending toward the shelves. To move forward, I navigate around the right side of the table toward the kitchen counter. The 3D layout shows the counter is a connected workspace reachable by panned movement. The area between the table and the counter is free of large obstacles, providing a safe walking path.",
+        "question": "In which direction must I move to reach the coffee machine from the starting position?",
+        "answer": "Forward and to the right"
+      },
+      "depth_dynamic_recognition": {
+        "caption": "My hands are the first dynamic entities detected, appearing at close range around frame 000600. The desk lamp is recognized as a dynamic object starting near frame 003600 as it changes its depth position relative to the table. Mugs are identified as moving objects when they are lifted from the table surface and approach the camera in the mid-to-late frames.",
+        "question": "Is the desk lamp moving away from me or being brought closer?",
+        "answer": "Brought closer"
+      },
+      "depth_action": {
+        "caption": "I start by surveying the room, then reach out into the near-field to pick up a mug from the table. Following this, I navigate closer to the counter and reach for the desk lamp, pulling it toward the camera to adjust its position. Finally, I interact with the coffee machine, moving my hand to grasp the portafilter handle and locking it into place, which involves a rotational motion at mid-range depth.",
+        "question": "What action am I performing with the coffee machine handle?",
+        "answer": "Grasping and locking it"
+      },
+      "depth_non_common": {
+        "caption": "The depth stream accurately reflects standard 3D geometry; objects are correctly layered and resting on surfaces. There are no floating artifacts, intersecting meshes, or physically impossible depth orderings. The relative sizes of the mug, table, and coffee machine are consistent with real-world expectations.",
+        "question": "Do any objects appear to be floating without support in the depth view?",
+        "answer": "No"
+      }
+    }
+  },
+  "wash_hands": {
+    "day_depth_count": 125,
+    "night_depth_count": 139,
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The video presents an indoor environment beginning with an office space containing rectangular monitor screens and boxy computer towers situated on desks. As the sequence progresses, the perspective shifts toward a plumbing area where a vertical cylindrical faucet and an indented sink basin are visible. Finally, a human silhouette is recognized standing within the rectangular frame of a doorway at a mid-range distance.",
+        "question": "I am looking at a desk; which object is positioned further away from me, the rectangular monitor or the computer tower?",
+        "answer": "The computer tower."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "In the initial office scene, the monitors are closer to me than the computer towers they are paired with. The chairs are positioned beside the desks, primarily in the lower depth foreground. When the sink area appears, the faucet is located above the basin and closer to my perspective. Later, when a person is visible, they stand within a door frame that is farther away than the objects in the immediate foreground.",
+        "question": "Is the faucet positioned above or below the sink basin in the 3D layout?",
+        "answer": "Above."
+      },
+      "depth_scene_sequence": {
+        "caption": "The depth stream transitions from an office layout with multiple workstations to a corridor area where a sink and faucet are prominent. The camera then moves toward a doorway, revealing a person standing in the adjacent space beyond the threshold. This sequence moves from a cluttered work environment to a transition area and finally a controlled social interaction space.",
+        "question": "What is the sequence of primary functional areas I move through based on the 3D layout?",
+        "answer": "Office, sink area, doorway."
+      },
+      "depth_counting": {
+        "caption": "Across the full sequence, I can identify at least two computer monitors and two computer towers on the desks. There are approximately three office chairs visible at various points. In the latter half, one faucet, one sink basin, and one toilet are distinguishable by their unique depth contours. Finally, one person appears at the end.",
+        "question": "How many computer monitors can I count in the office area?",
+        "answer": "2"
+      },
+      "depth_dynamic_counting": {
+        "caption": "One dynamic human figure is observed at a mid-depth range standing in a doorway toward the end of the video. Additionally, the camera holder's hands appear at a very close depth range during the interaction with the faucet. No other moving objects are detected in the depth stream.",
+        "question": "How many people do I see moving in or near the doorway?",
+        "answer": "1"
+      },
+      "depth_navigation": {
+        "caption": "The 3D layout suggests a navigable path starting between the office desks, leading toward a wall-mounted sink area. From the sink, the path turns toward an open doorway which represents a clear exit or transition point into another room. The floor remains a flat, low-depth surface throughout, facilitating movement.",
+        "question": "After passing the office desks, in which direction does the navigable path turn to reach the doorway?",
+        "answer": "Slightly right."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "A person appears in the doorway at a mid-depth range and remains stationary relative to the floor. My hands appear in the very near foreground (less than 0.5 meters) as I reach for the sink faucet and again when I reach for the door handle. The movement of these limbs is clearly separated from the static background geometry.",
+        "question": "Is the person in the doorway moving toward me or staying at a constant depth?",
+        "answer": "Staying at constant depth."
+      },
+      "depth_action": {
+        "caption": "I move through the office and approach a sink, where my hands reach forward to interact with the faucet, a clear action at close depth. Subsequently, I move toward a door and extend my hand to manipulate the handle, causing a change in the door's 3D orientation. Throughout, the changes in foreground depth reflect my intentional interactions with the environment.",
+        "question": "What am I doing with my hands near the sink basin?",
+        "answer": "Interacting with the faucet."
+      },
+      "depth_non_common": {
+        "caption": "The 3D structure and depth ordering throughout the video appear consistent with a standard indoor environment. Objects maintain logical contact with the floor or desk surfaces, and there are no signs of floating geometry, intersecting planes, or unrealistic depth layering.",
+        "question": "Are there any floating objects or physically implausible depth relations visible in the office or bathroom?",
+        "answer": "No."
+      }
+    }
+  },
+  "cut_carrot": {
+    "day_depth_count": 185,
+    "night_depth_count": 162,
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_spatial_reasoning": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_scene_sequence": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      }
+    }
+  }
+}

@@ -15,6 +15,12 @@ def run_marigold_depth_estimation(*args, **kwargs):
     return _run(*args, **kwargs)
 
 
+def run_marigold_ir_depth_estimation(*args, **kwargs):
+    from .pipeline.modalities.marigold import run_marigold_ir_depth_estimation as _run
+
+    return _run(*args, **kwargs)
+
+
 __all__ = [
     "run",
     "run_audio",
@@ -22,6 +28,7 @@ __all__ = [
     "run_depth",
     "run_ir",
     "run_marigold_depth_estimation",
+    "run_marigold_ir_depth_estimation",
     "run_marigold_depth_qa",
     "run_late_fusion",
 ]

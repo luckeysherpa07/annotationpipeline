@@ -9,8 +9,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from annotation_feature.marigold_preprocessor import (
     get_cached_rgb_frames,
+    list_cached_ir_night_folders,
     list_cached_rgb_folders,
     preprocess_marigold_depth,
+    resolve_cached_ir_night_pair_from_folder,
     resolve_cached_rgb_frame_from_folder,
     resolve_cached_rgb_pair_from_folder,
 )
@@ -117,7 +119,66 @@ def run_marigold_depth_estimation(
     return marigold_frames
 
 
+def run_marigold_ir_depth_estimation(
+    dataset_folder: Path | str = "dataset",
+    model_name: str = "prs-eth/marigold-depth-v1-1",
+    device: str = "auto",
+    selected_cache_folder: str | None = None,
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Estimate Marigold depth maps from one selected night IR frame cache folder."""
+    print("=" * 60)
+    print("Marigold depth estimation on one selected night IR frame folder")
+    print("=" * 60)
+
+    dataset_folder = Path(dataset_folder)
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find IR frames cache in: {dataset_folder}")
+        return {}
+
+    print(f"Dataset directory: {dataset_folder}")
+
+    if not selected_cache_folder:
+        print("ERROR: No night IR cache folder selected.")
+        return {}
+
+    ir_frames = resolve_cached_ir_night_pair_from_folder(
+        selected_cache_folder,
+        dataset_folder=dataset_folder,
+    )
+    if not ir_frames:
+        print("No depth maps were generated.")
+        return {}
+
+    print(f"Resolved night IR cache folder '{selected_cache_folder}' to {len(ir_frames)} logical pair")
+
+    marigold_frames = preprocess_marigold_depth(
+        dataset_folder=dataset_folder,
+        output_subdir=".frames_cache_marigold_ir",
+        model_name=model_name,
+        device=device,
+        cache_frames=ir_frames,
+        cache_subdir=".frames_cache_ir",
+        cache_modality="ir",
+    )
+    if not marigold_frames:
+        print("No depth maps were generated.")
+        return {}
+
+    total_night = sum(len(frames.get("night", [])) for frames in marigold_frames.values())
+
+    print("\nSummary:")
+    print(f"  Video pairs processed: {len(marigold_frames)}")
+    print("  Total day depth maps: 0")
+    print(f"  Total night depth maps: {total_night}")
+    print(f"  Total depth maps: {total_night}")
+
+    return marigold_frames
+
+
 __all__ = [
+    "list_cached_ir_night_folders",
     "list_cached_rgb_folders",
     "run_marigold_depth_estimation",
+    "run_marigold_ir_depth_estimation",
 ]
