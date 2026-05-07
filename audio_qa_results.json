@@ -4,59 +4,68 @@
     "day_rgb_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
     "night_rgb_file": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
     "annotations": {
-      "hia": "00:04 - 00:38: peel the carrot.\n00:39 - 01:03: cut the carrot.",
-      "caption": "[00:04 – 00:23] Rhythmic, raspy scraping sounds with a dry texture as the user peels the carrot over a bowl; each stroke produces a short, sharp rasp as the blade shaves the skin.\n\n[00:24 – 00:38] The scraping sounds become faster and more continuous as the user finishes peeling the carrot, creating a flurry of textured shavings falling into the bowl.\n\n[00:39 – 00:41] A sharp metallic clink occurs as the user places the peeler onto the stainless steel countertop to the right of the cutting board.\n\n[00:42 – 00:46] Soft rustling and plastic-on-metal sliding sounds are heard as the user repositions the bowl of carrot peels and prepares the workspace for cutting.\n\n[00:47 – 01:08] Blunt, rhythmic thuds of a chef's knife striking the plastic cutting board through the carrot; these firm sounds reflect the carrot's hardness as it is sliced into planks.\n\n[01:09 – 01:14] Dull sliding and rustling sounds as the user manually rearranges the carrot planks on the cutting board to prepare for julienning.\n\n[01:15 – 01:43] Rapid, percussive taps with a higher frequency as the knife juliennes the carrot planks into thin strips; the sound is consistent and sharp against the board.\n\n[01:44 – 01:49] A distinct, high-pitched metallic scraping sound as the side of the knife blade is used to gather the julienned carrot strips across the plastic board.\n\n[01:50 – 02:12] Continuous, fast-paced chopping thuds as the julienning process resumes on the next segment of the carrot, creating a steady percussive rhythm.\n\n[02:13 – 02:27] A combination of dragging and slower, deliberate tapping sounds as the knife is used to adjust and slice the final pieces of the carrot segment.\n\n[02:28 – 03:04] A final sequence of rapid, rhythmic chopping thuds as the remaining carrot pieces are julienned, concluding with a final sharp tap as the knife rests on the board.",
-      "qa_pairs": [
-        {
-          "timestamp": "00:04 - 00:23",
-          "context": "[00:04] Rhythmic, raspy scraping sounds with a dry texture as the user peels the carrot.",
-          "question_type": "SOUND CHARACTERISTICS",
-          "question": "What are the acoustic qualities and texture of the sounds produced while the user is peeling the carrot between 00:04 and 00:23?",
-          "answer": "The sounds are described as rhythmic and raspy with a dry texture. Each stroke of the blade produces a short, sharp rasp as it shaves the skin."
+      "audio_hia": {
+        "caption": "00:04 - 00:26: Peel carrot.\n00:26 - 00:28: Put down peeler.\n00:28 - 00:30: Put down bowl.\n00:30 - 00:31: Take knife.\n00:31 - 01:14: Slice carrot.\n01:14 - 01:15: Put down knife."
+      },
+      "audio_chronological_caption": {
+        "caption": "[00:04 - 00:41] The user begins peeling a carrot over a small white bowl, producing a series of sharp, rhythmic scraping sounds. Each downward stroke of the peeler against the carrot's skin creates a distinct rasping noise that lasts about a second, confirming the physical removal of the peel.\n\n[00:41 - 00:46] As the peeling concludes, a light metallic click is heard when the user places the peeler on the counter, followed by a soft sliding sound and a muffled thud as the bowl containing the peels is moved to the side.\n\n[00:47 - 01:13] The user picks up a large chef's knife and starts slicing the carrot on a white cutting board. The audio consists of repetitive, percussive \"thwack\" sounds as the blade cuts through the vegetable and strikes the board, indicating a forceful and steady slicing motion.\n\n[01:13 - 01:18] A short break in the chopping is filled with a soft scraping sound as the user uses the knife blade to gather the sliced carrot pieces together on the plastic surface.\n\n[01:18 - 01:43] Rapid, rhythmic chopping sounds resume as the user continues to slice the carrot into thinner strips. The sharp, nearby impacts of the knife against the board are consistent in volume and tempo, visually guided by the user's controlled hand movements.\n\n[01:43 - 01:49] The chopping stops temporarily, replaced by the faint rustling and sliding sounds of carrot strips being rearranged and aligned on the cutting board by the user's hand.\n\n[01:49 - 02:12] Another sequence of steady, rhythmic chopping begins, targeting the remaining sections of the carrot. The volume of the knife strikes remains consistent, reflecting the uniform force applied to the cutting board.\n\n[02:12 - 02:30] The sound of the knife blade scraping across the board is heard as the user gathers the strips into a pile, followed by a few isolated, heavier \"thuds\" as the last few large chunks are halved.\n\n[02:30 - 03:04] A final, sustained sequence of fast-paced chopping occurs as the user finely juliennes the carrot strips. The tempo of the \"thwack-thwack-thwack\" sounds increases, ending with a final metallic clatter as the user sets the knife down on the countertop."
+      },
+      "categories": {
+        "audio_sound_characteristics": {
+          "timestamp": "00:04 - 00:41",
+          "caption": "[00:04 - 00:41] The user begins peeling a carrot over a small white bowl, producing a series of sharp, rhythmic scraping sounds.",
+          "question": "What are the specific acoustic qualities and texture of the sounds heard while the carrot is being peeled between 00:04 and 00:41?",
+          "answer": "The sounds are described as a series of sharp, rhythmic scraping noises with a distinct rasping texture."
         },
-        {
-          "timestamp": "00:39 - 00:41",
-          "context": "[00:39] A sharp metallic clink occurs as the user places the peeler onto the stainless steel countertop.",
-          "question_type": "COUNTING",
-          "question": "How many distinct metallic 'clink' sounds occur between 00:39 and 00:41 as the user finishes peeling?",
-          "answer": "There is one single sharp metallic clink heard during this interval."
+        "audio_temporal_attribute": {
+          "timestamp": "00:04 - 00:41",
+          "caption": "[00:04 - 00:41] Each downward stroke of the peeler against the carrot's skin creates a distinct rasping noise that lasts about a second.",
+          "question": "What is the typical duration of each individual rasping sound produced during the carrot peeling process?",
+          "answer": "Each rasping noise lasts about one second."
         },
-        {
-          "timestamp": "01:15 - 01:43",
-          "context": "[01:15] Rapid, percussive taps with a higher frequency as the knife juliennes the carrot planks.",
-          "question_type": "TEMPORAL ATTRIBUTE",
-          "question": "What is the duration and tempo of the percussive knife sounds heard during the julienning process starting at 01:15?",
-          "answer": "The sound lasts for 28 seconds (from 01:15 to 01:43) and is characterized by rapid, high-frequency taps."
+        "audio_sound_source_identification": {
+          "timestamp": "00:41 - 00:46",
+          "caption": "[00:41 - 00:46] A light metallic click is heard when the user places the peeler on the counter, followed by a soft sliding sound and a muffled thud as the bowl containing the peels is moved to the side.",
+          "question": "What objects and actions are responsible for the light metallic click and the muffled thud heard between 00:41 and 00:46?",
+          "answer": "The light metallic click is caused by the user placing the peeler on the counter, and the muffled thud is caused by moving the bowl of peels to the side."
         },
-        {
-          "timestamp": "00:39 - 00:41",
-          "context": "[00:39] A sharp metallic clink occurs as the user places the peeler onto the stainless steel countertop to the right of the cutting board.",
-          "question_type": "SPATIAL LOCATION",
-          "question": "Where is the source of the sharp metallic clink located relative to the cutting board at 00:39?",
-          "answer": "The sound originates from the stainless steel countertop to the right of the cutting board."
+        "audio_cross_modal_reasoning": {
+          "timestamp": "00:47 - 01:13",
+          "caption": "[00:47 - 01:13] The user picks up a large chef's knife and starts slicing the carrot on a white cutting board. The audio consists of repetitive, percussive 'thwack' sounds.",
+          "question": "When the user begins slicing the carrot with the chef's knife at 00:47, what auditory cue confirms the knife is hitting the cutting board, and what does it suggest about the movement?",
+          "answer": "The auditory cue is a repetitive, percussive 'thwack' sound, which indicates a forceful and steady slicing motion."
         },
-        {
-          "timestamp": "01:44 - 01:49",
-          "context": "[01:44] A distinct, high-pitched metallic scraping sound as the side of the knife blade is used to gather the julienned carrot strips.",
-          "question_type": "SOUND SOURCE IDENTIFICATION",
-          "question": "What specific object and action generated the high-pitched metallic scraping sound at 01:44?",
-          "answer": "The sound was generated by the side of the chef's knife blade being used to gather julienned carrot strips across the plastic cutting board."
+        "audio_inferential_causality": {
+          "timestamp": "01:13 - 01:18",
+          "caption": "[01:13 - 01:18] A short break in the chopping is filled with a soft scraping sound as the user uses the knife blade to gather the sliced carrot pieces together.",
+          "question": "What is the reason for the soft scraping sound heard between 01:13 and 01:18 during the break in chopping?",
+          "answer": "The sound occurs because the user is using the blade of the knife to gather the sliced carrot pieces together on the surface of the cutting board."
         },
-        {
-          "timestamp": "00:47 - 01:08",
-          "context": "[00:47] Blunt, rhythmic thuds of a chef's knife striking the plastic cutting board through the carrot; these firm sounds reflect the carrot's hardness.",
-          "question_type": "INFERENTIAL CAUSALITY",
-          "question": "Based on the sound description between 00:47 and 01:08, why are the knife strikes characterized as 'blunt' and 'firm'?",
-          "answer": "The sounds are blunt and firm because the knife is striking a plastic cutting board while cutting through a hard carrot to slice it into planks."
+        "audio_sound_characteristics_2": {
+          "timestamp": "01:18 - 01:43",
+          "caption": "[01:18 - 01:43] Rapid, rhythmic chopping sounds resume... The sharp, nearby impacts of the knife against the board are consistent in volume and tempo.",
+          "question": "How would you describe the volume and tempo of the knife impacts during the rapid chopping sequence from 01:18 to 01:43?",
+          "answer": "The volume and tempo of the sharp, nearby impacts are consistent, reflecting controlled hand movements."
         },
-        {
-          "timestamp": "01:09 - 01:14",
-          "context": "[01:09] Dull sliding and rustling sounds as the user manually rearranges the carrot planks on the cutting board.",
-          "question_type": "CROSS-MODAL REASONING",
-          "question": "When the user is seen manually rearranging the carrot planks on the board at 01:09, what corresponding audio is heard?",
-          "answer": "The visual action of rearranging the planks corresponds to dull sliding and rustling sounds."
+        "audio_sound_source_identification_2": {
+          "timestamp": "01:43 - 01:49",
+          "caption": "[01:43 - 01:49] The chopping stops temporarily, replaced by the faint rustling and sliding sounds of carrot strips being rearranged and aligned on the cutting board by the user's hand.",
+          "question": "What is the source of the faint rustling and sliding sounds heard at 01:43?",
+          "answer": "The sounds are produced by the user's hand rearranging and aligning carrot strips on the cutting board."
+        },
+        "audio_inferential_causality_2": {
+          "timestamp": "02:12 - 02:30",
+          "caption": "[02:12 - 02:30] ...followed by a few isolated, heavier 'thuds' as the last few large chunks are halved.",
+          "question": "Why do the chopping sounds change to isolated, heavier 'thuds' toward the end of the segment at 02:12 - 02:30?",
+          "answer": "The sounds become heavier thuds because the user is halving the last few remaining large chunks of the carrot."
+        },
+        "audio_sound_characteristics_3": {
+          "timestamp": "02:30 - 03:04",
+          "caption": "[02:30 - 03:04] A final, sustained sequence of fast-paced chopping occurs... The tempo of the 'thwack-thwack-thwack' sounds increases, ending with a final metallic clatter.",
+          "question": "What happens to the tempo of the chopping sounds during the final julienne stage, and what sound marks the end of the activity?",
+          "answer": "The tempo of the 'thwack-thwack-thwack' sounds increases, and the activity ends with a metallic clatter as the knife is set down on the countertop."
         }
-      ]
+      }
     }
   },
   "dataset\\wash_hand_split\\wash_hands": {
@@ -64,59 +73,56 @@
     "day_rgb_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
     "night_rgb_file": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
     "annotations": {
-      "hia": "00:09 - 00:11: open door\n00:23 - 00:25: operate soap dispenser\n00:26 - 00:36: wash hands\n00:36 - 00:37: take paper towel\n00:37 - 00:41: dry hands\n00:41 - 00:42: throw paper towel\n00:44 - 00:46: swipe key card\n00:46 - 00:47: open door",
-      "caption": "The following audiovisual caption provides a detailed chronological record of the sound events and their corresponding visual actions in the video:\n\n[00:13 – 00:15] A sharp metallic click is heard as the user presses down the room door handle, followed by the soft sound of the door swinging open as they exit into the hallway.\n\n[00:22 – 00:24] A hollow thud marks the room door closing shut behind the user as they walk away.\n\n[00:28 – 00:30] As the user reaches the bathroom, a metallic latch click and the sound of the door swinging open occur, providing access to the facilities.\n\n[00:34 – 00:36] A firm thud is heard as the user closes the bathroom door from the inside to ensure privacy.\n\n[00:39 – 00:41] Two distinct mechanical clicks and soft squelching sounds occur as the user pumps the manual soap dispenser to prepare for hand washing.\n\n[00:42 – 00:44] A sudden, loud rush of water begins as the user turns on the faucet, creating a continuous white noise in the small room.\n\n[00:47 – 01:01] Rhythmic splashing and wet rubbing sounds persist as the user thoroughly washes their hands under the steady stream of water, indicating a focused hygiene task.\n\n[01:02 – 01:03] The rushing water sound stops abruptly with a final splash as the user shuts off the faucet.\n\n[01:24 – 01:26] Multiple quick, sharp rustling sounds are heard as the user pulls paper towels from a manual dispenser.\n\n[01:27 – 01:34] A continuous, high-frequency crinkling sound fills the air while the user dries their hands, vigorously manipulating the paper towels.\n\n[01:36 – 01:38] A metallic click and swinging sound recur as the user opens the bathroom door to return to the hallway.\n\n[01:41 – 01:43] A solid thud occurs as the bathroom door latches shut behind the exiting user.\n\n[01:47 – 01:48] A short, high-pitched electronic beep is emitted from the door lock as the user taps their key card against the reader for authorization.\n\n[01:49 – 01:51] A metallic latch click and door swing indicate the room door has been successfully unlocked and opened, cued by the previous audio beep.\n\n[01:56 – 01:58] A final hollow thud sounds as the user pulls the room door shut behind them, completing the sequence.",
-      "qa_pairs": [
-        {
-          "timestamp": "00:42 - 00:44",
-          "context": "[00:42] A sudden, loud rush of water begins as the user turns on the faucet, creating a continuous white noise in the small room.",
-          "question_type": "SOUND CHARACTERISTICS",
-          "question": "What are the acoustic qualities and the perceived effect of the water sound starting at 00:42?",
-          "answer": "The sound is a sudden, loud rush of water that functions as a continuous white noise within the small room."
+      "audio_hia": {
+        "caption": "The egocentric video shows the camera wearer interacting with nearby objects using their hands. The main interactions involve reaching, grasping, moving, placing, and manipulating items on a work surface."
+      },
+      "audio_chronological_caption": {
+        "caption": "00:13 - 00:14 A sharp metallic click occurs as the camera wearer reaches out and pulls the silver door handle to open the exit door of the study room.\n\n00:15 - 00:18 A series of soft rustling sounds and muffled thuds are heard as the person moves their body and walks through the doorway into the hallway.\n\n00:22 - 00:23 A solid, medium-volume thud resonates as the user closes the white door behind them, signaling they have completely left the previous room.\n\n00:24 - 00:27 Rhythmic, soft thumping sounds of footsteps on the wooden-patterned floor are heard as the user walks towards the restroom door.\n\n00:29 - 00:30 A mechanical click of a handle is followed immediately by a louder thud as the user pushes open the door to the restroom area.\n\n00:34 - 00:36 A sharp click followed by a heavy thud occurs as the user pulls the restroom door shut from the inside to secure privacy.\n\n00:39 - 00:42 Three distinct plastic clicking sounds are heard as the user repeatedly presses the top of the white and pink soap dispenser mounted on the wall.\n\n00:43 - 00:45 A sudden, steady rushing sound of water begins as the user activates the faucet to wet their hands.\n\n00:47 - 01:02 Continuous soft, squelching and rubbing sounds are produced as the user thoroughly lathers soap between their palms, visible in the mirror.\n\n01:02 - 01:05 The rushing sound of the faucet intensifies briefly as the water is triggered again, signaling the start of the rinsing process.\n\n01:05 - 01:21 Intermittent splashing and wet rubbing sounds occur as the user moves their hands under the water stream to rinse off the soap.\n\n01:22 - 01:24 A brief, fast rustling sound is heard as the user vigorously shakes excess water from their hands into the sink basin.\n\n01:24 - 01:29 Sharp, papery rustling sounds are heard as the user pulls a paper towel from the dispenser and rubs it against their hands to dry them.\n\n01:32 - 01:34 A dry, crunching sound of paper is heard as the user crumples the used towel before discarding it into the nearby bin.\n\n01:35 - 01:37 A metallic click of the door handle occurs as the user grasps it and pulls to open the restroom door and exit.\n\n01:38 - 01:43 A sequence of footsteps is followed by a loud, echoing bang as the restroom door slams shut automatically behind the departing user.\n\n01:47 - 01:50 A short electronic beep is followed by a mechanical clicking sound as the user taps an ID card against the electronic lock and pulls the door open.\n\n01:55 - 01:58 A final, solid thud is heard as the user enters the study room and pulls the door shut to return to their workspace.\n\n01:59 - 02:03 Soft thuds and rustling sounds occur as the person approaches the desk and prepares to sit back down at the computer."
+      },
+      "categories": {
+        "audio_sound_characteristics": {
+          "timestamp": "00:22 - 00:23",
+          "caption": "[00:22] A solid, medium-volume thud resonates as the user closes the white door behind them.",
+          "question": "What were the acoustic characteristics and volume of the sound heard when the white door was closed at 00:22?",
+          "answer": "The sound was a solid, medium-volume thud."
         },
-        {
-          "timestamp": "00:39 - 00:41",
-          "context": "[00:39] Two distinct mechanical clicks and soft squelching sounds occur as the user pumps the manual soap dispenser.",
-          "question_type": "COUNTING",
-          "question": "How many distinct mechanical clicks can be heard as the user operates the soap dispenser between 00:39 and 00:41?",
-          "answer": "There are two distinct mechanical clicks heard during that interval."
+        "audio_counting": {
+          "timestamp": "00:39 - 00:42",
+          "caption": "[00:39] Three distinct plastic clicking sounds are heard as the user repeatedly presses the top of the white and pink soap dispenser mounted on the wall.",
+          "question": "How many times did the user press the soap dispenser, as indicated by the number of plastic clicking sounds?",
+          "answer": "The user pressed the soap dispenser three times, resulting in three distinct clicking sounds."
         },
-        {
-          "timestamp": "01:27 - 01:34",
-          "context": "[01:27] A continuous, high-frequency crinkling sound fills the air while the user dries their hands, vigorously manipulating the paper towels.",
-          "question_type": "TEMPORAL ATTRIBUTE",
-          "question": "What is the duration and nature of the crinkling sound heard while the user dries their hands?",
-          "answer": "The high-frequency crinkling sound is continuous and lasts for approximately 7 seconds, from 01:27 to 01:34."
+        "audio_temporal_attribute": {
+          "timestamp": "00:47 - 01:02",
+          "caption": "[00:47] Continuous soft, squelching and rubbing sounds are produced as the user thoroughly lathers soap between their palms.",
+          "question": "What was the duration of the continuous soft, squelching and rubbing sounds during the soap lathering process?",
+          "answer": "The sounds lasted for approximately 15 seconds, starting at 00:47 and continuing until 01:02."
         },
-        {
-          "timestamp": "00:22 - 00:24",
-          "context": "[00:22] A hollow thud marks the room door closing shut behind the user as they walk away.",
-          "question_type": "SPATIAL LOCATION",
-          "question": "What was the spatial location of the hollow thud sound at 00:22 relative to the camera/user's movement?",
-          "answer": "The sound originated from behind the user as they were walking away from the room door."
+        "audio_spatial_location": {
+          "timestamp": "00:22 - 00:23",
+          "caption": "[00:22] A solid, medium-volume thud resonates as the user closes the white door behind them, signaling they have completely left the previous room.",
+          "question": "What was the spatial location of the sound of the door closing at 00:22 relative to the camera wearer?",
+          "answer": "The sound originated from behind the camera wearer as they closed the door to the room they just exited."
         },
-        {
-          "timestamp": "01:47 - 01:48",
-          "context": "[01:47] A short, high-pitched electronic beep is emitted from the door lock as the user taps their key card against the reader.",
-          "question_type": "SOUND SOURCE IDENTIFICATION",
-          "question": "What specific object produced the short, high-pitched electronic beep at 01:47?",
-          "answer": "The electronic beep was emitted by the door lock's key card reader."
+        "audio_sound_source_identification": {
+          "timestamp": "01:32 - 01:34",
+          "caption": "[01:32] A dry, crunching sound of paper is heard as the user crumples the used towel before discarding it into the nearby bin.",
+          "question": "What specific action and object generated the dry, crunching sound at 01:32?",
+          "answer": "The sound was generated by the user crumpling a used paper towel."
         },
-        {
-          "timestamp": "00:34 - 00:36",
-          "context": "[00:28] User reaches the bathroom. [00:34] A firm thud is heard as the user closes the bathroom door from the inside to ensure privacy.",
-          "question_type": "INFERENTIAL CAUSALITY",
-          "question": "Based on the sequence of events, why did the user close the bathroom door at 00:34?",
-          "answer": "The user closed the door from the inside to ensure privacy while using the bathroom facilities."
+        "audio_inferential_causality": {
+          "timestamp": "01:47 - 01:50",
+          "caption": "[01:47] A short electronic beep is followed by a mechanical clicking sound as the user taps an ID card against the electronic lock and pulls the door open.",
+          "question": "Why was a short electronic beep heard at 01:47 before the door was opened?",
+          "answer": "The electronic beep occurred because the user tapped an ID card against the electronic lock to authorize opening the door."
         },
-        {
-          "timestamp": "01:47 - 01:51",
-          "context": "[01:47] A short, high-pitched electronic beep is emitted from the door lock. [01:49] A metallic latch click and door swing indicate the room door has been successfully unlocked.",
-          "question_type": "CROSS-MODAL REASONING",
-          "question": "How does the audio beep at 01:47 relate to the subsequent visual and auditory opening of the door at 01:49?",
-          "answer": "The electronic beep at 01:47 serves as an auditory cue for authorization; once the key card is accepted, it triggers the physical unlocking of the door, which is then confirmed by the metallic latch click and the visual swing of the door at 01:49."
+        "audio_cross_modal_reasoning": {
+          "timestamp": "01:38 - 01:43",
+          "caption": "[01:38] A sequence of footsteps is followed by a loud, echoing bang as the restroom door slams shut automatically behind the departing user.",
+          "question": "Based on the visual movement of the user and the subsequent audio, what causes the loud, echoing bang heard at the end of this segment?",
+          "answer": "After the user walks away from the restroom (footsteps), the door slams shut automatically, creating the loud, echoing bang."
         }
-      ]
+      }
     }
   }
 }

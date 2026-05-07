@@ -141,6 +141,78 @@ def parse_qna_response(text: str) -> list[dict]:
     return normalized
 
 
+def _slug_question_type(question_type: Any) -> str:
+    text = str(question_type or "").strip().lower()
+    slug = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    return slug or "qa_pair"
+
+
+def format_audio_annotations(raw_results: Any) -> dict:
+    """Convert raw audio cascade output into section-level annotations."""
+    if not isinstance(raw_results, dict):
+        raw_results = {}
+
+    formatted: dict = {}
+    categories: dict = {}
+
+    hia_caption = raw_results.get("hia", "")
+    if isinstance(hia_caption, str) and hia_caption.strip():
+        formatted["audio_hia"] = {"caption": hia_caption}
+
+    chronological_caption = raw_results.get("caption", "")
+    if isinstance(chronological_caption, str) and chronological_caption.strip():
+        formatted["audio_chronological_caption"] = {"caption": chronological_caption}
+
+    section_counts: dict[str, int] = {}
+    qa_pairs = raw_results.get("qa_pairs", [])
+    if isinstance(qa_pairs, list):
+        for qa_pair in qa_pairs:
+            if not isinstance(qa_pair, dict):
+                continue
+
+            section_base = f"audio_{_slug_question_type(qa_pair.get('question_type'))}"
+            section_counts[section_base] = section_counts.get(section_base, 0) + 1
+            section_name = section_base
+            if section_counts[section_base] > 1:
+                section_name = f"{section_base}_{section_counts[section_base]}"
+
+            context = qa_pair.get("context", "")
+            question = qa_pair.get("question", "")
+            answer = qa_pair.get("answer", "")
+            categories[section_name] = {
+                "timestamp": qa_pair.get("timestamp"),
+                "caption": context if isinstance(context, str) else "",
+                "question": question if isinstance(question, str) else "",
+                "answer": answer if isinstance(answer, str) else "",
+            }
+
+    formatted["categories"] = categories
+    return formatted
+
+
+def _nest_audio_categories(annotation_results: dict) -> dict:
+    """Move flat audio QA sections under annotations.categories."""
+    formatted: dict = {}
+
+    for section_name in ("audio_hia", "audio_chronological_caption"):
+        section_value = annotation_results.get(section_name)
+        if isinstance(section_value, dict):
+            formatted[section_name] = section_value
+
+    categories: dict = {}
+    existing_categories = annotation_results.get("categories")
+    if isinstance(existing_categories, dict):
+        categories.update(existing_categories)
+
+    for section_name, section_value in annotation_results.items():
+        if section_name in {"audio_hia", "audio_chronological_caption", "categories"}:
+            continue
+        categories[section_name] = section_value
+
+    formatted["categories"] = categories
+    return formatted
+
+
 async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -> str:
     for attempt in range(1, max_retries + 1):
         try:
@@ -318,13 +390,16 @@ async def process_single_audio(
 
 def normalize_annotation_results(raw_results: Any) -> dict:
     """Backward-compatible normalizer for legacy imports."""
-    if isinstance(raw_results, dict) and {"hia", "caption", "qa_pairs"} <= set(raw_results):
-        return raw_results
-    return {
+    if isinstance(raw_results, dict):
+        if {"hia", "caption", "qa_pairs"} <= set(raw_results):
+            return format_audio_annotations(raw_results)
+        if any(str(key).startswith("audio_") for key in raw_results) or "categories" in raw_results:
+            return _nest_audio_categories(raw_results)
+    return format_audio_annotations({
         "hia": DEMO_HIA_CAPTION,
         "caption": DEMO_TIMESTAMPED_CAPTION,
         "qa_pairs": copy.deepcopy(DEMO_QA_PAIRS),
-    }
+    })
 
 
 async def run_parallel_pipeline(

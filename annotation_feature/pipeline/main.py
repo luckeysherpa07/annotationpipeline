@@ -19,7 +19,10 @@ from .modalities.rgb import run_parallel_pipeline
 from .modalities.event import run_event_parallel_pipeline
 from .modalities.depth import run_depth_parallel_pipeline
 from .modalities.ir import run_ir_parallel_pipeline
-from .modalities.audio import run_parallel_pipeline as run_audio_parallel_pipeline
+from .modalities.audio import (
+    format_audio_annotations,
+    run_parallel_pipeline as run_audio_parallel_pipeline,
+)
 
 
 def _audio_source_pair_key(file: Path) -> str:
@@ -818,7 +821,7 @@ def run_audio(
             "audio_file": str(audio_path),
             "day_rgb_file": str(day_rgb_file) if day_rgb_file else None,
             "night_rgb_file": str(night_rgb_file) if night_rgb_file else None,
-            "annotations": file_results,
+            "annotations": format_audio_annotations(file_results),
         }
         print(f"Done: {pair_key}")
 
