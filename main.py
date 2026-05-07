@@ -21,6 +21,7 @@ from annotation_feature.pipeline import (
     run_marigold_depth_qa,
     run_late_fusion,
 )
+from annotation_feature.reasoning import normalize_all_modalities
 from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -191,9 +192,10 @@ def main():
         print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
         print("26. Run late fusion on existing modality JSON results")
-        print("\n27. Exit")
+        print("27. Normalize evidence units from existing modality JSON results")
+        print("\n28. Exit")
 
-        choice = input("\nEnter choice (1-27): ").strip()
+        choice = input("\nEnter choice (1-28): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -468,6 +470,15 @@ def main():
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
 
         elif choice == "27":
+            print("\n" + "-" * 60)
+            print("Running: normalize evidence units from existing modality JSON results")
+            print("-" * 60)
+            print("This step reads RGB, event, depth, IR, and audio result files.")
+            print("It writes normalized section-level evidence to normalized_evidence_units.json.\n")
+            normalized_results = normalize_all_modalities()
+            print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
+
+        elif choice == "28":
             print("\nExiting.")
             break
 

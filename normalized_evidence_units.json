@@ -1,0 +1,625 @@
+{
+  "cut_carrot": {
+    "source_keys": {
+      "rgb": "dataset/cut_carrot_split/cut_carrot_rgb",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_event",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_depth",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_ir",
+      "audio": "dataset\\cut_carrot_split\\cut_carrot"
+    },
+    "evidence_units": [
+      {
+        "modality": "rgb",
+        "section": "action",
+        "caption": "I am peeling an orange carrot with a black Victorinox peeler, holding it over a bowl to collect the waste. After peeling, I use a chef's knife to slice the carrot into segments and then julienne them into thin strips, likely for use in a salad or stir-fry.",
+        "question": "1. What am I doing with the peeler? 2. What is the purpose of the knife? 3. Why am I holding the carrot over the bowl? 4. What happens to the carrot after it is peeled? 5. What kind of cut am I making with the knife? 6. Am I using a cutting board? 7. What is the intended consequence of the cutting? 8. Are my hands moving quickly or carefully?",
+        "answer": "1. Peeling a carrot. 2. To slice the carrot. 3. To catch the peels. 4. It is sliced into strips. 5. Slicing/Julienning. 6. Yes. 7. Creating thin carrot strips for cooking. 8. Carefully.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "counting",
+        "caption": "In the scene, there is 1 orange carrot, 1 black peeler, 1 large chef's knife, 1 white bowl, 1 grey laptop, 1 white cutting board, 1 power strip with 3 sockets, and 1 black induction stove.",
+        "question": "1. How many carrots are on the board? 2. How many knives are visible? 3. How many peelers are in the scene? 4. How many white bowls are used? 5. How many laptops are on the stove? 6. How many cutting boards are present? 7. How many hands are interacting with the objects? 8. How many electrical sockets are seen on the power strip? 9. How many stovetop heating zones are visible? 10. How many tools total are used for the carrot preparation?",
+        "answer": "1. One. 2. One. 3. One. 4. One. 5. One. 6. One. 7. Two. 8. Three. 9. Two. 10. Two (peeler and knife).",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "dynamic_counting",
+        "caption": "The peeler moves back and forth across the carrot skin. The knife moves up and down during slicing. Carrot peels fall into the bowl. Sliced carrot strips are moved to the side of the board.",
+        "question": "1. How many peelers move during the peeling process? 2. How many knives are used for slicing? 3. How many carrots are being processed? 4. Do any objects other than the tools and food move? 5. How many bowls are used to catch the movement of the peels? 6. Does the laptop move at any time? 7. How many cutting boards are shifted during the action? 8. Do any new objects enter the scene while I am cutting?",
+        "answer": "1. One. 2. One. 3. One. 4. No. 5. One. 6. No. 7. None (it remains stationary). 8. No.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "dynamic_recognition",
+        "caption": "My hands pick up the peeler and carrot starting around frame_001350 and finish peeling by frame_002220. I then pick up the knife and start slicing the carrot segments from frame_003270 until frame_004200.",
+        "question": "When do I begin the action of slicing the carrot segments with the knife?",
+        "answer": "At frame 003270.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "light_change",
+        "caption": "The illumination in the room is constant throughout the video. There are no instances of lights being turned on or off, and the brightness level does not fluctuate despite the movement of my hands.",
+        "question": "1. Did the kitchen lights turn off at any point? 2. Is the scene getting darker as I work? 3. Does the light source move? 4. Does the laptop screen provide a significant change in light? 5. Is there a flickering of the overhead light? 6. Is it getting brighter towards the end? 7. Did any external light, like car headlights, pass through the scene? 8. Does the shadow intensity change significantly?",
+        "answer": "1. No. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. No.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "light_recongnition",
+        "caption": "The kitchen workspace is illuminated by an overhead room light that provides steady, even brightness across the metallic counter, the white cutting board, and the red wall, creating distinct shadows beneath my hands and the tools.",
+        "question": "From which direction is the primary light source hitting the cutting board?",
+        "answer": "From above (overhead).",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "navigation",
+        "caption": "To prepare the carrot, I reach for the peeler in the center. I move my right hand to the right to deposit peels in the bowl. I reach for the knife on the right side of the board. I move sliced pieces toward the top edge of the board to clear space.",
+        "question": "1. Where should I move my hand to reach the bowl? 2. In which direction is the laptop located? 3. Where is the knife placed relative to the carrot initially? 4. To clear the board, where do I move the cut strips? 5. Where do the peels go? 6. Where is the peeler relative to the bowl? 7. Which way do I move the knife to slice? 8. Where are my hands positioned during cutting? 9. Where is the power outlet located? 10. How do I reach the laptop from the cutting board?",
+        "answer": "1. To the right. 2. To the left. 3. To the right. 4. Towards the top of the board. 5. Into the bowl on the right. 6. To the left of it. 7. Downwards. 8. In the center of the board. 9. On the wall to the top right. 10. Move your hand to the left.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "non_common",
+        "caption": "The grey laptop is sitting directly on top of the black induction stovetop. This is an unsafe layout as the stove is meant for cooking, and placing a computer there risks heat damage or fire if the appliance is activated.",
+        "question": "What is wrong with the placement of the electronic device in the kitchen?",
+        "answer": "The laptop is sitting on the stove.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "object_recognition",
+        "caption": "In a kitchen setting, a grey laptop is placed on the left over a black induction stovetop. A white cutting board occupies the center, holding a long orange carrot, a black Victorinox peeler, and a large metal chef's knife with a textured handle. To the right of the cutting board sits an empty white bowl. The wall behind the counter is painted a vibrant red.",
+        "question": "What electronic device is situated on the black stovetop to the left of the cutting board?",
+        "answer": "A grey laptop.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "scene_sequence",
+        "caption": "The video sequence shows a kitchen counter. Initially, a carrot, peeler, and knife are stationary on a cutting board. Then, my hands enter the frame. I pick up the carrot and peeler to remove the skin over a white bowl. After peeling, I set the peeler down, pick up the knife, and proceed to slice the carrot into segments and then into thin strips.",
+        "question": "1. What is the first tool I pick up? 2. What object is used to collect the carrot skin? 3. What action follows the peeling of the carrot? 4. What tool is used after the peeler is put down? 5. Where do I place the carrot segments before julienning them? 6. What is the sequence of tasks performed? 7. Was the bowl empty or full at the start? 8. What is the last tool I am seen holding? 9. Where is the knife located at the beginning? 10. What did I do immediately after finishing peeling?",
+        "answer": "1. The peeler. 2. A white bowl. 3. Slicing with a knife. 4. A chef's knife. 5. On the cutting board. 6. Peeling, then slicing. 7. Empty. 8. The knife. 9. On the right side of the cutting board. 10. Set down the peeler and picked up the knife.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "spatial_reasoning",
+        "caption": "The laptop is positioned about 1 step to the left of the white cutting board. The orange carrot lies centrally on the board. The white bowl is placed roughly 0.5 steps to the right of the cutting board. A power strip with three sockets is mounted on the wall above the bowl, approximately 1 step away from the center of the workspace.",
+        "question": "Where is the white bowl located in relation to the cutting board?",
+        "answer": "To the right.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "rgb",
+        "section": "text_recognition",
+        "caption": "In the DAY frames, specifically around frame_001350, the brand name 'VICTORINOX' is clearly visible on the black handle of the vegetable peeler, identifying its manufacturer. On the laptop, a 'Lenovo' logo is visible on the lid, and an 'intel CORE' sticker is present near the keyboard, indicating the hardware specifications.",
+        "question": "1. What brand is written on the handle of the peeler? 2. What brand of laptop is on the stove? 3. What word is visible on the laptop's processor sticker? 4. Where is the 'VICTORINOX' text located? 5. Is there any text on the white bowl? 6. What logo is seen on the lid of the computer? 7. How many brand names can be read in the scene? 8. On which object do you find the 'intel' logo?",
+        "answer": "1. Victorinox. 2. Lenovo. 3. CORE. 4. On the peeler's handle. 5. No. 6. Lenovo. 7. At least three (Victorinox, Lenovo, Intel). 8. The laptop.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_action",
+        "caption": "I am preparing food. I reach for the carrot with my left hand and hold it upright. Simultaneously or sequentially, I grasp the peeler with my right hand. I then begin the peeling action, characterized by pulling the peeler's blade downward along the carrot's exterior. The scene shows the carrot being stabilized while the peeler is actively moved against it.",
+        "question": "What tool do I use on the carrot?",
+        "answer": "A vegetable peeler.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_counting",
+        "caption": "From motion and event boundaries, I can identify: 1 cutting board, 1 chef's knife, 1 vegetable peeler, 1 carrot, and 2 hands (or two distinct hand movements). There is 1 handle hole on the cutting board and 1 main workspace area. A total of 3 items are involved in the dynamic interaction.",
+        "question": "How many knives are on the cutting board?",
+        "answer": "One.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_dynamic_counting",
+        "caption": "A single hand enters the frame to initiate movement. The carrot is lifted once. The peeler is lifted once. The peeler makes approximately three distinct downward strokes against the carrot in the final frames. No other objects or people move in the background.",
+        "question": "How many hands enter the field of view?",
+        "answer": "One.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_dynamic_recognition",
+        "caption": "A hand appears at frame 60, moving steadily toward the carrot. The carrot's static boundary disappears as it is lifted around frame 90. The peeler is recognized as a separate moving entity when it is picked up at frame 120. The motion then transitions into a rhythmic scraping pattern as the peeler interacts with the carrot's length.",
+        "question": "When did my hand first appear in the scene?",
+        "answer": "Frame 60.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_navigation",
+        "caption": "The camera viewpoint is fixed over a kitchen workspace. Navigation cues are limited to the reaching path of the hands. The first hand moves from the bottom center toward the carrot's position. The second hand follows a similar path toward the peeler. There are no turns or changes in the camera's location, as it remains focused on the cutting board.",
+        "question": "In what direction does my hand move to reach the carrot?",
+        "answer": "Bottom to center.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_non_common",
+        "caption": "The event stream depicts a standard kitchen task. All objects follow normal physical laws: the hand lifts the objects, and the peeler stays in contact with the carrot. There are no floating objects, clipping errors, or unrealistic motion patterns observed.",
+        "question": "Is there any object floating in the air without being held?",
+        "answer": "No.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_object_recognition",
+        "caption": "The event stream begins with a static arrangement on a cutting board: a knife on the right, a carrot in the center, and a peeler on the left. Temporal activity increases as a hand enters the lower part of the frame, reaching for and grasping the carrot. Shortly after, another hand or a coordinated movement picks up the peeler. The most salient activity occurs at the end of the sequence, where the peeler's rapid motion against the carrot's surface generates dense event clusters along the contact boundary.",
+        "question": "What object do I pick up first after my hand enters the scene?",
+        "answer": "The carrot.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_scene_sequence",
+        "caption": "The sequence opens with a still life of kitchen tools. At frame 60, a hand enters the field of view. By frame 90, the carrot is lifted from the board. Between frames 90 and 120, the peeler is also picked up. The final segment of the video is dominated by the repetitive downward motion of the peeler against the carrot, signifying the start of the peeling process.",
+        "question": "What is the final action visible in the full sequence?",
+        "answer": "Peeling the carrot.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_spatial_reasoning",
+        "caption": "At the start, the carrot lies between the peeler and the knife on the cutting board. My hand enters from the bottom, overlapping the edge of the cutting board as it approaches the carrot. Once lifted, the carrot is positioned above the board. The peeler is then moved from its initial position on the board to overlap with the carrot's surface. Throughout the interaction, the knife remains stationary to the right of the main activity area.",
+        "question": "Where is the peeler located relative to the carrot before I pick it up?",
+        "answer": "To its left.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "depth",
+        "section": "depth_action",
+        "caption": "I am moving steadily forward at a constant rate. There are no direct interactions with objects, such as reaching out or turning. The spatial consequence is a consistent decrease in distance to the objects ahead and the passing of lateral structures like the poles. The motion is linear and continuous.",
+        "question": "1. What am I doing in the scene? 2. Am I interacting with any objects? 3. How does the distance to the poles change? 4. Am I turning left or right? 5. Am I stopping at any point? 6. Is my speed changing significantly? 7. Which direction is my primary movement intent? 8. Am I moving through a doorway?",
+        "answer": "1. Moving forward. 2. No. 3. It decreases. 4. No. 5. No. 6. No. 7. Forward. 8. No.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "depth",
+        "section": "depth_counting",
+        "caption": "Based on depth separation, I can identify at least 5 distinct vertical poles on the left. There is one large circular region on the right. There are approximately 3 distinct distance layers in the background vegetation. I also see several small depth noise clusters. Total pole count is 5 or more.",
+        "question": "1. How many distinct vertical poles can be counted on the left? 2. How many large circular objects are on the right? 3. How many flat ground planes are visible? 4. How many main paths are being followed? 5. How many distinct depth layers are in the far background? 6. How many objects are passed on the right in the first half? 7. How many poles are in the immediate foreground at the start? 8. Total number of primary vertical structures on the left?",
+        "answer": "1. Five. 2. One. 3. One. 4. One. 5. Three. 6. One. 7. Two. 8. Five.",
+        "timestamp": null,
+        "confidence": 0.35
+      },
+      {
+        "modality": "depth",
+        "section": "depth_dynamic_counting",
+        "caption": "There are few moving entities. One small object moves from left to right in the far distance around frame 1800. Another object approaches from the right midground toward the end of the DAY sequence. In the NIGHT sequence, the noise makes it hard to distinguish, but no clear humans are approaching.",
+        "question": "1. How many cars approach me from the front? 2. How many people pass by at a near range? 3. How many times does a distant object cross the path? 4. How many moving objects are in the mid-range? 5. How many humans are walking away? 6. How many animals are seen moving? 7. How many objects move between depth layers on the left? 8. Total number of moving entities excluding me?",
+        "answer": "1. Zero. 2. Zero. 3. One. 4. One. 5. Zero. 6. Zero. 7. Zero. 8. Two.",
+        "timestamp": null,
+        "confidence": 0.35
+      },
+      {
+        "modality": "depth",
+        "section": "depth_dynamic_recognition",
+        "caption": "A small dynamic object appears in the distance at frame 1800 and moves horizontally across the path until frame 2400. Later, a larger blob appears on the right edge at frame 4500 and moves slightly inward before the sequence ends. No humans are recognized with certainty.",
+        "question": "1. Does any object move toward me? 2. When did a small object appear in the distance? 3. Has the object on the right vanished behind a wall? 4. Is there a vehicle moving away from me? 5. Does the distant object cross from left to right? 6. When does the second moving blob appear? 7. Did the objects move quickly or slowly? 8. Is any moving object at a close range?",
+        "answer": "1. Yes, one later. 2. Frame 1800. 3. No. 4. No. 5. Yes. 6. Frame 4500. 7. Slowly. 8. No.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "depth",
+        "section": "depth_navigation",
+        "caption": "The path is a straight, forward-extending ground plane. Navigation is restricted by the poles on the left and the large object/clutter on the right. The 3D layout suggests a safe walking or driving lane between these boundaries. There are no steps or steep turns visible, only a gradual progression forward into the depth of the scene.",
+        "question": "In which direction does the safe navigable path extend?",
+        "answer": "Straight forward.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "depth",
+        "section": "depth_non_common",
+        "caption": "The depth stream contains significant noise, appearing as floating particles or 'snow' throughout the scene, especially in the NIGHT frames. Some of these particles appear to intersect with the ground or other objects in a physically impossible way. However, no large macro-objects are floating or clipped unnaturally.",
+        "question": "What depth-based anomaly is frequently seen, especially in the night frames?",
+        "answer": "Floating noise particles.",
+        "timestamp": null,
+        "confidence": 0.35
+      },
+      {
+        "modality": "depth",
+        "section": "depth_object_recognition",
+        "caption": "The video starts with a large, rounded object on the right, positioned at a medium distance. On the far left, several thin, vertical structures, likely trees or poles, are visible at varying distances, showing a clear near-to-far progression. As I move forward, these vertical objects pass to the side. The ground is a flat surface extending into the distance. In later frames, more complex 3D structures appear on the right, suggesting a roadside with vegetation or buildings.",
+        "question": "What is the most prominent 3D shape visible on the right side in the early frames?",
+        "answer": "A large circular object.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "depth",
+        "section": "depth_scene_sequence",
+        "caption": "The sequence begins in an open outdoor area with a path flanked by poles on the left and a large sign-like object on the right. As the camera moves forward, it transitions into a more cluttered roadside environment. The 3D layout shifts from a relatively clear path to one with more peripheral vegetation and depth variation on both sides. The connectivity is a linear path following a road or walkway.",
+        "question": "Describe the transition of the path's 3D layout as I move through the sequence.",
+        "answer": "From open to cluttered.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "depth",
+        "section": "depth_spatial_reasoning",
+        "caption": "At the start, the circular object on the right is closer to me than the distant horizontal horizon line. The vertical poles on the left are arranged in a line, with the leftmost pole being the closest and subsequent poles receding into the distance. There is significant overlap between the trees as the camera moves. The ground plane is consistently below all other objects. As I advance, the objects on the left move from the foreground into the midground and then disappear as they are passed.",
+        "question": "Relative to the vertical poles on the left, where is the ground plane located?",
+        "answer": "Below them.",
+        "timestamp": null,
+        "confidence": 0.65
+      },
+      {
+        "modality": "ir",
+        "section": "action",
+        "caption": "I am peeling a carrot using a handheld peeler. I pick up the carrot with my left hand and the peeler with my right hand around frame_000030. I then position the carrot over the white bowl and use a downward stroking motion with the peeler to remove the outer skin. The purpose is food preparation, and the consequence is a peeled carrot ready for cooking or eating, with waste collected in the bowl.",
+        "question": "What am I doing with the peeler and the carrot?",
+        "answer": "Peeling the carrot.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "counting",
+        "caption": "In the video, there is 1 laptop on the left. There is 1 cutting board in the middle. On or near the board, I count 1 peeler, 1 carrot, 1 knife, and 1 white bowl. There is also 1 power strip visible in the background.",
+        "question": "How many electronic devices are visible on the counter?",
+        "answer": "One laptop.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "dynamic_counting",
+        "caption": "The only dynamic 'objects' are the two human hands entering the frame and interacting with the stationary items. I can see the carrot and peeler being moved by the hands starting from frame_000030. As the peeling happens (frames 000060-000150), small slivers of carrot skin (peels) fall into the bowl, though they are difficult to count individually in IR.",
+        "question": "How many hands enter the frame to pick up the tools?",
+        "answer": "Two.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "dynamic_recognition",
+        "caption": "Hands enter the frame at frame_000030. They reach for the peeler and carrot, lifting them from the cutting board by frame_000060. From frame_000060 to frame_000150, a continuous peeling motion is performed. The carrot peels are seen dropping into the bowl.",
+        "question": "At what point do the hands first appear in the video?",
+        "answer": "Around frame 30.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "light_change",
+        "caption": "The transition from day to night frames shows a significant drop in ambient light levels. The day frames have a much higher overall brightness and clarity of the surrounding surfaces. In the night frames, the environment becomes very dark, making the self-illuminating laptop screen and the warm human hands stand out as the primary visible elements.",
+        "question": "Does the environment get darker or brighter as the video progresses into the night frames?",
+        "answer": "Darker.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "light_recongnition",
+        "caption": "The scene is primarily lit by an overhead light source, creating soft shadows behind the objects. The laptop screen also acts as a secondary light source, casting a faint glow on the left side of the cutting board. In the night frames, the overall brightness decreases significantly, emphasizing the thermal hotspots of the laptop screen and the human hands.",
+        "question": "Which object besides the overhead light contributes to the illumination of the counter?",
+        "answer": "The laptop screen.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "navigation",
+        "caption": "The camera is stationary, so no navigation occurs. To reach the sink from this position, one would likely step back and turn right. To reach a fridge, one might turn left. In the current video, there are 0 steps taken as the subject stays in place at the counter.",
+        "question": "Which way should I turn to leave the counter area based on the typical layout?",
+        "answer": "Step back and turn left or right.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "non_common",
+        "caption": "The layout is standard for a kitchen preparation area. However, placing a laptop directly on what looks like a ceramic or induction stovetop (to the left) is a bit unconventional as it could be damaged if the stove were accidentally turned on. An improvement would be to keep the laptop on a dedicated non-heated surface.",
+        "question": "What is unusual about the placement of the laptop in this kitchen scene?",
+        "answer": "It is placed on a stovetop.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "object_recognition",
+        "caption": "The IR video captures a kitchen countertop scene. On the far left, a laptop is positioned on a dark surface, likely an induction stove, with its keyboard and screen showing distinct thermal signatures. In the center, there is a white rectangular cutting board. Initially, on the board, a peeler is on the left, a whole carrot is in the middle, and a large chef's knife is on the right. To the right of the cutting board is a white bowl. In the top right corner, a power strip with several circular outlets and a plugged-in cord is visible. As the video progresses, human hands enter the frame, appearing as bright hotspots due to body heat, to interact with the carrot and peeler.",
+        "question": "What items are placed on the white cutting board at the start of the video?",
+        "answer": "A peeler, a carrot, and a knife.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "scene_sequence",
+        "caption": "The video begins with a static shot of kitchen tools (peeler, carrot, knife) arranged on a cutting board next to a laptop and bowl. Between frame_000000 and frame_000030, hands move into the frame. From frame_000060 to frame_000150, the hands pick up the carrot and peeler and begin the process of peeling the carrot, with the carrot being held over the white bowl to catch the skins.",
+        "question": "What is the sequence of actions involving the carrot?",
+        "answer": "It is initially on the board, then picked up and peeled over a bowl.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "spatial_reasoning",
+        "caption": "In the initial scene, the laptop is approximately 2 steps to the left of the cutting board. The peeler is placed directly to the left of the carrot on the cutting board. The chef's knife is situated to the right of the carrot. The white bowl is located about 1 step to the right of the cutting board. The power strip is in the background, roughly 2 steps behind and slightly to the right of the bowl. The subject's hands start below the frame and move towards the center of the cutting board.",
+        "question": "Where is the chef's knife positioned relative to the carrot on the cutting board?",
+        "answer": "To the right.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "ir",
+        "section": "text_recognition",
+        "caption": "There are subtle text-like thermal patterns on the lower right corner of the laptop's base, which likely represents a brand logo or model identifier, appearing throughout the frames. On the power strip in the top right (frame_000000 to frame_000150), the circular outlines of the sockets might have faint molded-in text for safety ratings, though not clearly legible. The peeler's handle also shows a small, distinct thermal indentation that could be a brand name like 'Victorinox'.",
+        "question": "Where can text-like thermal patterns be observed on the laptop?",
+        "answer": "On the lower right corner of the base.",
+        "timestamp": null,
+        "confidence": 0.75
+      },
+      {
+        "modality": "audio",
+        "section": "audio_cross_modal_reasoning",
+        "caption": "[00:47 - 01:13] The user picks up a large chef's knife and starts slicing the carrot on a white cutting board. The audio consists of repetitive, percussive 'thwack' sounds.",
+        "question": "When the user begins slicing the carrot with the chef's knife at 00:47, what auditory cue confirms the knife is hitting the cutting board, and what does it suggest about the movement?",
+        "answer": "The auditory cue is a repetitive, percussive 'thwack' sound, which indicates a forceful and steady slicing motion.",
+        "timestamp": "00:47 - 01:13",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_inferential_causality",
+        "caption": "[01:13 - 01:18] A short break in the chopping is filled with a soft scraping sound as the user uses the knife blade to gather the sliced carrot pieces together.",
+        "question": "What is the reason for the soft scraping sound heard between 01:13 and 01:18 during the break in chopping?",
+        "answer": "The sound occurs because the user is using the blade of the knife to gather the sliced carrot pieces together on the surface of the cutting board.",
+        "timestamp": "01:13 - 01:18",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_inferential_causality_2",
+        "caption": "[02:12 - 02:30] ...followed by a few isolated, heavier 'thuds' as the last few large chunks are halved.",
+        "question": "Why do the chopping sounds change to isolated, heavier 'thuds' toward the end of the segment at 02:12 - 02:30?",
+        "answer": "The sounds become heavier thuds because the user is halving the last few remaining large chunks of the carrot.",
+        "timestamp": "02:12 - 02:30",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_characteristics",
+        "caption": "[00:04 - 00:41] The user begins peeling a carrot over a small white bowl, producing a series of sharp, rhythmic scraping sounds.",
+        "question": "What are the specific acoustic qualities and texture of the sounds heard while the carrot is being peeled between 00:04 and 00:41?",
+        "answer": "The sounds are described as a series of sharp, rhythmic scraping noises with a distinct rasping texture.",
+        "timestamp": "00:04 - 00:41",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_characteristics_2",
+        "caption": "[01:18 - 01:43] Rapid, rhythmic chopping sounds resume... The sharp, nearby impacts of the knife against the board are consistent in volume and tempo.",
+        "question": "How would you describe the volume and tempo of the knife impacts during the rapid chopping sequence from 01:18 to 01:43?",
+        "answer": "The volume and tempo of the sharp, nearby impacts are consistent, reflecting controlled hand movements.",
+        "timestamp": "01:18 - 01:43",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_characteristics_3",
+        "caption": "[02:30 - 03:04] A final, sustained sequence of fast-paced chopping occurs... The tempo of the 'thwack-thwack-thwack' sounds increases, ending with a final metallic clatter.",
+        "question": "What happens to the tempo of the chopping sounds during the final julienne stage, and what sound marks the end of the activity?",
+        "answer": "The tempo of the 'thwack-thwack-thwack' sounds increases, and the activity ends with a metallic clatter as the knife is set down on the countertop.",
+        "timestamp": "02:30 - 03:04",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_source_identification",
+        "caption": "[00:41 - 00:46] A light metallic click is heard when the user places the peeler on the counter, followed by a soft sliding sound and a muffled thud as the bowl containing the peels is moved to the side.",
+        "question": "What objects and actions are responsible for the light metallic click and the muffled thud heard between 00:41 and 00:46?",
+        "answer": "The light metallic click is caused by the user placing the peeler on the counter, and the muffled thud is caused by moving the bowl of peels to the side.",
+        "timestamp": "00:41 - 00:46",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_source_identification_2",
+        "caption": "[01:43 - 01:49] The chopping stops temporarily, replaced by the faint rustling and sliding sounds of carrot strips being rearranged and aligned on the cutting board by the user's hand.",
+        "question": "What is the source of the faint rustling and sliding sounds heard at 01:43?",
+        "answer": "The sounds are produced by the user's hand rearranging and aligning carrot strips on the cutting board.",
+        "timestamp": "01:43 - 01:49",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_temporal_attribute",
+        "caption": "[00:04 - 00:41] Each downward stroke of the peeler against the carrot's skin creates a distinct rasping noise that lasts about a second.",
+        "question": "What is the typical duration of each individual rasping sound produced during the carrot peeling process?",
+        "answer": "Each rasping noise lasts about one second.",
+        "timestamp": "00:04 - 00:41",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "wash_hands": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_event",
+      "ir": "dataset\\wash_hand_split\\wash_hands_ir",
+      "audio": "dataset\\wash_hand_split\\wash_hands"
+    },
+    "evidence_units": [
+      {
+        "modality": "event",
+        "section": "event_action",
+        "caption": "I am holding and moving the camera to perform a visual sweep of a workspace. I pan left to inspect the desk, then tilt down to see the floor and chairs, and finally move the camera closer to the desk to get a detailed view of a specific component or area.",
+        "question": "1. What am I doing with the camera at the start? 2. Which direction am I panning? 3. Am I looking at the floor at any point? 4. Do I interact physically with any keyboard? 5. Do I move closer to the desk at the end? 6. Am I inspecting the PC tower or the monitor first? 7. How long do I spend looking at the chairs? 8. Do I pick up any objects?",
+        "answer": "1. Panning, 2. Left, 3. Yes, 4. No, 5. Yes, 6. PC tower, 7. Briefly, 8. No",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_counting",
+        "caption": "Based on the event activity during the camera's movement, I can identify and count three monitors, two PC towers, two keyboards, and two office chairs. The long desk surface serves as a single continuous platform for most of these objects.",
+        "question": "1. How many monitors do I count in total? 2. How many PC towers are visible? 3. How many keyboards appear during the pan? 4. How many chairs do I see in the seating area? 5. How many main desks are present? 6. How many monitors are in the first workstation setup? 7. How many keyboards are in the second workstation? 8. How many distinct workstations do I pass?",
+        "answer": "1. 3, 2. 2, 3. 2, 4. 2, 5. 1, 6. 1, 7. 1, 8. 2",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_dynamic_counting",
+        "caption": "There are no independent moving humans or objects in the scene. All apparent motion is caused by the camera holder. I observe two chairs and two keyboards entering and exiting the field of view as I move the camera along the desk path.",
+        "question": "1. How many people do I see moving in the room? 2. How many chairs do I pass during my movement? 3. How many keyboards enter my field of view? 4. How many PC towers move past my frame? 5. How many times does an object move independently? 6. How many monitors do I pan across? 7. How many desks do I traverse? 8. How many times do I change direction to look at the floor?",
+        "answer": "1. 0, 2. 2, 3. 2, 4. 2, 5. 0, 6. 3, 7. 1, 8. 1",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_dynamic_recognition",
+        "caption": "The scene consists of static office furniture and electronics. The monitors appear at frame 0 and frame 30 as I move. The chairs become visible around frame 60 and frame 90. No independent dynamic behavior like doors closing or people walking is detected.",
+        "question": "1. Does a person walk across my view? 2. When does the second monitor appear? 3. Does any monitor move on its own? 4. Has a chair been moved during the recording? 5. Did I see a car through a window? 6. Does a screen flicker or change content? 7. Does the camera stop at a specific object? 8. Do any cables move independently?",
+        "answer": "1. No, 2. Frame 30, 3. No, 4. No, 5. No, 6. No, 7. Yes, 8. No",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_navigation",
+        "caption": "The camera follows a path starting from a right-side workstation, moving leftward along the length of a desk. The viewpoint then shifts downward toward the floor area near the chairs before moving forward to inspect a specific area on the desk surface.",
+        "question": "In which direction do I primarily move at the start of the video?",
+        "answer": "Left.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_non_common",
+        "caption": "The video shows a typical and realistic office environment with computers, desks, and chairs. No floating objects, clipping issues, or physically impossible motions are observed in the event stream.",
+        "question": "Are there any floating monitors or unrealistic objects in the scene?",
+        "answer": "No.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_object_recognition",
+        "caption": "The camera pans across a workspace, capturing the boundaries and motion-induced edges of several computer monitors, PC towers, multiple keyboards, and a tangle of cables on a desk. Two distinct chairs are visible as the camera moves lower, with the scene structure defined by the rectangular shapes of the screens and the vertical lines of the furniture.",
+        "question": "What primary piece of computer equipment do I see positioned next to the first monitor?",
+        "answer": "A PC tower.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_scene_sequence",
+        "caption": "The sequence begins with a focused view of a computer workstation. Next, a rapid pan to the left reveals additional desk space and a second setup. The camera then tilts downward, bringing the floor and the legs of office chairs into view. Finally, the motion shifts forward, ending with a close-up perspective of the desk surface and associated hardware.",
+        "question": "Do I see the office chairs before or after the camera pans across the first monitor?",
+        "answer": "After.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "event",
+        "section": "event_spatial_reasoning",
+        "caption": "In the initial view, a PC tower is located to the right of a monitor, with cables winding between them. As the camera pans left, a second monitor and keyboard appear farther along the desk. The chairs are positioned below the desk's edge, partially occluded by the desk surface as the viewpoint lowers. Toward the end, the camera moves significantly closer to a small object on the desk surface.",
+        "question": "Is the first keyboard I see in front of or behind the monitor?",
+        "answer": "In front.",
+        "timestamp": null,
+        "confidence": 0.85
+      },
+      {
+        "modality": "audio",
+        "section": "audio_counting",
+        "caption": "[00:39] Three distinct plastic clicking sounds are heard as the user repeatedly presses the top of the white and pink soap dispenser mounted on the wall.",
+        "question": "How many times did the user press the soap dispenser, as indicated by the number of plastic clicking sounds?",
+        "answer": "The user pressed the soap dispenser three times, resulting in three distinct clicking sounds.",
+        "timestamp": "00:39 - 00:42",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_cross_modal_reasoning",
+        "caption": "[01:38] A sequence of footsteps is followed by a loud, echoing bang as the restroom door slams shut automatically behind the departing user.",
+        "question": "Based on the visual movement of the user and the subsequent audio, what causes the loud, echoing bang heard at the end of this segment?",
+        "answer": "After the user walks away from the restroom (footsteps), the door slams shut automatically, creating the loud, echoing bang.",
+        "timestamp": "01:38 - 01:43",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_inferential_causality",
+        "caption": "[01:47] A short electronic beep is followed by a mechanical clicking sound as the user taps an ID card against the electronic lock and pulls the door open.",
+        "question": "Why was a short electronic beep heard at 01:47 before the door was opened?",
+        "answer": "The electronic beep occurred because the user tapped an ID card against the electronic lock to authorize opening the door.",
+        "timestamp": "01:47 - 01:50",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_characteristics",
+        "caption": "[00:22] A solid, medium-volume thud resonates as the user closes the white door behind them.",
+        "question": "What were the acoustic characteristics and volume of the sound heard when the white door was closed at 00:22?",
+        "answer": "The sound was a solid, medium-volume thud.",
+        "timestamp": "00:22 - 00:23",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_sound_source_identification",
+        "caption": "[01:32] A dry, crunching sound of paper is heard as the user crumples the used towel before discarding it into the nearby bin.",
+        "question": "What specific action and object generated the dry, crunching sound at 01:32?",
+        "answer": "The sound was generated by the user crumpling a used paper towel.",
+        "timestamp": "01:32 - 01:34",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_spatial_location",
+        "caption": "[00:22] A solid, medium-volume thud resonates as the user closes the white door behind them, signaling they have completely left the previous room.",
+        "question": "What was the spatial location of the sound of the door closing at 00:22 relative to the camera wearer?",
+        "answer": "The sound originated from behind the camera wearer as they closed the door to the room they just exited.",
+        "timestamp": "00:22 - 00:23",
+        "confidence": 0.8
+      },
+      {
+        "modality": "audio",
+        "section": "audio_temporal_attribute",
+        "caption": "[00:47] Continuous soft, squelching and rubbing sounds are produced as the user thoroughly lathers soap between their palms.",
+        "question": "What was the duration of the continuous soft, squelching and rubbing sounds during the soap lathering process?",
+        "answer": "The sounds lasted for approximately 15 seconds, starting at 00:47 and continuing until 01:02.",
+        "timestamp": "00:47 - 01:02",
+        "confidence": 0.8
+      }
+    ]
+  }
+}
