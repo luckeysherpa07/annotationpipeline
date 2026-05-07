@@ -21,7 +21,7 @@ from annotation_feature.pipeline import (
     run_marigold_depth_qa,
     run_late_fusion,
 )
-from annotation_feature.reasoning import normalize_all_modalities
+from annotation_feature.reasoning import normalize_all_modalities, run_group_evidence
 from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -193,9 +193,10 @@ def main():
         print("\n--- LATE FUSION ---")
         print("26. Run late fusion on existing modality JSON results")
         print("27. Normalize evidence units from existing modality JSON results")
-        print("\n28. Exit")
+        print("28. Group normalized evidence units by reasoning category")
+        print("\n29. Exit")
 
-        choice = input("\nEnter choice (1-28): ").strip()
+        choice = input("\nEnter choice (1-29): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -479,6 +480,15 @@ def main():
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
         elif choice == "28":
+            print("\n" + "-" * 60)
+            print("Running: group normalized evidence units by reasoning category")
+            print("-" * 60)
+            print("This step reads normalized_evidence_units.json.")
+            print("It writes grouped evidence to grouped_evidence.json.\n")
+            grouped_results = run_group_evidence()
+            print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
+
+        elif choice == "29":
             print("\nExiting.")
             break
 
