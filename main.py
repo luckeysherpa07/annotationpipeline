@@ -192,6 +192,7 @@ def main():
         print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
         print("26. Run late fusion on existing modality JSON results")
+        print("\n--- HOLISTIC QA ---")
         print("27. Normalize evidence units from existing modality JSON results")
         print("28. Group normalized evidence units by reasoning category")
         print("\n29. Exit")
