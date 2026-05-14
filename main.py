@@ -21,7 +21,11 @@ from annotation_feature.pipeline import (
     run_marigold_depth_qa,
     run_late_fusion,
 )
-from annotation_feature.reasoning import normalize_all_modalities, run_group_evidence
+from annotation_feature.reasoning import (
+    normalize_all_modalities,
+    run_export_grouped_qa,
+    run_group_evidence,
+)
 from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -195,9 +199,10 @@ def main():
         print("\n--- HOLISTIC QA ---")
         print("27. Normalize evidence units from existing modality JSON results")
         print("28. Group normalized evidence units by reasoning category")
-        print("\n29. Exit")
+        print("29. Export Q/A pairs from grouped QA into JSON")
+        print("\n30. Exit")
 
-        choice = input("\nEnter choice (1-29): ").strip()
+        choice = input("\nEnter choice (1-30): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -490,6 +495,15 @@ def main():
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
         elif choice == "29":
+            print("\n" + "-" * 60)
+            print("Running: export grouped Q/A pairs to separate JSON")
+            print("-" * 60)
+            print("This step reads grouped_evidence.json.")
+            print("It writes split Q/A pairs to grouped_qa_pairs.json.\n")
+            grouped_qa_results = run_export_grouped_qa()
+            print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
+
+        elif choice == "30":
             print("\nExiting.")
             break
 
