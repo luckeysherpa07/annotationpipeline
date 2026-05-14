@@ -20,8 +20,14 @@ from annotation_feature.pipeline import (
     run_marigold_ir_depth_estimation,
     run_marigold_depth_qa,
     run_late_fusion,
+    run_task_slicing,
+    run_segmented_pipeline,
 )
-from annotation_feature.reasoning import normalize_all_modalities, run_group_evidence
+from annotation_feature.reasoning import (
+    normalize_all_modalities,
+    run_export_grouped_qa,
+    run_group_evidence,
+)
 from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -143,6 +149,29 @@ def _run_all_pipelines(test_mode: bool, skip_api: bool) -> None:
     print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
 
 
+def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
+    print("\n" + "-" * 60)
+    print(f"Running: {label}")
+    print("-" * 60)
+    print("This step reads dataset/**/**_task_segments.json.")
+    print("It writes selected segmented modality results to segmented_outputs/.")
+    print(f"Selected modality/modalities: {', '.join(modalities)}")
+    print("WARNING: This will use Gemini API quota for each selected segment and modality.")
+    print("-" * 60)
+    if _confirm():
+        output_paths = run_segmented_pipeline(
+            dataset_folder="dataset",
+            output_folder="segmented_outputs",
+            skip_api=False,
+            modalities=modalities,
+        )
+        print("Segmented outputs:")
+        for modality, path in sorted(output_paths.items()):
+            print(f"  {modality}: {path}")
+    else:
+        print("Cancelled.")
+
+
 def main():
     print("\n" + "=" * 60)
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
@@ -192,12 +221,21 @@ def main():
         print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
         print("26. Run late fusion on existing modality JSON results")
+        print("\n--- TASK SLICING ---")
+        print("27. Generate semantic task segment suggestions")
+        print("28. Run RGB QA after task segment")
+        print("29. Run EVENT QA after task segment")
+        print("30. Run DEPTH QA after task segment")
+        print("31. Run IR QA after task segment")
+        print("32. Run AUDIO QA after task segment")
+        print("33. Run ALL QA pipelines on task segments")
         print("\n--- HOLISTIC QA ---")
-        print("27. Normalize evidence units from existing modality JSON results")
-        print("28. Group normalized evidence units by reasoning category")
-        print("\n29. Exit")
+        print("34. Normalize evidence units from existing modality JSON results")
+        print("35. Group normalized evidence units by reasoning category")
+        print("36. Export Q/A pairs from grouped QA into JSON")
+        print("\n37. Exit")
 
-        choice = input("\nEnter choice (1-29): ").strip()
+        choice = input("\nEnter choice (1-37): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -473,6 +511,41 @@ def main():
 
         elif choice == "27":
             print("\n" + "-" * 60)
+            print("Running: generate semantic task segment suggestions")
+            print("-" * 60)
+            print("This step reads dataset videos/audio across RGB, event, depth, IR, and audio.")
+            print("It writes editable metadata-only *_task_segments.json manifests beside source media.")
+            print("WARNING: This will use Gemini API quota for each day/night sample.")
+            print("-" * 60)
+            if _confirm():
+                output_paths = run_task_slicing(dataset_folder="dataset", test_mode=False)
+                print(f"Generated {len(output_paths)} task segment manifest(s).")
+            else:
+                print("Cancelled.")
+
+        elif choice == "28":
+            _run_segmented_qa_menu_option(["rgb"], "RGB QA after task segment")
+
+        elif choice == "29":
+            _run_segmented_qa_menu_option(["event"], "EVENT QA after task segment")
+
+        elif choice == "30":
+            _run_segmented_qa_menu_option(["depth"], "DEPTH QA after task segment")
+
+        elif choice == "31":
+            _run_segmented_qa_menu_option(["ir"], "IR QA after task segment")
+
+        elif choice == "32":
+            _run_segmented_qa_menu_option(["audio"], "AUDIO QA after task segment")
+
+        elif choice == "33":
+            _run_segmented_qa_menu_option(
+                ["rgb", "event", "depth", "ir", "audio"],
+                "ALL QA pipelines on task segments",
+            )
+
+        elif choice == "34":
+            print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
             print("This step reads RGB, event, depth, IR, and audio result files.")
@@ -480,7 +553,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "28":
+        elif choice == "35":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -489,7 +562,16 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "29":
+        elif choice == "36":
+            print("\n" + "-" * 60)
+            print("Running: export grouped Q/A pairs to separate JSON")
+            print("-" * 60)
+            print("This step reads grouped_evidence.json.")
+            print("It writes split Q/A pairs to grouped_qa_pairs.json.\n")
+            grouped_qa_results = run_export_grouped_qa()
+            print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
+
+        elif choice == "37":
             print("\nExiting.")
             break
 

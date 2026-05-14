@@ -1,0 +1,37 @@
+{
+  "dataset\\cut_carrot_split\\cut_carrot_day_seg_001": {
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_001",
+      "task_label": "peeling carrot",
+      "start_seconds": 0.0,
+      "end_seconds": 45.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:45.000"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The egocentric video shows the camera wearer interacting with nearby objects using their hands. The main interactions involve reaching, grasping, moving, placing, and manipulating items on a work surface."
+      },
+      "audio_chronological_caption": {
+        "caption": "[00:00 - 00:04] The user begins manipulating objects near the camera; soft handling sounds align with visible hand movement.\n[00:04 - 00:09] A short sequence of sharper contact sounds occurs as an object is placed or adjusted on the surface.\n[00:09 - 00:14] The interaction continues with quieter rustling and movement sounds, consistent with ongoing hand-object activity."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 00:04",
+          "caption": "[00:00] Soft handling sounds occur while the user manipulates nearby objects.",
+          "question": "What action most likely produced the soft handling sounds at the start?",
+          "answer": "The user's hand-object manipulation produced the sounds."
+        },
+        "audio_sound_characteristics": {
+          "timestamp": "00:04 - 00:09",
+          "caption": "[00:04] Sharper contact sounds occur as an object is placed or adjusted.",
+          "question": "What was the character of the contact sounds in the middle segment?",
+          "answer": "They were sharper contact sounds from placing or adjusting an object."
+        }
+      }
+    }
+  }
+}
