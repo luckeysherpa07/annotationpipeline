@@ -21,6 +21,12 @@ def run_marigold_ir_depth_estimation(*args, **kwargs):
     return _run(*args, **kwargs)
 
 
+def run_task_slicing(*args, **kwargs):
+    from .task_slicing import run_task_slicing as _run
+
+    return _run(*args, **kwargs)
+
+
 __all__ = [
     "run",
     "run_audio",
@@ -31,4 +37,5 @@ __all__ = [
     "run_marigold_ir_depth_estimation",
     "run_marigold_depth_qa",
     "run_late_fusion",
+    "run_task_slicing",
 ]

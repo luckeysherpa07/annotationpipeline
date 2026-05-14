@@ -20,6 +20,7 @@ from annotation_feature.pipeline import (
     run_marigold_ir_depth_estimation,
     run_marigold_depth_qa,
     run_late_fusion,
+    run_task_slicing,
 )
 from annotation_feature.reasoning import (
     normalize_all_modalities,
@@ -196,13 +197,15 @@ def main():
         print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
         print("26. Run late fusion on existing modality JSON results")
+        print("\n--- TASK SLICING ---")
+        print("27. Generate semantic task segment suggestions")
         print("\n--- HOLISTIC QA ---")
-        print("27. Normalize evidence units from existing modality JSON results")
-        print("28. Group normalized evidence units by reasoning category")
-        print("29. Export Q/A pairs from grouped QA into JSON")
-        print("\n30. Exit")
+        print("28. Normalize evidence units from existing modality JSON results")
+        print("29. Group normalized evidence units by reasoning category")
+        print("30. Export Q/A pairs from grouped QA into JSON")
+        print("\n31. Exit")
 
-        choice = input("\nEnter choice (1-30): ").strip()
+        choice = input("\nEnter choice (1-31): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -478,6 +481,20 @@ def main():
 
         elif choice == "27":
             print("\n" + "-" * 60)
+            print("Running: generate semantic task segment suggestions")
+            print("-" * 60)
+            print("This step reads dataset videos/audio across RGB, event, depth, IR, and audio.")
+            print("It writes editable metadata-only *_task_segments.json manifests beside source media.")
+            print("WARNING: This will use Gemini API quota for each day/night sample.")
+            print("-" * 60)
+            if _confirm():
+                output_paths = run_task_slicing(dataset_folder="dataset", test_mode=False)
+                print(f"Generated {len(output_paths)} task segment manifest(s).")
+            else:
+                print("Cancelled.")
+
+        elif choice == "28":
+            print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
             print("This step reads RGB, event, depth, IR, and audio result files.")
@@ -485,7 +502,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "28":
+        elif choice == "29":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -494,7 +511,7 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "29":
+        elif choice == "30":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs to separate JSON")
             print("-" * 60)
@@ -503,7 +520,7 @@ def main():
             grouped_qa_results = run_export_grouped_qa()
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
-        elif choice == "30":
+        elif choice == "31":
             print("\nExiting.")
             break
 
