@@ -9,12 +9,11 @@ caption for each sample.
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
 import re
 from typing import Any
-
 
 DEFAULT_MODALITY_FILES = {
     "rgb": "rgb_qa_results.json",
@@ -52,8 +51,8 @@ DEFAULT_SECTION_QA_LIMITS = {
     "visible_objects_and_layout": 3,
     "motion_and_event_cues": 2,
     "audio_cues": 2,
-    "cross_modal_details": 2,
-    "final_unified_caption": 1,
+    "cross_modal_details": 0,
+    "final_unified_caption": 0,
 }
 
 RELAXED_SECTION_QA_LIMITS = {
@@ -61,8 +60,8 @@ RELAXED_SECTION_QA_LIMITS = {
     "visible_objects_and_layout": 6,
     "motion_and_event_cues": 4,
     "audio_cues": 4,
-    "cross_modal_details": 3,
-    "final_unified_caption": 1,
+    "cross_modal_details": 0,
+    "final_unified_caption": 0,
 }
 
 DEFAULT_MIN_SCORE = 0.45
@@ -133,7 +132,8 @@ SECTION_KEYWORDS = {
 
 SECTION_CATEGORY_HINTS = {
     "scene_overview": ("object_recognition", "scene_sequence", "environmental_scene", "depth_object_recognition"),
-    "visible_objects_and_layout": ("object_recognition", "spatial_reasoning", "counting", "depth_spatial_reasoning", "depth_counting"),
+    "visible_objects_and_layout": ("object_recognition", "spatial_reasoning", "counting", "depth_spatial_reasoning",
+                                   "depth_counting"),
     "motion_and_event_cues": ("dynamic_recognition", "dynamic_counting", "scene_sequence", "action", "event_"),
     "audio_cues": ("sound_", "speech_", "music_", "audio_", "environmental_scene", "action_from_sound"),
     "cross_modal_details": ("text_recognition", "light_", "non_common", "action", "audio_visual_correspondence"),
@@ -165,23 +165,499 @@ MODALITY_SORT_ORDER = {
     "audio": 4,
 }
 
+QA_SECTIONS = (
+    "scene_and_context",
+    "objects_and_attributes",
+    "spatial_and_layout",
+    "motion_and_action",
+    "temporal_sequence",
+    "counting",
+    "text_and_symbols",
+    "audio_understanding",
+    "anomaly_and_safety",
+    "others",
+)
+
+CATEGORY_SECTION_MAP = {
+    "scene_sequence": "temporal_sequence",
+    "event_scene_sequence": "temporal_sequence",
+    "depth_scene_sequence": "temporal_sequence",
+    "light_recongnition": "scene_and_context",
+    "light_recognition": "scene_and_context",
+    "light_change": "scene_and_context",
+    "object_recognition": "objects_and_attributes",
+    "event_object_recognition": "objects_and_attributes",
+    "depth_object_recognition": "objects_and_attributes",
+    "spatial_reasoning": "spatial_and_layout",
+    "event_spatial_reasoning": "spatial_and_layout",
+    "depth_spatial_reasoning": "spatial_and_layout",
+    "navigation": "spatial_and_layout",
+    "event_navigation": "spatial_and_layout",
+    "depth_navigation": "spatial_and_layout",
+    "action": "motion_and_action",
+    "dynamic_recognition": "motion_and_action",
+    "dynamic_counting": "motion_and_action",
+    "event_action": "motion_and_action",
+    "event_dynamic_recognition": "motion_and_action",
+    "event_dynamic_counting": "motion_and_action",
+    "depth_action": "motion_and_action",
+    "depth_dynamic_recognition": "motion_and_action",
+    "depth_dynamic_counting": "motion_and_action",
+    "counting": "counting",
+    "event_counting": "counting",
+    "depth_counting": "counting",
+    "text_recognition": "text_and_symbols",
+    "audio_hia": "audio_understanding",
+    "audio_chronological_caption": "audio_understanding",
+    "non_common": "anomaly_and_safety",
+    "event_non_common": "anomaly_and_safety",
+    "depth_non_common": "anomaly_and_safety",
+}
+
+SECTION_FACT_TYPES = {
+    "scene_overview": {"scene", "environment", "object_presence", "lighting"},
+    "visible_objects_and_layout": {"object_presence", "spatial_relation", "count", "non_common"},
+    "motion_and_event_cues": {"action", "motion", "temporal", "verification"},
+    "audio_cues": {"sound", "audio_event", "audio_causality"},
+    "cross_modal_details": {"cross_modal"},
+    "final_unified_caption": {
+        "scene",
+        "environment",
+        "object_presence",
+        "spatial_relation",
+        "count",
+        "lighting",
+        "action",
+        "motion",
+        "temporal",
+        "sound",
+        "audio_event",
+        "audio_causality",
+        "verification",
+        "cross_modal",
+        "non_common",
+    },
+}
+
+FACT_SECTION_PRIORITIES = {
+    "scene_overview": ("scene", "environment", "lighting", "object_presence", "count"),
+    "visible_objects_and_layout": ("spatial_relation", "object_presence", "count", "non_common"),
+    "motion_and_event_cues": ("action", "motion", "temporal", "verification"),
+    "audio_cues": ("sound", "audio_event", "audio_causality"),
+    "cross_modal_details": ("cross_modal",),
+    "final_unified_caption": (
+        "cross_modal",
+        "scene",
+        "environment",
+        "object_presence",
+        "spatial_relation",
+        "count",
+        "lighting",
+        "action",
+        "motion",
+        "temporal",
+        "sound",
+        "audio_event",
+        "audio_causality",
+        "verification",
+        "non_common",
+    ),
+}
+
+
+@dataclass
+class SemanticFact:
+    modality: str
+    section: str
+    fact_type: str
+    entity: str
+    attribute: str
+    value: str
+    confidence: float
+    source_question: str
+    source_answer: str
+    source_caption: str
+    source_key: str
+    annotation_key: str
+    support_score: float = 0.0
+    modality_reliability: float = 0.0
+
 
 @dataclass
 class CaptionEvidence:
     modality: str
     source_key: str
     annotation_key: str
+    question: str
+    answer: str
     caption: str
     sentence: str
     normalized_tokens: set[str]
+    qa_index: int | None = None
     support_score: float = 0.0
     modality_reliability: float = 0.0
-    original_qa: dict[str, str] | None = None  # Preserve original modality Q/A as fallback
+    semantic_facts: list[SemanticFact] = field(default_factory=list)
+    original_qa: dict[str, str] | None = None
+
+
+def _serialize_semantic_fact(fact: SemanticFact) -> dict[str, Any]:
+    return asdict(fact)
+
+
+def _is_yes_no_answer(text: str) -> bool:
+    normalized = _clean_whitespace(text).lower()
+    return normalized in {"yes", "no", "true", "false"}
+
+
+def _looks_like_question(text: str) -> bool:
+    normalized = _clean_whitespace(text).lower()
+    return normalized.startswith(("what ", "where ", "when ", "which ", "how ", "why ", "is ", "are ", "do ", "does ", "did ", "was ", "were "))
+
+
+def _first_answer_fragment(text: str) -> str:
+    cleaned = _clean_whitespace(text).strip(" .,:;\n\t")
+    if not cleaned:
+        return ""
+
+    parts = [part.strip(" .,:;\n\t") for part in re.split(r"\s*\d+\.\s*", cleaned) if part.strip(" .,:;\n\t")]
+    if parts:
+        return parts[0]
+
+    return cleaned
+
+
+def _infer_fact_type(section: str, question: str, answer: str, caption: str) -> str:
+    text = f"{section} {question} {answer} {caption}".lower()
+    question_lower = question.lower().strip()
+    section_lower = section.lower()
+
+    if "audio_" in section_lower or section_lower.startswith("audio"):
+        if any(word in section_lower for word in ("chronological", "temporal")):
+            return "audio_event"
+        if any(word in section_lower for word in ("source", "causality", "inferential")):
+            return "audio_causality"
+        return "sound"
+
+    if "object_recognition" in section_lower:
+        return "object_presence"
+
+    if any(word in section_lower for word in ("spatial_reasoning", "navigation")):
+        return "spatial_relation"
+
+    if "counting" in section_lower:
+        return "count"
+
+    if any(word in section_lower for word in ("dynamic_recognition", "scene_sequence")):
+        return "motion"
+
+    if "dynamic_counting" in section_lower:
+        return "count"
+
+    if "action" in section_lower:
+        return "action"
+
+    if any(word in section_lower for word in ("light_recongnition", "light_recognition", "light_change")):
+        return "lighting"
+
+    if "text_recognition" in section_lower:
+        return "object_presence"
+
+    if "non_common" in section_lower:
+        return "non_common"
+
+    if "scene_sequence" in section_lower:
+        return "motion"
+
+    if section.startswith("audio_") or "sound" in text or "audio" in text or "scraping" in text or "thwack" in text:
+        if any(word in text for word in ("because", "caused", "cause", "result", "due to")):
+            return "audio_causality"
+        if any(word in text for word in ("characteristics", "texture", "tempo", "source", "identification")):
+            return "audio_event"
+        return "sound"
+
+    if any(word in text for word in ("light", "illumination", "brightness", "shadow", "luminous")):
+        return "lighting"
+
+    if question_lower.startswith(("how many", "how much")) or re.search(r"\b\d+\b", answer):
+        return "count"
+
+    if question_lower.startswith(("where", "which side", "in which direction")) or any(
+        phrase in text for phrase in ("to the left", "to the right", "on the", "in front", "behind", "above", "below")
+    ):
+        return "spatial_relation"
+
+    if question_lower.startswith(("what action", "what is happening", "what occurs", "what does", "what do")):
+        return "action"
+
+    if any(word in text for word in ("enter", "lift", "grasp", "pick up", "move", "motion", "moving", "sequence")):
+        return "motion"
+
+    if question_lower.startswith(("when", "at what frame")) or "frame_" in text or re.search(r"\bframe\b", text):
+        return "temporal"
+
+    if _is_yes_no_answer(answer) or question_lower.startswith(("is ", "are ", "was ", "were ", "did ", "does ", "do ")):
+        return "verification"
+
+    if any(word in text for word in ("setting", "scene", "workspace", "kitchen", "room", "environment")):
+        return "scene"
+
+    if any(word in text for word in ("object", "device", "tool", "item", "carrot", "bowl", "knife", "peeler", "laptop", "hands")):
+        return "object_presence"
+
+    if any(word in text for word in ("match", "correspond", "consistent", "align", "reinforced", "cross modal")):
+        return "cross_modal"
+
+    if any(word in text for word in ("unsafe", "odd", "wrong", "uncommon", "non common", "impossible")):
+        return "non_common"
+
+    return "environment"
+
+
+def _infer_fact_entity(section: str, question: str, answer: str, fact_type: str) -> str:
+    cleaned_answer = _first_answer_fragment(answer)
+    if not cleaned_answer:
+        return ""
+    if fact_type == "count":
+        count_question = _clean_whitespace(question)
+        match = re.search(r"how many\s+(.+?)(?:\s+are\b|\s+is\b|\s+do\b|\s+does\b|\s+appear\b|\s+visible\b|\s+present\b|\s+in\b|\s+on\b|\?|$)", count_question, flags=re.IGNORECASE)
+        if match:
+            entity = _clean_whitespace(match.group(1))
+            entity = re.split(r"\b(?:are|is|do|does|move|moves|enter|enters|appear|appears|start|starts|begin|begins|in|on|at|with|during|while|to)\b", entity, maxsplit=1, flags=re.IGNORECASE)[0]
+            return _clean_whitespace(entity)
+        return cleaned_answer
+
+    if fact_type == "temporal":
+        return _clean_whitespace(question)
+
+    if fact_type == "verification":
+        return cleaned_answer
+
+    if fact_type == "spatial_relation":
+        if any(token in cleaned_answer.lower() for token in ("left", "right", "above", "below", "in front", "behind", "center", "middle")):
+            return _clean_whitespace(question)
+        return cleaned_answer
+
+    if fact_type in {"sound", "audio_event", "audio_causality", "action", "motion", "scene", "environment", "object_presence", "lighting", "non_common"}:
+        return cleaned_answer
+
+    return cleaned_answer
+
+
+def _infer_fact_attribute(section: str, question: str, fact_type: str) -> str:
+    question = _clean_whitespace(question)
+    if fact_type == "spatial_relation":
+        if " of the " in question.lower():
+            return "relative_location"
+        return "location"
+    if fact_type == "count":
+        return "count"
+    if fact_type in {"sound", "audio_event", "audio_causality"}:
+        return "audio"
+    if fact_type == "lighting":
+        return "illumination"
+    if fact_type == "verification":
+        return "truth_value"
+    if fact_type in {"action", "motion"}:
+        return "motion"
+    if fact_type == "temporal":
+        return "time"
+    if fact_type == "scene":
+        return "scene_type"
+    if fact_type == "non_common":
+        return "anomaly"
+    return "fact"
+
+
+def _infer_fact_value(answer: str, caption: str, fact_type: str) -> str:
+    cleaned_answer = _first_answer_fragment(answer)
+    if cleaned_answer:
+        if fact_type == "verification":
+            return cleaned_answer.lower().capitalize()
+        return cleaned_answer
+
+    cleaned_caption = _clean_whitespace(caption)
+    if fact_type == "scene":
+        return cleaned_caption
+    if fact_type == "count":
+        match = re.search(r"\b\d+\b", cleaned_caption)
+        if match:
+            return match.group(0)
+    return cleaned_caption
+
+
+def _build_semantic_fact(
+        modality: str,
+        source_key: str,
+        annotation_key: str,
+        section: str,
+        caption: str,
+        question: str,
+        answer: str,
+        confidence: float,
+        support_score: float,
+        modality_reliability: float,
+) -> SemanticFact:
+    fact_type = _infer_fact_type(section, question, answer, caption)
+    entity = _infer_fact_entity(section, question, answer, fact_type)
+    attribute = _infer_fact_attribute(section, question, fact_type)
+    value = _infer_fact_value(answer, caption, fact_type)
+    if fact_type == "cross_modal":
+        attribute = "agreement"
+    return SemanticFact(
+        modality=modality,
+        section=section,
+        fact_type=fact_type,
+        entity=entity,
+        attribute=attribute,
+        value=value,
+        confidence=confidence,
+        source_question=_clean_whitespace(question),
+        source_answer=_clean_whitespace(answer),
+        source_caption=_clean_whitespace(caption),
+        source_key=source_key,
+        annotation_key=annotation_key,
+        support_score=support_score,
+        modality_reliability=modality_reliability,
+    )
+
+
+def _fact_section_score(fact: SemanticFact, section: str) -> float:
+    score = fact.confidence * 0.8 + fact.modality_reliability * 0.6 + fact.support_score * 0.5
+    if fact.fact_type in SECTION_FACT_TYPES.get(section, set()):
+        score += 0.7
+    if fact.fact_type in FACT_SECTION_PRIORITIES.get(section, ()):  # type: ignore[arg-type]
+        score += 0.35
+    if section == "cross_modal_details" and len(fact.entity.split()) > 1:
+        score += 0.1
+    return score
+
+
+def _format_fact_clause(fact: SemanticFact) -> str:
+    modality = fact.modality.upper()
+    entity = fact.entity.strip()
+    value = fact.value.strip()
+
+    if fact.fact_type == "spatial_relation":
+        if entity and value and not _looks_like_question(entity):
+            return f"{modality} places {entity} {value}"
+        if value:
+            return f"{modality} places {value}"
+    if fact.fact_type == "count":
+        if entity and value and not _looks_like_question(entity):
+            return f"{modality} counts {value} {entity}"
+        return f"{modality} counts {value}"
+    if fact.fact_type == "object_presence":
+        return f"{modality} grounds {value or entity}"
+    if fact.fact_type in {"action", "motion"}:
+        return f"{modality} captures {value or entity}"
+    if fact.fact_type in {"sound", "audio_event", "audio_causality"}:
+        return f"{modality} captures {value or entity}"
+    if fact.fact_type == "lighting":
+        return f"{modality} describes {value or entity}"
+    if fact.fact_type == "verification":
+        return f"{modality} confirms {value or entity}"
+    if fact.fact_type == "temporal":
+        return f"{modality} anchors the event at {value or entity}"
+    if fact.fact_type == "non_common":
+        return f"{modality} flags {value or entity}"
+    if fact.fact_type == "scene":
+        return f"{modality} sets the scene as {value or entity}"
+    if fact.fact_type == "cross_modal":
+        return f"{modality} links {value or entity}"
+    if entity and value and entity.lower() != value.lower() and not _looks_like_question(entity):
+        return f"{modality} grounds {entity} as {value}"
+    return f"{modality} notes {value or entity}"
+
+
+def _fact_to_qa(fact: SemanticFact, section: str) -> tuple[str, str]:
+    entity = fact.entity.strip()
+    value = fact.value.strip()
+
+    if section == "scene_overview":
+        if value:
+            return "What scene context is grounded by the semantic facts?", value
+        return "What scene context is grounded by the semantic facts?", entity or fact.source_answer
+
+    if section == "visible_objects_and_layout":
+        if fact.fact_type == "spatial_relation" and entity and value:
+            return f"Where is {entity} located?", value
+        if fact.fact_type == "count" and entity and value:
+            return f"How many {entity} are identified?", value
+        return "What object or layout fact is grounded?", value or entity
+
+    if section == "motion_and_event_cues":
+        return "What motion or event cue is grounded?", value or entity or fact.source_answer
+
+    if section == "audio_cues":
+        return "What audio cue is grounded?", value or entity or fact.source_answer
+
+    if section == "cross_modal_details":
+        return "What cross-modal detail is supported by the facts?", value or entity or fact.source_answer
+
+    if section == "final_unified_caption":
+        return "What unified scene does the semantic graph describe?", value or entity or fact.source_answer
+
+    return "What semantic fact is grounded?", value or entity or fact.source_answer
+
+
+def _choose_facts_for_section(
+        semantic_facts: list[SemanticFact],
+        section: str,
+        limit: int,
+) -> list[SemanticFact]:
+    allowed_types = SECTION_FACT_TYPES.get(section, set())
+    scoped_facts = [fact for fact in semantic_facts if not allowed_types or fact.fact_type in allowed_types]
+    if not scoped_facts:
+        scoped_facts = semantic_facts
+
+    seen: set[tuple[str, str, str, str, str]] = set()
+    scored_facts: list[tuple[float, SemanticFact]] = []
+
+    for fact in scoped_facts:
+        score = _fact_section_score(fact, section)
+        if score <= 0:
+            continue
+        key = (fact.modality, fact.fact_type, fact.entity, fact.attribute, fact.value)
+        if key in seen:
+            continue
+        seen.add(key)
+        scored_facts.append((score, fact))
+
+    scored_facts.sort(key=lambda item: (-item[0], -item[1].confidence, -item[1].modality_reliability, item[1].modality))
+    selected = [fact for _, fact in scored_facts[:limit]]
+    if section == "cross_modal_details":
+        return [fact for fact in selected if fact.fact_type == "cross_modal"] or selected
+    return selected
+
+
+def _summarize_facts(semantic_facts: list[SemanticFact], section: str, limit: int) -> str:
+    selected = _choose_facts_for_section(semantic_facts, section, limit)
+    if not selected:
+        return ""
+
+    clauses = [_format_fact_clause(fact) for fact in selected if _format_fact_clause(fact)]
+    clauses = list(dict.fromkeys(clauses))
+    if section == "cross_modal_details" and len(clauses) >= 2:
+        return f"{clauses[0]} while {clauses[1].lower()}"
+    return ". ".join(clause.rstrip(".") for clause in clauses[:limit]).strip()
+
+
+def _facts_from_evidences(evidences: list[CaptionEvidence]) -> list[SemanticFact]:
+    facts: list[SemanticFact] = []
+    seen: set[tuple[str, str, str, str, str, str]] = set()
+    for evidence in evidences:
+        for fact in evidence.semantic_facts:
+            key = (fact.modality, fact.section, fact.fact_type, fact.entity, fact.attribute, fact.value)
+            if key in seen:
+                continue
+            seen.add(key)
+            facts.append(fact)
+    return facts
 
 
 def _trim_answer(text: str, max_words: int = 8) -> str:
     """Trim answer to complete phrases with intelligent sentence boundary detection.
-    
+
     Args:
         text: The answer text to trim
         max_words: Maximum number of words allowed (default 8 for balanced VQA compliance)
@@ -191,23 +667,23 @@ def _trim_answer(text: str, max_words: int = 8) -> str:
                   - Spatial relations need: 3-6 words (2-word object + 3-4 words context)
                   - Multi-word objects: up to 8 words (e.g., "empty white bowl on counter")
                   - Compromise: 8 words balances completeness with conciseness
-    
+
     Strategy:
     1. Try to find a natural sentence boundary (period, exclamation mark, question mark)
     2. If found, take up to that boundary (or up to max_words, whichever is shorter)
     3. Otherwise, try phrase separators (comma, "and", etc.)
     4. As fallback, apply word-count truncation and remove trailing prepositions/articles
-    
+
     This prevents incomplete truncations like "To the right of the cutting" when
     the full phrase should be "To the right of the cutting board" (staying within limits).
     """
     text = _clean_whitespace(text.strip(" .,:;"))
     if not text:
         return ""
-    
+
     # Remove leading articles
     text = re.sub(r"^(?:a|an|the)\s+", "", text, flags=re.IGNORECASE)
-    
+
     # First, try to find a natural sentence boundary (period, exclamation, question mark)
     # Look for these within max_words to keep answers reasonably concise
     sentence_boundary_match = re.search(r'([^.!?]*[.!?])', text)
@@ -216,7 +692,7 @@ def _trim_answer(text: str, max_words: int = 8) -> str:
         words_in_candidate = len(candidate.split())
         if words_in_candidate <= max_words:
             return candidate
-    
+
     # Second, try phrase boundary separators (ordered by priority)
     phrase_separators = (
         ", followed by", ". ", ",",
@@ -226,30 +702,30 @@ def _trim_answer(text: str, max_words: int = 8) -> str:
         if separator in text:
             text = text.split(separator, 1)[0].strip()
             break
-    
+
     # Finally, apply word-count truncation if necessary
     words = text.split()
     if len(words) > max_words:
         words = words[:max_words]
-        
+
         # Remove trailing prepositions/articles to avoid incomplete phrases
-        # (e.g., "power strip with 3 outlets sits on the" → "power strip with 3 outlets sits on")
-        trailing_preps = {"on", "in", "at", "to", "from", "by", "of", "with", "for", 
-                         "a", "an", "the", "and", "or", "as", "but"}
+        # (e.g., "power strip with 3 outlets sits on the" â†’ "power strip with 3 outlets sits on")
+        trailing_preps = {"on", "in", "at", "to", "from", "by", "of", "with", "for",
+                          "a", "an", "the", "and", "or", "as", "but"}
         while words and words[-1].lower() in trailing_preps:
             words.pop()
-        
+
         # Ensure we still have content
         if not words:
             words = text.split()[:max_words]
-    
+
     result = " ".join(words)
     return result.strip(" .,:;")
 
 
 def _best_visual_modality(
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
 ) -> str:
     available_visual = [modality for modality in VISUAL_MODALITIES if modality in source_entries]
     if "rgb" in available_visual:
@@ -268,9 +744,9 @@ def _best_visual_modality(
 
 
 def _primary_category_for_section(
-    section: str,
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
+        section: str,
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
 ) -> str:
     if section in {"scene_overview", "cross_modal_details", "final_unified_caption"}:
         return "fused"
@@ -292,12 +768,13 @@ def _primary_category_for_section(
 
 
 def _supporting_modalities(
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
 ) -> list[str]:
     return sorted(
         source_entries.keys(),
-        key=lambda modality: (-modality_reliability.get(modality, 0.0), MODALITY_SORT_ORDER.get(modality, 99), modality),
+        key=lambda modality: (-modality_reliability.get(modality, 0.0), MODALITY_SORT_ORDER.get(modality, 99),
+                              modality),
     )
 
 
@@ -417,10 +894,11 @@ def _extract_final_qa(caption: str) -> tuple[str, str]:
 
 
 def _generate_field_qa(
-    section: str,
-    caption: str,
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
+        section: str,
+        caption: str,
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
+    semantic_facts: list[SemanticFact] | None = None,
 ) -> dict[str, Any]:
     category = _primary_category_for_section(section, source_entries, modality_reliability)
     qa = {
@@ -429,9 +907,24 @@ def _generate_field_qa(
         "answer": "",
         "category": category,
         "supporting_modalities": _supporting_modalities(source_entries, modality_reliability),
+        "qa_source": "generated_from_caption",
     }
     if not caption:
         return qa
+
+    if semantic_facts:
+        selected_fact = _choose_facts_for_section(semantic_facts, section, limit=1)
+        if selected_fact:
+            question, answer = _fact_to_qa(selected_fact[0], section)
+            qa["question"] = _clean_whitespace(question)
+            qa["answer"] = _clean_whitespace(answer or selected_fact[0].value or selected_fact[0].source_answer)
+            qa["semantic_fact"] = _serialize_semantic_fact(selected_fact[0])
+            qa["fact_type"] = selected_fact[0].fact_type
+            qa["source_question"] = selected_fact[0].source_question
+            qa["source_answer"] = selected_fact[0].source_answer
+            qa["source_caption"] = selected_fact[0].source_caption
+            qa["qa_source"] = "semantic_fact"
+            return qa
 
     if section == "scene_overview":
         answer = _extract_scene_answer(caption)
@@ -452,23 +945,204 @@ def _generate_field_qa(
     return qa
 
 
+def _qa_from_evidence(section: str, evidence: CaptionEvidence) -> dict[str, Any]:
+    qa = {
+        "caption": evidence.caption or evidence.sentence,
+        "question": evidence.question,
+        "answer": evidence.answer,
+        "category": evidence.annotation_key,
+        "supporting_modalities": [evidence.modality],
+        "qa_source": "original_modality",
+    }
+    if qa["question"] and qa["answer"]:
+        return qa
+
+    generated = _generate_field_qa(
+        _legacy_section_for_qa_section(section),
+        evidence.caption or evidence.sentence,
+        {evidence.modality: evidence.source_key},
+        {evidence.modality: evidence.modality_reliability},
+    )
+    generated["qa_source"] = "caption_fallback"
+    return generated
+
+
+def _section_for_category(category: str) -> str:
+    return CATEGORY_SECTION_MAP.get(category, "others")
+
+
+def _benchmark_qa_from_evidence(
+        evidence: CaptionEvidence,
+        *,
+        section: str,
+        fusion_score: float,
+        selection_reason: str,
+) -> dict[str, Any]:
+    qa = _qa_from_evidence(section, evidence)
+    qa["section"] = section
+    qa["category"] = evidence.annotation_key
+    qa["source_modality"] = evidence.modality
+    qa["source_key"] = evidence.source_key
+    qa["annotation_key"] = evidence.annotation_key
+    qa["qa_index"] = evidence.qa_index
+    qa["support_score"] = round(evidence.support_score, 3)
+    qa["modality_reliability"] = round(evidence.modality_reliability, 3)
+    qa["fusion_score"] = round(fusion_score, 3)
+    qa["is_outlier"] = _looks_outlier(evidence)
+    qa["selection_reason"] = selection_reason
+    qa["source_caption"] = evidence.caption
+    if evidence.original_qa and evidence.qa_index is not None:
+        qa["source_question_block"] = evidence.original_qa["question"]
+        qa["source_answer_block"] = evidence.original_qa["answer"]
+    return qa
+
+
+def _drop_record(
+        evidence: CaptionEvidence,
+        *,
+        section: str,
+        score: float,
+        reason: str,
+) -> dict[str, Any]:
+    return {
+        "reason": reason,
+        "section": section,
+        "category": evidence.annotation_key,
+        "source_modality": evidence.modality,
+        "source_key": evidence.source_key,
+        "annotation_key": evidence.annotation_key,
+        "qa_index": evidence.qa_index,
+        "question": evidence.question,
+        "answer": evidence.answer,
+        "caption": evidence.caption,
+        "support_score": round(evidence.support_score, 3),
+        "modality_reliability": round(evidence.modality_reliability, 3),
+        "fusion_score": round(score, 3),
+        "is_outlier": _looks_outlier(evidence),
+    }
+
+
+def _deduplicate_qas(
+        scored_items: list[tuple[float, CaptionEvidence, str]],
+) -> tuple[list[tuple[float, CaptionEvidence, str]], list[dict[str, Any]]]:
+    selected: list[tuple[float, CaptionEvidence, str]] = []
+    seen_exact: set[tuple[str, str]] = set()
+    seen_tokens: list[set[str]] = []
+    dropped: list[dict[str, Any]] = []
+    for score, evidence, section in sorted(scored_items, key=lambda item: item[0], reverse=True):
+        question_key = _clean_whitespace(evidence.question).lower()
+        answer_key = _clean_whitespace(evidence.answer).lower()
+        exact_key = (question_key, answer_key)
+        if question_key and answer_key and exact_key in seen_exact:
+            dropped.append(_drop_record(evidence, section=section, score=score, reason="duplicate_exact_qa"))
+            continue
+        tokens = _tokenize(f"{evidence.question} {evidence.answer}")
+        if tokens and any(_jaccard(tokens, previous) > 0.85 for previous in seen_tokens):
+            dropped.append(_drop_record(evidence, section=section, score=score, reason="duplicate_similar_qa"))
+            continue
+        selected.append((score, evidence, section))
+        if question_key and answer_key:
+            seen_exact.add(exact_key)
+        if tokens:
+            seen_tokens.append(tokens)
+    return selected, dropped
+
+
+def _select_reliable_qas(
+        evidences: list[CaptionEvidence],
+        *,
+        min_score: float,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    scored_items: list[tuple[float, CaptionEvidence, str]] = []
+    dropped: list[dict[str, Any]] = []
+    reason_counts: dict[str, int] = defaultdict(int)
+    for evidence in evidences:
+        section = _section_for_category(evidence.annotation_key)
+        score = _sentence_score(evidence, section if section in SECTION_MODALITY_WEIGHTS else _legacy_section_for_qa_section(section))
+        if evidence.qa_index is not None:
+            score += 0.1
+        if evidence.question and evidence.answer:
+            score += 0.15
+        if section == "others":
+            score -= 0.2
+        if score <= min_score:
+            dropped.append(_drop_record(evidence, section=section, score=score, reason="score_gate"))
+            reason_counts["score_gate"] += 1
+            continue
+        if _looks_outlier(evidence):
+            dropped.append(_drop_record(evidence, section=section, score=score, reason="outlier"))
+            reason_counts["outlier"] += 1
+            continue
+        scored_items.append((score, evidence, section))
+
+    deduped_items, dedup_drops = _deduplicate_qas(scored_items)
+    dropped.extend(dedup_drops)
+    for item in dedup_drops:
+        reason_counts[item["reason"]] += 1
+
+    selected = [
+        _benchmark_qa_from_evidence(
+            evidence,
+            section=section,
+            fusion_score=score,
+            selection_reason="passed_global_reliability_filter",
+        )
+        for score, evidence, section in deduped_items
+    ]
+    diagnostics = {
+        "total_candidates": len(evidences),
+        "passed_score_and_outlier_filters": len(scored_items),
+        "selected_count": len(selected),
+        "dropped_count": len(dropped),
+        "drop_reason_counts": dict(sorted(reason_counts.items())),
+        "dropped_qas": dropped,
+    }
+    return selected, diagnostics
+
+
+def _legacy_section_for_qa_section(section: str) -> str:
+    if section in {"scene_and_context", "temporal_sequence"}:
+        return "scene_overview"
+    if section in {"objects_and_attributes", "spatial_and_layout", "text_and_symbols", "counting", "anomaly_and_safety", "others"}:
+        return "visible_objects_and_layout"
+    if section == "motion_and_action":
+        return "motion_and_event_cues"
+    if section == "audio_understanding":
+        return "audio_cues"
+    return "visible_objects_and_layout"
+
+
+def _group_qas_by_section(qas: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped = {section: [] for section in QA_SECTIONS}
+    for qa in qas:
+        grouped.setdefault(qa.get("section", "others"), []).append(qa)
+    return grouped
+
+
 def _build_field_qas(
-    sections: dict[str, str],
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
+        sections: dict[str, str],
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
+        semantic_facts: list[SemanticFact] | None = None,
 ) -> dict[str, dict[str, Any]]:
     return {
-        section: _generate_field_qa(section, sections.get(section, ""), source_entries, modality_reliability)
+        section: _generate_field_qa(
+            section,
+            sections.get(section, ""),
+            source_entries,
+            modality_reliability,
+            semantic_facts,
+        )
         for section in FIELD_QA_SECTIONS
     }
 
 
 def _build_section_evidence_qas(
-    sections: dict[str, str],
-    selected_by_section: dict[str, list[CaptionEvidence]],
-    source_entries: dict[str, str],
-    modality_reliability: dict[str, float],
-    qa_limits: dict[str, int],
+        sections: dict[str, str],
+        selected_by_section: dict[str, list[CaptionEvidence]],
+        source_entries: dict[str, str],
+        modality_reliability: dict[str, float],
+        qa_limits: dict[str, int],
 ) -> dict[str, list[dict[str, Any]]]:
     section_qas: dict[str, list[dict[str, Any]]] = {}
 
@@ -488,7 +1162,7 @@ def _build_section_evidence_qas(
                 qa["modality_reliability"] = 1.0
                 qa["fusion_score"] = None
                 qa["is_outlier"] = False
-                qa["drop_reason"] = "selected_summary"
+                qa["selection_reason"] = "selected_summary"
                 section_qas[section] = [qa]
             else:
                 section_qas[section] = []
@@ -497,40 +1171,20 @@ def _build_section_evidence_qas(
         selected = selected_by_section.get(section, [])[:limit]
         items: list[dict[str, Any]] = []
         for evidence in selected:
-            qa = _generate_field_qa(section, evidence.sentence, source_entries, modality_reliability)
-            
-            # Fallback to original modality Q/A if extraction is poor quality
-            # (empty answer or extracted answer appears incomplete)
-            extracted_answer = qa.get("answer", "").strip()
-            word_count = len(extracted_answer.split()) if extracted_answer else 0
-            ends_with_preposition = extracted_answer.endswith(
-                (" of the", " of a", " of an", " the", " a", " an", " to", " in", " on")
-            )
-            
-            # Use original Q/A if:
-            # 1. No extracted answer at all, OR
-            # 2. Answer is extremely short (< 2 words), OR
-            # 3. Answer ends with incomplete preposition (e.g., "To the" without the object)
-            should_use_original = evidence.original_qa and (
-                not extracted_answer 
-                or word_count < 2  # Extremely short (less than 2 words)
-                or ends_with_preposition  # Ends with incomplete preposition
-            )
-            
-            if should_use_original:
-                qa["question"] = evidence.original_qa["question"]
-                qa["answer"] = evidence.original_qa["answer"]
-                qa["qa_source"] = "original_modality"  # Mark that we used original Q/A
-            else:
-                qa["qa_source"] = "extracted"  # Mark that we used extracted Q/A
-            
+            qa = _qa_from_evidence(section, evidence)
+
             qa["source_modality"] = evidence.modality
             qa["annotation_key"] = evidence.annotation_key
+            qa["qa_index"] = evidence.qa_index
             qa["support_score"] = round(evidence.support_score, 3)
             qa["modality_reliability"] = round(evidence.modality_reliability, 3)
             qa["fusion_score"] = round(_sentence_score(evidence, section), 3)
             qa["is_outlier"] = _looks_outlier(evidence)
-            qa["drop_reason"] = "selected_topk"
+            qa["selection_reason"] = "selected_topk"
+            qa["source_caption"] = evidence.caption
+            if evidence.original_qa and evidence.qa_index is not None:
+                qa["source_question_block"] = evidence.original_qa["question"]
+                qa["source_answer_block"] = evidence.original_qa["answer"]
             items.append(qa)
 
         if not items:
@@ -543,7 +1197,7 @@ def _build_section_evidence_qas(
                 fallback["modality_reliability"] = 1.0
                 fallback["fusion_score"] = None
                 fallback["is_outlier"] = False
-                fallback["drop_reason"] = "fallback_no_selected_evidence"
+                fallback["selection_reason"] = "fallback_no_selected_evidence"
                 items = [fallback]
             else:
                 items = []
@@ -615,6 +1269,49 @@ def _normalize_sample_key(raw_key: str, payload: dict[str, Any] | None = None) -
     return raw_key.lower().replace("\\", "/")
 
 
+def _split_numbered_items(text: str) -> list[tuple[int, str]]:
+    text = _clean_whitespace(text)
+    if not text:
+        return []
+
+    matches = list(re.finditer(r"(?:^|\s)(\d+)\.\s*", text))
+    if len(matches) < 2:
+        return []
+
+    items: list[tuple[int, str]] = []
+    for index, match in enumerate(matches):
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        value = _clean_whitespace(text[start:end].strip(" .;"))
+        if value:
+            items.append((int(match.group(1)), value))
+    return items
+
+
+def _split_qa_pairs(question: str, answer: str) -> list[tuple[int | None, str, str]]:
+    question_items = _split_numbered_items(question)
+    answer_items = _split_numbered_items(answer)
+    if not question_items or not answer_items:
+        return [(None, question, answer)] if question and answer else []
+
+    answers_by_index = {index: value for index, value in answer_items}
+    pairs = [
+        (index, item_question, answers_by_index[index])
+        for index, item_question in question_items
+        if index in answers_by_index
+    ]
+    if pairs:
+        return pairs
+
+    if len(question_items) == len(answer_items):
+        return [
+            (question_item[0], question_item[1], answer_item[1])
+            for question_item, answer_item in zip(question_items, answer_items)
+        ]
+
+    return [(None, question, answer)] if question and answer else []
+
+
 def _extract_caption_evidence(modality: str, source_key: str, payload: dict[str, Any]) -> list[CaptionEvidence]:
     annotations = payload.get("annotations", {})
     if not isinstance(annotations, dict):
@@ -624,33 +1321,47 @@ def _extract_caption_evidence(modality: str, source_key: str, payload: dict[str,
     for annotation_key, annotation_payload in annotations.items():
         if not isinstance(annotation_payload, dict):
             continue
-        caption = annotation_payload.get("caption")
-        if not isinstance(caption, str):
-            continue
-        caption = _clean_whitespace(caption)
-        if not caption:
-            continue
-        
-        # Extract original Q/A pair from this annotation as fallback
-        original_qa = None
+
         original_question = annotation_payload.get("question")
         original_answer = annotation_payload.get("answer")
-        if original_question and original_answer:
+        question_text = _clean_whitespace(str(original_question)) if original_question is not None else ""
+        answer_text = _clean_whitespace(str(original_answer)) if original_answer is not None else ""
+
+        caption = annotation_payload.get("caption")
+        caption_text = _clean_whitespace(caption) if isinstance(caption, str) else ""
+        if not caption_text and not (question_text or answer_text):
+            continue
+
+        original_qa = None
+        if question_text and answer_text:
             original_qa = {
-                "question": _clean_whitespace(str(original_question)),
-                "answer": _clean_whitespace(str(original_answer)),
+                "question": question_text,
+                "answer": answer_text,
             }
-        
-        for sentence in _split_sentences(caption):
-            tokens = _tokenize(sentence)
+
+        qa_pairs = _split_qa_pairs(question_text, answer_text)
+        if not qa_pairs:
+            qa_pairs = [(None, question_text, answer_text)]
+
+        for qa_index, item_question, item_answer in qa_pairs:
+            evidence_text = _clean_whitespace(" ".join(
+                part for part in (item_question, item_answer) if part
+            ))
+            if not evidence_text:
+                evidence_text = caption_text
+            sentence = caption_text or evidence_text
+            tokens = _tokenize(evidence_text)
             evidences.append(
                 CaptionEvidence(
                     modality=modality,
                     source_key=source_key,
                     annotation_key=annotation_key,
-                    caption=caption,
+                    question=item_question,
+                    answer=item_answer,
+                    caption=caption_text,
                     sentence=sentence,
                     normalized_tokens=tokens,
+                    qa_index=qa_index,
                     original_qa=original_qa,
                 )
             )
@@ -758,13 +1469,19 @@ def _sentence_score(evidence: CaptionEvidence, section: str) -> float:
 def _section_route_bonus(evidence: CaptionEvidence, section: str) -> float:
     annotation_key = evidence.annotation_key.lower()
     tokens = evidence.normalized_tokens
+    qa_text = f"{evidence.question} {evidence.answer}".lower()
+    question = evidence.question.lower().strip()
 
     if section == "scene_overview":
         bonus = 0.0
-        if any(hint in annotation_key for hint in ("scene", "overview", "setting", "environment", "context")):
+        if any(hint in annotation_key for hint in ("overview", "setting", "environment", "context")):
             bonus += 0.6
+        if any(phrase in qa_text for phrase in ("setting", "environment", "scene context", "overall scene")):
+            bonus += 0.4
         bonus += min(0.25, 0.05 * len(tokens & SECTION_KEYWORDS[section]))
-        if any(hint in annotation_key for hint in ("layout", "spatial", "object", "motion", "event", "audio", "sound")):
+        if question.startswith(("where", "how many", "what action", "what tool", "what object", "is ", "are ", "was ")):
+            bonus -= 0.45
+        if any(hint in annotation_key for hint in ("layout", "spatial", "count", "object", "motion", "event", "audio", "sound", "action", "dynamic")):
             bonus -= 0.3
         return bonus
 
@@ -772,6 +1489,8 @@ def _section_route_bonus(evidence: CaptionEvidence, section: str) -> float:
         bonus = 0.0
         if any(hint in annotation_key for hint in ("layout", "spatial", "count", "object")):
             bonus += 0.55
+        if question.startswith(("where", "how many", "which object", "what object", "what item", "what brand", "what logo")):
+            bonus += 0.45
         bonus += min(0.35, 0.08 * len(tokens & SECTION_KEYWORDS[section]))
         if any(hint in annotation_key for hint in ("scene", "overview", "audio", "sound", "motion", "event")):
             bonus -= 0.15
@@ -780,12 +1499,19 @@ def _section_route_bonus(evidence: CaptionEvidence, section: str) -> float:
     if section == "motion_and_event_cues":
         bonus = 0.0
         if any(
-            hint in annotation_key
-            for hint in ("dynamic", "action", "scene_sequence", "event_action", "event_dynamic", "event_scene", "motion")
+                hint in annotation_key
+                for hint in
+                ("dynamic", "action", "scene_sequence", "event_action", "event_dynamic", "event_scene", "motion")
         ):
             bonus += 0.7
+        if question.startswith(("what action", "what tool do", "what am i doing", "what do i", "what does", "when")):
+            bonus += 0.45
+        if any(token in qa_text for token in ("peel", "slice", "pick up", "put down", "grasp", "lift", "enter", "move")):
+            bonus += 0.25
         bonus += min(0.35, 0.08 * len(tokens & SECTION_KEYWORDS[section]))
-        if not any(token in tokens for token in ("move", "motion", "moving", "enter", "lift", "reach", "pick", "grasp", "peel", "contact", "activity", "interaction", "hands")):
+        if not any(token in tokens for token in
+                   ("move", "motion", "moving", "enter", "lift", "reach", "pick", "grasp", "peel", "contact",
+                    "activity", "interaction", "hands")):
             bonus -= 0.2
         return bonus
 
@@ -794,7 +1520,9 @@ def _section_route_bonus(evidence: CaptionEvidence, section: str) -> float:
         if any(hint in annotation_key for hint in ("audio", "sound", "speech", "music", "noise")):
             bonus += 0.75
         bonus += min(0.4, 0.1 * len(tokens & SECTION_KEYWORDS[section]))
-        if "audio" not in tokens and not any(token in tokens for token in ("sound", "speech", "music", "noise", "silence", "scraping", "chopping", "rhythmic")):
+        if "audio" not in tokens and not any(token in tokens for token in
+                                             ("sound", "speech", "music", "noise", "silence", "scraping", "chopping",
+                                              "rhythmic")):
             bonus -= 0.3
         return bonus
 
@@ -811,13 +1539,13 @@ def _deduplicate_sentences(scored_sentences: list[tuple[float, CaptionEvidence]]
 
 
 def _select_sentences(
-    evidences: list[CaptionEvidence],
-    section: str,
-    limit: int,
-    *,
-    min_score: float = DEFAULT_MIN_SCORE,
-    relax_filters: bool = False,
-    section_diagnostics: dict[str, Any] | None = None,
+        evidences: list[CaptionEvidence],
+        section: str,
+        limit: int,
+        *,
+        min_score: float = DEFAULT_MIN_SCORE,
+        relax_filters: bool = False,
+        section_diagnostics: dict[str, Any] | None = None,
 ) -> list[CaptionEvidence]:
     diagnostics: dict[str, Any] | None = None
     if section_diagnostics is not None:
@@ -877,8 +1605,9 @@ def _select_sentences(
                 continue
             if section == "motion_and_event_cues":
                 if keyword_hits == 0 and not any(
-                    hint in evidence.annotation_key
-                    for hint in ("dynamic", "action", "scene_sequence", "event_action", "event_dynamic", "event_scene")
+                        hint in evidence.annotation_key
+                        for hint in
+                        ("dynamic", "action", "scene_sequence", "event_action", "event_dynamic", "event_scene")
                 ):
                     if diagnostics is not None:
                         diagnostics["dropped_annotation_gate"] += 1
@@ -948,11 +1677,11 @@ def _select_sentences(
 
 
 def _assign_evidences_to_sections(
-    evidences: list[CaptionEvidence],
-    *,
-    min_score: float,
-    relax_filters: bool,
-    section_diagnostics: dict[str, Any] | None = None,
+        evidences: list[CaptionEvidence],
+        *,
+        min_score: float,
+        relax_filters: bool,
+        section_diagnostics: dict[str, Any] | None = None,
 ) -> dict[str, list[CaptionEvidence]]:
     selected_by_section: dict[str, list[tuple[float, CaptionEvidence]]] = {section: [] for section in PRIMARY_SECTIONS}
 
@@ -1001,11 +1730,25 @@ def _join_sentences(evidences: list[CaptionEvidence]) -> str:
     return " ".join(item.sentence.rstrip(".") + "." for item in evidences)
 
 
+def _join_evidence_captions(evidences: list[CaptionEvidence], limit: int) -> str:
+    selected: list[CaptionEvidence] = []
+    seen_tokens: list[set[str]] = []
+    for evidence in evidences:
+        tokens = evidence.normalized_tokens
+        if tokens and any(_jaccard(tokens, previous) > 0.65 for previous in seen_tokens):
+            continue
+        selected.append(evidence)
+        seen_tokens.append(tokens)
+        if len(selected) >= limit:
+            break
+    return _join_sentences(selected)
+
+
 def _build_cross_modal_details(
-    evidences: list[CaptionEvidence],
-    *,
-    min_score: float = DEFAULT_MIN_SCORE,
-    relax_filters: bool = False,
+        evidences: list[CaptionEvidence],
+        *,
+        min_score: float = DEFAULT_MIN_SCORE,
+        relax_filters: bool = False,
 ) -> str:
     reliable_modalities = {
         evidence.modality
@@ -1041,7 +1784,8 @@ def _build_cross_modal_details(
                 f"Event evidence is consistent with the observed motion: {motion_selected[0].sentence.rstrip('.')}."
             )
 
-    if {"audio", "rgb"} <= reliable_modalities or {"audio", "ir"} <= reliable_modalities or {"audio", "event"} <= reliable_modalities:
+    if {"audio", "rgb"} <= reliable_modalities or {"audio", "ir"} <= reliable_modalities or {"audio",
+                                                                                             "event"} <= reliable_modalities:
         audio_selected = _select_sentences(
             evidences,
             "audio_cues",
@@ -1069,7 +1813,8 @@ def _build_cross_modal_details(
 
 def _build_final_caption(sections: dict[str, str]) -> str:
     parts: list[str] = []
-    for key in ("scene_overview", "visible_objects_and_layout", "motion_and_event_cues", "audio_cues", "cross_modal_details"):
+    for key in ("scene_overview", "visible_objects_and_layout", "motion_and_event_cues", "audio_cues",
+                "cross_modal_details"):
         value = sections.get(key, "")
         first_sentence = _split_sentences(value)[:1]
         if first_sentence:
@@ -1103,10 +1848,10 @@ def _group_samples(modality_results: dict[str, dict[str, Any]]) -> dict[str, dic
 
 
 def fuse_sample(
-    sample_modalities: dict[str, dict[str, Any]],
-    *,
-    relax_filters: bool = False,
-    collect_diagnostics: bool = False,
+        sample_modalities: dict[str, dict[str, Any]],
+        *,
+        relax_filters: bool = False,
+        collect_diagnostics: bool = False,
 ) -> dict[str, Any]:
     evidences: list[CaptionEvidence] = []
     source_entries: dict[str, str] = {}
@@ -1137,17 +1882,14 @@ def fuse_sample(
         section_diagnostics=section_diagnostics,
     )
 
-    sections = {
-        "scene_overview": _join_sentences(selected_by_section["scene_overview"]),
-        "visible_objects_and_layout": _join_sentences(selected_by_section["visible_objects_and_layout"]),
-        "motion_and_event_cues": _join_sentences(selected_by_section["motion_and_event_cues"]),
-        "audio_cues": _join_sentences(selected_by_section["audio_cues"]),
-        "cross_modal_details": _build_cross_modal_details(
-            evidences,
-            min_score=min_score,
-            relax_filters=relax_filters,
-        ),
-    }
+    sections = {}
+    for section in PRIMARY_SECTIONS:
+        sections[section] = _join_evidence_captions(selected_by_section[section], section_limits[section])
+    sections["cross_modal_details"] = _build_cross_modal_details(
+        evidences,
+        min_score=min_score,
+        relax_filters=relax_filters,
+    )
     sections["final_unified_caption"] = _build_final_caption(sections)
 
     modality_reliability: dict[str, float] = {}
@@ -1156,40 +1898,66 @@ def fuse_sample(
         modality_reliability[evidence.modality] = max(score, evidence.modality_reliability)
 
     rounded_reliability = {key: round(value, 3) for key, value in sorted(modality_reliability.items())}
-    section_evidence_qas = _build_section_evidence_qas(
-        sections,
-        selected_by_section,
-        source_entries,
-        rounded_reliability,
-        qa_limits,
+    selected_reliable_qas, qa_selection_diagnostics = _select_reliable_qas(
+        evidences,
+        min_score=min_score,
     )
+    qas_by_section = _group_qas_by_section(selected_reliable_qas)
 
     fused_sample = {
         "source_entries": source_entries,
         "source_files": source_files,
         "modality_reliability": rounded_reliability,
         **sections,
-        "section_evidence_qas": section_evidence_qas,
+        "selected_reliable_qas": selected_reliable_qas,
+        "qas_by_section": qas_by_section,
     }
 
     if collect_diagnostics:
+        diagnostic_facts = [
+            _build_semantic_fact(
+                modality=evidence.modality,
+                source_key=evidence.source_key,
+                annotation_key=evidence.annotation_key,
+                section=evidence.annotation_key,
+                caption=evidence.caption,
+                question=evidence.question,
+                answer=evidence.answer,
+                confidence=0.85,
+                support_score=evidence.support_score,
+                modality_reliability=evidence.modality_reliability,
+            )
+            for evidence in evidences
+        ]
         fused_sample["fusion_diagnostics"] = {
             "relax_filters": relax_filters,
             "min_score": min_score,
             "section_limits": section_limits,
             "sections": section_diagnostics,
+            "qa_selection": qa_selection_diagnostics,
+            "semantic_facts": [_serialize_semantic_fact(fact) for fact in diagnostic_facts],
+            "semantic_scene_graph": {
+                section: [
+                    _serialize_semantic_fact(fact)
+                    for fact in _choose_facts_for_section(diagnostic_facts, section, limit=qa_limits.get(section, 1))
+                ]
+                for section in OUTPUT_SECTIONS
+            },
         }
 
     return fused_sample
 
 
 def run_late_fusion(
-    input_dir: Path | str = ".",
-    output_file: Path | str = "fused_qa_results.json",
-    modality_files: dict[str, str] | None = None,
-    relax_filters: bool = False,
-    collect_diagnostics: bool = False,
-    diagnostics_output_file: Path | str = "fusion_diagnostics.json",
+        input_dir: Path | str = ".",
+        output_file: Path | str = "fused_qa_results.json",
+        modality_files: dict[str, str] | None = None,
+        relax_filters: bool = False,
+        collect_diagnostics: bool = False,
+        diagnostics_output_file: Path | str = "fusion_diagnostics.json",
+        generate_analysis: bool = True,
+        analysis_output_json: Path | str = "fusion_qa_stats.json",
+        analysis_output_csv: Path | str = "fusion_qa_rows.csv",
 ) -> dict[str, Any]:
     input_dir = Path(input_dir)
     output_file = Path(output_file)
@@ -1224,6 +1992,17 @@ def run_late_fusion(
         diagnostics_output_file = Path(diagnostics_output_file)
         with open(diagnostics_output_file, "w", encoding="utf-8") as handle:
             json.dump(diagnostics_results, handle, indent=2, ensure_ascii=False)
+
+    if generate_analysis:
+        from annotation_feature.analyze_fusion_outputs import build_reports
+
+        diagnostics_path = Path(diagnostics_output_file) if collect_diagnostics else Path("__missing_fusion_diagnostics__.json")
+        build_reports(
+            fused_results_path=output_file,
+            diagnostics_path=diagnostics_path,
+            output_json_path=Path(analysis_output_json),
+            output_csv_path=Path(analysis_output_csv),
+        )
 
     return fused_results
 

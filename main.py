@@ -145,8 +145,9 @@ def _run_all_pipelines(test_mode: bool, skip_api: bool) -> None:
     run_audio(test_mode=test_mode, skip_api=skip_api)
 
     print("[6/6] Late fusion...")
-    fused_results = run_late_fusion()
+    fused_results = run_late_fusion(collect_diagnostics=True)
     print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
+    print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
 
 
 def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
@@ -505,9 +506,10 @@ def main():
             print("Running: late fusion on existing modality JSON results")
             print("-" * 60)
             print("This step reads the current RGB, IR, event, audio, and depth result files.")
-            print("It writes fused scene summaries to fused_qa_results.json.\n")
-            fused_results = run_late_fusion()
+            print("It writes fused QA results, diagnostics, and analysis files.\n")
+            fused_results = run_late_fusion(collect_diagnostics=True)
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
+            print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
 
         elif choice == "27":
             print("\n" + "-" * 60)
