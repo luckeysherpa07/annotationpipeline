@@ -26,6 +26,7 @@ from annotation_feature.pipeline import (
 from annotation_feature.reasoning import (
     normalize_all_modalities,
     run_export_grouped_qa,
+    run_export_segmented_grouped_qa,
     run_group_evidence,
 )
 from annotation_feature.pipeline.modalities.marigold import (
@@ -229,13 +230,14 @@ def main():
         print("31. Run IR QA after task segment")
         print("32. Run AUDIO QA after task segment")
         print("33. Run ALL QA pipelines on task segments")
+        print("34. Export grouped Q/A pairs from segmented modality results")
         print("\n--- HOLISTIC QA ---")
-        print("34. Normalize evidence units from existing modality JSON results")
-        print("35. Group normalized evidence units by reasoning category")
-        print("36. Export Q/A pairs from grouped QA into JSON")
-        print("\n37. Exit")
+        print("35. Normalize evidence units from existing modality JSON results")
+        print("36. Group normalized evidence units by reasoning category")
+        print("37. Export Q/A pairs from grouped QA into JSON")
+        print("\n38. Exit")
 
-        choice = input("\nEnter choice (1-37): ").strip()
+        choice = input("\nEnter choice (1-38): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -546,6 +548,18 @@ def main():
 
         elif choice == "34":
             print("\n" + "-" * 60)
+            print("Running: export grouped Q/A pairs from segmented modality results")
+            print("-" * 60)
+            print("This step reads segmented_outputs/segmented_*_qa_results.json.")
+            print("It writes split grouped Q/A pairs to segmented_grouped_qa_pairs.json.\n")
+            segmented_grouped_qa_results = run_export_segmented_grouped_qa()
+            print(
+                f"Exported {len(segmented_grouped_qa_results)} segmented samples "
+                "into segmented_grouped_qa_pairs.json"
+            )
+
+        elif choice == "35":
+            print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
             print("This step reads RGB, event, depth, IR, and audio result files.")
@@ -553,7 +567,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "35":
+        elif choice == "36":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -562,7 +576,7 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "36":
+        elif choice == "37":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs to separate JSON")
             print("-" * 60)
@@ -571,7 +585,7 @@ def main():
             grouped_qa_results = run_export_grouped_qa()
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
-        elif choice == "37":
+        elif choice == "38":
             print("\nExiting.")
             break
 

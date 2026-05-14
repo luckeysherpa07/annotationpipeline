@@ -1,0 +1,1326 @@
+{
+  "cut_carrot_day_seg_001": {
+    "source_keys": {
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [
+          {
+            "section": "counting",
+            "question": "How many main mailbox sections are visible in the mailbox area?",
+            "answer": "2 sections - one grey and one vibrant green",
+            "caption": "Objects Counted in Video:\n1. Chairs: 1 (black swivel desk chair)\n2. Shoes: 4+ pairs visible in room\n3. Doors: 1 blue door\n4. Mailbox sections: 2 main sections (grey and green)\n5. Mailbox units: Approximately 9-12 individual mailbox compartments visible\n6. Staircase sections: 2 visible staircase runs\n7. Light fixtures: 1 desk lamp, 1 overhead ceiling light, recessed LEDs (multiple)\n8. Storage containers: 2+ (blue bin, dresser)",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "object_recognition",
+            "question": "What is the color of the door I pass through to exit the room and enter the dark hallway?",
+            "answer": "Blue",
+            "caption": "1. Indoor Starting Area (The Room)\nScene: A domestic interior, likely a dorm or studio apartment.\nObjects: Furniture includes a white desk with a black swivel chair, a small white dresser/nightstand, and a shoe rack. Footwear visible includes black sneakers, white-and-purple athletic shoes, and black slides. Household items include cleaning bottles and a blue storage container.\nColor & Texture: White walls with matte texture. Blue-grey linoleum floor. Lighting is a mix of overhead light and warm desk lamp.\n\n2. Transition & Hallway\nScene: Camera moves from room into a dark hallway.\nObjects: A solid blue door leads out of the room. Metal door handles, light switches visible.\nColor & Texture: High contrast between bright interior room and nearly black hallway. Blue door provides sharp pop of color.\n\n3. Building Exterior & Mailbox Area\nScene: Outdoor walkway in modern apartment complex at night.\nObjects: Large bank of mailboxes (metallic grey with vibrant green section). Metal staircases with vertical slat railings. Green-and-white emergency exit sign visible.\nColor & Texture: Dominant dark greys and blacks. Green mailboxes most significant visual anchor.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [
+          {
+            "section": "depth_counting",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          },
+          {
+            "section": "depth_object_recognition",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 3,
+            "pair_index": 1
+          }
+        ],
+        "ir": [
+          {
+            "section": "counting",
+            "question": "How many sockets are visible on the white power strip in the background?",
+            "answer": "Four",
+            "caption": "In the kitchen scene, I can identify several common objects: 1 laptop, 1 white cutting board, 1 white ceramic bowl, 1 black vegetable peeler, 1 kitchen knife, 1 long vegetable (parsnip/carrot), and 1 power strip with 4 visible sockets. As the video progresses, the number of peel strips inside the bowl increases from zero to dozens.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 4,
+            "pair_index": 1
+          },
+          {
+            "section": "object_recognition",
+            "question": "What electronic device is open on the left side of the countertop?",
+            "answer": "Laptop",
+            "caption": "In this IR video, the scene is set in a kitchen workspace. A large white cutting board sits centrally on a dark countertop. To the left, an open laptop is visible, its screen emitting thermal radiation that creates a distinct glow. Adjacent to the laptop is a dark cooktop surface. On the cutting board, there is a long, light-colored vegetable, likely a parsnip or white carrot, alongside a black Y-shaped vegetable peeler and a large kitchen knife. To the right of the board, a white ceramic bowl is positioned to catch peelings. In the far right corner, a white power strip with multiple plugs is visible. The thermal contrast is high between the white objects (board, bowl, vegetable) and the dark counter.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 5,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [
+          {
+            "section": "navigation",
+            "question": "How would you navigate from the mailbox area back to the bedroom?",
+            "answer": "Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom",
+            "caption": "Navigation Path Documentation:\n1. Starting point: Inside bedroom/room area\n2. Action 1: Open blue door and move through doorway (1-2 steps)\n3. Action 2: Navigate through dark hallway (3-4 meters, straight path)\n4. Action 3: Exit to outdoor area (1-2 steps)\n5. Action 4: Move to mailbox area (2-3 meters, slight left turn toward staircase)\n6. Final position: Standing in front of mailbox section 1'233-1'235\n7. Total navigation: Indoor room -> Hallway -> Outdoor walkway -> Mailbox cluster",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "spatial_reasoning",
+            "question": "Which room section is closest to the mailbox area when exiting through the blue door?",
+            "answer": "The hallway and staircase area",
+            "caption": "Spatial Relationships Identified:\n1. Desk is approximately 2 meters from the room entrance\n2. The mailbox is positioned above eye level, roughly 1.5 meters from the approach area\n3. The staircase is located to the left of the mailbox area, about 3 meters away\n4. The fire exit sign is mounted on the wall above and to the right of the mailboxes\n5. The hallway extends approximately 5 meters before reaching the outdoor area\n6. The blue door frame is positioned centrally between the room and hallway",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [
+          {
+            "section": "depth_navigation",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          },
+          {
+            "section": "depth_spatial_reasoning",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 3,
+            "pair_index": 1
+          }
+        ],
+        "ir": [
+          {
+            "section": "navigation",
+            "question": "How many steps away from the cutting board is the power strip located?",
+            "answer": "One step",
+            "caption": "The subject remains stationary at the kitchen counter. Navigation is restricted to hand movements between tools. To reach the peeler from the starting position, my hand moves approximately 0.2 steps forward and center. To move the vegetable from the board to the bowl, it is a movement of about 0.3 steps to the right. The laptop is roughly 1 step to the left of the central work area.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 4,
+            "pair_index": 1
+          },
+          {
+            "section": "spatial_reasoning",
+            "question": "Where is the white ceramic bowl positioned in relation to the cutting board?",
+            "answer": "To the right",
+            "caption": "The laptop is located to the far left of the workspace. The cutting board is positioned centrally, about 0.5 steps from the front edge of the counter. The white ceramic bowl is placed to the immediate right of the cutting board. The kitchen knife is laying on the right side of the cutting board, oriented diagonally. The power strip is located in the upper right background, approximately 1 step away from the bowl. The vegetable and peeler are initially in the center of the cutting board.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 5,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [
+          {
+            "section": "dynamic_recognition",
+            "question": "What dynamic action involving the hand appears in the mailbox area?",
+            "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox",
+            "caption": "Dynamic Elements Recognition:\n1. Primary moving object: The camera operator's hand (blue gloved) - appears around frame 20 and persists to frame 30\n2. Hand trajectory: Approaches mailbox horizontally, extends toward mailbox slot area\n3. Camera movement: Continuous forward and lateral movement throughout entire video (0-35 frames)\n4. Camera perspective: First-person view showing hand interactions and path navigation\n5. Hand-object interaction: Insert key/hand into mailbox area, appears to be accessing mailbox\n6. No other dynamic elements: No people, vehicles, or animals visible besides camera operator",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "scene_sequence",
+            "question": "What is the sequence of major areas passed through in this video?",
+            "answer": "Bedroom, hallway, outdoor walkway, and mailbox area",
+            "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [
+          {
+            "section": "depth_dynamic_recognition",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          },
+          {
+            "section": "depth_scene_sequence",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 3,
+            "pair_index": 1
+          }
+        ],
+        "ir": [
+          {
+            "section": "dynamic_recognition",
+            "question": "When do the first vegetable peelings start falling into the bowl?",
+            "answer": "Around frame 000240",
+            "caption": "A dynamic event begins at frame 000210 when the vegetable peeler is lifted from the board. Between frames 000240 and 001320, the parsnip undergoes a continuous transformation as its skin is removed. The resulting peel strips are dynamic objects that appear and fall into the bowl throughout this period. Each individual peeling motion constitutes a small dynamic sequence lasting about 30-60 frames.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 4,
+            "pair_index": 1
+          },
+          {
+            "section": "scene_sequence",
+            "question": "What is the sequence of tasks performed at the kitchen counter?",
+            "answer": "Preparing tools, picking up the vegetable, and peeling it into the bowl.",
+            "caption": "The video follows a specific task sequence in a stationary kitchen scene. Initially, frames 000000-000180 show the setup phase where tools like the knife, peeler, and vegetable are arranged on the cutting board. From frame 000210 onwards, the action shifts to the execution phase where I pick up the vegetable and the peeler. For the remainder of the video, up to frame 001320, I am actively peeling the vegetable, with thermal signatures of thin strips falling into the bowl and accumulating.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 5,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [
+          {
+            "section": "action",
+            "question": "What is the primary activity being performed with the mailbox?",
+            "answer": "Accessing the mailbox with a key, likely to retrieve or check mail",
+            "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "dynamic_counting",
+            "question": "What dynamic action occurs with the mailbox in this video?",
+            "answer": "A blue-gloved hand approaches and interacts with the mailbox",
+            "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [
+          {
+            "section": "depth_action",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          },
+          {
+            "section": "depth_dynamic_counting",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 3,
+            "pair_index": 1
+          }
+        ],
+        "ir": [
+          {
+            "section": "action",
+            "question": "What is the primary action I am performing with the vegetable and the black tool?",
+            "answer": "Peeling",
+            "caption": "The action performed is peeling a long, white vegetable with a Y-peeler. I pick up the peeler and the vegetable around frame 000210. I then repeatedly stroke the peeler down the length of the vegetable, holding it over the white bowl. The purpose is to remove the outer skin for food preparation. The consequence is the accumulation of thin white strips in the bowl and the exposure of the smoother inner flesh of the vegetable.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 4,
+            "pair_index": 1
+          },
+          {
+            "section": "dynamic_counting",
+            "question": "How many individual vegetable strips can be seen falling into the bowl between frames 000300 and 000600?",
+            "answer": "Approximately five",
+            "caption": "The dynamic objects in this video are the vegetable peelings. Starting from frame 000210, I begin peeling, and with each stroke, a new strip falls into the bowl. By frame 000600, there are approximately 5 distinct strips visible. By the end of the video at frame 001320, there are over 20 strips accumulated in the bowl. No other dynamic objects like other people or external items enter the frame.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 5,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": [
+          {
+            "section": "audio_sound_characteristics",
+            "question": "What was the character of the contact sounds in the middle segment?",
+            "answer": "They were sharper contact sounds from placing or adjusting an object.",
+            "caption": "[00:04] Sharper contact sounds occur as an object is placed or adjusted.",
+            "confidence": 0.8,
+            "timestamp": "00:04 - 00:09",
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "audio_sound_source_identification",
+            "question": "What action most likely produced the soft handling sounds at the start?",
+            "answer": "The user's hand-object manipulation produced the sounds.",
+            "caption": "[00:00] Soft handling sounds occur while the user manipulates nearby objects.",
+            "confidence": 0.8,
+            "timestamp": "00:00 - 00:04",
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ]
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [
+          {
+            "section": "light_change",
+            "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+            "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area",
+            "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "light_recongnition",
+            "question": "What types of light sources are visible in the outdoor mailbox area?",
+            "answer": "Recessed linear LED ceiling lights creating bright white streaks",
+            "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          },
+          {
+            "section": "non_common",
+            "question": "Are there any unusual design elements visible in the mailbox area?",
+            "answer": "Yes, one mailbox section is painted vibrant green which contrasts sharply with the standard metallic grey sections",
+            "caption": "Potential Non-Common Scene Elements:\n1. High-ISO grain: Significant video noise due to extremely low-light recording conditions\n2. Unusual lighting: The LED ceiling lights create artificial patterns in an outdoor residential area\n3. Color inconsistency: The vibrant green mailbox section contrasts sharply with standard grey sections\n4. Hand appearance: Blue gloves in a residential mailbox area - possible protective gear or environmental adaptation\n5. Layout observation: Modern residential building with outdoor mailbox cluster rather than interior boxes\n6. No obvious floating objects or mesh clipping issues detected",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [
+          {
+            "section": "depth_non_common",
+            "question": "Demo question?",
+            "answer": "Demo answer",
+            "caption": "Demo caption",
+            "confidence": 0.65,
+            "timestamp": null,
+            "source_unit_index": 3,
+            "pair_index": 1
+          }
+        ],
+        "ir": [
+          {
+            "section": "light_change",
+            "question": "Does the intensity of the light on the cutting board change significantly during the peeling process?",
+            "answer": "No",
+            "caption": "The illumination remains relatively constant throughout the IR video. There are no major light switches or sudden changes in brightness. However, as my hands move during the peeling action between frames 000210 and 001320, the shadows cast by the overhead light shift across the cutting board and into the bowl. The thermal signature of the laptop screen stays steady as a constant secondary light source on the left.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 4,
+            "pair_index": 1
+          },
+          {
+            "section": "light_recongnition",
+            "question": "What is the shape of the main reflection on the surface of the white bowl?",
+            "answer": "Circular",
+            "caption": "The primary light source is overhead, creating a strong circular hotspot on the inside of the white ceramic bowl and a bright reflection on the white cutting board. The laptop screen acts as a secondary light source on the left, casting a soft glow on the nearby cooktop. Shadows are cast downwards and slightly to the left, suggesting the light is coming from the upper right. The power strip on the far right also shows some small point-source glints from its plastic surface.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 5,
+            "pair_index": 1
+          },
+          {
+            "section": "non_common",
+            "question": "Is there any object in the video that appears to be floating above the countertop surface?",
+            "answer": "No",
+            "caption": "The layout of the kitchen workspace is standard and follows common sense. The objects are placed reasonably on the counter. There are no instances of mesh clipping or floating objects. The thermal signatures of the tools and the subject's hands are realistic and consistent with their physical properties. One minor drawback is that the laptop is placed very close to the stove area, which could be a safety hazard in a real scenario, though it is not a physical law violation.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 6,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [
+          {
+            "section": "text_recognition",
+            "question": "What are the visible mailbox numbers shown in the video?",
+            "answer": "1'233, 1'234, and 1'235",
+            "caption": "Text elements visible in video:\n1. Mailbox labels (Frame 15-20): \"R. Festa\", \"L. Wiebusch\", \"S. Hollemann\" - resident names on mailbox sections\n2. Mailbox numbers (Frame 20-25): \"1'233\", \"1'234\", \"1'235\" - unit numbers, used for postal identification\n3. Emergency sign (Frame 18-22): \"EXIT\" with running man symbol - indicates emergency evacuation route\n4. Fire safety markings - visible on wall signage indicating building code compliance",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          }
+        ],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "text_recognition",
+            "question": "What kind of pattern can be observed on the handle of the black vegetable peeler?",
+            "answer": "Manufacturer logo",
+            "caption": "In the sequence of frames, particularly around frame 000300, a small rectangular logo or text-like pattern is visible on the bottom-left corner of the laptop's base, likely a brand label. On the power strip in the background (visible throughout), there are circular markings around each socket which might contain technical specifications or voltage information. On the handle of the black peeler, there is a faint white insignia or text that likely denotes the manufacturer.",
+            "confidence": 0.75,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      }
+    },
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_001",
+      "task_label": "peeling carrot",
+      "start_seconds": 0.0,
+      "end_seconds": 45.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:45.000"
+    },
+    "source_files": {
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4",
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4"
+    }
+  },
+  "cut_carrot_day_seg_002": {
+    "source_keys": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_seg_002",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_seg_002"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_002",
+      "task_label": "slicing carrot",
+      "start_seconds": 45.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:00:45.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_files": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4"
+    }
+  },
+  "cut_carrot_night_seg_001": {
+    "source_keys": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_001",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_seg_001"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "object_recognition",
+            "question": "What primary tool am I using at the beginning of the video to prepare the food?",
+            "answer": "A peeler.",
+            "caption": "In this infrared video, the scene is a kitchen countertop. A central white cutting board holds a small bowl and a long vegetable, possibly a parsnip or a large potato. To the right of the cutting board lies a large kitchen knife. In the upper right corner, a power strip with four outlets is visible. The person behind the camera is holding the vegetable with their left hand and a peeler with their right hand. Thermally, the hands and the subject's arms appear as bright hotspots, while the metal parts of the peeler and knife are darker due to lower emissivity or temperature. The cutting board and countertop provide a neutral mid-tone background with high thermal contrast against the hot hands.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "spatial_reasoning",
+            "question": "Where is the knife placed relative to the cutting board?",
+            "answer": "To the right.",
+            "caption": "The vegetable is held in the left hand while the peeler is held in the right hand, interacting directly at a distance of zero steps from the subject. The small bowl is situated in the center of the white cutting board. The cutting board is positioned centrally on the countertop. A metal knife is placed roughly half a step to the right of the cutting board. The power strip is located about one step away in the upper right quadrant of the frame. The spatial layout shows the subject is within arm's reach of all items on the counter.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "light_recongnition",
+            "question": "From which direction is the primary light coming?",
+            "answer": "Top left.",
+            "caption": "The scene is illuminated by an overhead light source positioned towards the left of the subject. This is identified by the thermal shadows cast by the subject's hands onto the cutting board and the slight glares visible on the reflective countertop and the metallic knife blade. The lighting is consistent and even, providing good contrast for the infrared sensor to pick up object shapes.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "non_common",
+            "question": "Is there any unrealistic behavior with the vegetable peels in the bowl?",
+            "answer": "Yes, clipping.",
+            "caption": "The video appears realistic for an infrared simulation, but a minor common-sense violation occurs with the vegetable peels. In some frames, the peels seem to disappear or clip through the bottom of the small bowl rather than piling up realistically (frames 300-600). An improvement would be to refine the collision physics for the peels to ensure they stack and remain visible within the bowl's volume.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_001",
+      "task_label": "slicing carrot rounds",
+      "start_seconds": 0.0,
+      "end_seconds": 40.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:40.000"
+    },
+    "source_files": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    }
+  },
+  "cut_carrot_night_seg_002": {
+    "source_keys": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_002",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_seg_002"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_002",
+      "task_label": "julienning carrots",
+      "start_seconds": 40.0,
+      "end_seconds": 140.0,
+      "start_timestamp": "00:00:40.000",
+      "end_timestamp": "00:02:20.000"
+    },
+    "source_files": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    }
+  },
+  "cut_carrot_night_seg_003": {
+    "source_keys": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_003",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_seg_003"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_003",
+      "task_label": "gathering julienned carrots",
+      "start_seconds": 140.0,
+      "end_seconds": 161.933,
+      "start_timestamp": "00:02:20.000",
+      "end_timestamp": "00:02:41.933"
+    },
+    "source_files": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    }
+  },
+  "wash_hands_day_seg_001": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_seg_001",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_seg_001"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_001",
+      "task_label": "leave room and go to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 38.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:38.000"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    }
+  },
+  "wash_hands_day_seg_002": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_seg_002",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_seg_002"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 38.0,
+      "end_seconds": 81.0,
+      "start_timestamp": "00:00:38.000",
+      "end_timestamp": "00:01:21.000"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    }
+  },
+  "wash_hands_day_seg_003": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_seg_003",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_seg_003"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_003",
+      "task_label": "dry hands and return to desk",
+      "start_seconds": 81.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:21.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    }
+  },
+  "wash_hands_night_seg_001": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_seg_001",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_seg_001"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_001",
+      "task_label": "walk to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 34.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:34.000"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    }
+  },
+  "wash_hands_night_seg_002": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_seg_002",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_seg_002"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "counting",
+            "question": "How many sinks are in the bathroom? How many toilets are visible? How many light switches are on the wall? How many faucets are on the sink? How many soap dispensers are mounted? How many QR code stickers are there? How many mirrors are in the room? How many doors did I pass in the hallway before entering? How many male restroom icons are on the entrance door? How many paper signs are on the stall wall?",
+            "answer": "One; One; One; One; One; One; One; At least four; One; One.",
+            "caption": "In the full sequence, I count at least 5 doors in the hallway. Inside the bathroom, there is 1 sink, 1 faucet, 1 toilet, 1 soap dispenser, 1 light switch, and 2 distinct signs (one on the door and one on the wall). There is also 1 QR code sticker identified.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "object_recognition",
+            "question": "What symbol is identified on the door I enter halfway through the video?",
+            "answer": "Male restroom icon.",
+            "caption": "The infrared video begins with a series of black frames, transitioning into a brightly lit indoor hallway. I encounter a white door equipped with a standard lever handle and an electronic lock. As I proceed down the corridor, multiple doors line the walls. I stop at a door marked with a thermal silhouette of a male figure, indicating a restroom. Below the icon, there is a small rectangular sticker containing a QR code. Entering the room, the scene reveals a compact bathroom stall with a white ceramic sink, a chrome faucet, and a wall-mounted toilet. Adjacent to the sink, there is a white hand sanitizer or soap dispenser with a push-lever and a white light switch. A mirror reflects a subject wearing a thermal-contrasting white puffy jacket and a helmet with a camera rig. A small paper sign is taped to the wall with the text 'PLEASE FLUSH THE TOILET'.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "navigation",
+            "question": "Which way do I turn after entering to reach the sink? How many steps do I take in the hallway? Which side is the bathroom door on? How many steps are between the toilet and the sink? How do I open the door? Do I turn left or right to enter the bathroom? Where is the mirror? How do I reach the dispenser from the sink? Is the bathroom at the end of the hall? How many steps to the toilet?",
+            "answer": "Right; Approximately ten; Right; One; Turn the handle and push; Right; Above the sink; Reach to the right; No; Two.",
+            "caption": "Starting from the hallway, I walk forward for about 10 steps. I stop at the door on the right. I turn the handle, push the door open, and enter. I take 2 steps forward to face the toilet, then turn 90 degrees to the right to reach the sink, which is 1 step away.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "spatial_reasoning",
+            "question": "Where is the light switch located relative to the hand sanitizer dispenser?",
+            "answer": "To the right.",
+            "caption": "In the hallway, doors are positioned approximately 4 steps apart on either side. Once inside the bathroom, the sink is directly in front of me, about 1 step away. The mirror is positioned on the wall above the sink. The hand sanitizer dispenser is located to the right of the sink, mounted about 2 feet above the counter level. The light switch is situated approximately 6 inches to the right of the dispenser. The toilet is located in the corner to the left of the sink area, roughly 3 steps away from the entry point. The paper sign is taped to the left wall adjacent to the toilet.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "dynamic_recognition",
+            "question": "When does the water start flowing? When do I reach for the soap dispenser? At what frame do I enter the bathroom? Has the door closed behind me? When do I look in the mirror? Are my hands moving under the tap? Did a new object appear in the sink? Is the faucet being turned off?",
+            "answer": "Frame 1770; Frame 1650; Frame 1380; Yes; Frame 1530; Yes; No; No.",
+            "caption": "The subject reaches for the door handle at frame 1200. The subject enters the bathroom stall at frame 1380. Subject looks into the mirror at frame 1530. Subject's hands reach for the soap dispenser lever at frame 1650. Water begins to flow from the faucet at frame 1770 and continues through frame 2550. The subject's hands rub together under the water from frame 1800 to the end.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "scene_sequence",
+            "question": "What is the sequence of scenes I pass through? What do I see immediately after entering the door? What room am I in after the hallway? Where do I go after seeing the toilet? What is the last scene in the video? What was the first visible scene? Did I pass a kitchen? What room is the sink in? What is the environment before the sink? Did I see a bed?",
+            "answer": "Darkness, hallway, bathroom interior; A toilet; Bathroom; Toward the sink; Washing hands at the sink; A hallway; No; Bathroom; Bathroom stall interior; No.",
+            "caption": "The video sequence starts with total darkness. Then, I move through a white hallway. I approach and open a door with a male restroom symbol. Upon entering, I face a toilet area and then turn toward the sink. I interact with a dispenser and finally spend the remainder of the video at the sink basin performing a hand-washing action.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "action",
+            "question": "What am I doing at the sink? What object do I interact with before washing? Why am I rubbing my hands? What is on my head? What am I wearing? Am I using the toilet? What is coming out of the faucet? What part of my body is being cleaned?",
+            "answer": "Washing hands; Soap dispenser; To clean/rinse them; A helmet; A white jacket; No; Water; Hands.",
+            "caption": "I am performing a hygiene routine. I enter the restroom to use the facilities or wash my hands. I approach the sink, interact with a soap or sanitizer dispenser to clean my hands, and then use the faucet to rinse them. The purpose is cleanliness, and the consequence is sanitized hands.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "dynamic_counting",
+            "question": "How many water streams are flowing from the tap? How many people are walking past me in the hallway? How many objects fall during the video? How many doors open on their own? How many cars are seen? How many animals appear? How many other people are in the mirror? How many dispensers am I using?",
+            "answer": "One; Zero; Zero; Zero; Zero; Zero; Zero; One.",
+            "caption": "The only dynamic elements in the video are the subject's hands and the flow of water from the faucet. In frame 1650, the subject's right hand moves to the dispenser. From frame 1770 onwards, a single stream of water is activated and flows continuously until the end of the clip.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "light_change",
+            "question": "Did the lights turn on or off after the initial sequence? Is the light level changing in the bathroom? Did the hallway get darker as I walked? Is there a light source approaching me? Did a flashlight pass by? Is it getting brighter at the sink? Does the mirror reflect a changing light? Are the lights dimming at the end?",
+            "answer": "No; No; No; No; No; No; No; No.",
+            "caption": "The video starts in total darkness (frames 1020-1170). Light suddenly appears as the hallway becomes visible. The illumination remains constant throughout the hallway and bathroom scenes. There are no instances of lights flickering, turning off, or changing intensity once the subject enters the visible space.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          },
+          {
+            "section": "light_recongnition",
+            "question": "What is the shape of the light switch seen in the bathroom?",
+            "answer": "Rectangular.",
+            "caption": "The hallway is illuminated by overhead ceiling lights, creating uniform brightness. Inside the bathroom, a single light source is positioned above the sink area, evidenced by the reflection in the mirror and on the metallic faucet. A white, rectangular light switch is mounted on the wall to the right of the sink, near the soap dispenser.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 1,
+            "pair_index": 1
+          },
+          {
+            "section": "non_common",
+            "question": "What is unusual about the subject's attire in the bathroom?",
+            "answer": "Wearing a helmet with a camera.",
+            "caption": "The subject is wearing a bicycle helmet with a mounted camera inside a small bathroom stall, which is unusual for common social behavior. However, the layout of the bathroom and its objects conform to physical laws and common design.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 2,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [
+          {
+            "section": "text_recognition",
+            "question": "What is the text on the sign taped to the bathroom wall? What is the male icon on the door? Where is the QR code sticker located? What three letters are on the QR code sticker? In which frame is the male icon first clearly visible? What is the purpose of the sign on the wall? How many signs are in the bathroom? What is the shape of the male icon sign?",
+            "answer": "PLEASE FLUSH THE TOILET; A male silhouette symbol; Below the restroom icon; WCH; Frame 1320; Hygiene reminder; One; Square.",
+            "caption": "In frame 1200, a sign is visible on a door but is too blurry to read. By frame 1320, a clear male silhouette icon is on the door. Below it, in frame 1350, a sticker displays a QR code and the text 'WCH' along with some numbers. In frame 1440, a vertical white paper on the wall clearly reads 'PLEASE FLUSH THE TOILET' in a simple black font, likely used as a hygiene reminder for users.",
+            "confidence": 0.85,
+            "timestamp": null,
+            "source_unit_index": 0,
+            "pair_index": 1
+          }
+        ],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 34.0,
+      "end_seconds": 86.0,
+      "start_timestamp": "00:00:34.000",
+      "end_timestamp": "00:01:26.000"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    }
+  },
+  "wash_hands_night_seg_003": {
+    "source_keys": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_seg_003",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_seg_003"
+    },
+    "reasoning_groups": {
+      "object_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "spatial_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "temporal_sequence_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "action_motion_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "audio_visual_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "anomaly_uncertainty_reasoning": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      },
+      "ungrouped": {
+        "rgb": [],
+        "event": [],
+        "depth": [],
+        "ir": [],
+        "audio": []
+      }
+    },
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_003",
+      "task_label": "dry hands and return",
+      "start_seconds": 86.0,
+      "end_seconds": 138.5,
+      "start_timestamp": "00:01:26.000",
+      "end_timestamp": "00:02:18.500"
+    },
+    "source_files": {
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    }
+  }
+}
