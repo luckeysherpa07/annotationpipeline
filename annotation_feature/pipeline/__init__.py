@@ -21,6 +21,12 @@ def run_task_slicing(*args, **kwargs):
     return _run(*args, **kwargs)
 
 
+def run_segmented_pipeline(*args, **kwargs):
+    from ..segmented_pipeline import run_segmented_pipeline as _run
+
+    return _run(*args, **kwargs)
+
+
 __all__ = [
     "run",
     "run_audio",
@@ -32,4 +38,5 @@ __all__ = [
     "run_marigold_depth_qa",
     "run_late_fusion",
     "run_task_slicing",
+    "run_segmented_pipeline",
 ]
