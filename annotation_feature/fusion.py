@@ -489,6 +489,69 @@ CATEGORY_RELIABILITY_PROFILES = {
     },
 }
 
+SUPPORT_COMPATIBILITY_PROFILES = {
+    "visual_object": {
+        "direct": {"rgb", "ir", "depth"},
+        "complementary": {"event"},
+        "weak": set(),
+        "not_supported": {"audio"},
+    },
+    "visual_spatial": {
+        "direct": {"rgb", "ir", "depth"},
+        "complementary": {"event"},
+        "weak": set(),
+        "not_supported": {"audio"},
+    },
+    "visual_count": {
+        "direct": {"rgb", "ir", "depth"},
+        "complementary": set(),
+        "weak": {"event"},
+        "not_supported": {"audio"},
+    },
+    "visual_text": {
+        "direct": {"rgb", "ir"},
+        "complementary": set(),
+        "weak": {"event", "depth"},
+        "not_supported": {"audio"},
+    },
+    "visual_light": {
+        "direct": {"rgb", "ir"},
+        "complementary": set(),
+        "weak": {"event", "depth"},
+        "not_supported": {"audio"},
+    },
+    "visual_motion": {
+        "direct": {"event", "rgb", "ir"},
+        "complementary": {"audio", "depth"},
+        "weak": set(),
+        "not_supported": set(),
+    },
+    "temporal": {
+        "direct": {"event", "rgb", "ir"},
+        "complementary": {"audio", "depth"},
+        "weak": set(),
+        "not_supported": set(),
+    },
+    "audio": {
+        "direct": {"audio"},
+        "complementary": {"event", "rgb", "ir"},
+        "weak": {"depth"},
+        "not_supported": set(),
+    },
+    "anomaly": {
+        "direct": {"rgb", "ir", "event", "depth", "audio"},
+        "complementary": set(),
+        "weak": set(),
+        "not_supported": set(),
+    },
+    "default": {
+        "direct": {"rgb", "ir", "event", "depth"},
+        "complementary": {"audio"},
+        "weak": set(),
+        "not_supported": set(),
+    },
+}
+
 SECTION_FACT_TYPES = {
     "scene_overview": {"scene", "environment", "object_presence", "lighting"},
     "visible_objects_and_layout": {"object_presence", "spatial_relation", "count", "non_common"},
@@ -577,8 +640,14 @@ class CaptionEvidence:
     lexical_support_match: dict[str, Any] | None = None
     semantic_support_match: dict[str, Any] | None = None
     support_by_modality: dict[str, float] = field(default_factory=dict)
+    support_relations_by_modality: dict[str, dict[str, Any]] = field(default_factory=dict)
     supporting_modalities: list[str] = field(default_factory=list)
     supporting_modality_count: int = 0
+    complementary_supporting_modalities: list[str] = field(default_factory=list)
+    complementary_supporting_modality_count: int = 0
+    conflicting_modalities: list[str] = field(default_factory=list)
+    conflicting_modality_count: int = 0
+    weak_or_irrelevant_modalities: list[str] = field(default_factory=list)
     modality_reliability: float = 0.0
     semantic_facts: list[SemanticFact] = field(default_factory=list)
     original_qa: dict[str, str] | None = None
@@ -1288,6 +1357,18 @@ def _modality_weights_for_category(category: str) -> dict[str, float]:
     return MODALITY_WEIGHT_PROFILES.get(profile_name, MODALITY_WEIGHT_PROFILES["default"])
 
 
+def _support_compatibility_for_category(category: str) -> dict[str, set[str]]:
+    profile = _reliability_profile_for_category(category)
+    profile_name = str(profile.get("modality_weight_profile", "default"))
+    compatibility = SUPPORT_COMPATIBILITY_PROFILES.get(profile_name, SUPPORT_COMPATIBILITY_PROFILES["default"])
+    return {
+        "direct": set(compatibility.get("direct", set())),
+        "complementary": set(compatibility.get("complementary", set())),
+        "weak": set(compatibility.get("weak", set())),
+        "not_supported": set(compatibility.get("not_supported", set())),
+    }
+
+
 def _normalize_semantic_cosine(cosine: float) -> float:
     normalized = (cosine - SEMANTIC_SUPPORT_COSINE_FLOOR) / (
         SEMANTIC_SUPPORT_COSINE_CEILING - SEMANTIC_SUPPORT_COSINE_FLOOR
@@ -1437,8 +1518,14 @@ def _benchmark_qa_from_evidence(
         key: round(value, 3)
         for key, value in evidence.support_by_modality.items()
     }
+    qa["support_relations_by_modality"] = evidence.support_relations_by_modality
     qa["supporting_modalities"] = evidence.supporting_modalities
     qa["supporting_modality_count"] = evidence.supporting_modality_count
+    qa["complementary_supporting_modalities"] = evidence.complementary_supporting_modalities
+    qa["complementary_supporting_modality_count"] = evidence.complementary_supporting_modality_count
+    qa["conflicting_modalities"] = evidence.conflicting_modalities
+    qa["conflicting_modality_count"] = evidence.conflicting_modality_count
+    qa["weak_or_irrelevant_modalities"] = evidence.weak_or_irrelevant_modalities
     qa["modality_reliability"] = round(evidence.modality_reliability, 3)
     qa["modality_weight_profile"] = profile["modality_weight_profile"]
     qa["requires_lexical_support"] = bool(profile.get("requires_lexical_support", False))
@@ -1491,8 +1578,14 @@ def _drop_record(
             key: round(value, 3)
             for key, value in evidence.support_by_modality.items()
         },
+        "support_relations_by_modality": evidence.support_relations_by_modality,
         "supporting_modalities": evidence.supporting_modalities,
         "supporting_modality_count": evidence.supporting_modality_count,
+        "complementary_supporting_modalities": evidence.complementary_supporting_modalities,
+        "complementary_supporting_modality_count": evidence.complementary_supporting_modality_count,
+        "conflicting_modalities": evidence.conflicting_modalities,
+        "conflicting_modality_count": evidence.conflicting_modality_count,
+        "weak_or_irrelevant_modalities": evidence.weak_or_irrelevant_modalities,
         "modality_reliability": round(evidence.modality_reliability, 3),
         "modality_weight_profile": profile["modality_weight_profile"],
         "requires_lexical_support": bool(profile.get("requires_lexical_support", False)),
@@ -1636,6 +1729,34 @@ def _has_token_conflict(current: str, other: str, extractor: Any) -> bool:
     return bool(current_tokens and other_tokens and current_tokens != other_tokens)
 
 
+def _support_conflict_types(current: CaptionEvidence, other: CaptionEvidence) -> list[str]:
+    current_text = f"{current.question} {current.answer}"
+    other_text = f"{other.question} {other.answer}"
+    conflict_types: list[str] = []
+    if _has_token_conflict(current_text, other_text, _number_tokens):
+        conflict_types.append("numeric")
+    if _has_token_conflict(current_text, other_text, _direction_tokens):
+        conflict_types.append("direction")
+    if _has_token_conflict(current_text, other_text, _polarity_tokens):
+        conflict_types.append("negation")
+    return conflict_types
+
+
+def _support_relation_for_match(evidence: CaptionEvidence, other: CaptionEvidence, score: float) -> tuple[str, list[str]]:
+    conflict_types = _support_conflict_types(evidence, other)
+    question_overlap = _jaccard(_tokenize(evidence.question), _tokenize(other.question))
+    if conflict_types and score >= 0.7 and question_overlap >= 0.45:
+        return "conflict", conflict_types
+
+    compatibility = _support_compatibility_for_category(evidence.annotation_key)
+    modality = other.modality
+    if modality in compatibility["direct"]:
+        return "direct_support", []
+    if modality in compatibility["complementary"]:
+        return "complementary_support", []
+    return "weak_or_irrelevant", []
+
+
 def _category_mismatch_reasons(evidence: CaptionEvidence) -> list[str]:
     category = evidence.annotation_key
     qa_text = f"{evidence.question} {evidence.answer}".lower()
@@ -1695,6 +1816,8 @@ def _review_priority(review_reasons: list[str]) -> str:
         "possible_direction_conflict",
         "possible_negation_conflict",
         "no_supporting_modality",
+        "conflicting_support_detected",
+        "only_complementary_support",
         "answer_repeats_question",
         "uncertain_answer",
     }
@@ -1708,6 +1831,7 @@ def _review_priority(review_reasons: list[str]) -> str:
         "long_question",
         "semantic_high_lexical_low",
         "generic_answer",
+        "unsupported_modality_match",
     }
     if any(reason in medium_priority for reason in review_reasons):
         return "medium"
@@ -1740,9 +1864,17 @@ def _support_explanation(evidence: CaptionEvidence, gate: str) -> dict[str, Any]
         "support_level": _support_level(evidence.support_score),
         "best_support_modality": best_support_modality,
         "best_support_score": round(best_support_score, 3),
+        "best_direct_support_modality": evidence.supporting_modalities[0] if evidence.supporting_modalities else "",
+        "best_complementary_support_modality": (
+            evidence.complementary_supporting_modalities[0]
+            if evidence.complementary_supporting_modalities else ""
+        ),
         "best_match_modality": best_match.get("source_modality", "") if isinstance(best_match, dict) else "",
         "best_match_category": best_match.get("category", "") if isinstance(best_match, dict) else "",
         "supporting_modality_count": evidence.supporting_modality_count,
+        "complementary_supporting_modality_count": evidence.complementary_supporting_modality_count,
+        "conflicting_modality_count": evidence.conflicting_modality_count,
+        "conflicting_modalities": evidence.conflicting_modalities,
         "requires_lexical_support": bool(profile.get("requires_lexical_support", False)),
         "lexical_support_score": round(evidence.lexical_support_score, 3),
         "semantic_support_score": round(evidence.semantic_support_score, 3),
@@ -1769,6 +1901,12 @@ def _review_reasons_for_evidence(evidence: CaptionEvidence, gate: str) -> list[s
         reasons.append("semantic_high_lexical_low")
     if profile.get("requires_lexical_support", False) and evidence.lexical_support_score < STRICT_MIN_LEXICAL_SUPPORT_SCORE:
         reasons.append("strict_category_low_lexical")
+    if evidence.conflicting_modality_count > 0:
+        reasons.append("conflicting_support_detected")
+    if gate == "support_required" and evidence.supporting_modality_count < 1 and evidence.complementary_supporting_modality_count > 0:
+        reasons.append("only_complementary_support")
+    if evidence.weak_or_irrelevant_modalities and not evidence.supporting_modalities:
+        reasons.append("unsupported_modality_match")
     if gate == "support_required" and evidence.supporting_modality_count < 1:
         reasons.append("no_supporting_modality")
     reasons.extend(_category_mismatch_reasons(evidence))
@@ -2281,6 +2419,7 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
         semantic_raw_cosine = 0.0
         semantic_match: CaptionEvidence | None = None
         support_by_modality: dict[str, float] = {}
+        support_relations_by_modality: dict[str, dict[str, Any]] = {}
         if semantic_enabled and embeddings is not None:
             evidence_embedding = embeddings[evidence_indices[id(evidence)]]
             for other in other_evidences:
@@ -2292,11 +2431,13 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
                     semantic_match = other
 
         weights = _support_weights_for_category(evidence.annotation_key, semantic_enabled=semantic_enabled)
-        support = weights["lexical"] * lexical_score + weights["semantic"] * semantic_score
         for modality, items in by_modality.items():
             if modality == evidence.modality:
                 continue
             modality_best = 0.0
+            modality_best_match: CaptionEvidence | None = None
+            modality_best_lexical = 0.0
+            modality_best_semantic = 0.0
             for other in items:
                 lexical = _jaccard(evidence.normalized_tokens, other.normalized_tokens) if other.normalized_tokens else 0.0
                 semantic = 0.0
@@ -2306,12 +2447,84 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
                         embeddings[evidence_indices[id(other)]],
                     )
                     semantic = _normalize_semantic_cosine(raw_cosine)
-                modality_best = max(modality_best, weights["lexical"] * lexical + weights["semantic"] * semantic)
+                fused_score = weights["lexical"] * lexical + weights["semantic"] * semantic
+                if fused_score > modality_best:
+                    modality_best = fused_score
+                    modality_best_match = other
+                    modality_best_lexical = lexical
+                    modality_best_semantic = semantic
             support_by_modality[modality] = modality_best
+            if modality_best_match is not None:
+                relation, conflict_types = _support_relation_for_match(evidence, modality_best_match, modality_best)
+                support_relations_by_modality[modality] = {
+                    "relation": relation,
+                    "score": round(modality_best, 3),
+                    "lexical_score": round(modality_best_lexical, 3),
+                    "semantic_score": round(modality_best_semantic, 3),
+                    "match_category": modality_best_match.annotation_key,
+                    "match_modality": modality_best_match.modality,
+                    "match_source_key": modality_best_match.source_key,
+                    "match_qa_index": modality_best_match.qa_index,
+                    "match_question": modality_best_match.question,
+                    "match_answer": modality_best_match.answer,
+                    "conflict_types": conflict_types,
+                }
+
+        direct_support_scores = {
+            modality: relation["score"]
+            for modality, relation in support_relations_by_modality.items()
+            if relation.get("relation") == "direct_support"
+        }
+        complementary_support_scores = {
+            modality: relation["score"]
+            for modality, relation in support_relations_by_modality.items()
+            if relation.get("relation") == "complementary_support"
+        }
+        conflict_scores = {
+            modality: relation["score"]
+            for modality, relation in support_relations_by_modality.items()
+            if relation.get("relation") == "conflict"
+        }
+        weak_or_irrelevant_scores = {
+            modality: relation["score"]
+            for modality, relation in support_relations_by_modality.items()
+            if relation.get("relation") == "weak_or_irrelevant"
+        }
+        direct_support = max(direct_support_scores.values(), default=0.0)
+        complementary_support = max(complementary_support_scores.values(), default=0.0)
+        support = max(direct_support, 0.5 * complementary_support)
+
         supporting_modalities = sorted(
-            modality
-            for modality, score in support_by_modality.items()
-            if score >= SUPPORTING_MODALITY_THRESHOLD
+            (
+                modality
+                for modality, score in direct_support_scores.items()
+                if score >= SUPPORTING_MODALITY_THRESHOLD
+            ),
+            key=lambda modality: (-direct_support_scores[modality], MODALITY_SORT_ORDER.get(modality, 99), modality),
+        )
+        complementary_modalities = sorted(
+            (
+                modality
+                for modality, score in complementary_support_scores.items()
+                if score >= SUPPORTING_MODALITY_THRESHOLD
+            ),
+            key=lambda modality: (-complementary_support_scores[modality], MODALITY_SORT_ORDER.get(modality, 99), modality),
+        )
+        conflicting_modalities = sorted(
+            (
+                modality
+                for modality, score in conflict_scores.items()
+                if score >= DEFAULT_MIN_SUPPORT_SCORE
+            ),
+            key=lambda modality: (-conflict_scores[modality], MODALITY_SORT_ORDER.get(modality, 99), modality),
+        )
+        weak_or_irrelevant_modalities = sorted(
+            (
+                modality
+                for modality, score in weak_or_irrelevant_scores.items()
+                if score >= DEFAULT_MIN_SUPPORT_SCORE
+            ),
+            key=lambda modality: (-weak_or_irrelevant_scores[modality], MODALITY_SORT_ORDER.get(modality, 99), modality),
         )
         evidence.lexical_support_score = lexical_score
         evidence.semantic_support_score = semantic_score
@@ -2323,8 +2536,14 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
             _support_match_record(semantic_match, semantic_raw_cosine) if semantic_match else None
         )
         evidence.support_by_modality = support_by_modality
+        evidence.support_relations_by_modality = support_relations_by_modality
         evidence.supporting_modalities = supporting_modalities
         evidence.supporting_modality_count = len(supporting_modalities)
+        evidence.complementary_supporting_modalities = complementary_modalities
+        evidence.complementary_supporting_modality_count = len(complementary_modalities)
+        evidence.conflicting_modalities = conflicting_modalities
+        evidence.conflicting_modality_count = len(conflicting_modalities)
+        evidence.weak_or_irrelevant_modalities = weak_or_irrelevant_modalities
         evidence.modality_reliability = reliability.get(evidence.modality, 0.5)
 
 
