@@ -14,6 +14,7 @@ from .qa_exporter import (
     export_grouped_qa_pairs,
     run_export_grouped_qa,
     run_export_segmented_grouped_qa,
+    run_export_segmented_normalized_evidence_csv,
     split_numbered_text,
     split_qa_pairs,
 )
@@ -30,4 +31,5 @@ __all__ = [
     "export_grouped_qa_pairs",
     "run_export_grouped_qa",
     "run_export_segmented_grouped_qa",
+    "run_export_segmented_normalized_evidence_csv",
 ]
