@@ -1,0 +1,68 @@
+{
+  "source_prefix": "check_mailbox_day",
+  "split_dir": "check_mailbox_split",
+  "side": "day",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 194.9,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4",
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4"
+    },
+    "audio": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+    "with_audio": null
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "check_mailbox_day_seg_001",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "depth"
+      ],
+      "notes": "The recording begins with the user inside, transitioning to walking down hallways and through stairwells to exit the building. RGB and depth frames show the changing environment, while the audio captures consistent footsteps and the sound of opening doors."
+    },
+    {
+      "segment_id": "check_mailbox_day_seg_002",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "event"
+      ],
+      "notes": "The user reaches the mailbox area. The RGB video shows interaction with the mailbox unit, and the audio contains metallic sounds characteristic of checking mail. Event data shows high activity during the manual manipulation of the mailbox."
+    },
+    {
+      "segment_id": "check_mailbox_day_seg_003",
+      "task_label": "return from mailbox",
+      "start_seconds": 105.0,
+      "end_seconds": 194.9,
+      "start_timestamp": "00:01:45.000",
+      "end_timestamp": "00:03:14.900",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "ir"
+      ],
+      "notes": "The user walks back through the building, following the same path in reverse, and finally returns to the original desk. RGB and IR capture the transition from outdoors back to the interior lighting. The audio records the return journey's footsteps and the final sounds of sitting back down and closing the laptop."
+    }
+  ]
+}

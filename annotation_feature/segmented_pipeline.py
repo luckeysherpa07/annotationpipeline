@@ -102,13 +102,19 @@ def _load_json(path: Path) -> dict[str, Any]:
     return data
 
 
-def _load_segment_jobs(dataset_folder: Path, test_mode: bool = False) -> list[SegmentJob]:
+def _load_segment_jobs(
+    dataset_folder: Path,
+    task_segments_folder: Path,
+    test_mode: bool = False,
+) -> list[SegmentJob]:
     jobs: list[SegmentJob] = []
-    manifest_paths = sorted(dataset_folder.rglob("*_task_segments.json"))
+    manifest_paths = sorted(task_segments_folder.rglob("*_task_segments.json")) if task_segments_folder.exists() else []
 
     for manifest_path in manifest_paths:
         manifest = _load_json(manifest_path)
         source_prefix = str(manifest.get("source_prefix") or manifest_path.name.replace("_task_segments.json", ""))
+        split_dir_name = str(manifest.get("split_dir") or manifest_path.parent.name)
+        source_split_dir = dataset_folder / split_dir_name
         side = str(manifest.get("side") or "unknown")
         source_files = manifest.get("source_files", {})
         if not isinstance(source_files, dict):
@@ -127,13 +133,13 @@ def _load_segment_jobs(dataset_folder: Path, test_mode: bool = False) -> list[Se
                 print(f"WARNING: Segment without segment_id in {manifest_path}; skipping")
                 continue
 
-            key = str(manifest_path.parent / segment_id)
+            key = str(source_split_dir / segment_id)
             jobs.append(
                 SegmentJob(
                     key=key,
                     manifest_path=manifest_path,
                     source_prefix=source_prefix,
-                    split_dir=manifest_path.parent,
+                    split_dir=source_split_dir,
                     side=side,
                     segment=segment,
                     source_files=source_files,
@@ -852,6 +858,7 @@ async def _run_audio_modality(
 
 async def _run_segmented_pipeline_async(
     dataset_folder: Path,
+    task_segments_folder: Path,
     output_folder: Path,
     test_mode: bool,
     skip_api: bool,
@@ -862,9 +869,9 @@ async def _run_segmented_pipeline_async(
     batch_segments: bool,
     batch_audio: bool,
 ) -> dict[str, Path]:
-    jobs = _load_segment_jobs(dataset_folder, test_mode=test_mode)
+    jobs = _load_segment_jobs(dataset_folder, task_segments_folder, test_mode=test_mode)
     if not jobs:
-        print("ERROR: No task segment manifests found. Run task slicing first.")
+        print(f"ERROR: No task segment manifests found in {task_segments_folder}. Run task slicing first.")
         return {}
 
     print(f"Found {len(jobs)} task segment(s).")
@@ -957,6 +964,7 @@ async def _run_segmented_pipeline_async(
 def run_segmented_pipeline(
     dataset_folder: Path | str = "dataset",
     output_folder: Path | str = "segmented_outputs",
+    task_segments_folder: Path | str | None = None,
     test_mode: bool = False,
     skip_api: bool = False,
     delay_between_segments: int | None = None,
@@ -969,6 +977,7 @@ def run_segmented_pipeline(
     """Run selected QA modalities over task segments."""
     dataset_folder = Path(dataset_folder)
     output_folder = Path(output_folder)
+    task_segments_folder = Path(task_segments_folder) if task_segments_folder is not None else output_folder / "dataset"
     if not dataset_folder.exists():
         print(f"ERROR: Dataset folder not found: {dataset_folder}")
         return {}
@@ -982,6 +991,7 @@ def run_segmented_pipeline(
     return asyncio.run(
         _run_segmented_pipeline_async(
             dataset_folder=dataset_folder,
+            task_segments_folder=task_segments_folder,
             output_folder=output_folder,
             test_mode=test_mode,
             skip_api=skip_api,
@@ -998,6 +1008,7 @@ def run_segmented_pipeline(
 def estimate_segmented_work(
     dataset_folder: Path | str = "dataset",
     output_folder: Path | str = "segmented_outputs",
+    task_segments_folder: Path | str | None = None,
     modalities: list[str] | tuple[str, ...] | None = None,
     skip_api: bool = False,
     resume: bool = True,
@@ -1007,8 +1018,13 @@ def estimate_segmented_work(
     """Estimate segmented QA work and Gemini calls for a menu preview."""
     dataset_folder = Path(dataset_folder)
     output_folder = Path(output_folder)
+    task_segments_folder = Path(task_segments_folder) if task_segments_folder is not None else output_folder / "dataset"
     selected_modalities = _normalize_modalities(modalities)
-    jobs = _load_segment_jobs(dataset_folder, test_mode=False) if dataset_folder.exists() else []
+    jobs = (
+        _load_segment_jobs(dataset_folder, task_segments_folder, test_mode=False)
+        if dataset_folder.exists()
+        else []
+    )
 
     modality_counts: dict[str, dict[str, int]] = {}
     estimated_calls = 0

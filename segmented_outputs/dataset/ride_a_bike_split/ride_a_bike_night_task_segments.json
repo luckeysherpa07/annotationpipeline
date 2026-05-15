@@ -1,0 +1,57 @@
+{
+  "source_prefix": "ride_a_bike_night",
+  "split_dir": "ride_a_bike_split",
+  "side": "night",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 104.0,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+      "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+      "ir": "dataset\\ride_a_bike_split\\ride_a_bike_night_ir.mp4",
+      "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4"
+    },
+    "audio": "dataset\\ride_a_bike_split\\ride_a_bike_night.m4a",
+    "with_audio": null
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "ride_a_bike_night_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "event",
+        "depth",
+        "ir"
+      ],
+      "notes": "The video starts with the camera moving forward at a steady pace. Audio contains significant wind noise and the rhythmic sound of bicycle tires on the road. IR and depth modalities clearly show the road and surrounding environment during the ride."
+    },
+    {
+      "segment_id": "ride_a_bike_night_seg_002",
+      "task_label": "parking and locking the bike",
+      "start_seconds": 64.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:44.000",
+      "confidence": 0.95,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "event",
+        "depth",
+        "ir"
+      ],
+      "notes": "At around 64 seconds, the forward motion stops. The audio captures the sound of the bicycle being positioned and the distinct metallic rattling and clicking of a bike lock being used. IR and depth frames show the bike being placed into a rack and the hands manipulating the lock."
+    }
+  ]
+}

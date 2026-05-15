@@ -1,0 +1,68 @@
+{
+  "source_prefix": "wash_hands_night",
+  "split_dir": "wash_hand_split",
+  "side": "night",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 138.5,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4"
+    },
+    "audio": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+    "with_audio": null
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "wash_hands_night_seg_001",
+      "task_label": "entering bathroom and approaching sink",
+      "start_seconds": 0.0,
+      "end_seconds": 54.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:54.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "ir"
+      ],
+      "notes": "The recording begins in darkness. IR and depth modalities show movement through a hallway. At approximately 52 seconds, a light switch click is heard, and the RGB camera shows the user entering a bathroom and reaching for the faucet."
+    },
+    {
+      "segment_id": "wash_hands_night_seg_002",
+      "task_label": "washing hands with soap",
+      "start_seconds": 54.0,
+      "end_seconds": 94.0,
+      "start_timestamp": "00:00:54.000",
+      "end_timestamp": "00:01:34.000",
+      "confidence": 0.95,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "event"
+      ],
+      "notes": "At 54 seconds, the user turns on the water (audible and visible in RGB). They apply soap and scrub their hands over the sink. High motion activity is captured in the event stream."
+    },
+    {
+      "segment_id": "wash_hands_night_seg_003",
+      "task_label": "rinsing and drying hands",
+      "start_seconds": 94.0,
+      "end_seconds": 138.5,
+      "start_timestamp": "00:01:34.000",
+      "end_timestamp": "00:02:18.500",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "depth"
+      ],
+      "notes": "The user finishes scrubbing and rinses their hands under the running water. The water is turned off around 94 seconds (visible in RGB and marked by the cessation of water noise in audio). The user then reaches for a towel to dry their hands before exiting the room."
+    }
+  ]
+}

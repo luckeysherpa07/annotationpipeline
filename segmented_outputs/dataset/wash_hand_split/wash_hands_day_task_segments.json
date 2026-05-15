@@ -1,0 +1,82 @@
+{
+  "source_prefix": "wash_hands_day",
+  "split_dir": "wash_hand_split",
+  "side": "day",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 124.7,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4"
+    },
+    "audio": "dataset\\wash_hand_split\\wash_hands_day.m4a",
+    "with_audio": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4"
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "wash_hands_day_seg_001",
+      "task_label": "walking to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 28.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:28.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio"
+      ],
+      "notes": "The person leaves the computer lab, walks through the hallway, and arrives at the bathroom door."
+    },
+    {
+      "segment_id": "wash_hands_day_seg_002",
+      "task_label": "washing hands",
+      "start_seconds": 28.0,
+      "end_seconds": 84.0,
+      "start_timestamp": "00:00:28.000",
+      "end_timestamp": "00:01:24.000",
+      "confidence": 1.0,
+      "evidence_modalities": [
+        "rgb",
+        "audio",
+        "depth",
+        "ir",
+        "event"
+      ],
+      "notes": "The person enters the bathroom, applies soap, scrubs their hands under running water, and then rinses them. Multimodal evidence clearly shows the interaction with the sink and soap dispenser."
+    },
+    {
+      "segment_id": "wash_hands_day_seg_003",
+      "task_label": "drying hands",
+      "start_seconds": 84.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:24.000",
+      "end_timestamp": "00:01:44.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "audio"
+      ],
+      "notes": "The person pulls paper towels from the dispenser and dries their hands thoroughly before disposing of the towel."
+    },
+    {
+      "segment_id": "wash_hands_day_seg_004",
+      "task_label": "walking back to room",
+      "start_seconds": 104.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:44.000",
+      "end_timestamp": "00:02:04.700",
+      "confidence": 0.8,
+      "evidence_modalities": [
+        "rgb",
+        "audio"
+      ],
+      "notes": "The person leaves the bathroom and walks back through the hallway to the initial computer lab room."
+    }
+  ]
+}

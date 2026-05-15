@@ -1,0 +1,108 @@
+{
+  "source_prefix": "check_mailbox_night",
+  "split_dir": "check_mailbox_split",
+  "side": "night",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 216.6,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+    },
+    "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "with_audio": null
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "check_mailbox_night_seg_001",
+      "task_label": "walking to mailboxes",
+      "start_seconds": 0.0,
+      "end_seconds": 42.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:42.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "event",
+        "depth",
+        "ir",
+        "audio"
+      ],
+      "notes": "The user starts at their desk, walks out of the room, and proceeds down a dark corridor to the mailboxes for the first attempt."
+    },
+    {
+      "segment_id": "check_mailbox_night_seg_002",
+      "task_label": "returning to room to find key",
+      "start_seconds": 42.0,
+      "end_seconds": 125.0,
+      "start_timestamp": "00:00:42.000",
+      "end_timestamp": "00:02:05.000",
+      "confidence": 0.85,
+      "evidence_modalities": [
+        "rgb",
+        "event",
+        "depth",
+        "ir",
+        "audio"
+      ],
+      "notes": "After finding the mailbox locked, the user walks back to their room and searches the desk area for the key."
+    },
+    {
+      "segment_id": "check_mailbox_night_seg_003",
+      "task_label": "walking to mailboxes again",
+      "start_seconds": 125.0,
+      "end_seconds": 150.0,
+      "start_timestamp": "00:02:05.000",
+      "end_timestamp": "00:02:30.000",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "event",
+        "depth",
+        "ir",
+        "audio"
+      ],
+      "notes": "With the key in hand, the user exits the room again and walks back to the mailbox area."
+    },
+    {
+      "segment_id": "check_mailbox_night_seg_004",
+      "task_label": "unlocking and checking mailbox",
+      "start_seconds": 150.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:02:30.000",
+      "end_timestamp": "00:03:05.000",
+      "confidence": 0.95,
+      "evidence_modalities": [
+        "rgb",
+        "event",
+        "depth",
+        "ir",
+        "audio"
+      ],
+      "notes": "The user reaches the mailboxes, uses the key to unlock their box, checks inside for mail, then closes and relocks it."
+    },
+    {
+      "segment_id": "check_mailbox_night_seg_005",
+      "task_label": "returning to room and sitting down",
+      "start_seconds": 185.0,
+      "end_seconds": 216.6,
+      "start_timestamp": "00:03:05.000",
+      "end_timestamp": "00:03:36.600",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "rgb",
+        "event",
+        "depth",
+        "ir",
+        "audio"
+      ],
+      "notes": "The user walks back through the corridor, enters their room, and returns to sitting at the desk."
+    }
+  ]
+}

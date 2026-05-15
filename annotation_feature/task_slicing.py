@@ -535,6 +535,7 @@ async def _slice_sample(
 async def _run_task_slicing_async(
     samples: list[MediaSample],
     dataset_folder: Path,
+    output_folder: Path,
     skip_api: bool,
 ) -> list[Path]:
     client = None
@@ -550,7 +551,8 @@ async def _run_task_slicing_async(
     for index, sample in enumerate(samples, start=1):
         print(f"\n[{index}/{len(samples)}] Slicing task segments for {sample.prefix}")
         manifest = await _slice_sample(client, sample, dataset_folder, skip_api=skip_api)
-        output_path = sample.split_dir / f"{sample.prefix}_task_segments.json"
+        output_path = output_folder / sample.split_dir.name / f"{sample.prefix}_task_segments.json"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as handle:
             json.dump(manifest, handle, indent=2, ensure_ascii=False)
         output_paths.append(output_path)
@@ -561,12 +563,14 @@ async def _run_task_slicing_async(
 
 def run_task_slicing(
     dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = "segmented_outputs/dataset",
     test_mode: bool = False,
     test_sample_index: int = 0,
     skip_api: bool = False,
 ) -> list[Path]:
     """Generate editable semantic task segment manifests for dataset samples."""
     dataset_folder = Path(dataset_folder)
+    output_folder = Path(output_folder)
     if not dataset_folder.exists():
         print(f"ERROR: Dataset folder not found: {dataset_folder}")
         return []
@@ -580,5 +584,5 @@ def run_task_slicing(
         return []
 
     print(f"Found {len(samples)} media sample(s) for task slicing.")
-    print("Output: metadata-only *_task_segments.json manifests beside the source media.")
-    return asyncio.run(_run_task_slicing_async(samples, dataset_folder, skip_api=skip_api))
+    print(f"Output: metadata-only *_task_segments.json manifests under {output_folder}.")
+    return asyncio.run(_run_task_slicing_async(samples, dataset_folder, output_folder, skip_api=skip_api))

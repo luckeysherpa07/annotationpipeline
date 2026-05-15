@@ -1,0 +1,55 @@
+{
+  "source_prefix": "cut_carrot_night",
+  "split_dir": "cut_carrot_split",
+  "side": "night",
+  "status": "suggested",
+  "segment_source": "all_modalities",
+  "minimum_segment_seconds": 15.0,
+  "duration_seconds": 161.933,
+  "source_files": {
+    "videos": {
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4",
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4"
+    },
+    "audio": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+    "with_audio": null
+  },
+  "model": "gemini-3-flash-preview",
+  "model_error": null,
+  "segments": [
+    {
+      "segment_id": "cut_carrot_night_seg_001",
+      "task_label": "slicing carrot",
+      "start_seconds": 0.0,
+      "end_seconds": 78.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:18.000",
+      "confidence": 0.85,
+      "evidence_modalities": [
+        "ir",
+        "depth",
+        "audio",
+        "event"
+      ],
+      "notes": "The user starts by cutting the carrot into long, thin strips (julienne). This is characterized by slower, more deliberate knife strokes which are clearly audible and visible in the IR and depth streams despite the dark RGB environment."
+    },
+    {
+      "segment_id": "cut_carrot_night_seg_002",
+      "task_label": "chopping carrot",
+      "start_seconds": 78.0,
+      "end_seconds": 161.9,
+      "start_timestamp": "00:01:18.000",
+      "end_timestamp": "00:02:41.900",
+      "confidence": 0.9,
+      "evidence_modalities": [
+        "ir",
+        "depth",
+        "audio",
+        "event"
+      ],
+      "notes": "At approximately 78 seconds, the user gathers the strips and begins a rapid cross-cutting motion to dice or mince the carrot. The frequency of the cutting sounds increases significantly, and IR frames show the transition from long strips to a pile of small pieces."
+    }
+  ]
+}

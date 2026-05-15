@@ -165,7 +165,7 @@ def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
     print("\n" + "-" * 60)
     print(f"Running: {label}")
     print("-" * 60)
-    print("This step reads dataset/**/**_task_segments.json.")
+    print("This step reads segmented_outputs/dataset/**/*_task_segments.json.")
     print("It writes selected segmented modality results to segmented_outputs/.")
     print(f"Selected modality/modalities: {', '.join(modalities)}")
     print(f"Found {estimate['total_segments']} task segment(s). Resume + batched mode is enabled.")
@@ -626,7 +626,7 @@ def main():
             print("Running: generate semantic task segment suggestions")
             print("-" * 60)
             print("This step reads dataset videos/audio across RGB, event, depth, IR, and audio.")
-            print("It writes editable metadata-only *_task_segments.json manifests beside source media.")
+            print("It writes editable metadata-only *_task_segments.json manifests under segmented_outputs/dataset/.")
             print("WARNING: This will use Gemini API quota for each day/night sample.")
             print("-" * 60)
             if _confirm():
