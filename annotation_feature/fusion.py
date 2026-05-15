@@ -83,6 +83,7 @@ SEMANTIC_SUPPORT_COSINE_FLOOR = 0.4
 SEMANTIC_SUPPORT_COSINE_CEILING = 0.9
 SEMANTIC_HIGH_REVIEW_THRESHOLD = 0.75
 LEXICAL_LOW_REVIEW_THRESHOLD = 0.05
+SEMANTIC_DUPLICATE_THRESHOLD = 0.9
 
 PRIMARY_SECTIONS = (
     "scene_overview",
@@ -231,61 +232,261 @@ CATEGORY_SECTION_MAP = {
     "depth_non_common": "anomaly_and_safety",
 }
 
-SUPPORT_EXEMPT_CATEGORIES = {
-    "text_recognition",
-    "audio_hia",
-    "audio_chronological_caption",
-    "light_recongnition",
-    "light_recognition",
-    "light_change",
+CATEGORY_SECTIONS_MAP = {
+    "scene_sequence": ("temporal_sequence", "motion_and_action"),
+    "event_scene_sequence": ("temporal_sequence", "motion_and_action"),
+    "depth_scene_sequence": ("temporal_sequence", "spatial_and_layout"),
+    "light_recongnition": ("scene_and_context",),
+    "light_recognition": ("scene_and_context",),
+    "light_change": ("scene_and_context",),
+    "object_recognition": ("objects_and_attributes",),
+    "event_object_recognition": ("objects_and_attributes",),
+    "depth_object_recognition": ("objects_and_attributes",),
+    "spatial_reasoning": ("spatial_and_layout",),
+    "event_spatial_reasoning": ("spatial_and_layout",),
+    "depth_spatial_reasoning": ("spatial_and_layout",),
+    "navigation": ("spatial_and_layout", "motion_and_action"),
+    "event_navigation": ("spatial_and_layout", "motion_and_action"),
+    "depth_navigation": ("spatial_and_layout", "motion_and_action"),
+    "action": ("motion_and_action",),
+    "dynamic_recognition": ("motion_and_action",),
+    "dynamic_counting": ("motion_and_action", "counting"),
+    "event_action": ("motion_and_action",),
+    "event_dynamic_recognition": ("motion_and_action",),
+    "event_dynamic_counting": ("motion_and_action", "counting"),
+    "depth_action": ("motion_and_action",),
+    "depth_dynamic_recognition": ("motion_and_action",),
+    "depth_dynamic_counting": ("motion_and_action", "counting"),
+    "counting": ("counting",),
+    "event_counting": ("counting",),
+    "depth_counting": ("counting",),
+    "text_recognition": ("text_and_symbols", "objects_and_attributes"),
+    "audio_hia": ("audio_understanding",),
+    "audio_chronological_caption": ("audio_understanding", "temporal_sequence"),
+    "non_common": ("anomaly_and_safety",),
+    "event_non_common": ("anomaly_and_safety",),
+    "depth_non_common": ("anomaly_and_safety",),
 }
 
-SUPPORT_SOFT_CATEGORIES = {
-    "action",
-    "dynamic_recognition",
-    "dynamic_counting",
-    "event_action",
-    "event_dynamic_recognition",
-    "event_dynamic_counting",
-    "scene_sequence",
-    "event_scene_sequence",
-    "depth_action",
-    "depth_dynamic_recognition",
-    "depth_dynamic_counting",
+MODALITY_WEIGHT_PROFILES = {
+    "visual_object": {"rgb": 1.2, "ir": 1.1, "event": 0.8, "audio": 0.2, "depth": 1.0},
+    "visual_spatial": {"rgb": 1.1, "ir": 1.0, "event": 0.7, "audio": 0.1, "depth": 1.2},
+    "visual_count": {"rgb": 1.1, "ir": 1.0, "event": 0.8, "audio": 0.1, "depth": 1.1},
+    "visual_text": {"rgb": 1.4, "ir": 1.0, "event": 0.2, "audio": 0.0, "depth": 0.2},
+    "visual_light": {"rgb": 1.0, "ir": 1.2, "event": 0.4, "audio": 0.0, "depth": 0.2},
+    "visual_motion": {"rgb": 0.8, "ir": 0.9, "event": 1.3, "audio": 0.4, "depth": 0.6},
+    "temporal": {"rgb": 0.8, "ir": 0.8, "event": 1.2, "audio": 0.5, "depth": 0.6},
+    "audio": {"rgb": 0.1, "ir": 0.1, "event": 0.1, "audio": 1.5, "depth": 0.1},
+    "anomaly": {"rgb": 1.0, "ir": 1.0, "event": 0.9, "audio": 0.6, "depth": 0.8},
+    "default": {"rgb": 0.8, "ir": 0.8, "event": 0.8, "audio": 0.5, "depth": 0.8},
 }
 
-SUPPORT_REQUIRED_CATEGORIES = {
-    "object_recognition",
-    "event_object_recognition",
-    "depth_object_recognition",
-    "spatial_reasoning",
-    "event_spatial_reasoning",
-    "depth_spatial_reasoning",
-    "navigation",
-    "event_navigation",
-    "depth_navigation",
-    "counting",
-    "event_counting",
-    "depth_counting",
+DEFAULT_CATEGORY_RELIABILITY_PROFILE = {
+    "gate": "support_required",
+    "modality_weight_profile": "default",
+    "support_weights": {"lexical": 0.5, "semantic": 0.5},
+    "requires_lexical_support": False,
 }
 
-REVIEW_CATEGORIES = {
-    "non_common",
-    "event_non_common",
-    "depth_non_common",
-}
-
-SUPPORT_FUSION_WEIGHTS = {
-    "scene_and_context": {"lexical": 0.4, "semantic": 0.6},
-    "objects_and_attributes": {"lexical": 0.55, "semantic": 0.45},
-    "spatial_and_layout": {"lexical": 0.6, "semantic": 0.4},
-    "motion_and_action": {"lexical": 0.35, "semantic": 0.65},
-    "temporal_sequence": {"lexical": 0.4, "semantic": 0.6},
-    "counting": {"lexical": 0.7, "semantic": 0.3},
-    "text_and_symbols": {"lexical": 0.65, "semantic": 0.35},
-    "audio_understanding": {"lexical": 0.3, "semantic": 0.7},
-    "anomaly_and_safety": {"lexical": 0.5, "semantic": 0.5},
-    "others": {"lexical": 0.5, "semantic": 0.5},
+CATEGORY_RELIABILITY_PROFILES = {
+    "scene_sequence": {
+        "gate": "support_soft",
+        "modality_weight_profile": "temporal",
+        "support_weights": {"lexical": 0.4, "semantic": 0.6},
+        "requires_lexical_support": False,
+    },
+    "event_scene_sequence": {
+        "gate": "support_soft",
+        "modality_weight_profile": "temporal",
+        "support_weights": {"lexical": 0.4, "semantic": 0.6},
+        "requires_lexical_support": False,
+    },
+    "depth_scene_sequence": {
+        "gate": "support_soft",
+        "modality_weight_profile": "temporal",
+        "support_weights": {"lexical": 0.4, "semantic": 0.6},
+        "requires_lexical_support": False,
+    },
+    "light_recongnition": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "visual_light",
+        "support_weights": {"lexical": 0.45, "semantic": 0.55},
+        "requires_lexical_support": False,
+    },
+    "light_recognition": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "visual_light",
+        "support_weights": {"lexical": 0.45, "semantic": 0.55},
+        "requires_lexical_support": False,
+    },
+    "light_change": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "visual_light",
+        "support_weights": {"lexical": 0.45, "semantic": 0.55},
+        "requires_lexical_support": False,
+    },
+    "object_recognition": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_object",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": False,
+    },
+    "event_object_recognition": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_object",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": False,
+    },
+    "depth_object_recognition": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_object",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": False,
+    },
+    "spatial_reasoning": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "event_spatial_reasoning": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "depth_spatial_reasoning": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "navigation": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "event_navigation": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "depth_navigation": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_spatial",
+        "support_weights": {"lexical": 0.6, "semantic": 0.4},
+        "requires_lexical_support": True,
+    },
+    "action": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "dynamic_recognition": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "dynamic_counting": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": True,
+    },
+    "event_action": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "event_dynamic_recognition": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "event_dynamic_counting": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": True,
+    },
+    "depth_action": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "depth_dynamic_recognition": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.35, "semantic": 0.65},
+        "requires_lexical_support": False,
+    },
+    "depth_dynamic_counting": {
+        "gate": "support_soft",
+        "modality_weight_profile": "visual_motion",
+        "support_weights": {"lexical": 0.55, "semantic": 0.45},
+        "requires_lexical_support": True,
+    },
+    "counting": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_count",
+        "support_weights": {"lexical": 0.7, "semantic": 0.3},
+        "requires_lexical_support": True,
+    },
+    "event_counting": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_count",
+        "support_weights": {"lexical": 0.7, "semantic": 0.3},
+        "requires_lexical_support": True,
+    },
+    "depth_counting": {
+        "gate": "support_required",
+        "modality_weight_profile": "visual_count",
+        "support_weights": {"lexical": 0.7, "semantic": 0.3},
+        "requires_lexical_support": True,
+    },
+    "text_recognition": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "visual_text",
+        "support_weights": {"lexical": 0.65, "semantic": 0.35},
+        "requires_lexical_support": True,
+    },
+    "audio_hia": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "audio",
+        "support_weights": {"lexical": 0.3, "semantic": 0.7},
+        "requires_lexical_support": False,
+    },
+    "audio_chronological_caption": {
+        "gate": "support_exempt",
+        "modality_weight_profile": "audio",
+        "support_weights": {"lexical": 0.3, "semantic": 0.7},
+        "requires_lexical_support": False,
+    },
+    "non_common": {
+        "gate": "review_recommended",
+        "modality_weight_profile": "anomaly",
+        "support_weights": {"lexical": 0.5, "semantic": 0.5},
+        "requires_lexical_support": False,
+    },
+    "event_non_common": {
+        "gate": "review_recommended",
+        "modality_weight_profile": "anomaly",
+        "support_weights": {"lexical": 0.5, "semantic": 0.5},
+        "requires_lexical_support": False,
+    },
+    "depth_non_common": {
+        "gate": "review_recommended",
+        "modality_weight_profile": "anomaly",
+        "support_weights": {"lexical": 0.5, "semantic": 0.5},
+        "requires_lexical_support": False,
+    },
 }
 
 SECTION_FACT_TYPES = {
@@ -1051,13 +1252,40 @@ def _qa_from_evidence(section: str, evidence: CaptionEvidence) -> dict[str, Any]
 
 
 def _section_for_category(category: str) -> str:
-    return CATEGORY_SECTION_MAP.get(category, "others")
+    return _sections_for_category(category)[0]
 
 
-def _support_weights_for_section(section: str, *, semantic_enabled: bool) -> dict[str, float]:
+def _sections_for_category(category: str) -> list[str]:
+    sections = CATEGORY_SECTIONS_MAP.get(category)
+    if sections is None:
+        sections = (CATEGORY_SECTION_MAP.get(category, "others"),)
+    valid_sections = [section for section in sections if section in QA_SECTIONS]
+    return list(dict.fromkeys(valid_sections)) or ["others"]
+
+
+def _reliability_profile_for_category(category: str) -> dict[str, Any]:
+    profile = CATEGORY_RELIABILITY_PROFILES.get(category, DEFAULT_CATEGORY_RELIABILITY_PROFILE)
+    return {
+        **DEFAULT_CATEGORY_RELIABILITY_PROFILE,
+        **profile,
+    }
+
+
+def _support_weights_for_category(category: str, *, semantic_enabled: bool) -> dict[str, float]:
     if not semantic_enabled:
         return {"lexical": 1.0, "semantic": 0.0}
-    return SUPPORT_FUSION_WEIGHTS.get(section, SUPPORT_FUSION_WEIGHTS["others"])
+    profile = _reliability_profile_for_category(category)
+    weights = profile.get("support_weights", DEFAULT_CATEGORY_RELIABILITY_PROFILE["support_weights"])
+    return {
+        "lexical": float(weights.get("lexical", 0.5)),
+        "semantic": float(weights.get("semantic", 0.5)),
+    }
+
+
+def _modality_weights_for_category(category: str) -> dict[str, float]:
+    profile = _reliability_profile_for_category(category)
+    profile_name = str(profile.get("modality_weight_profile", "default"))
+    return MODALITY_WEIGHT_PROFILES.get(profile_name, MODALITY_WEIGHT_PROFILES["default"])
 
 
 def _normalize_semantic_cosine(cosine: float) -> float:
@@ -1074,10 +1302,14 @@ def _evidence_support_text(evidence: CaptionEvidence) -> str:
 
 
 def _support_match_record(evidence: CaptionEvidence, score: float) -> dict[str, Any]:
+    sections = _sections_for_category(evidence.annotation_key)
+    primary_section = sections[0]
     return {
         "source_modality": evidence.modality,
         "category": evidence.annotation_key,
-        "section": _section_for_category(evidence.annotation_key),
+        "section": primary_section,
+        "primary_section": primary_section,
+        "sections": sections,
         "source_key": evidence.source_key,
         "annotation_key": evidence.annotation_key,
         "qa_index": evidence.qa_index,
@@ -1124,6 +1356,52 @@ def _embedding_similarity(embedding_a: Any, embedding_b: Any) -> float:
         return sum(float(a) * float(b) for a, b in zip(embedding_a, embedding_b))
 
 
+def _compute_text_embeddings(texts: list[str], *, model_name: str = DEFAULT_EMBEDDING_MODEL) -> list[Any] | None:
+    model = _load_embedding_model(model_name)
+    if model is None:
+        return None
+    try:
+        return list(model.encode(texts, normalize_embeddings=True))
+    except Exception:
+        return None
+
+
+def _qa_duplicate_text(evidence: CaptionEvidence) -> str:
+    return _clean_whitespace(" ".join(
+        part for part in (evidence.question, evidence.answer) if part
+    )) or evidence.caption or evidence.sentence
+
+
+def _has_duplicate_conflict(current: CaptionEvidence, previous: CaptionEvidence) -> bool:
+    current_text = f"{current.question} {current.answer}"
+    previous_text = f"{previous.question} {previous.answer}"
+    return (
+        _has_token_conflict(current_text, previous_text, _number_tokens)
+        or _has_token_conflict(current_text, previous_text, _direction_tokens)
+        or _has_token_conflict(current_text, previous_text, _polarity_tokens)
+    )
+
+
+def _answers_compatible_for_duplicate(current: CaptionEvidence, previous: CaptionEvidence) -> bool:
+    current_answer = _clean_whitespace(current.answer).lower()
+    previous_answer = _clean_whitespace(previous.answer).lower()
+    if not current_answer or not previous_answer:
+        return False
+    if current_answer == previous_answer:
+        return True
+    if _is_yes_no_answer(current_answer) or _is_yes_no_answer(previous_answer):
+        return False
+
+    current_tokens = _tokenize(current_answer)
+    previous_tokens = _tokenize(previous_answer)
+    if not current_tokens or not previous_tokens:
+        return False
+    if _jaccard(current_tokens, previous_tokens) >= 0.7:
+        return True
+    shorter, longer = sorted((current_answer, previous_answer), key=len)
+    return len(shorter.split()) >= 2 and shorter in longer
+
+
 def _benchmark_qa_from_evidence(
         evidence: CaptionEvidence,
         *,
@@ -1133,8 +1411,13 @@ def _benchmark_qa_from_evidence(
         reliability_gate: str,
         review_recommended: bool,
 ) -> dict[str, Any]:
+    sections = _sections_for_category(evidence.annotation_key)
+    primary_section = section if section in sections else sections[0]
+    profile = _reliability_profile_for_category(evidence.annotation_key)
     qa = _qa_from_evidence(section, evidence)
-    qa["section"] = section
+    qa["section"] = primary_section
+    qa["primary_section"] = primary_section
+    qa["sections"] = sections
     qa["category"] = evidence.annotation_key
     qa["source_modality"] = evidence.modality
     qa["source_key"] = evidence.source_key
@@ -1157,11 +1440,15 @@ def _benchmark_qa_from_evidence(
     qa["supporting_modalities"] = evidence.supporting_modalities
     qa["supporting_modality_count"] = evidence.supporting_modality_count
     qa["modality_reliability"] = round(evidence.modality_reliability, 3)
+    qa["modality_weight_profile"] = profile["modality_weight_profile"]
+    qa["requires_lexical_support"] = bool(profile.get("requires_lexical_support", False))
     qa["fusion_score"] = round(fusion_score, 3)
     qa["is_outlier"] = _looks_outlier(evidence)
     qa["selection_reason"] = selection_reason
     qa["reliability_gate"] = reliability_gate
     qa["review_recommended"] = review_recommended
+    qa["review_priority"] = "none"
+    qa["support_explanation"] = _support_explanation(evidence, reliability_gate)
     qa["source_caption"] = evidence.caption
     if evidence.original_qa and evidence.qa_index is not None:
         qa["source_question_block"] = evidence.original_qa["question"]
@@ -1178,9 +1465,14 @@ def _drop_record(
         reliability_gate: str = "",
         review_recommended: bool = False,
 ) -> dict[str, Any]:
+    sections = _sections_for_category(evidence.annotation_key)
+    primary_section = section if section in sections else sections[0]
+    profile = _reliability_profile_for_category(evidence.annotation_key)
     return {
         "reason": reason,
-        "section": section,
+        "section": primary_section,
+        "primary_section": primary_section,
+        "sections": sections,
         "category": evidence.annotation_key,
         "source_modality": evidence.modality,
         "source_key": evidence.source_key,
@@ -1202,10 +1494,13 @@ def _drop_record(
         "supporting_modalities": evidence.supporting_modalities,
         "supporting_modality_count": evidence.supporting_modality_count,
         "modality_reliability": round(evidence.modality_reliability, 3),
+        "modality_weight_profile": profile["modality_weight_profile"],
+        "requires_lexical_support": bool(profile.get("requires_lexical_support", False)),
         "fusion_score": round(score, 3),
         "is_outlier": _looks_outlier(evidence),
         "reliability_gate": reliability_gate,
         "review_recommended": review_recommended,
+        "support_explanation": _support_explanation(evidence, reliability_gate),
     }
 
 
@@ -1216,7 +1511,12 @@ def _deduplicate_qas(
     seen_exact: set[tuple[str, str]] = set()
     seen_tokens: list[set[str]] = []
     dropped: list[dict[str, Any]] = []
-    for score, evidence, section in sorted(scored_items, key=lambda item: item[0], reverse=True):
+    sorted_items = sorted(scored_items, key=lambda item: item[0], reverse=True)
+    duplicate_texts = [_qa_duplicate_text(evidence) for _, evidence, _ in sorted_items]
+    embeddings = _compute_text_embeddings(duplicate_texts) if duplicate_texts else None
+    selected_embedding_items: list[tuple[Any, CaptionEvidence, str, float]] = []
+
+    for item_index, (score, evidence, section) in enumerate(sorted_items):
         question_key = _clean_whitespace(evidence.question).lower()
         answer_key = _clean_whitespace(evidence.answer).lower()
         exact_key = (question_key, answer_key)
@@ -1227,7 +1527,38 @@ def _deduplicate_qas(
         if tokens and any(_jaccard(tokens, previous) > 0.85 for previous in seen_tokens):
             dropped.append(_drop_record(evidence, section=section, score=score, reason="duplicate_similar_qa"))
             continue
+        if embeddings is not None:
+            current_embedding = embeddings[item_index]
+            duplicate_match: tuple[float, CaptionEvidence, str, float] | None = None
+            for previous_embedding, previous_evidence, previous_section, previous_score in selected_embedding_items:
+                similarity = _embedding_similarity(current_embedding, previous_embedding)
+                if similarity < SEMANTIC_DUPLICATE_THRESHOLD:
+                    continue
+                if _has_duplicate_conflict(evidence, previous_evidence):
+                    continue
+                if not _answers_compatible_for_duplicate(evidence, previous_evidence):
+                    continue
+                if duplicate_match is None or similarity > duplicate_match[0]:
+                    duplicate_match = (similarity, previous_evidence, previous_section, previous_score)
+            if duplicate_match is not None:
+                similarity, previous_evidence, previous_section, previous_score = duplicate_match
+                drop = _drop_record(evidence, section=section, score=score, reason="duplicate_semantic_qa")
+                drop["duplicate_of"] = {
+                    "section": previous_section,
+                    "category": previous_evidence.annotation_key,
+                    "source_modality": previous_evidence.modality,
+                    "source_key": previous_evidence.source_key,
+                    "qa_index": previous_evidence.qa_index,
+                    "question": previous_evidence.question,
+                    "answer": previous_evidence.answer,
+                    "fusion_score": round(previous_score, 3),
+                    "semantic_duplicate_score": round(similarity, 3),
+                }
+                dropped.append(drop)
+                continue
         selected.append((score, evidence, section))
+        if embeddings is not None:
+            selected_embedding_items.append((embeddings[item_index], evidence, section, score))
         if question_key and answer_key:
             seen_exact.add(exact_key)
         if tokens:
@@ -1236,15 +1567,8 @@ def _deduplicate_qas(
 
 
 def _qa_gate_for_category(category: str) -> tuple[str, bool]:
-    if category in SUPPORT_EXEMPT_CATEGORIES:
-        return "support_exempt", False
-    if category in SUPPORT_SOFT_CATEGORIES:
-        return "support_soft", False
-    if category in SUPPORT_REQUIRED_CATEGORIES:
-        return "support_required", False
-    if category in REVIEW_CATEGORIES:
-        return "review_recommended", True
-    return "support_required", False
+    gate = str(_reliability_profile_for_category(category).get("gate", "support_required"))
+    return gate, gate == "review_recommended"
 
 
 def _qa_gate_decision(
@@ -1312,7 +1636,121 @@ def _has_token_conflict(current: str, other: str, extractor: Any) -> bool:
     return bool(current_tokens and other_tokens and current_tokens != other_tokens)
 
 
-def _review_reasons_for_evidence(evidence: CaptionEvidence, section: str, gate: str) -> list[str]:
+def _category_mismatch_reasons(evidence: CaptionEvidence) -> list[str]:
+    category = evidence.annotation_key
+    qa_text = f"{evidence.question} {evidence.answer}".lower()
+    question = evidence.question.lower().strip()
+    reasons: list[str] = []
+
+    counting_categories = {"counting", "event_counting", "depth_counting", "dynamic_counting",
+                           "event_dynamic_counting", "depth_dynamic_counting"}
+    spatial_categories = {"spatial_reasoning", "event_spatial_reasoning", "depth_spatial_reasoning",
+                          "navigation", "event_navigation", "depth_navigation"}
+    text_categories = {"text_recognition"}
+    audio_categories = {"audio_hia", "audio_chronological_caption"}
+    motion_categories = {"action", "dynamic_recognition", "dynamic_counting", "event_action",
+                         "event_dynamic_recognition", "event_dynamic_counting", "depth_action",
+                         "depth_dynamic_recognition", "depth_dynamic_counting", "scene_sequence",
+                         "event_scene_sequence", "depth_scene_sequence"}
+
+    if question.startswith(("how many", "how much")) and category not in counting_categories:
+        reasons.append("category_mismatch_counting_hint")
+    if question.startswith(("where", "which side", "in which direction")) and category not in spatial_categories:
+        reasons.append("category_mismatch_spatial_hint")
+    if any(word in qa_text for word in ("brand", "logo", "word", "text", "written", "sticker")) and category not in text_categories:
+        reasons.append("category_mismatch_text_hint")
+    if question.startswith(("what sound", "what audio", "which sound", "which audio")) and category not in audio_categories:
+        reasons.append("category_mismatch_audio_hint")
+    if question.startswith(("what action", "what is happening", "what occurs", "what does", "what do", "when")) and category not in motion_categories:
+        reasons.append("category_mismatch_motion_hint")
+
+    return reasons
+
+
+def _answer_quality_reasons(evidence: CaptionEvidence) -> list[str]:
+    question = _clean_whitespace(evidence.question).lower()
+    answer = _clean_whitespace(evidence.answer).lower()
+    if not answer:
+        return []
+
+    reasons: list[str] = []
+    generic_answers = {"it", "this", "that", "there", "object", "thing", "something", "unknown", "unclear", "none"}
+    uncertainty_terms = ("not sure", "unclear", "cannot tell", "can't tell", "unknown", "maybe", "possibly")
+
+    if answer in generic_answers and not _is_yes_no_answer(answer):
+        reasons.append("generic_answer")
+    if any(term in answer for term in uncertainty_terms):
+        reasons.append("uncertain_answer")
+    if question and (answer == question or answer in question and len(answer.split()) >= 5):
+        reasons.append("answer_repeats_question")
+
+    return reasons
+
+
+def _review_priority(review_reasons: list[str]) -> str:
+    if not review_reasons:
+        return "none"
+    high_priority = {
+        "possible_numeric_conflict",
+        "possible_direction_conflict",
+        "possible_negation_conflict",
+        "no_supporting_modality",
+        "answer_repeats_question",
+        "uncertain_answer",
+    }
+    if any(reason in high_priority or reason.startswith("category_mismatch_") for reason in review_reasons):
+        return "high"
+    medium_priority = {
+        "strict_category_low_lexical",
+        "unparsed_numbered_block",
+        "multi_clause_answer",
+        "long_answer",
+        "long_question",
+        "semantic_high_lexical_low",
+        "generic_answer",
+    }
+    if any(reason in medium_priority for reason in review_reasons):
+        return "medium"
+    return "low"
+
+
+def _support_level(score: float) -> str:
+    if score >= 0.45:
+        return "strong"
+    if score >= STRICT_MIN_SUPPORT_SCORE:
+        return "moderate"
+    if score >= DEFAULT_MIN_SUPPORT_SCORE:
+        return "weak"
+    return "very_weak"
+
+
+def _support_explanation(evidence: CaptionEvidence, gate: str) -> dict[str, Any]:
+    profile = _reliability_profile_for_category(evidence.annotation_key)
+    best_support_modality = ""
+    best_support_score = 0.0
+    if evidence.support_by_modality:
+        best_support_modality, best_support_score = max(
+            evidence.support_by_modality.items(),
+            key=lambda item: item[1],
+        )
+    best_match = evidence.semantic_support_match or evidence.lexical_support_match or {}
+    return {
+        "gate": gate,
+        "modality_weight_profile": profile["modality_weight_profile"],
+        "support_level": _support_level(evidence.support_score),
+        "best_support_modality": best_support_modality,
+        "best_support_score": round(best_support_score, 3),
+        "best_match_modality": best_match.get("source_modality", "") if isinstance(best_match, dict) else "",
+        "best_match_category": best_match.get("category", "") if isinstance(best_match, dict) else "",
+        "supporting_modality_count": evidence.supporting_modality_count,
+        "requires_lexical_support": bool(profile.get("requires_lexical_support", False)),
+        "lexical_support_score": round(evidence.lexical_support_score, 3),
+        "semantic_support_score": round(evidence.semantic_support_score, 3),
+    }
+
+
+def _review_reasons_for_evidence(evidence: CaptionEvidence, gate: str) -> list[str]:
+    profile = _reliability_profile_for_category(evidence.annotation_key)
     reasons: list[str] = []
     if gate == "review_recommended":
         reasons.append("anomaly_category")
@@ -1329,10 +1767,12 @@ def _review_reasons_for_evidence(evidence: CaptionEvidence, section: str, gate: 
         reasons.append("multi_clause_answer")
     if evidence.semantic_support_score >= SEMANTIC_HIGH_REVIEW_THRESHOLD and evidence.lexical_support_score < LEXICAL_LOW_REVIEW_THRESHOLD:
         reasons.append("semantic_high_lexical_low")
-    if section in {"spatial_and_layout", "counting", "text_and_symbols"} and evidence.lexical_support_score < STRICT_MIN_LEXICAL_SUPPORT_SCORE:
+    if profile.get("requires_lexical_support", False) and evidence.lexical_support_score < STRICT_MIN_LEXICAL_SUPPORT_SCORE:
         reasons.append("strict_category_low_lexical")
     if gate == "support_required" and evidence.supporting_modality_count < 1:
         reasons.append("no_supporting_modality")
+    reasons.extend(_category_mismatch_reasons(evidence))
+    reasons.extend(_answer_quality_reasons(evidence))
 
     match = evidence.semantic_support_match or evidence.lexical_support_match
     if match and isinstance(match, dict):
@@ -1357,9 +1797,10 @@ def _select_reliable_qas(
     dropped: list[dict[str, Any]] = []
     reason_counts: dict[str, int] = defaultdict(int)
     review_reason_counts: dict[str, int] = defaultdict(int)
+    review_priority_counts: dict[str, int] = defaultdict(int)
     for evidence in evidences:
         section = _section_for_category(evidence.annotation_key)
-        score = _sentence_score(evidence, section if section in SECTION_MODALITY_WEIGHTS else _legacy_section_for_qa_section(section))
+        score = _qa_reliability_score(evidence)
         if evidence.qa_index is not None:
             score += 0.1
         if evidence.question and evidence.answer:
@@ -1390,10 +1831,11 @@ def _select_reliable_qas(
             ))
             reason_counts[reason] += 1
             continue
-        review_reasons = _review_reasons_for_evidence(evidence, section, gate)
+        review_reasons = _review_reasons_for_evidence(evidence, gate)
         if review_reasons:
             for review_reason in review_reasons:
                 review_reason_counts[review_reason] += 1
+            review_priority_counts[_review_priority(review_reasons)] += 1
             review_items.append((score, evidence, section, reason, True, gate, review_reasons))
             continue
         scored_items.append((score, evidence, section, reason, review_recommended, gate))
@@ -1435,6 +1877,7 @@ def _select_reliable_qas(
                 reliability_gate=gate,
             ),
             "review_reasons": review_reasons,
+            "review_priority": _review_priority(review_reasons),
         }
         for score, evidence, section, selection_reason, _, gate, review_reasons in sorted(
             review_items,
@@ -1450,6 +1893,7 @@ def _select_reliable_qas(
         "dropped_count": len(dropped),
         "drop_reason_counts": dict(sorted(reason_counts.items())),
         "review_reason_counts": dict(sorted(review_reason_counts.items())),
+        "review_priority_counts": dict(sorted(review_priority_counts.items())),
         "dropped_qas": dropped,
         "review_recommended_qas": review_recommended_qas,
     }
@@ -1471,7 +1915,12 @@ def _legacy_section_for_qa_section(section: str) -> str:
 def _group_qas_by_section(qas: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     grouped = {section: [] for section in QA_SECTIONS}
     for qa in qas:
-        grouped.setdefault(qa.get("section", "others"), []).append(qa)
+        sections = qa.get("sections")
+        if not isinstance(sections, list) or not sections:
+            sections = [qa.get("section", "others")]
+        for section in sections:
+            section_key = section if section in QA_SECTIONS else "others"
+            grouped.setdefault(section_key, []).append(qa)
     return grouped
 
 
@@ -1842,8 +2291,7 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
                     semantic_raw_cosine = raw_cosine
                     semantic_match = other
 
-        section = _section_for_category(evidence.annotation_key)
-        weights = _support_weights_for_section(section, semantic_enabled=semantic_enabled)
+        weights = _support_weights_for_category(evidence.annotation_key, semantic_enabled=semantic_enabled)
         support = weights["lexical"] * lexical_score + weights["semantic"] * semantic_score
         for modality, items in by_modality.items():
             if modality == evidence.modality:
@@ -1910,6 +2358,18 @@ def _sentence_score(evidence: CaptionEvidence, section: str) -> float:
     score += evidence.support_score * 1.2
     score += _category_bonus(evidence.annotation_key, section)
     score += _keyword_bonus(evidence.normalized_tokens, section)
+    if _looks_outlier(evidence):
+        score -= 1.0
+    return score
+
+
+def _qa_reliability_score(evidence: CaptionEvidence) -> float:
+    weights = _modality_weights_for_category(evidence.annotation_key)
+    score = weights.get(evidence.modality, 0.3)
+    score += evidence.modality_reliability * 0.6
+    score += evidence.support_score * 1.2
+    if evidence.annotation_key not in CATEGORY_RELIABILITY_PROFILES:
+        score -= 0.15
     if _looks_outlier(evidence):
         score -= 1.0
     return score
