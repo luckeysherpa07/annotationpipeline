@@ -8,7 +8,7 @@ caption for each sample.
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
@@ -66,6 +66,23 @@ RELAXED_SECTION_QA_LIMITS = {
 
 DEFAULT_MIN_SCORE = 0.45
 RELAXED_MIN_SCORE = 0.2
+DEFAULT_RELIABLE_QA_MIN_SCORE = 1.8
+RELAXED_RELIABLE_QA_MIN_SCORE = 1.6
+EXEMPT_RELIABLE_QA_MIN_SCORE = 1.7
+REVIEW_RELIABLE_QA_MIN_SCORE = 2.0
+DEFAULT_MIN_SUPPORT_SCORE = 0.08
+STRICT_MIN_SUPPORT_SCORE = 0.12
+STRICT_MIN_LEXICAL_SUPPORT_SCORE = 0.04
+SUPPORTING_MODALITY_THRESHOLD = 0.3
+STRICT_SUPPORTING_MODALITY_THRESHOLD = 0.25
+ANSWER_REVIEW_WORD_LIMIT = 12
+QUESTION_REVIEW_WORD_LIMIT = 35
+SOFT_HIGH_SCORE = 2.2
+DEFAULT_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+SEMANTIC_SUPPORT_COSINE_FLOOR = 0.4
+SEMANTIC_SUPPORT_COSINE_CEILING = 0.9
+SEMANTIC_HIGH_REVIEW_THRESHOLD = 0.75
+LEXICAL_LOW_REVIEW_THRESHOLD = 0.05
 
 PRIMARY_SECTIONS = (
     "scene_overview",
@@ -214,6 +231,63 @@ CATEGORY_SECTION_MAP = {
     "depth_non_common": "anomaly_and_safety",
 }
 
+SUPPORT_EXEMPT_CATEGORIES = {
+    "text_recognition",
+    "audio_hia",
+    "audio_chronological_caption",
+    "light_recongnition",
+    "light_recognition",
+    "light_change",
+}
+
+SUPPORT_SOFT_CATEGORIES = {
+    "action",
+    "dynamic_recognition",
+    "dynamic_counting",
+    "event_action",
+    "event_dynamic_recognition",
+    "event_dynamic_counting",
+    "scene_sequence",
+    "event_scene_sequence",
+    "depth_action",
+    "depth_dynamic_recognition",
+    "depth_dynamic_counting",
+}
+
+SUPPORT_REQUIRED_CATEGORIES = {
+    "object_recognition",
+    "event_object_recognition",
+    "depth_object_recognition",
+    "spatial_reasoning",
+    "event_spatial_reasoning",
+    "depth_spatial_reasoning",
+    "navigation",
+    "event_navigation",
+    "depth_navigation",
+    "counting",
+    "event_counting",
+    "depth_counting",
+}
+
+REVIEW_CATEGORIES = {
+    "non_common",
+    "event_non_common",
+    "depth_non_common",
+}
+
+SUPPORT_FUSION_WEIGHTS = {
+    "scene_and_context": {"lexical": 0.4, "semantic": 0.6},
+    "objects_and_attributes": {"lexical": 0.55, "semantic": 0.45},
+    "spatial_and_layout": {"lexical": 0.6, "semantic": 0.4},
+    "motion_and_action": {"lexical": 0.35, "semantic": 0.65},
+    "temporal_sequence": {"lexical": 0.4, "semantic": 0.6},
+    "counting": {"lexical": 0.7, "semantic": 0.3},
+    "text_and_symbols": {"lexical": 0.65, "semantic": 0.35},
+    "audio_understanding": {"lexical": 0.3, "semantic": 0.7},
+    "anomaly_and_safety": {"lexical": 0.5, "semantic": 0.5},
+    "others": {"lexical": 0.5, "semantic": 0.5},
+}
+
 SECTION_FACT_TYPES = {
     "scene_overview": {"scene", "environment", "object_presence", "lighting"},
     "visible_objects_and_layout": {"object_presence", "spatial_relation", "count", "non_common"},
@@ -295,6 +369,15 @@ class CaptionEvidence:
     normalized_tokens: set[str]
     qa_index: int | None = None
     support_score: float = 0.0
+    lexical_support_score: float = 0.0
+    semantic_support_score: float = 0.0
+    semantic_support_raw_cosine: float = 0.0
+    support_fusion_weights: dict[str, float] = field(default_factory=dict)
+    lexical_support_match: dict[str, Any] | None = None
+    semantic_support_match: dict[str, Any] | None = None
+    support_by_modality: dict[str, float] = field(default_factory=dict)
+    supporting_modalities: list[str] = field(default_factory=list)
+    supporting_modality_count: int = 0
     modality_reliability: float = 0.0
     semantic_facts: list[SemanticFact] = field(default_factory=list)
     original_qa: dict[str, str] | None = None
@@ -971,12 +1054,84 @@ def _section_for_category(category: str) -> str:
     return CATEGORY_SECTION_MAP.get(category, "others")
 
 
+def _support_weights_for_section(section: str, *, semantic_enabled: bool) -> dict[str, float]:
+    if not semantic_enabled:
+        return {"lexical": 1.0, "semantic": 0.0}
+    return SUPPORT_FUSION_WEIGHTS.get(section, SUPPORT_FUSION_WEIGHTS["others"])
+
+
+def _normalize_semantic_cosine(cosine: float) -> float:
+    normalized = (cosine - SEMANTIC_SUPPORT_COSINE_FLOOR) / (
+        SEMANTIC_SUPPORT_COSINE_CEILING - SEMANTIC_SUPPORT_COSINE_FLOOR
+    )
+    return min(1.0, max(0.0, normalized))
+
+
+def _evidence_support_text(evidence: CaptionEvidence) -> str:
+    return _clean_whitespace(" ".join(
+        part for part in (evidence.question, evidence.answer) if part
+    )) or evidence.caption or evidence.sentence
+
+
+def _support_match_record(evidence: CaptionEvidence, score: float) -> dict[str, Any]:
+    return {
+        "source_modality": evidence.modality,
+        "category": evidence.annotation_key,
+        "section": _section_for_category(evidence.annotation_key),
+        "source_key": evidence.source_key,
+        "annotation_key": evidence.annotation_key,
+        "qa_index": evidence.qa_index,
+        "question": evidence.question,
+        "answer": evidence.answer,
+        "score": round(score, 3),
+    }
+
+
+_EMBEDDING_MODEL_CACHE: Any | None = None
+_EMBEDDING_MODEL_LOAD_FAILED = False
+
+
+def _load_embedding_model(model_name: str = DEFAULT_EMBEDDING_MODEL) -> Any | None:
+    global _EMBEDDING_MODEL_CACHE, _EMBEDDING_MODEL_LOAD_FAILED
+    if _EMBEDDING_MODEL_CACHE is not None:
+        return _EMBEDDING_MODEL_CACHE
+    if _EMBEDDING_MODEL_LOAD_FAILED:
+        return None
+    try:
+        from sentence_transformers import SentenceTransformer
+        _EMBEDDING_MODEL_CACHE = SentenceTransformer(model_name)
+        return _EMBEDDING_MODEL_CACHE
+    except Exception:
+        _EMBEDDING_MODEL_LOAD_FAILED = True
+        return None
+
+
+def _compute_embeddings(evidences: list[CaptionEvidence], *, model_name: str = DEFAULT_EMBEDDING_MODEL) -> list[Any] | None:
+    model = _load_embedding_model(model_name)
+    if model is None:
+        return None
+    texts = [_evidence_support_text(evidence) for evidence in evidences]
+    try:
+        return list(model.encode(texts, normalize_embeddings=True))
+    except Exception:
+        return None
+
+
+def _embedding_similarity(embedding_a: Any, embedding_b: Any) -> float:
+    try:
+        return float(embedding_a @ embedding_b)
+    except Exception:
+        return sum(float(a) * float(b) for a, b in zip(embedding_a, embedding_b))
+
+
 def _benchmark_qa_from_evidence(
         evidence: CaptionEvidence,
         *,
         section: str,
         fusion_score: float,
         selection_reason: str,
+        reliability_gate: str,
+        review_recommended: bool,
 ) -> dict[str, Any]:
     qa = _qa_from_evidence(section, evidence)
     qa["section"] = section
@@ -986,10 +1141,27 @@ def _benchmark_qa_from_evidence(
     qa["annotation_key"] = evidence.annotation_key
     qa["qa_index"] = evidence.qa_index
     qa["support_score"] = round(evidence.support_score, 3)
+    qa["lexical_support_score"] = round(evidence.lexical_support_score, 3)
+    qa["semantic_support_score"] = round(evidence.semantic_support_score, 3)
+    qa["semantic_support_raw_cosine"] = round(evidence.semantic_support_raw_cosine, 3)
+    qa["support_fusion_weights"] = {
+        key: round(value, 3)
+        for key, value in evidence.support_fusion_weights.items()
+    }
+    qa["lexical_support_match"] = evidence.lexical_support_match
+    qa["semantic_support_match"] = evidence.semantic_support_match
+    qa["support_by_modality"] = {
+        key: round(value, 3)
+        for key, value in evidence.support_by_modality.items()
+    }
+    qa["supporting_modalities"] = evidence.supporting_modalities
+    qa["supporting_modality_count"] = evidence.supporting_modality_count
     qa["modality_reliability"] = round(evidence.modality_reliability, 3)
     qa["fusion_score"] = round(fusion_score, 3)
     qa["is_outlier"] = _looks_outlier(evidence)
     qa["selection_reason"] = selection_reason
+    qa["reliability_gate"] = reliability_gate
+    qa["review_recommended"] = review_recommended
     qa["source_caption"] = evidence.caption
     if evidence.original_qa and evidence.qa_index is not None:
         qa["source_question_block"] = evidence.original_qa["question"]
@@ -1003,6 +1175,8 @@ def _drop_record(
         section: str,
         score: float,
         reason: str,
+        reliability_gate: str = "",
+        review_recommended: bool = False,
 ) -> dict[str, Any]:
     return {
         "reason": reason,
@@ -1016,9 +1190,22 @@ def _drop_record(
         "answer": evidence.answer,
         "caption": evidence.caption,
         "support_score": round(evidence.support_score, 3),
+        "lexical_support_score": round(evidence.lexical_support_score, 3),
+        "semantic_support_score": round(evidence.semantic_support_score, 3),
+        "semantic_support_raw_cosine": round(evidence.semantic_support_raw_cosine, 3),
+        "lexical_support_match": evidence.lexical_support_match,
+        "semantic_support_match": evidence.semantic_support_match,
+        "support_by_modality": {
+            key: round(value, 3)
+            for key, value in evidence.support_by_modality.items()
+        },
+        "supporting_modalities": evidence.supporting_modalities,
+        "supporting_modality_count": evidence.supporting_modality_count,
         "modality_reliability": round(evidence.modality_reliability, 3),
         "fusion_score": round(score, 3),
         "is_outlier": _looks_outlier(evidence),
+        "reliability_gate": reliability_gate,
+        "review_recommended": review_recommended,
     }
 
 
@@ -1048,14 +1235,128 @@ def _deduplicate_qas(
     return selected, dropped
 
 
+def _qa_gate_for_category(category: str) -> tuple[str, bool]:
+    if category in SUPPORT_EXEMPT_CATEGORIES:
+        return "support_exempt", False
+    if category in SUPPORT_SOFT_CATEGORIES:
+        return "support_soft", False
+    if category in SUPPORT_REQUIRED_CATEGORIES:
+        return "support_required", False
+    if category in REVIEW_CATEGORIES:
+        return "review_recommended", True
+    return "support_required", False
+
+
+def _qa_gate_decision(
+        evidence: CaptionEvidence,
+        *,
+        score: float,
+        min_score: float,
+) -> tuple[bool, str, str, bool]:
+    category = evidence.annotation_key
+    gate, review_recommended = _qa_gate_for_category(category)
+    support = evidence.support_score
+
+    if gate == "support_exempt":
+        threshold = min(EXEMPT_RELIABLE_QA_MIN_SCORE, min_score)
+        if score >= threshold:
+            return True, "passed_support_exempt_gate", gate, review_recommended
+        return False, "score_gate", gate, review_recommended
+
+    if gate == "support_soft":
+        if score < min_score:
+            return False, "score_gate", gate, review_recommended
+        if support >= DEFAULT_MIN_SUPPORT_SCORE or score >= SOFT_HIGH_SCORE:
+            return True, "passed_support_soft_gate", gate, review_recommended
+        return False, "low_cross_modal_support", gate, review_recommended
+
+    if gate == "review_recommended":
+        if score >= REVIEW_RELIABLE_QA_MIN_SCORE:
+            return True, "passed_review_gate", gate, review_recommended
+        return False, "score_gate", gate, review_recommended
+
+    if score < min_score:
+        return False, "score_gate", gate, review_recommended
+    if support < STRICT_MIN_SUPPORT_SCORE:
+        return False, "low_cross_modal_support", gate, review_recommended
+    return True, "passed_support_required_gate", gate, review_recommended
+
+
+def _number_tokens(text: str) -> set[str]:
+    number_words = {
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    }
+    tokens = set(re.findall(r"\b\d+\b", text.lower()))
+    tokens.update(token for token in re.findall(r"[a-z]+", text.lower()) if token in number_words)
+    return tokens
+
+
+def _direction_tokens(text: str) -> set[str]:
+    directions = {"left", "right", "above", "below", "front", "behind", "before", "after"}
+    return {token for token in re.findall(r"[a-z]+", text.lower()) if token in directions}
+
+
+def _polarity_tokens(text: str) -> set[str]:
+    text = text.lower()
+    tokens: set[str] = set()
+    if re.search(r"\b(?:yes|true|visible|present)\b", text):
+        tokens.add("positive")
+    if re.search(r"\b(?:no|false|not|none|absent|invisible|without)\b", text):
+        tokens.add("negative")
+    return tokens
+
+
+def _has_token_conflict(current: str, other: str, extractor: Any) -> bool:
+    current_tokens = extractor(current)
+    other_tokens = extractor(other)
+    return bool(current_tokens and other_tokens and current_tokens != other_tokens)
+
+
+def _review_reasons_for_evidence(evidence: CaptionEvidence, section: str, gate: str) -> list[str]:
+    reasons: list[str] = []
+    if gate == "review_recommended":
+        reasons.append("anomaly_category")
+    if not (evidence.question and evidence.answer):
+        reasons.append("caption_fallback")
+    if len(evidence.answer.split()) > ANSWER_REVIEW_WORD_LIMIT:
+        reasons.append("long_answer")
+    if len(evidence.question.split()) > QUESTION_REVIEW_WORD_LIMIT:
+        reasons.append("long_question")
+    if _split_numbered_items(evidence.question) or _split_numbered_items(evidence.answer):
+        reasons.append("unparsed_numbered_block")
+    clause_count = len(re.findall(r"\b(?:and|or|while|because|then|followed by)\b", evidence.answer.lower()))
+    if clause_count >= 2:
+        reasons.append("multi_clause_answer")
+    if evidence.semantic_support_score >= SEMANTIC_HIGH_REVIEW_THRESHOLD and evidence.lexical_support_score < LEXICAL_LOW_REVIEW_THRESHOLD:
+        reasons.append("semantic_high_lexical_low")
+    if section in {"spatial_and_layout", "counting", "text_and_symbols"} and evidence.lexical_support_score < STRICT_MIN_LEXICAL_SUPPORT_SCORE:
+        reasons.append("strict_category_low_lexical")
+    if gate == "support_required" and evidence.supporting_modality_count < 1:
+        reasons.append("no_supporting_modality")
+
+    match = evidence.semantic_support_match or evidence.lexical_support_match
+    if match and isinstance(match, dict):
+        other_answer = str(match.get("answer", ""))
+        if _has_token_conflict(evidence.answer, other_answer, _number_tokens):
+            reasons.append("possible_numeric_conflict")
+        if _has_token_conflict(evidence.answer, other_answer, _direction_tokens):
+            reasons.append("possible_direction_conflict")
+        if _has_token_conflict(evidence.answer, other_answer, _polarity_tokens):
+            reasons.append("possible_negation_conflict")
+
+    return list(dict.fromkeys(reasons))
+
+
 def _select_reliable_qas(
         evidences: list[CaptionEvidence],
         *,
         min_score: float,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    scored_items: list[tuple[float, CaptionEvidence, str]] = []
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    scored_items: list[tuple[float, CaptionEvidence, str, str, bool, str]] = []
+    review_items: list[tuple[float, CaptionEvidence, str, str, bool, str, list[str]]] = []
     dropped: list[dict[str, Any]] = []
     reason_counts: dict[str, int] = defaultdict(int)
+    review_reason_counts: dict[str, int] = defaultdict(int)
     for evidence in evidences:
         section = _section_for_category(evidence.annotation_key)
         score = _sentence_score(evidence, section if section in SECTION_MODALITY_WEIGHTS else _legacy_section_for_qa_section(section))
@@ -1065,39 +1366,94 @@ def _select_reliable_qas(
             score += 0.15
         if section == "others":
             score -= 0.2
-        if score <= min_score:
-            dropped.append(_drop_record(evidence, section=section, score=score, reason="score_gate"))
-            reason_counts["score_gate"] += 1
-            continue
         if _looks_outlier(evidence):
-            dropped.append(_drop_record(evidence, section=section, score=score, reason="outlier"))
+            gate, review_recommended = _qa_gate_for_category(evidence.annotation_key)
+            dropped.append(_drop_record(
+                evidence,
+                section=section,
+                score=score,
+                reason="outlier",
+                reliability_gate=gate,
+                review_recommended=review_recommended,
+            ))
             reason_counts["outlier"] += 1
             continue
-        scored_items.append((score, evidence, section))
+        keep, reason, gate, review_recommended = _qa_gate_decision(evidence, score=score, min_score=min_score)
+        if not keep:
+            dropped.append(_drop_record(
+                evidence,
+                section=section,
+                score=score,
+                reason=reason,
+                reliability_gate=gate,
+                review_recommended=review_recommended,
+            ))
+            reason_counts[reason] += 1
+            continue
+        review_reasons = _review_reasons_for_evidence(evidence, section, gate)
+        if review_reasons:
+            for review_reason in review_reasons:
+                review_reason_counts[review_reason] += 1
+            review_items.append((score, evidence, section, reason, True, gate, review_reasons))
+            continue
+        scored_items.append((score, evidence, section, reason, review_recommended, gate))
 
-    deduped_items, dedup_drops = _deduplicate_qas(scored_items)
+    dedup_input = [(score, evidence, section) for score, evidence, section, _, _, _ in scored_items]
+    deduped_items, dedup_drops = _deduplicate_qas(dedup_input)
+    selected_keys = {
+        (id(evidence), section)
+        for _, evidence, section in deduped_items
+    }
     dropped.extend(dedup_drops)
     for item in dedup_drops:
         reason_counts[item["reason"]] += 1
 
+    metadata_by_key = {
+        (id(evidence), section): (selection_reason, review_recommended, gate)
+        for _, evidence, section, selection_reason, review_recommended, gate in scored_items
+    }
     selected = [
         _benchmark_qa_from_evidence(
             evidence,
             section=section,
             fusion_score=score,
-            selection_reason="passed_global_reliability_filter",
+            selection_reason=metadata_by_key[(id(evidence), section)][0],
+            review_recommended=metadata_by_key[(id(evidence), section)][1],
+            reliability_gate=metadata_by_key[(id(evidence), section)][2],
         )
         for score, evidence, section in deduped_items
+        if (id(evidence), section) in selected_keys
+    ]
+    review_recommended_qas = [
+        {
+            **_benchmark_qa_from_evidence(
+                evidence,
+                section=section,
+                fusion_score=score,
+                selection_reason=selection_reason,
+                review_recommended=True,
+                reliability_gate=gate,
+            ),
+            "review_reasons": review_reasons,
+        }
+        for score, evidence, section, selection_reason, _, gate, review_reasons in sorted(
+            review_items,
+            key=lambda item: item[0],
+            reverse=True,
+        )
     ]
     diagnostics = {
         "total_candidates": len(evidences),
-        "passed_score_and_outlier_filters": len(scored_items),
+        "passed_score_and_outlier_filters": len(scored_items) + len(review_items),
         "selected_count": len(selected),
+        "review_count": len(review_recommended_qas),
         "dropped_count": len(dropped),
         "drop_reason_counts": dict(sorted(reason_counts.items())),
+        "review_reason_counts": dict(sorted(review_reason_counts.items())),
         "dropped_qas": dropped,
+        "review_recommended_qas": review_recommended_qas,
     }
-    return selected, diagnostics
+    return selected, review_recommended_qas, diagnostics
 
 
 def _legacy_section_for_qa_section(section: str) -> str:
@@ -1117,6 +1473,42 @@ def _group_qas_by_section(qas: list[dict[str, Any]]) -> dict[str, list[dict[str,
     for qa in qas:
         grouped.setdefault(qa.get("section", "others"), []).append(qa)
     return grouped
+
+
+def _build_modality_support_summary(
+        evidences: list[CaptionEvidence],
+        selected_qas: list[dict[str, Any]],
+        review_qas: list[dict[str, Any]],
+        dropped_qas: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    summary: dict[str, dict[str, Any]] = {}
+    selected_counts = Counter(str(qa.get("source_modality", "unknown")) for qa in selected_qas)
+    review_counts = Counter(str(qa.get("source_modality", "unknown")) for qa in review_qas)
+    dropped_counts = Counter(str(qa.get("source_modality", "unknown")) for qa in dropped_qas)
+    by_modality: dict[str, list[CaptionEvidence]] = defaultdict(list)
+    for evidence in evidences:
+        by_modality[evidence.modality].append(evidence)
+
+    for modality, items in sorted(by_modality.items()):
+        support_values = [item.support_score for item in items]
+        lexical_values = [item.lexical_support_score for item in items]
+        semantic_values = [item.semantic_support_score for item in items]
+        supporting_counts = [item.supporting_modality_count for item in items]
+        avg_support = sum(support_values) / len(support_values) if support_values else 0.0
+        avg_supporting_count = sum(supporting_counts) / len(supporting_counts) if supporting_counts else 0.0
+        needs_review = avg_support < STRICT_MIN_SUPPORT_SCORE or avg_supporting_count < 0.5
+        summary[modality] = {
+            "candidate_count": len(items),
+            "selected_count": selected_counts.get(modality, 0),
+            "review_count": review_counts.get(modality, 0),
+            "dropped_count": dropped_counts.get(modality, 0),
+            "avg_support_score": round(avg_support, 3),
+            "avg_lexical_support_score": round(sum(lexical_values) / len(lexical_values), 3) if lexical_values else 0.0,
+            "avg_semantic_support_score": round(sum(semantic_values) / len(semantic_values), 3) if semantic_values else 0.0,
+            "avg_supporting_modality_count": round(avg_supporting_count, 3),
+            "needs_review": needs_review,
+        }
+    return summary
 
 
 def _build_field_qas(
@@ -1415,19 +1807,76 @@ def _populate_support_scores(evidences: list[CaptionEvidence]) -> None:
     for evidence in evidences:
         by_modality[evidence.modality].append(evidence)
 
+    embeddings = _compute_embeddings(evidences)
+    semantic_enabled = embeddings is not None
+    evidence_indices = {id(evidence): index for index, evidence in enumerate(evidences)}
+
     for evidence in evidences:
-        other_sentence_sets = [
-            other.normalized_tokens
+        other_evidences = [
+            other
             for modality, items in by_modality.items()
             if modality != evidence.modality
             for other in items
-            if other.normalized_tokens
         ]
-        if other_sentence_sets:
-            support = max((_jaccard(evidence.normalized_tokens, tokens) for tokens in other_sentence_sets), default=0.0)
-        else:
-            support = 0.0
+        lexical_score = 0.0
+        lexical_match: CaptionEvidence | None = None
+        for other in other_evidences:
+            if not other.normalized_tokens:
+                continue
+            score = _jaccard(evidence.normalized_tokens, other.normalized_tokens)
+            if score > lexical_score:
+                lexical_score = score
+                lexical_match = other
+
+        semantic_score = 0.0
+        semantic_raw_cosine = 0.0
+        semantic_match: CaptionEvidence | None = None
+        support_by_modality: dict[str, float] = {}
+        if semantic_enabled and embeddings is not None:
+            evidence_embedding = embeddings[evidence_indices[id(evidence)]]
+            for other in other_evidences:
+                raw_cosine = _embedding_similarity(evidence_embedding, embeddings[evidence_indices[id(other)]])
+                score = _normalize_semantic_cosine(raw_cosine)
+                if score > semantic_score:
+                    semantic_score = score
+                    semantic_raw_cosine = raw_cosine
+                    semantic_match = other
+
+        section = _section_for_category(evidence.annotation_key)
+        weights = _support_weights_for_section(section, semantic_enabled=semantic_enabled)
+        support = weights["lexical"] * lexical_score + weights["semantic"] * semantic_score
+        for modality, items in by_modality.items():
+            if modality == evidence.modality:
+                continue
+            modality_best = 0.0
+            for other in items:
+                lexical = _jaccard(evidence.normalized_tokens, other.normalized_tokens) if other.normalized_tokens else 0.0
+                semantic = 0.0
+                if semantic_enabled and embeddings is not None:
+                    raw_cosine = _embedding_similarity(
+                        embeddings[evidence_indices[id(evidence)]],
+                        embeddings[evidence_indices[id(other)]],
+                    )
+                    semantic = _normalize_semantic_cosine(raw_cosine)
+                modality_best = max(modality_best, weights["lexical"] * lexical + weights["semantic"] * semantic)
+            support_by_modality[modality] = modality_best
+        supporting_modalities = sorted(
+            modality
+            for modality, score in support_by_modality.items()
+            if score >= SUPPORTING_MODALITY_THRESHOLD
+        )
+        evidence.lexical_support_score = lexical_score
+        evidence.semantic_support_score = semantic_score
+        evidence.semantic_support_raw_cosine = semantic_raw_cosine
         evidence.support_score = support
+        evidence.support_fusion_weights = dict(weights)
+        evidence.lexical_support_match = _support_match_record(lexical_match, lexical_score) if lexical_match else None
+        evidence.semantic_support_match = (
+            _support_match_record(semantic_match, semantic_raw_cosine) if semantic_match else None
+        )
+        evidence.support_by_modality = support_by_modality
+        evidence.supporting_modalities = supporting_modalities
+        evidence.supporting_modality_count = len(supporting_modalities)
         evidence.modality_reliability = reliability.get(evidence.modality, 0.5)
 
 
@@ -1873,6 +2322,7 @@ def fuse_sample(
     section_limits = RELAXED_SECTION_LIMITS if relax_filters else DEFAULT_SECTION_LIMITS
     qa_limits = RELAXED_SECTION_QA_LIMITS if relax_filters else DEFAULT_SECTION_QA_LIMITS
     min_score = RELAXED_MIN_SCORE if relax_filters else DEFAULT_MIN_SCORE
+    reliable_qa_min_score = RELAXED_RELIABLE_QA_MIN_SCORE if relax_filters else DEFAULT_RELIABLE_QA_MIN_SCORE
     section_diagnostics: dict[str, Any] | None = {} if collect_diagnostics else None
 
     selected_by_section = _assign_evidences_to_sections(
@@ -1898,11 +2348,28 @@ def fuse_sample(
         modality_reliability[evidence.modality] = max(score, evidence.modality_reliability)
 
     rounded_reliability = {key: round(value, 3) for key, value in sorted(modality_reliability.items())}
-    selected_reliable_qas, qa_selection_diagnostics = _select_reliable_qas(
+    selected_reliable_qas, review_recommended_qas, qa_selection_diagnostics = _select_reliable_qas(
         evidences,
-        min_score=min_score,
+        min_score=reliable_qa_min_score,
     )
+    semantic_support_enabled = any(
+        evidence.support_fusion_weights.get("semantic", 0.0) > 0
+        for evidence in evidences
+    )
+    modality_support_summary = _build_modality_support_summary(
+        evidences,
+        selected_reliable_qas,
+        review_recommended_qas,
+        qa_selection_diagnostics.get("dropped_qas", []),
+    )
+    qa_selection_diagnostics["support_scoring"] = {
+        "lexical_enabled": True,
+        "semantic_enabled": semantic_support_enabled,
+        "embedding_model": DEFAULT_EMBEDDING_MODEL if semantic_support_enabled else None,
+    }
+    qa_selection_diagnostics["modality_support_summary"] = modality_support_summary
     qas_by_section = _group_qas_by_section(selected_reliable_qas)
+    review_qas_by_section = _group_qas_by_section(review_recommended_qas)
 
     fused_sample = {
         "source_entries": source_entries,
@@ -1910,7 +2377,9 @@ def fuse_sample(
         "modality_reliability": rounded_reliability,
         **sections,
         "selected_reliable_qas": selected_reliable_qas,
+        "review_recommended_qas": review_recommended_qas,
         "qas_by_section": qas_by_section,
+        "review_qas_by_section": review_qas_by_section,
     }
 
     if collect_diagnostics:
@@ -1932,6 +2401,7 @@ def fuse_sample(
         fused_sample["fusion_diagnostics"] = {
             "relax_filters": relax_filters,
             "min_score": min_score,
+            "reliable_qa_min_score": reliable_qa_min_score,
             "section_limits": section_limits,
             "sections": section_diagnostics,
             "qa_selection": qa_selection_diagnostics,
