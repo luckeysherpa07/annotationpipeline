@@ -13,6 +13,7 @@ from .groups import (
 from .qa_exporter import (
     export_grouped_qa_pairs,
     run_export_grouped_qa,
+    run_export_segmented_grouped_qa,
     split_numbered_text,
     split_qa_pairs,
 )
@@ -28,4 +29,5 @@ __all__ = [
     "split_qa_pairs",
     "export_grouped_qa_pairs",
     "run_export_grouped_qa",
+    "run_export_segmented_grouped_qa",
 ]

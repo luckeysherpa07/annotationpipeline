@@ -33,5 +33,244 @@
         }
       }
     }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_001": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_001",
+      "task_label": "semantic task",
+      "start_seconds": 0.0,
+      "end_seconds": 161.933,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:02:41.933"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "A person is chopping carrots on a wooden cutting board with a large knife."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:00 to 00:03, sounds of handling carrots are heard as they are placed on the board. Between 00:03 and 00:26, rhythmic, sharp chopping sounds occur as the knife cuts through a carrot and hits the wooden surface. At 00:27, there is a scraping sound as the chopped pieces are moved aside. From 00:39 to 01:08, a second session of rapid chopping is heard. Between 01:17 and 01:50, more chopping sounds are audible. The chopping continues intermittently with gathering sounds until 02:41."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:03 - 00:26",
+          "caption": "The rhythmic sound of a knife striking a carrot and cutting board.",
+          "question": "What is the primary source of the rhythmic sound heard during this interval?",
+          "answer": "The sound is produced by a large kitchen knife repeatedly striking a carrot and a wooden cutting board."
+        },
+        "audio_temporal_reasoning": {
+          "timestamp": "00:00 - 00:40",
+          "caption": "Initial handling followed by the start of chopping.",
+          "question": "After the initial preparation sounds, at what timestamp does the first chopping action begin?",
+          "answer": "The first chopping sound begins at approximately 00:03."
+        },
+        "audio_sound_quality_and_characteristics": {
+          "timestamp": "00:39 - 01:08",
+          "caption": "Rapid chopping sounds.",
+          "question": "How would you describe the quality and rhythm of the chopping sounds in this segment?",
+          "answer": "The chopping sounds are sharp, percussive, and follow a fast, consistent rhythm, indicating a practiced and rapid chopping technique."
+        },
+        "audio_contextual_and_semantic_understanding": {
+          "timestamp": "00:00 - 02:41",
+          "caption": "Complete chopping task.",
+          "question": "Based on the consistent audio of chopping and scraping, what is the most likely food preparation task being performed?",
+          "answer": "The person is dicing or slicing vegetables, specifically carrots, into uniform pieces for cooking."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_001": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_001",
+      "task_label": "leave room and go to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 38.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:38.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "A person gets up from a desk, walks through a hallway, and enters a bathroom."
+      },
+      "audio_chronological_caption": {
+        "caption": "00:00 - 00:10: Ruffling of clothes and walking noise as the person leaves the desk. 00:11 - 00:14: A door handle clicks and the door opens. 00:15 - 00:28: Rhythmic footsteps echo in a long hallway. 00:29 - 00:38: The person reaches the bathroom, opens the door, and enters."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:11 - 00:14",
+          "caption": "A door handle being turned and a latch clicking.",
+          "question": "What sound is heard as the person reaches the door to exit the room?",
+          "answer": "The metallic click of a door handle turning and the latch releasing can be heard."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_002": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 38.0,
+      "end_seconds": 81.0,
+      "start_timestamp": "00:00:38.000",
+      "end_timestamp": "00:01:21.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person applies soap and washes their hands under a running tap."
+      },
+      "audio_chronological_caption": {
+        "caption": "00:38 - 00:42: A mechanical clicking sound from a soap dispenser pump. 00:43 - 01:02: Water splashes as the faucet is turned on and hands are rubbed together. 01:03 - 01:21: The sound of running water continues as the person rinses their hands."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:38 - 00:42",
+          "caption": "A manual soap dispenser pump.",
+          "question": "What characterizes the sound at the beginning of the handwashing sequence?",
+          "answer": "A rhythmic mechanical pumping sound is heard from a manual soap dispenser."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_003": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_003",
+      "task_label": "dry hands and return to desk",
+      "start_seconds": 81.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:21.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "After washing, the user dries their hands with paper towels, exits the bathroom, and returns to the desk."
+      },
+      "audio_chronological_caption": {
+        "caption": "01:21 - 01:33: The rustling sound of paper towels being pulled and hands being dried. 01:34 - 01:45: The sound of the bathroom door opening and footsteps in the corridor. 01:46 - 01:52: An electronic beep followed by the mechanical click of an office door lock. 01:53 - 02:04: Footsteps as the person enters the office and returns to the desk."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:21 - 01:33",
+          "caption": "Rustling noise of paper towels.",
+          "question": "What sound is prominent as the person finishes at the sink?",
+          "answer": "The crisp rustling and tearing sound of paper towels being used to dry hands."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_001": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_001",
+      "task_label": "walk to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 34.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:34.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "A person walks across a carpeted room, opens a door, and enters a bathroom."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:00 to 00:30, steady, muffled footsteps are heard on a carpeted surface. At 00:31, the sound of a door handle turning and a door opening occurs, followed by sharper footsteps on a hard tile floor until 00:34."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 00:34",
+          "caption": "The audio captures footsteps on carpet, a door opening, and footsteps on tile.",
+          "question": "What sequence of sound events marks the transition between rooms?",
+          "answer": "The sequence starts with soft footsteps on carpet, followed by the mechanical click and creak of a door opening, ending with the higher-pitched sound of footsteps on a hard surface."
+        },
+        "audio_environment_spatial_context": {
+          "timestamp": "00:00 - 00:34",
+          "caption": "The acoustics change from a damped carpeted environment to a more resonant hard-floored space.",
+          "question": "How does the sound indicate a change in the environment?",
+          "answer": "The footsteps change from muffled thuds on carpet to clear, resonant strikes on tile, indicating the person has moved from a bedroom or hallway into a bathroom."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_002": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 34.0,
+      "end_seconds": 86.0,
+      "start_timestamp": "00:00:34.000",
+      "end_timestamp": "00:01:26.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person washes their hands in the sink under a continuous stream of water."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 00:34, a metallic click and the rush of water beginning is heard. From 00:35 to 01:23, there is a consistent sound of water splashing against the sink basin and hands. At 01:24, the water flow stops with another click of the faucet handle."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:34 - 01:26",
+          "caption": "The primary sound is running water from a bathroom faucet.",
+          "question": "What specific sound indicates the start of the hand-washing task?",
+          "answer": "The sudden rush of water hitting the sink basin, preceded by the mechanical sound of the faucet handle being lifted or turned."
+        },
+        "audio_temporal_analysis": {
+          "timestamp": "00:34 - 01:26",
+          "caption": "The water runs continuously for approximately 50 seconds.",
+          "question": "For how long is the water running during this hand-washing segment?",
+          "answer": "The water starts at 00:34 and stops at 01:24, making the duration of the running water approximately 50 seconds."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_003": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_003",
+      "task_label": "dry hands and return",
+      "start_seconds": 86.0,
+      "end_seconds": 138.5,
+      "start_timestamp": "00:01:26.000",
+      "end_timestamp": "00:02:18.500"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "After turning off the water, the person dries their hands and walks back to the starting room."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 01:26 to 01:45, a soft, repetitive rustling sound indicates hands being dried. At 01:46, footsteps on the tile floor begin, transitioning back to the muffled sound of carpet around 01:58 and continuing until the end at 02:18.5."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:26 - 02:18.5",
+          "caption": "Sounds include hand drying rustle and footsteps returning across different floor types.",
+          "question": "What sound follows the water being turned off, and what does it represent?",
+          "answer": "A soft rustling sound follows, which represents the person drying their hands with a towel or paper."
+        },
+        "audio_event_occurrence_detection": {
+          "timestamp": "01:26 - 02:18.5",
+          "caption": "The transition from drying hands to walking occurs mid-segment.",
+          "question": "At what point does the person finish drying their hands and start walking away?",
+          "answer": "The hand-drying rustling stops and the sound of footsteps on the hard floor begins at approximately 01:46."
+        }
+      }
+    }
   }
 }

@@ -4,58 +4,478 @@
     "side": "day",
     "segment": {
       "segment_id": "cut_carrot_day_seg_001",
-      "task_label": "peeling carrot",
+      "task_label": "semantic task",
       "start_seconds": 0.0,
-      "end_seconds": 45.0,
+      "end_seconds": 185.0,
       "start_timestamp": "00:00:00.000",
-      "end_timestamp": "00:00:45.000"
+      "end_timestamp": "00:03:05.000"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
     "annotations": {
       "depth_object_recognition": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "The scene is a kitchen workspace viewed from a first-person perspective. A large rectangular cutting board sits centrally on a flat table surface. To its right is a concave spherical bowl, and further right is a handheld peeler. A long, thin, elongated knife rests on the board initially. Two human hands enter the near field. A cylindrical carrot is held in the left hand. The depth map reveals the 3D structure of the knife's blade as it moves, and the carrot segments into multiple smaller rectangular prisms as it is sliced. The background consists of a vertical plane representing a wall or cabinet at a far distance.",
+        "question": "What is the 3D shape of the object I am holding in my left hand?",
+        "answer": "Cylindrical carrot"
       },
       "depth_spatial_reasoning": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "In the depth stream, my hands are the closest objects to the camera, frequently occluding parts of the table. The cutting board is positioned directly beneath my hands. The knife is placed above the board, often overlapping with the carrot during the slicing action. The spherical bowl is adjacent to the board on the right side. The peeler is initially near the bowl but moves into the center as I use it. The carrot stays between my hands, closer to the left hand than the right. Slices of the carrot accumulate on the cutting board's surface, which is farther than the tools but closer than the background wall.",
+        "question": "Is the bowl positioned to the left or right of the cutting board from my perspective?",
+        "answer": "Right"
       },
       "depth_scene_sequence": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "The video sequence begins with a static layout of a cutting board, bowl, and tools on a table. The camera remains mostly stationary. First, a transition occurs as I pick up the peeler to interact with the cylindrical carrot. After peeling, there is a sequence where I put down the peeler and pick up the elongated knife. The main action sequence follows, showing the 3D separation of carrot slices from the main cylinder. The scene ends with a pile of sliced carrot segments gathered on the board near the bowl.",
+        "question": "Which tool do I interact with first, the knife or the peeler?",
+        "answer": "Peeler"
       },
       "depth_counting": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "Based on depth boundaries and 3D separation, I can count several distinct objects: one rectangular cutting board, one elongated knife, one small peeler tool, one concave bowl, and two human hands. As the action progresses, the single cylindrical carrot is divided into approximately 14 smaller rectangular carrot segments that rest on the board.",
+        "question": "How many cutting boards are visible on the table?",
+        "answer": "1"
       },
       "depth_dynamic_counting": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "Moving entities include my two hands and the kitchen tools. The peeler moves across the carrot multiple times in the first half of the segment. The knife moves vertically in a slicing motion approximately 15 times to create carrot sticks. Each time a slice is completed, a new dynamic object (a carrot segment) moves from the main carrot body to a resting position on the board. No other dynamic humans or objects approach from the background.",
+        "question": "How many times does the knife move vertically to make a full slice through the carrot?",
+        "answer": "Approximately 15 times"
       },
       "depth_navigation": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "The scene is a stationary workspace, providing no navigable path through rooms. Navigation cues are limited to the reach of my hands across the 3D tabletop. The cutting board acts as the central landmark. The bowl to the right is a secondary landmark where finished pieces might go. The distance from my chest to the board is roughly 30-50cm, and the background wall is significantly farther, establishing a clear clear zone for hand movement in the near-to-mid range.",
+        "question": "Which object acts as the central landmark for my workspace?",
+        "answer": "Cutting board"
       },
       "depth_dynamic_recognition": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "Dynamic objects include the knife, which oscillates vertically between the near and mid-depth layers as it slices. My hands are constantly moving in the near-field to manipulate the carrot. The carrot pieces are recognized as dynamic entities the moment they detach from the main carrot and slide across the board surface. The peeler is dynamic only during the initial peeling phase before it is set down at a mid-depth distance.",
+        "question": "Which object is moving in a repetitive up-and-down motion?",
+        "answer": "The knife"
       },
       "depth_action": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "I am performing a food preparation task. First, I use the peeler to remove the outer layer of the carrot, with depth changes showing the tool moving along the carrot's length. Then, I switch to the knife to slice the carrot. My right hand grips the knife handle, applying downward force while my left hand stabilizes the carrot. The spatial consequence is the transformation of a single long cylinder into a collection of smaller 3D segments on the board.",
+        "question": "What am I doing to the carrot with the knife?",
+        "answer": "Slicing"
       },
       "depth_non_common": {
-        "caption": "Demo caption",
-        "question": "Demo question?",
-        "answer": "Demo answer"
+        "caption": "The depth information consistently reflects standard real-world geometry. Objects rest firmly on the table surface, and hand-object interactions follow expected occlusion patterns. There are no floating objects or intersecting geometries. Minor depth noise is present around the edges of the thin knife blade, but this is a sensor artifact rather than a physical anomaly.",
+        "question": "Are there any objects floating unnaturally in the air?",
+        "answer": "No"
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_001": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_001",
+      "task_label": "semantic task",
+      "start_seconds": 0.0,
+      "end_seconds": 161.933,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:02:41.933"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In this depth-encoded sequence, a kitchen environment is observed from a high angle. Identifiable objects include a large, dark blob representing the subject's torso when leaning in close, two smaller elongated shapes for the hands, a flat rectangular region at a mid-depth level serving as a workspace or cutting board, and a circular silhouette indicating a bowl or plate positioned to the right of the workspace. The far-field background appears as a uniform light grey layer, while the workspace and subject interact in the near-to-mid foreground layers.",
+        "question": "Which object appears as a dark circular silhouette in the mid-foreground to the right of the workspace?",
+        "answer": "A bowl or plate."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Spatial relationships are defined by the subject's hands and torso being closer to the camera (darker) than the workspace. The rectangular cutting board is located directly below the subject's reach. The circular bowl is adjacent to the board on the right side. Throughout the interaction, the hands move in front of the board, occasionally occluding parts of it as they move between the subject and the work surface. The far-field background remains consistently behind all foreground objects.",
+        "question": "Are my hands closer or farther than the rectangular workspace during the interaction?",
+        "answer": "They are closer."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence begins with an empty workspace characterized by a flat rectangular plane at mid-depth. As the video progresses, a large dark mass enters the frame from the side, representing the subject leaning over the area. This is followed by the appearance of two smaller dynamic depth blobs, the hands, which move across the workspace. A transition occurs when a round object is placed or moved on the right. Finally, the subject recedes, and the depth map returns to the initial static layout of the workspace and background.",
+        "question": "What is the sequence of appearance for the subject and the hands in the scene?",
+        "answer": "Subject torso, then hands."
+      },
+      "depth_counting": {
+        "caption": "Several distinct depth regions can be counted: 1 static background layer, 1 rectangular workspace plane, 1 round bowl silhouette, 2 moving hand blobs, and 1 large torso mass entering the near-field. In total, five primary 3D entities or layers interact within the scene geometry.",
+        "question": "How many moving hand blobs are identifiable in the scene?",
+        "answer": "2"
+      },
+      "depth_dynamic_counting": {
+        "caption": "The video features two primary moving entities: the left and right hands. These hands move between the near-field (closest to the camera) and the mid-field workspace layer multiple times. The subject's torso also moves vertically as they lean into and out of the scene. No other dynamic objects like cars or other people pass through different depth layers during the recording.",
+        "question": "How many hands move between the camera and the workspace?",
+        "answer": "2"
+      },
+      "depth_navigation": {
+        "caption": "The 3D layout shows a clear, unobstructed vertical path from the camera down to the workspace. Navigable space is restricted to the area above the rectangular cutting board and around the adjacent round bowl. The depth values indicate that the subject's torso occupies the lower and left portions of the immediate foreground, creating a boundary for hand movements which primarily occur in the central mid-depth region.",
+        "question": "Is the workspace located in the near foreground or mid-depth range relative to the camera?",
+        "answer": "Mid-depth range."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "Dynamic recognition identifies the subject's hands as they reach into the frame (appearing as dark, high-proximity blobs) and move toward the workspace. The torso is recognized as a larger, slower-moving dark mass that leans into the scene around frame 003600 and remains partially visible as it moves vertically. The bowl is moved slightly by a hand around frame 004500, temporarily changing its 2D coordinates while staying in the same mid-depth layer.",
+        "question": "Which part of me appears as the largest dark mass leaning into the frame?",
+        "answer": "The torso."
+      },
+      "depth_action": {
+        "caption": "The subject performs several actions: leaning forward (depth decrease of the torso mass), reaching toward the round bowl (hand blob moving to the right), and manipulating objects on the rectangular board (repetitive hand movements across the surface). These actions demonstrate intentional interaction with objects at the mid-depth kitchen layer while maintaining close proximity to the camera sensor.",
+        "question": "What am I doing when my hand blob moves toward the circular silhouette on the right?",
+        "answer": "Reaching for the bowl."
+      },
+      "depth_non_common": {
+        "caption": "The depth stream generally follows realistic kitchen geometry. However, at extreme close range, some parts of the subject's torso or hands exhibit depth clipping, where they appear unnaturally flat or cut off at the edge of the sensor's minimum range. No floating objects or intersecting solid geometries are observed in the physical space.",
+        "question": "Do any objects appear to float without physical support in the 3D layout?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_001": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_001",
+      "task_label": "leave room and go to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 38.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:38.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The video begins at a computer desk area characterized by two large, rectangular monitor planes and two vertical, boxy computer towers. Several chairs with distinct backrests and leg structures are positioned in front of and around the desks. As I stand and move, the scene transitions into a narrow corridor defined by flat vertical walls and a rectangular doorway frame ahead.",
+        "question": "What is the 3D shape of the monitors visible at the start of the sequence?",
+        "answer": "Rectangular and flat."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Initially, the computer towers are located behind the monitor planes relative to my position. The chairs are closer to me than the desk surface. As I move forward, the hallway walls maintain a consistent parallel adjacency. The doorway is initially at a distance and becomes the primary near-depth feature as I navigate through it.",
+        "question": "Initially, are the computer towers positioned in front of or behind the monitors?",
+        "answer": "Behind the monitors."
+      },
+      "depth_scene_sequence": {
+        "caption": "The video starts in an office environment, then moves into a narrow corridor, and finally reaches a transition point at a doorway leading to the bathroom.",
+        "question": "What sequence of spaces do I traverse after leaving the office desk?",
+        "answer": "A narrow corridor then a doorway."
+      },
+      "depth_counting": {
+        "caption": "In this sequence, I can count two monitors on the desk, two vertical computer towers, at least three chairs, one primary desk surface, two parallel hallway walls, and one doorway structure.",
+        "question": "How many monitors are visible on the office desk?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "No moving humans or dynamic objects are detected in the depth layers apart from the camera's own forward motion relative to the stationary office and hallway structures.",
+        "question": "How many people walk past me in the hallway?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The navigable path leads from the desk area, around a chair, and directly through the narrow hallway towards the doorway landmarks at the far end of the corridor.",
+        "question": "Which direction does the path go relative to the starting position?",
+        "answer": "Forward through a hallway."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "No dynamic entities appear or disappear at different depth ranges; all perceived motion is due to the camera receding from the desk and approaching the hallway walls.",
+        "question": "Do any moving humans appear at close range in the hallway?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I am standing up from a sitting position, which is shown by a change in height relative to the desk, and then I am walking forward into the hallway to reach the bathroom.",
+        "question": "What action am I taking at the beginning of the video?",
+        "answer": "Standing up and walking."
+      },
+      "depth_non_common": {
+        "caption": "The scene layout is physically plausible, with all desks, towers, and walls maintaining standard 3D depth relationships and orientations.",
+        "question": "Are there any floating objects or intersecting geometries in the hallway?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_002": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 38.0,
+      "end_seconds": 81.0,
+      "start_timestamp": "00:00:38.000",
+      "end_timestamp": "00:01:21.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In the bathroom, the depth stream identifies a concave sink basin at center range. A cylindrical faucet structure protrudes upwards. My hands appear as two dynamic segments at the bottom near range, moving closer to the faucet. A boxy soap dispenser is visible to the side of the faucet.",
+        "question": "What is the 3D shape of the sink basin?",
+        "answer": "Concave."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "My hands are the closest objects to the camera. The faucet handle is positioned above the sink basin and in front of the wall. The soap dispenser is adjacent to the faucet on the right side.",
+        "question": "Are my hands closer to the camera or farther than the faucet?",
+        "answer": "Closer."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera transitions from the bathroom entrance to a fixed position directly in front of the sink basin and faucet.",
+        "question": "Where is the camera positioned during the hand washing task?",
+        "answer": "Directly in front of the sink."
+      },
+      "depth_counting": {
+        "caption": "I count two hands, one faucet spout, one soap dispenser box, one sink basin, one mirror plane, and one back wall surface.",
+        "question": "How many hands are interacting with the sink area?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "My hands move between the bottom edge and the center of the frame, approaching the faucet and dispenser at near-depth layers multiple times.",
+        "question": "How many pairs of hands appear at near range?",
+        "answer": "One pair."
+      },
+      "depth_navigation": {
+        "caption": "Navigation is minimal as I am stationary at the sink, with the basin and faucet providing the primary spatial cues for hand movement.",
+        "question": "Is there a clear path for movement in front of the sink?",
+        "answer": "No, it is a workstation area."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "My hands are the only dynamic entities, appearing at frame 1140 and remaining at close range throughout the rubbing and rinsing actions.",
+        "question": "When do the hands appear at close range?",
+        "answer": "At the start of the segment."
+      },
+      "depth_action": {
+        "caption": "I am reaching for the soap dispenser, applying soap, and then rubbing my hands together over the sink basin before rinsing them under the faucet.",
+        "question": "What object am I interacting with to get soap?",
+        "answer": "A soap dispenser."
+      },
+      "depth_non_common": {
+        "caption": "The sink, faucet, and hand interaction all follow realistic 3D depth and occlusion patterns.",
+        "question": "Is the faucet intersecting with the sink basin unnaturally?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_003": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_003",
+      "task_label": "dry hands and return to desk",
+      "start_seconds": 81.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:21.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "After washing, I move toward a boxy towel dispenser on the wall. Turning around, the hallway is visible again as a narrow rectangular space, ending at the office desk area where rectangular monitors and boxy towers reappear.",
+        "question": "What shape is the towel dispenser mounted on the wall?",
+        "answer": "Boxy or rectangular."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The towel dispenser is initially near me on the wall. After turning, the hallway walls are closer than the office desk. The chairs in the office are located in front of the desk.",
+        "question": "Is the office desk closer or farther than the hallway walls as I return?",
+        "answer": "Farther."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence moves from the towel dispenser area, through the bathroom door, down the hallway, and finally back to the office desk.",
+        "question": "What is the final room reached in the sequence?",
+        "answer": "The office."
+      },
+      "depth_counting": {
+        "caption": "I can count one towel dispenser, one door handle, two hallway walls, at least two chairs at the office desk, and two monitors at the end of the trip.",
+        "question": "How many monitors are visible when I sit back down?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "No moving entities are present in the depth stream during the return trip to the office.",
+        "question": "How many people are seen in the hallway during the return?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The navigation involves a 180-degree turn, walking through the bathroom doorway, traversing the straight hallway path, and sitting at the desk landmarks.",
+        "question": "Does the path back to the desk involve any turns?",
+        "answer": "Yes, turning away from the sink."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "There are no dynamic entities apart from my own movement. The bathroom structures recede and the office objects approach as I walk forward.",
+        "question": "Does any person approach me at close range in this segment?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I am drying my hands with a paper towel, turning away from the sink, walking back through the corridor, and sitting back down at my desk.",
+        "question": "What action am I performing before leaving the bathroom?",
+        "answer": "Drying my hands."
+      },
+      "depth_non_common": {
+        "caption": "The hallway and office layout remains consistent and plausible throughout the return journey.",
+        "question": "Are there any floating objects in the office area at the end?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_001": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_001",
+      "task_label": "walk to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 34.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:34.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In this segment, I move through a room where a flat desk surface and several upright monitors are positioned in front of me at a distance of approximately 1-2 meters. As I advance, the depth map reveals a narrow passage or doorway. The wall surfaces on either side form a corridor structure before I enter a new space, where a recessed sink area and a vertical mirror plane become detectable at close range.",
+        "question": "What is the relative depth ordering of the desk and the monitors in the first room?",
+        "answer": "The monitors are positioned slightly further back than the front edge of the desk."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Initially, the desk is positioned directly in front of me, with monitors placed behind its front edge. A chair is adjacent to the desk on the left. As I navigate, a doorway appears between two parallel wall segments, creating an occlusion as I pass through. Upon entering the bathroom, the sink basin is located below the level of the faucet, and the mirror is a flat vertical plane behind the sink area.",
+        "question": "Where is the sink located relative to the mirror as I enter the bathroom?",
+        "answer": "The sink is in front of the mirror plane."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence begins in an office-like room containing a desk and computer setup. I then transition through a narrow doorway into a short corridor. Finally, I move into a bathroom space, where the camera settles in front of a sink and vanity unit.",
+        "question": "What is the sequence of navigable spaces I move through before reaching the bathroom?",
+        "answer": "Office room then a doorway."
+      },
+      "depth_counting": {
+        "caption": "Within the initial room, I can identify one desk surface, at least two distinct monitor rectangles, and one chair volume. Moving forward, I pass through one doorway frame. In the final scene of this segment, one sink bowl and one faucet extension are visible.",
+        "question": "How many monitor volumes are identifiable in the first room?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "During the transition from the room to the bathroom, no other moving entities are detected in the depth stream. Only the change in distance relative to static walls and furniture indicates my own forward motion.",
+        "question": "How many moving objects pass across my path in the corridor?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The navigation path starts by moving around a desk setup, following a clear floor plane. I then orient toward a doorway, which is a gap in the depth values of the walls. Moving through this gap, the path leads into a small enclosed bathroom area where the sink serves as a landmark at the end of the trajectory.",
+        "question": "How does the 3D layout indicate a path to the bathroom?",
+        "answer": "Through a doorway gap in the walls."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "As the camera moves, the desk and monitors recede to the sides. The doorway appears as a dark vertical void that enlarges as I approach. Once inside the bathroom, the sink unit remains at a consistent depth until I stop moving forward.",
+        "question": "When does the doorway reach its closest depth range before I pass through it?",
+        "answer": "Around 25 seconds."
+      },
+      "depth_action": {
+        "caption": "I am walking forward, indicated by the decreasing distance to the doorway. I then make a slight turn to align with the sink. My movement intent is clearly toward the bathroom utility area as inferred by the sequence of approaching fixed structures.",
+        "question": "What is my primary action indicated by the changing depth of the doorway?",
+        "answer": "Walking toward and through it."
+      },
+      "depth_non_common": {
+        "caption": "The 3D geometry of the rooms and corridor appears physically plausible. There are no floating objects or intersecting structures observed during this transition segment.",
+        "question": "Are there any objects that appear to be floating unnaturally in the corridor?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_002": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 34.0,
+      "end_seconds": 86.0,
+      "start_timestamp": "00:00:34.000",
+      "end_timestamp": "00:01:26.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In this segment, the primary objects are my hands, which appear as dynamic volumes at a very close depth range (0.3-0.5 meters). Below them is the concave shape of the sink basin. A faucet fixture extends horizontally into the scene at a medium depth. The mirror behind the sink is represented as a flat, distant vertical surface.",
+        "question": "What is the shape of the main object directly below my hands?",
+        "answer": "A concave sink basin."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "My hands are positioned consistently in front of the sink basin and below the faucet. The faucet is mounted on the wall/mirror plane and extends over the sink. During the washing action, my hands overlap each other and periodically occlude parts of the sink's interior surface.",
+        "question": "What is the spatial relationship between the faucet and the sink basin?",
+        "answer": "The faucet is above the basin."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera remains stationary in front of the sink. The sequence is defined by the repetitive motion of hand volumes entering and leaving the central near-depth region. There is no transition to other rooms in this segment.",
+        "question": "Does the room layout change during this hand-washing activity?",
+        "answer": "No, it remains static."
+      },
+      "depth_counting": {
+        "caption": "I can count two distinct hand volumes moving in the foreground. There is one faucet fixture and one sink basin. The background shows one continuous flat wall/mirror plane.",
+        "question": "How many hands are visible interacting in the depth foreground?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "Two hand volumes are in constant motion, moving towards and away from each other within a range of about 20cm. They occasionally move closer to the camera, increasing their depth profile, and then recede back toward the sink basin.",
+        "question": "How many dynamic objects are moving within the sink area?",
+        "answer": "Two hands."
+      },
+      "depth_navigation": {
+        "caption": "The scene is not navigable in this segment as I am stationary. The 3D layout consists of a confined workspace where the sink and faucet define the operational boundaries for the hand-washing task.",
+        "question": "Is there a navigable path visible past the sink in this segment?",
+        "answer": "No, the path is blocked by the sink and wall."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The hands are the only dynamic entities, appearing at a close depth range from the start. They move rhythmically, rubbing against each other. They disappear briefly from the center as I reach for the soap or faucet handle, then return to the foreground above the sink.",
+        "question": "When do the hands move closest to the camera?",
+        "answer": "Periodically throughout the washing process."
+      },
+      "depth_action": {
+        "caption": "I am washing my hands. This is characterized by the interaction of two close-range volumes (hands) over a lower surface (sink). The depth between the hands varies as they rub together, and their distance to the sink remains relatively small.",
+        "question": "What action am I performing with the two volumes in the foreground?",
+        "answer": "Washing hands."
+      },
+      "depth_non_common": {
+        "caption": "The running water is sometimes represented as a fuzzy vertical artifact in the depth map, which might appear as a semi-transparent or unstable column connecting the faucet to the sink basin. This is a common depth sensor characteristic rather than a physical anomaly.",
+        "question": "Does the running water appear as a solid, stable 3D object?",
+        "answer": "No, it is a fuzzy artifact."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_003": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_003",
+      "task_label": "dry hands and return",
+      "start_seconds": 86.0,
+      "end_seconds": 138.5,
+      "start_timestamp": "00:01:26.000",
+      "end_timestamp": "00:02:18.500"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "This segment shows me moving away from the sink. The sink basin and faucet recede into the distance. As I turn, I pass the bathroom walls and doorway. I return to the first room, where the desk, two monitors, and the chair volume are again recognizable in their original spatial arrangement.",
+        "question": "What objects become visible as I return to the original room?",
+        "answer": "Desk, monitors, and chair."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "As I exit, the sink is left behind me. I move through the doorway, which is now between me and the bathroom. In the final scene, the chair is placed in front of the desk, and I position myself in the space directly before the desk setup.",
+        "question": "Where is the chair relative to the desk at the end of the video?",
+        "answer": "In front of the desk."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence follows the reverse of the first segment: leaving the bathroom, passing through the corridor/doorway, and re-entering the office room to face the desk setup again.",
+        "question": "In what order do I pass through the spaces to return to the desk?",
+        "answer": "Bathroom, doorway, then office."
+      },
+      "depth_counting": {
+        "caption": "I count one sink as I leave. Passing through the corridor, I see two walls. In the office, I can count two monitors, one desk, and one chair volume.",
+        "question": "How many monitors are visible when I sit back down?",
+        "answer": "Two."
+      },
+      "depth_dynamic_counting": {
+        "caption": "No other moving objects are seen during the return trip. The depth variations are entirely due to the camera's translation and rotation through the static environment.",
+        "question": "How many people do I pass in the corridor on my way back?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The return path is a clear walk back through the doorway. The depth map shows the office desk as the destination landmark. The path is unobstructed, allowing for a straight transition back to the sitting area.",
+        "question": "What landmark guides my navigation back to the original room?",
+        "answer": "The desk setup."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The bathroom fixtures recede as I move away. The doorway frame appears and then passes out of view as I enter the larger office room. Finally, the desk and monitors approach the foreground and stabilize as I reach my seat.",
+        "question": "At what point do the monitors become the most prominent objects in the depth field again?",
+        "answer": "Near the very end."
+      },
+      "depth_action": {
+        "caption": "I am walking away from the sink and returning to the office. The action concludes with me approaching the desk and chair, likely with the intent to sit down, as indicated by the decreasing distance to the chair volume.",
+        "question": "What is my final intended action based on the approaching chair volume?",
+        "answer": "Sitting down."
+      },
+      "depth_non_common": {
+        "caption": "The 3D layout remains consistent and realistic throughout the return journey. No abnormal depth ordering or floating objects are detected.",
+        "question": "Are there any depth artifacts that make the chair appear to intersect the floor?",
+        "answer": "No."
       }
     }
   }

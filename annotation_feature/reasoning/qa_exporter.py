@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from .groups import MODALITIES, REASONING_GROUPS
+from .groups import group_all_evidence
+from .normalizer import MODALITY_ORDER, normalize_all_modalities, normalize_sample_key
 
 
 NUMBERED_ITEM_RE = re.compile(r"(?:^|\s)(\d+)[.)]\s+")
@@ -196,5 +198,109 @@ def run_export_grouped_qa(
         print(f"  {sample_id}: {sample_total} Q/A pairs")
     print(f"Total Q/A pairs: {total_pairs}")
     print(f"Grouped Q/A pairs written to: {Path(output_path)}")
+
+    return exported
+
+
+def collect_segment_metadata(modality_paths: dict[str, str | Path]) -> dict[str, dict[str, Any]]:
+    """Collect segment metadata from segmented modality result files."""
+    metadata_by_sample: dict[str, dict[str, Any]] = {}
+
+    for modality in MODALITY_ORDER:
+        path = modality_paths.get(modality)
+        if path is None:
+            continue
+
+        data = load_json_file(path)
+        for raw_key in sorted(data):
+            sample_data = data[raw_key]
+            if not isinstance(sample_data, dict):
+                continue
+
+            sample_id = normalize_sample_key(raw_key)
+            sample_metadata = metadata_by_sample.setdefault(
+                sample_id,
+                {
+                    "source_files": {},
+                },
+            )
+
+            for field in ("source_prefix", "side", "segment"):
+                if field not in sample_metadata and field in sample_data:
+                    sample_metadata[field] = sample_data[field]
+
+            source_file = sample_data.get("source_file")
+            if isinstance(source_file, str) and source_file:
+                sample_metadata["source_files"][modality] = source_file
+
+    return metadata_by_sample
+
+
+def attach_segment_metadata(
+    exported: dict[str, dict[str, Any]],
+    segment_metadata: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Attach collected segment metadata to exported grouped Q/A samples."""
+    for sample_id, sample_output in exported.items():
+        if not isinstance(sample_output, dict):
+            continue
+
+        metadata = segment_metadata.get(sample_id, {})
+        if not isinstance(metadata, dict):
+            continue
+
+        for field in ("source_prefix", "side", "segment"):
+            if field in metadata:
+                sample_output[field] = metadata[field]
+
+        source_files = metadata.get("source_files", {})
+        if isinstance(source_files, dict):
+            sample_output["source_files"] = {
+                modality: source_files[modality]
+                for modality in MODALITY_ORDER
+                if modality in source_files
+            }
+
+    return exported
+
+
+def run_export_segmented_grouped_qa(
+    segmented_folder: str | Path = "segmented_outputs",
+    normalized_output_path: str | Path = "segmented_normalized_evidence_units.json",
+    output_path: str | Path = "segmented_grouped_qa_pairs.json",
+) -> dict:
+    """Export split grouped Q/A pairs from segmented modality result files."""
+    segmented_dir = Path(segmented_folder)
+    modality_paths = {
+        modality: segmented_dir / f"segmented_{modality}_qa_results.json"
+        for modality in MODALITY_ORDER
+    }
+
+    segment_metadata = collect_segment_metadata(modality_paths)
+
+    normalized_data = normalize_all_modalities(
+        rgb_path=modality_paths["rgb"],
+        event_path=modality_paths["event"],
+        depth_path=modality_paths["depth"],
+        ir_path=modality_paths["ir"],
+        audio_path=modality_paths["audio"],
+        output_path=normalized_output_path,
+    )
+
+    grouped_data = group_all_evidence(normalized_data)
+    exported = export_grouped_qa_pairs(grouped_data)
+    exported = attach_segment_metadata(exported, segment_metadata)
+    save_json_file(exported, output_path)
+
+    total_pairs = 0
+    print(f"Exported segmented samples: {len(exported)}")
+    for sample_id in sorted(exported):
+        sample_total = 0
+        for group_data in exported[sample_id]["reasoning_groups"].values():
+            sample_total += sum(len(records) for records in group_data.values())
+        total_pairs += sample_total
+        print(f"  {sample_id}: {sample_total} Q/A pairs")
+    print(f"Total segmented Q/A pairs: {total_pairs}")
+    print(f"Segmented grouped Q/A pairs written to: {Path(output_path)}")
 
     return exported
