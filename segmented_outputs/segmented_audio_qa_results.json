@@ -272,5 +272,536 @@
         }
       }
     }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_001": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_001",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user starts inside a building, walking through hallways and down stairwells. They exit the building, as seen in the RGB and depth data, while the audio captures continuous footsteps and the sound of several doors opening."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 00:00, the user begins walking indoors, their footsteps echoing in the hallway. By 00:15, they approach a door, and the sound of the handle and hinges is clearly audible as they pass through. At 00:30, they enter a stairwell, where the sound of footsteps changes slightly on the harder surface. At 00:45, they open an exterior door, and ambient outdoor sounds momentarily mingle with the mechanical sound of the door closing."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 00:64",
+          "caption": "Footsteps on various surfaces and the mechanical sound of doors opening and closing.",
+          "question": "What are the primary sound sources heard as the user navigates to the mailbox?",
+          "answer": "The primary sound sources are the user's footsteps on indoor surfaces and stairwells, and the mechanical sounds of doors being opened and closed."
+        },
+        "audio_ambient_environment_understanding": {
+          "timestamp": "00:00 - 00:64",
+          "caption": "A transition from a quiet indoor environment to a slightly more open outdoor space.",
+          "question": "How does the ambient audio change during this segment?",
+          "answer": "The audio transitions from the echoing, contained sounds of a hallway and stairwell to the open, briefly captured ambient noise of the outdoors as the user exits the building."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_002": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_002",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user arrives at the mailbox area and interacts with the mailbox unit. The RGB video captures manual manipulation, while the audio features distinct metallic sounds associated with checking mail."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 01:04, the user reaches the mailbox unit. At 01:15, the metallic click of a key or latch is heard, followed by the sound of a metal door swinging open. For the next 20 seconds, there are rhythmic rustling sounds as the user checks for mail. At 01:40, the mailbox door is closed with a final metallic clang."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:04 - 01:45",
+          "caption": "Metallic clicks, the sound of a metal door opening and closing, and the rustling of paper.",
+          "question": "What specific sounds indicate the user is checking the mailbox?",
+          "answer": "The metallic click of the lock, the sound of the metal door moving, and the rustling sound of mail being handled all indicate the mailbox is being checked."
+        },
+        "audio_event_detection": {
+          "timestamp": "01:04 - 01:45",
+          "caption": "A series of distinct mechanical and manual interaction sounds.",
+          "question": "Are there any sudden or sharp sounds in this segment?",
+          "answer": "Yes, there are sharp metallic clicks and clangs when the mailbox is opened and then finally closed."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_003": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_003",
+      "task_label": "return from mailbox",
+      "start_seconds": 105.0,
+      "end_seconds": 194.9,
+      "start_timestamp": "00:01:45.000",
+      "end_timestamp": "00:03:14.900"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user walks back from the mailbox to their original desk. The audio captures footsteps on the reverse path, doors opening and closing, and finally the sound of the user sitting down and closing a laptop."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 01:45, the user begins the return walk, with footsteps audible as they re-enter the building. At 02:15, the sound of stairs is heard again. By 02:45, the user is back in the hallway. At 03:05, they enter their room, and at 03:12, the audio captures the sound of a chair moving and a laptop lid closing, marking the end of the task."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:45 - 03:14",
+          "caption": "Footsteps, doors, a moving chair, and a laptop lid closing.",
+          "question": "What sounds signal the completion of the task in this segment?",
+          "answer": "The sound of a chair moving as the user sits down and the distinct 'thud' of a laptop lid closing signal the end of the task."
+        },
+        "audio_ambient_environment_understanding": {
+          "timestamp": "01:45 - 03:14",
+          "caption": "The audio reflects a transition back into a familiar, quiet indoor workspace.",
+          "question": "Does the environment sound different at the end of the segment compared to the beginning?",
+          "answer": "Yes, the segment ends with the sounds of a quiet, personal workspace, such as a chair and laptop, which are distinct from the more transient sounds of hallways and stairwells."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_001": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_001",
+      "task_label": "walking to mailboxes",
+      "start_seconds": 0.0,
+      "end_seconds": 42.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:42.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user is walking through a dark corridor to the mailboxes."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 00:00, the user stands up from the desk, with the sound of movement and footsteps. At 00:10, footsteps continue as the user exits the room. At 00:25, the user is walking down a long, dark corridor. At 00:40, the user reaches the mailbox area, with the sounds of footsteps echoing in the hallway."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 00:42",
+          "caption": "The primary sound source is the person walking, indicated by rhythmic footsteps and rustling clothing.",
+          "question": "What is the primary sound source heard as the user travels through the building?",
+          "answer": "The primary sound source is the user's footsteps and movement through the hallway."
+        },
+        "audio_acoustic_environment": {
+          "timestamp": "00:10 - 00:42",
+          "caption": "The sound of footsteps has a slight echo, suggesting a large, hard-surfaced indoor environment like a corridor.",
+          "question": "What can be inferred about the environment based on the sound of the footsteps?",
+          "answer": "The echoing footsteps suggest the user is walking in a large, hard-surfaced indoor space like a hallway or corridor."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_002": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_002",
+      "task_label": "returning to room to find key",
+      "start_seconds": 42.0,
+      "end_seconds": 125.0,
+      "start_timestamp": "00:00:42.000",
+      "end_timestamp": "00:02:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user returns to their room and searches for the mailbox key on the desk."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 00:42, the user turns around and begins walking back. At 01:05, the user enters the room and approaches the desk. At 01:20, sounds of objects being moved on the desk can be heard. At 01:50, the user finds the key, with the sound of metal clinking."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:20 - 02:00",
+          "caption": "Sounds of searching on a desk, including shuffling papers and moving small objects, are heard.",
+          "question": "What sounds indicate the user is searching for something on the desk?",
+          "answer": "The sounds of shuffling papers, objects being moved, and finally metal clinking indicate the user is searching for and finding the key."
+        },
+        "audio_event_detection": {
+          "timestamp": "01:55 - 02:05",
+          "caption": "A clear clinking sound of keys is heard when the user picks them up.",
+          "question": "How do we know the user has likely found the key?",
+          "answer": "A distinct clinking sound of metal keys being handled is heard around the two-minute mark."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_003": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_003",
+      "task_label": "walking to mailboxes again",
+      "start_seconds": 125.0,
+      "end_seconds": 150.0,
+      "start_timestamp": "00:02:05.000",
+      "end_timestamp": "00:02:30.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user, now with the key, walks back towards the mailboxes."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 02:05, the user leaves the room again, with footsteps heard. At 02:15, the sound of walking through the corridor continues. At 02:25, the user arrives back at the mailboxes."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "02:05 - 02:30",
+          "caption": "Rhythmic footsteps on a hard floor continue as the user walks back to the destination.",
+          "question": "What sound confirms the user is moving between locations again?",
+          "answer": "The sound of rhythmic footsteps on a hard surface confirms the user is walking back through the corridor."
+        },
+        "audio_acoustic_environment": {
+          "timestamp": "02:10 - 02:30",
+          "caption": "The acoustic environment remains a quiet hallway with echoing footsteps.",
+          "question": "Is the environment noisy or quiet as the user walks back?",
+          "answer": "The environment is relatively quiet, with the user's footsteps being the most prominent sound."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_004": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_004",
+      "task_label": "unlocking and checking mailbox",
+      "start_seconds": 150.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:02:30.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user unlocks the mailbox, checks for mail, and then locks it again."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 02:30, the user reaches the mailbox. At 02:35, the sound of a key being inserted and turned in a lock is heard. At 02:40, the mailbox door creaks open. At 02:50, the user checks the box. At 03:00, the mailbox is closed and locked with more metallic sounds."
+      },
+      "categories": {
+        "audio_event_detection": {
+          "timestamp": "02:35 - 03:05",
+          "caption": "Specific sounds include key insertion, turning the lock, the mailbox door opening/closing, and the key being removed.",
+          "question": "What sequence of sounds describes the interaction with the mailbox?",
+          "answer": "The sounds include the key entering the lock, the lock turning, the door opening, checking the contents, and finally the door closing and locking."
+        },
+        "audio_sound_source_identification": {
+          "timestamp": "02:35 - 03:00",
+          "caption": "The primary sound is the metallic interaction between the key and the mailbox lock.",
+          "question": "What is the primary sound heard during the mailbox interaction?",
+          "answer": "The primary sound is the metallic clinking and turning of the key in the mailbox lock."
+        }
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_005": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_005",
+      "task_label": "returning to room and sitting down",
+      "start_seconds": 185.0,
+      "end_seconds": 216.6,
+      "start_timestamp": "00:03:05.000",
+      "end_timestamp": "00:03:36.600"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user returns to their room and sits back down at the desk."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 03:05, footsteps are heard as the user walks back to the room. At 03:20, the user enters the room. At 03:30, the sound of the user sitting down in a chair and the chair moving slightly is heard."
+      },
+      "categories": {
+        "audio_event_detection": {
+          "timestamp": "03:30 - 03:36",
+          "caption": "The final sound is the person settling into their chair at the desk.",
+          "question": "What sound indicates the end of the task?",
+          "answer": "The sound of the chair moving and the user settling back into their seat at the desk indicates the task is complete."
+        },
+        "audio_sound_source_identification": {
+          "timestamp": "03:05 - 03:30",
+          "caption": "Footsteps mark the return trip to the starting point.",
+          "question": "What sound source is most prominent as the user returns to their room?",
+          "answer": "The user's footsteps on the floor are the most prominent sound source as they return."
+        }
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_day_seg_002": {
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_002",
+      "task_label": "slicing a carrot",
+      "start_seconds": 45.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:00:45.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user picks up a kitchen knife and begins slicing the carrot into julienne strips on a white cutting board."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:45 to 03:05, the sound of a kitchen knife slicing through a carrot against a plastic cutting board creates a rhythmic chopping noise. The user first slices the carrot into rounds and then further cuts them into thin julienne strips."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00:45 - 00:03:05",
+          "caption": "The rhythmic chopping sound of a kitchen knife on a cutting board is prominent throughout this segment.",
+          "question": "What sound can be heard from 00:45 to 03:05 in the video?",
+          "answer": "The rhythmic chopping sound of a kitchen knife slicing through a carrot on a cutting board is clearly audible."
+        },
+        "audio_percussive_sound": {
+          "timestamp": "00:00:45 - 00:03:05",
+          "caption": "The chopping of the carrot creates a series of percussive sounds.",
+          "question": "Describe the nature of the sound heard as the user slices the carrot.",
+          "answer": "The sound is percussive and rhythmic, created by the blade of the knife hitting the cutting board after passing through the carrot."
+        },
+        "audio_spatial_location": {
+          "timestamp": "00:00:45 - 00:03:05",
+          "caption": "The sound of slicing originates from the center of the frame, where the carrot and knife are located.",
+          "question": "Where is the sound of the slicing coming from in the video?",
+          "answer": "The sound is coming from the central area of the countertop, where the user is using the knife on the cutting board."
+        },
+        "audio_contextual_relevance": {
+          "timestamp": "00:00:45 - 00:03:05",
+          "caption": "The chopping sound is directly related to the user's action of slicing the carrot.",
+          "question": "How does the audio relate to the visual actions in this segment?",
+          "answer": "The audio provides direct feedback for the visual action of slicing, with each knife stroke against the cutting board producing a corresponding chopping sound."
+        }
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_002": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_002",
+      "task_label": "chopping carrot",
+      "start_seconds": 78.0,
+      "end_seconds": 161.9,
+      "start_timestamp": "00:01:18.000",
+      "end_timestamp": "00:02:41.900"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The user starts a rapid cross-cutting motion to finely chop the gathered carrot strips."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:01:18 to 00:02:41, the user is seen rapidly cross-cutting carrot strips into small pieces, characterized by a series of high-frequency rhythmic chopping sounds against the wooden cutting board."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:18 - 02:41",
+          "caption": "A continuous sequence of rapid chopping sounds is heard as the knife hits the cutting board.",
+          "question": "What is the primary sound source during this segment?",
+          "answer": "The primary sound source is a knife chopping through carrot strips on a wooden cutting board."
+        },
+        "audio_sound_event_duration": {
+          "timestamp": "01:18 - 02:41",
+          "caption": "The rapid chopping sound lasts for the entire duration of the segment, reflecting the continuous dicing action.",
+          "question": "How long does the rapid chopping sound persist in this segment?",
+          "answer": "The rapid chopping sound persists for approximately 83.9 seconds, starting from 01:18 and ending at 02:41."
+        },
+        "audio_visual_correspondence": {
+          "timestamp": "01:18 - 02:41",
+          "caption": "The visual action of cross-cutting carrots into small bits matches the rapid, percussive sound of the knife hitting the board.",
+          "question": "How does the sound in this segment correspond to the visual actions observed?",
+          "answer": "The rapid percussive sound heard is perfectly synchronized with the user's quick dicing motion as the knife blade repeatedly strikes the wooden cutting board through the carrot pieces."
+        }
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 53.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:53.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person is riding a bike on a paved road and sidewalk."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:00 to 00:30, the sound of tires rolling on asphalt is heard alongside heavy wind noise. Between 00:30 and 00:45, the person continues riding, with the wind noise remaining prominent. From 00:45 to 00:53, the bike slows down as the rider approaches a wooden structure."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 00:53",
+          "caption": "The primary sound sources are the wind blowing against the microphone and the friction of the bike tires on the asphalt surface.",
+          "question": "What are the dominant sound sources heard while riding the bike?",
+          "answer": "The dominant sounds are the wind and the tires rolling on the pavement."
+        }
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_002",
+      "task_label": "parking and securing the bike",
+      "start_seconds": 53.0,
+      "end_seconds": 98.5,
+      "start_timestamp": "00:00:53.000",
+      "end_timestamp": "00:01:38.500"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person enters a storage area and parks the bike in a metal rack."
+      },
+      "audio_chronological_caption": {
+        "caption": "At 00:53, the rider enters the wooden storage area. From 01:00 to 01:15, the sound of the metal bike rack clinking is heard as the front wheel is guided in. Between 01:15 and 01:38, several metallic clicks and clangs occur as the bike is secured and adjusted in the rack."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:00 - 01:38",
+          "caption": "Distinct metallic clinking and clanging sounds are heard as the bike interacts with the metal rack.",
+          "question": "What is the source of the metallic sounds heard starting around 01:00?",
+          "answer": "The metallic sounds come from the bike's wheel and frame making contact with the metal bike rack."
+        },
+        "audio_sound_event_counting": {
+          "timestamp": "01:00 - 01:38",
+          "caption": "Multiple metallic impacts are heard during the parking process.",
+          "question": "How many times are distinct metallic clinks or clangs heard as the bike is being parked?",
+          "answer": "Approximately 5 to 7 distinct metallic clinks are heard as the bike is positioned and secured."
+        }
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person is riding a bike along a road at night."
+      },
+      "audio_chronological_caption": {
+        "caption": "From 00:00 to 01:04, the sound of wind rushing past the camera and the steady hum of bicycle tires on the pavement are heard as the rider travels forward."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:00 - 01:04",
+          "caption": "The sound of bicycle tires and wind.",
+          "question": "What are the primary sound sources heard while the camera is moving?",
+          "answer": "The primary sound sources are the bicycle tires rolling on the road and the wind noise created by the movement."
+        },
+        "audio_ambient_sound_analysis": {
+          "timestamp": "00:00 - 01:04",
+          "caption": "Continuous wind noise.",
+          "question": "Describe the ambient noise present during the bike ride.",
+          "answer": "The ambient noise consists of a continuous wind sound that provides a backdrop to the rhythmic rolling of the tires."
+        }
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_002",
+      "task_label": "parking and locking the bike",
+      "start_seconds": 64.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:44.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night.m4a",
+    "annotations": {
+      "audio_hia": {
+        "caption": "The person stops, positions the bike, and locks it to a rack."
+      },
+      "audio_chronological_caption": {
+        "caption": "Starting at 01:04, the bike comes to a halt. For the remainder of the segment until 01:44, metallic rattling and clicking sounds are heard as the lock is manipulated and secured."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "01:04 - 01:44",
+          "caption": "Metallic clinking of a bike lock.",
+          "question": "What distinctive sounds are heard after the bike stops moving?",
+          "answer": "Distinctive metallic clinking, rattling, and clicking sounds are heard as the bike lock is being used."
+        },
+        "audio_event_detection": {
+          "timestamp": "01:04 - 01:44",
+          "caption": "Securing the bicycle with a lock.",
+          "question": "What activity is occurring based on the audio cues?",
+          "answer": "Based on the metallic handling and clicking sounds, the user is parking the bike and securing it with a lock."
+        }
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_004": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_004",
+      "task_label": "walking back to room",
+      "start_seconds": 104.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:44.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+    "annotations": {
+      "audio_hia": {
+        "caption": "A person is leaving the bathroom and walking back to the computer room, opening and closing doors along the way."
+      },
+      "audio_chronological_caption": {
+        "caption": "The person leaves the bathroom at 00:01:44 and walks through the hallway, opening the door to the computer room at 00:01:48 and entering the room at 00:01:51. Finally, they close the computer room door at 00:01:54 and walk to their desk."
+      },
+      "categories": {
+        "audio_sound_source_identification": {
+          "timestamp": "00:01:44 - 00:02:04",
+          "caption": "The sounds in this segment include the person's footsteps as they walk, the sound of the bathroom door closing, the sound of the computer room door opening and closing, and the ambient noise of the building.",
+          "question": "What are the primary sound sources heard as the person walks back to the room?",
+          "answer": "The primary sound sources are the person's footsteps, the sounds of doors opening and closing, and the ambient noise of the building."
+        }
+      }
+    }
   }
 }

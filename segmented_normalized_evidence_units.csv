@@ -1,4 +1,312 @@
 segment_id,unit_index,modality,section,question,answer,timestamp,confidence
+check_mailbox_day_seg_001,0,rgb,action,1. What is my first action in the video? 2. Why am I leaving the room? 3. What do I do when I reach the door in frame 001260? 4. How do I navigate the hallway? 5. What is the result of me walking down the stairs? 6. Am I carrying anything in my hands? 7. Do I stop at any point in the hallway? 8. What is the final action in this segment?,1. Standing up from the desk. 2. To check the mailbox. 3. I push it open. 4. By walking straight down its center. 5. I reach the ground level outside. 6. It doesn't appear so. 7. No. 8. Descending the stairs.,,0.85
+check_mailbox_day_seg_001,1,rgb,counting,1. How many beds are in the starting room? 2. How many desks are visible? 3. How many grey doors do I pass in the hallway? 4. How many exit signs are visible in this segment? 5. How many flights of stairs do I go down? 6. How many posters are on the window sill? 7. How many windows are in the first room? 8. How many light switches are seen near the first door? 9. How many black chairs are in the room? 10. How many handles are visible on the first grey door?,1. One. 2. One. 3. Four. 4. One. 5. One. 6. One. 7. One large window. 8. Two. 9. One. 10. One.,,0.85
+check_mailbox_day_seg_001,2,rgb,dynamic_counting,1. How many people pass me in the hallway? 2. Do any doors open on their own? 3. Are there any cars moving outside the window? 4. How many pets are seen in the hallway? 5. Do any objects fall over as I walk? 6. Are there any birds visible through the window? 7. How many other people are using the stairs? 8. Does anyone else walk into the room?,1. None. 2. No. 3. None are visible moving. 4. None. 5. No. 6. No. 7. None. 8. No.,,0.85
+check_mailbox_day_seg_001,3,rgb,dynamic_recognition,1. When do I start moving? 2. At what point do I reach the hallway? 3. When do I pass the first grey door? 4. When is the exit sign first visible? 5. When do I walk through the door into the stairwell area? 6. When do my feet touch the metal grating of the stairs? 7. Does the camera angle shift as I go down the stairs? 8. How long does it take to walk the length of the hallway?,"1. Around frame 000120. 2. Around frame 000330. 3. Around frame 000450. 4. Around frame 001110. 5. Around frame 001260. 6. Around frame 001470. 7. Yes, it tilts downward. 8. About 30 seconds.",,0.85
+check_mailbox_day_seg_001,4,rgb,light_change,1. Does the room get darker as I move away from the window? 2. Is the hallway brighter than the room? 3. Does the lighting color change when entering the hallway? 4. Does a shadow fall over the camera in the stairwell? 5. Is there a glare on any surface in the hallway? 6. Does the light appear to come from above in the hallway? 7. Is the stairwell more dimly lit than the hallway? 8. How does the light change as I approach the exit door?,"1. Yes, slightly. 2. No, it is more consistent but slightly less intense than the window area. 3. Yes, it changes from warm natural light to cool artificial light. 4. Yes, as I move under the overhang. 5. Yes, on the polished floor and door handles. 6. Yes, from ceiling strips. 7. Yes, it has more shadows. 8. It becomes much brighter.",,0.85
+check_mailbox_day_seg_001,5,rgb,light_recongnition,What is the primary source of light in the starting room?,Natural daylight from the window.,,0.85
+check_mailbox_day_seg_001,6,rgb,navigation,"1. Which direction do I turn to leave the room? 2. Do I walk straight or turn in the first hallway? 3. How many doors do I pass before turning toward the exit? 4. Is the exit door on the left or right? 5. To reach the stairs, do I need to go through another door? 6. Which way do I turn after the exit sign? 7. Are the stairs located directly ahead of the exit door? 8. How many steps do I take in the hallway? 9. Do I go up or down to reach the mailbox? 10. What is the shortest path to the stairs from the bedroom?","1. Right. 2. Straight. 3. Four. 4. Straight ahead. 5. Yes. 6. Slightly left. 7. Yes. 8. Approximately 10. 9. Down. 10. Exit the room, walk down the hallway, and go through the door with the exit sign.",,0.85
+check_mailbox_day_seg_001,7,rgb,non_common,Is there anything in the room that violates the laws of physics?,No.,,0.85
+check_mailbox_day_seg_001,8,rgb,object_recognition,What color is the duvet on the bed in the initial room?,Light green.,,0.85
+check_mailbox_day_seg_001,9,rgb,scene_sequence,1. What scene is shown at the very beginning of the video? 2. What environment do I enter immediately after leaving the bedroom? 3. Do I pass any doors in the hallway? 4. What is the texture of the walls in the hallway? 5. Where do I go after walking through the hallway? 6. What type of stairs do I descend? 7. What did I pass just before reaching the stairs? 8. Is the stairwell inside or outside the main building structure? 9. What is the sequence of floor types I walk on? 10. Which area connects the indoor hallway to the stairwell?,"1. A bedroom or study. 2. A hallway. 3. Yes, several grey doors. 4. Smooth and white. 5. Toward a stairwell. 6. Metal grating stairs. 7. A doorway with an exit sign. 8. It appears to be an external or semi-enclosed stairwell. 9. Carpet or linoleum to concrete to metal grating. 10. A doorway with an exit sign.",,0.85
+check_mailbox_day_seg_001,10,rgb,spatial_reasoning,Where is the bed located in relation to the door when I leave the room?,To the left.,,0.85
+check_mailbox_day_seg_001,11,rgb,text_recognition,1. What word is written at the top of the poster on the window sill? 2. What phrase is at the bottom of that same poster? 3. What room numbers are listed on the grey door in the hallway? 4. What is the color of the text on the exit sign? 5. Where is the room number text located on the door? 6. What symbol is depicted next to the arrow on the exit sign? 7. What is the orientation of the text on the Guy Fawkes poster? 8. What does the text on the green sign indicate?,"1. REVOLUTION. 2. GAME OVER. 3. 1'233, 1'234, and 1'235. 4. White. 5. Centered on the door panel. 6. A running man. 7. Vertical along the edges. 8. An emergency exit route.",,0.85
+check_mailbox_day_seg_001,12,event,event_navigation,What direction do I turn to enter the stairwell after passing through the hallway door?,A right turn.,,0.85
+check_mailbox_day_seg_001,13,event,event_non_common,Are there any floating objects or unrealistic motion patterns visible in the stairwell?,No.,,0.85
+check_mailbox_day_seg_001,14,event,event_object_recognition,What distinct structural features create dense event clusters as I descend the stairs?,Parallel metal railings and steps.,,0.85
+check_mailbox_day_seg_001,15,event,event_scene_sequence,What is the first environment I transition into after leaving my room?,A long interior hallway.,,0.85
+check_mailbox_day_seg_001,16,event,event_spatial_reasoning,Where are the metal railings relative to my position as I walk down the stairs?,On my right side.,,0.85
+check_mailbox_day_seg_001,17,depth,depth_navigation,How does the 3D layout change as I move from the hallway to the stairs?,Floor height drops downward.,,0.65
+check_mailbox_day_seg_001,18,depth,depth_non_common,Are there any floating objects visible in the hallway depth?,No.,,0.65
+check_mailbox_day_seg_001,19,depth,depth_object_recognition,What is the depth relationship between the stairs and the railing posts as I descend?,Stairs recede downward while posts stay lateral.,,0.65
+check_mailbox_day_seg_001,20,depth,depth_scene_sequence,What space do I enter immediately after leaving the narrow corridor?,The stairwell.,,0.65
+check_mailbox_day_seg_001,21,depth,depth_spatial_reasoning,Where is the railing positioned relative to the path as I enter the stairwell?,To the right side.,,0.65
+check_mailbox_day_seg_001,22,ir,action,1. What is my first action? 2. What do I do when I reach the end of the indoor hallway? 3. Am I running or walking? 4. Do I interact with the jackets on the hooks? 5. Do I pick up any shoes? 6. What action do I take on the stairs? 7. Do I stop in the kitchen? 8. What is the purpose of walking down the stairs?,"1. Walking away from the desk. 2. Push open the exit door. 3. Walking. 4. No. 5. No. 6. Walking down. 7. No, I pass by. 8. To reach the courtyard/mailbox area.",,0.75
+check_mailbox_day_seg_001,23,ir,counting,1. How many posters are on the desk? 2. How many sinks are in the kitchen area? 3. How many pairs of shoes are clearly visible on the floor? 4. How many jackets can you count on the hooks? 5. How many indoor hallways are traversed? 6. How many metal staircases do I start descending? 7. How many external doors do I pass through? 8. How many drawer units are in the hallway? 9. How many windows are visible in the first room? 10. How many levels of the staircase do I reach in this segment?,1. One. 2. One. 3. At least four. 4. At least three. 5. One main hallway with segments. 6. One. 7. One. 8. One. 9. One large window. 10. One flight is started.,,0.75
+check_mailbox_day_seg_001,24,ir,dynamic_counting,1. How many people are seen outside in the first frame? 2. Are there any moving cars in this segment? 3. Do any pets cross the hallway? 4. How many people pass me in the hallway? 5. Are there dynamic objects in the kitchen? 6. Does anyone walk up the stairs as I walk down? 7. How many people are seen on the outdoor walkway? 8. Is any foliage moving in the wind outside?,1. Two distant figures. 2. No. 3. No. 4. Zero. 5. No. 6. No. 7. None besides me. 8. No noticeable movement.,,0.75
+check_mailbox_day_seg_001,25,ir,dynamic_recognition,1. Did anyone walk toward me in the hallway? 2. Did the door open automatically? 3. When did the figures outside disappear from view? 4. Did any vehicles pass by while I was on the stairs? 5. Did any birds fly across the frame? 6. Was the kitchen tap running? 7. Did I see any dynamic objects inside the building? 8. Did the window curtains move?,"1. No. 2. No, I pushed it open. 3. Around frame 000090 as I turned away. 4. No. 5. No. 6. No. 7. No. 8. No.",,0.75
+check_mailbox_day_seg_001,26,ir,light_change,1. Does it get brighter or darker as I walk through the door? 2. When does the most significant light change occur? 3. Are there any lights on in the kitchen area? 4. Does the outdoor light seem stronger than the indoor light? 5. Is there a shadow cast by the railing on the stairs? 6. Do the light levels remain consistent throughout the segment? 7. Is the bedroom brighter than the hallway? 8. Does the sunlight create hotspots on the metal?,"1. Brighter. 2. When exiting the building door. 3. Yes, under-cabinet lighting is visible. 4. Yes, significantly. 5. Yes, long shadows are visible on the walkway. 6. No, it changes from indoor to outdoor. 7. The bedroom has window light making it fairly bright. 8. Yes, the metal stairs show high thermal contrast from the sun.",,0.75
+check_mailbox_day_seg_001,27,ir,light_recongnition,What is the primary light source once I exit the building?,Natural sunlight.,,0.75
+check_mailbox_day_seg_001,28,ir,navigation,"1. Which direction do I turn after exiting the bedroom? 2. Do I go up or down the stairs? 3. How do I get from the hallway to the outdoors? 4. What is the fastest way to the stairs? 5. After passing the kitchen, where should I go? 6. How many turns are made inside the hallway? 7. Is the path to the mailbox linear? 8. Where are the stairs located? 9. Do I need to open any doors? 10. What is the surface of the outdoor path?","1. Straight. 2. Down. 3. Through the hallway exit door. 4. Walk straight through the corridor to the door. 5. Straight toward the exit. 6. None, it's mostly a straight path. 7. Yes, largely straight with one exit. 8. Outside the building exit. 9. Yes, the building exit door. 10. Concrete walkway and metal stairs.",,0.75
+check_mailbox_day_seg_001,29,ir,non_common,Is there anything floating or out of place in the kitchen?,"No, everything appears correctly placed on the counters.",,0.75
+check_mailbox_day_seg_001,30,ir,object_recognition,What items are hanging on the hooks in the hallway?,Several jackets are hanging on hooks in the hallway.,,0.75
+check_mailbox_day_seg_001,31,ir,scene_sequence,1. What room do I start in? 2. What do I pass immediately after leaving the first room? 3. Is the kitchen passed before or after the shoe area? 4. Where do I go after the shoe rack area? 5. What is the environment like after exiting the building door? 6. Which scene follows the indoor hallway? 7. What type of stairs do I descend? 8. Do I pass a dining table in this segment? 9. Where do I see jackets hanging? 10. What is the final scene in this segment?,"1. The bedroom. 2. A hallway. 3. The kitchen is passed before the shoe area. 4. I exit the indoor corridor. 5. It is an outdoor walkway. 6. The outdoor walkway. 7. Metal industrial stairs. 8. No, a kitchen counter is seen but no dining table. 9. In the hallway near the shoes. 10. The metal staircase leading down.",,0.75
+check_mailbox_day_seg_001,32,ir,spatial_reasoning,Where is the wooden dresser located relative to the hallway path?,The wooden dresser is on the left side of the hallway as I move toward the exit.,,0.75
+check_mailbox_day_seg_001,33,ir,text_recognition,1. What word is at the top of the poster on my desk? 2. What phrase is at the bottom of that same poster? 3. Does the poster appear in the hallway? 4. What is the implied theme of the poster text? 5. Where do I see the first set of text? 6. What kind of signs do I see near the building exit? 7. How many posters with text are seen in this segment? 8. What is the text on the exit sign?,"1. REVOLUTION. 2. GAME OVER. 3. No, it is on the desk. 4. It implies a 'V for Vendetta' or revolutionary theme. 5. On the desk in the initial room. 6. Emergency exit signs. 7. One poster is clearly visible. 8. It indicates an exit or evacuation route.",,0.75
+check_mailbox_day_seg_001,34,audio,audio_ambient_environment_understanding,How does the ambient audio change during this segment?,"The audio transitions from the echoing, contained sounds of a hallway and stairwell to the open, briefly captured ambient noise of the outdoors as the user exits the building.",00:00 - 00:64,0.8
+check_mailbox_day_seg_001,35,audio,audio_sound_source_identification,What are the primary sound sources heard as the user navigates to the mailbox?,"The primary sound sources are the user's footsteps on indoor surfaces and stairwells, and the mechanical sounds of doors being opened and closed.",00:00 - 00:64,0.8
+check_mailbox_day_seg_002,0,rgb,action,1. What is my primary action at the mailboxes? 2. Which mailbox number am I looking for? 3. What object do I use to interact with the mailbox? 4. Do I successfully open the mailbox in this segment? 5. What am I doing with my eyes? 6. Do I talk to the people in the background? 7. How do I hold the keys? 8. What is the consequence of me finding the right box?,1. Checking for mail. 2. 1'234. 3. Keys. 4. I am in the process of inserting the key. 5. Scanning the numbers on the boxes. 6. No. 7. Between my thumb and forefinger. 8. I can now unlock it.,,0.85
+check_mailbox_day_seg_002,1,rgb,counting,1. How many people are walking in the background? 2. How many mailbox units are visible in the green column? 3. How many keys am I holding? 4. How many concrete tiles do I stand on? 5. How many red panels are on the building in the distance? 6. How many bushes are in the garden area? 7. How many name labels can you read? 8. How many columns of mailboxes are there? 9. How many trees are in the background? 10. How many times do I try the key?,"1. Two. 2. At least five. 3. One set. 4. About four. 5. Many, at least twenty. 6. About three main clusters. 7. At least two (Wiebusch, F. Festa). 8. At least five. 9. Two. 10. Once.",,0.85
+check_mailbox_day_seg_002,2,rgb,dynamic_counting,1. How many people walk across the courtyard? 2. Is there any vehicle moving in the background? 3. Do the bushes move in the wind? 4. Does anyone approach me? 5. How many objects do I move with my hands? 6. Do the people in the background stop to talk? 7. Are there any flying insects visible? 8. Does a bird fly by?,"1. Two. 2. No. 3. No, they are still. 4. No. 5. One set of keys. 6. No, they continue walking. 7. No. 8. No.",,0.85
+check_mailbox_day_seg_002,3,rgb,dynamic_recognition,1. When do the people first appear in the background? 2. When do they disappear from view? 3. At what frame do my hands reach for the mailbox? 4. Does the person in the pink shirt move faster than the other? 5. When do I stop walking toward the mailboxes? 6. How long are the people visible for? 7. Does anyone else appear after they leave? 8. Is there any movement from inside the mailboxes?,"1. Around frame 002730. 2. Around frame 002940. 3. Around frame 003000. 4. No, they walk at a similar pace. 5. Around frame 002160. 6. About 7 seconds. 7. No. 8. No.",,0.85
+check_mailbox_day_seg_002,4,rgb,light_change,1. Does the sun come out during this segment? 2. Is there any flickering light? 3. Does my shadow move significantly? 4. Is the area near the mailboxes shaded? 5. Does the light change when I move closer to the mailbox? 6. Is it getting brighter toward the end? 7. Are there any reflections on the glass or metal surfaces? 8. How consistent is the illumination?,"1. No, it stays overcast. 2. No. 3. No. 4. It is under a slight overhang, so it is in soft shadow. 5. No. 6. No. 7. Yes, some soft reflections on the mailbox doors. 8. Very consistent.",,0.85
+check_mailbox_day_seg_002,5,rgb,light_recongnition,What is the lighting condition in this outdoor segment?,"Bright, diffused daylight.",,0.85
+check_mailbox_day_seg_002,6,rgb,navigation,1. How many steps do I take to reach the mailboxes? 2. Am I standing or walking during most of this segment? 3. Which column is my mailbox in? 4. Do I need to turn to see the other people? 5. How do I get back into the building? 6. Is the mailbox at eye level? 7. Do I move to the left or right to find the keyhole? 8. What is the distance between me and the garden? 9. How do I exit this area? 10. Is there a clear path back to the stairs?,"1. Two. 2. Standing. 3. The second column from the left in the green section. 4. No, they are straight ahead. 5. Turn around and walk back the way I came. 6. Yes, approximately. 7. No, it is directly in front. 8. About 4 steps. 9. Walk back toward the building entrance. 10. Yes.",,0.85
+check_mailbox_day_seg_002,7,rgb,non_common,Are there any design flaws in the mailbox area shown?,"No, it looks normal.",,0.85
+check_mailbox_day_seg_002,8,rgb,object_recognition,What colors are the mailboxes?,Grey and green.,,0.85
+check_mailbox_day_seg_002,9,rgb,scene_sequence,1. Where is the subject at the start of this segment? 2. What is the primary focus of this scene? 3. Do I move away from the mailboxes at any point? 4. What is behind the subject? 5. What is the subject facing? 6. Are there any other people in the scene? 7. What environment is shown in the background? 8. What is the sequence of actions I perform? 9. Where do the other people go? 10. Does the scene change from outdoors to indoors?,"1. On an outdoor patio. 2. Checking the mailbox. 3. No, I stay in front of them. 4. A building with red panels. 5. A bank of mailboxes. 6. Yes, two people are walking in the distance. 7. A courtyard with grass and bushes. 8. Approaching, searching for the number, and preparing the key. 9. They walk across the background courtyard. 10. No, it remains outdoors.",,0.85
+check_mailbox_day_seg_002,10,rgb,spatial_reasoning,Where are the keys in relation to the mailbox?,They are held right in front of the lock.,,0.85
+check_mailbox_day_seg_002,11,rgb,text_recognition,1. What is the specific number on the green mailbox I am checking? 2. What name is on the label of mailbox 1'234? 3. What name is on the label of mailbox 1'223? 4. What other numbers are listed on the grey sign beside the mailboxes? 5. Are the numbers written in a stylized font? 6. What is the first number seen in the 1'000 series? 7. How many room numbers are listed on the door I pass earlier? 8. What is the background color for the name labels?,"1. 1'234. 2. Wiebusch. 3. F. Festa. 4. 1'233, 1'234, 1'235. 5. Yes, they look like hand-drawn or stencil-style white digits. 6. 1'001. 7. Three. 8. White.",,0.85
+check_mailbox_day_seg_002,12,event,event_navigation,What turn do I make after finishing the mailbox check?,A 180-degree turn.,,0.85
+check_mailbox_day_seg_002,13,event,event_non_common,Does anything unusual happen while I am opening the mailbox?,No.,,0.85
+check_mailbox_day_seg_002,14,event,event_object_recognition,Which specific mailbox number is the focus of my interaction?,Mailbox 1'234.,,0.85
+check_mailbox_day_seg_002,15,event,event_scene_sequence,What is the very first action I perform after reaching the mailbox wall?,Reach for mailbox 1'234.,,0.85
+check_mailbox_day_seg_002,16,event,event_spatial_reasoning,Where is mailbox 1'233 relative to the target mailbox 1'234?,To the left.,,0.85
+check_mailbox_day_seg_002,17,depth,depth_navigation,Is there a navigable path visible beyond the mailboxes?,"No, just the wall.",,0.65
+check_mailbox_day_seg_002,18,depth,depth_non_common,Are there any unrealistic depth artifacts around the mailboxes?,No.,,0.65
+check_mailbox_day_seg_002,19,depth,depth_object_recognition,What occupies the near depth range as I check the mail?,My hand and arm.,,0.65
+check_mailbox_day_seg_002,20,depth,depth_scene_sequence,Does the camera move between different rooms in this segment?,"No, it remains stationary.",,0.65
+check_mailbox_day_seg_002,21,depth,depth_spatial_reasoning,Where is my arm relative to the mailbox unit?,In front of it.,,0.65
+check_mailbox_day_seg_002,22,ir,action,1. What is my primary action in this segment? 2. Do I use a key? 3. Which mailbox slot do I target? 4. Do I read the sign on the door? 5. What do I do after entering the lobby? 6. Do I pick up any mail? 7. Do I interact with the intercom? 8. Do I speak to anyone?,"1. Checking the mailbox. 2. It's implied, as I reach for the lock. 3. 1'235. 4. Yes, I pause to look at it. 5. Walk toward the mailboxes. 6. It is not shown clearly if I retrieve anything. 7. No. 8. No.",,0.75
+check_mailbox_day_seg_002,23,ir,counting,1. How many mailbox units are in the lobby? 2. How many glass doors are seen? 3. How many individual mailbox doors are visible in one row? 4. How many room numbers are on the initial door sign? 5. How many light fixtures are reflected in the mailboxes? 6. How many handles are on the mailbox unit? 7. How many pillars are in the lobby? 8. How many cameras do I pass in the lobby? 9. How many people are checking mail with me? 10. How many times do I see the number 1'235?,"1. One large unit. 2. One main glass entrance door. 3. About five or six. 4. Three. 5. Several points of light are reflected. 6. Every slot has a handle, totaling dozens. 7. One large pillar is visible. 8. None are clearly identified. 9. Zero. 10. At least twice (door label and mailbox).",,0.75
+check_mailbox_day_seg_002,24,ir,dynamic_counting,1. How many people enter the lobby while I am there? 2. Do any cars pass the window in the background? 3. Does any mail drop into the boxes dynamically? 4. Is there any movement in the courtyard seen through the glass? 5. Does the elevator door open? 6. Are there any dynamic objects on the mailbox unit? 7. Do any birds fly outside the lobby? 8. How many people are seen outside through the glass?,1. Zero. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. None.,,0.75
+check_mailbox_day_seg_002,25,ir,dynamic_recognition,1. Did a mailbox door open? 2. Did anyone walk past the entrance? 3. When did I reach for the mailbox? 4. Did the lobby door close behind me? 5. Was there any movement in the reflections? 6. Did the room numbers change? 7. Did a person enter from the elevator? 8. Did any dynamic objects appear?,"1. Not visibly in these frames, though I approach one. 2. No. 3. Around frame 003000. 4. Yes, it swings shut. 5. No. 6. No. 7. No. 8. No.",,0.75
+check_mailbox_day_seg_002,26,ir,light_change,1. Is the lobby darker than the outdoors? 2. Does the light flicker? 3. Is there a light source behind the mailboxes? 4. Do I pass under any bright lamps? 5. Is there light coming through the entrance glass? 6. Does the brightness change when I open a mailbox? 7. Are there any shadows in the corners? 8. Is the illumination steady?,"1. No, it is quite bright inside. 2. No. 3. No. 4. Yes, the overhead lobby lights. 5. Yes, daytime light from outside is visible. 6. Not significantly. 7. Minimal shadows due to even overhead light. 8. Yes, it is steady.",,0.75
+check_mailbox_day_seg_002,27,ir,light_recongnition,What kind of lighting is in the lobby?,Artificial overhead lighting.,,0.75
+check_mailbox_day_seg_002,28,ir,navigation,1. How do I enter the mailbox area? 2. Where is the mailbox bank relative to the entrance? 3. Is the mailbox area on the left or right? 4. Do I need to use an elevator? 5. How many steps is it from the door to the mailboxes? 6. Is the path obstructed? 7. Where should I look for the resident numbers? 8. What is the route back to the door? 9. Is there a seating area in the lobby? 10. Where is the intercom located?,1. Through the main glass door. 2. To the right. 3. On the right. 4. No. 5. About five steps. 6. No. 7. On the labels of the mailbox slots. 8. Turn around and walk straight. 9. No seating is shown. 10. Next to the entrance door.,,0.75
+check_mailbox_day_seg_002,29,ir,non_common,Are any mailboxes floating away from the wall?,"No, they are all securely wall-mounted.",,0.75
+check_mailbox_day_seg_002,30,ir,object_recognition,What is the main feature of this room?,A large unit of wall-mounted mailboxes.,,0.75
+check_mailbox_day_seg_002,31,ir,scene_sequence,1. Where do I enter from? 2. What is the first thing I see in the lobby? 3. Do I go upstairs or stay on the ground floor? 4. What do I approach after the door label? 5. Is the lobby empty or crowded? 6. What part of the mailbox unit do I focus on? 7. Which scene connects the building exterior to the mailboxes? 8. Are the mailboxes in a separate room? 9. What is the environment like in the lobby? 10. What is the final position I take in this segment?,"1. From the outside. 2. A door with a label. 3. I stay on the ground floor. 4. The mailbox bank. 5. It is empty. 6. The middle section with resident numbers. 7. The lobby entrance. 8. No, they are in the lobby area. 9. Clean, with walls and a large mailbox unit. 10. Standing in front of the mailboxes.",,0.75
+check_mailbox_day_seg_002,32,ir,spatial_reasoning,Where is the mailbox unit situated in the lobby?,It is mounted on the wall to the right of the entrance.,,0.75
+check_mailbox_day_seg_002,33,ir,text_recognition,1. What three numbers are listed on the first label I see in the lobby? 2. Is '1'235' one of the numbers on the mailbox slots? 3. What is the room number listed near the door? 4. How many distinct numbers can be read on the mailbox unit? 5. Where is the room label located? 6. What is the format of the numbers? 7. Does the text include any names? 8. Which mailbox slot do I appear to be checking?,"1. 1'233, 1'234, and 1'235. 2. Yes. 3. It lists multiple numbers, possibly a range. 4. Dozens of numbers are visible. 5. On the door before the mailboxes. 6. Four digits with an apostrophe (e.g., 1'235). 7. No, only numbers. 8. Mailbox 1'235.",,0.75
+check_mailbox_day_seg_002,34,audio,audio_event_detection,Are there any sudden or sharp sounds in this segment?,"Yes, there are sharp metallic clicks and clangs when the mailbox is opened and then finally closed.",01:04 - 01:45,0.8
+check_mailbox_day_seg_002,35,audio,audio_sound_source_identification,What specific sounds indicate the user is checking the mailbox?,"The metallic click of the lock, the sound of the metal door moving, and the rustling sound of mail being handled all indicate the mailbox is being checked.",01:04 - 01:45,0.8
+check_mailbox_day_seg_003,0,rgb,action,1. What is my first action in this segment? 2. What do I do when I reach the door to my room? 3. Do I close the door behind me? 4. What is the purpose of sitting in the chair? 5. What do I do with the keys? 6. Do I pick up the coffee mug? 7. What is the final action of the video? 8. How would you describe my walking pace?,"1. Turning around from the mailboxes. 2. I open it and enter. 3. It's not clearly shown, but I walk past it. 4. To return to my desk activities. 5. I likely put them in my pocket or on the desk. 6. No. 7. Sitting down in the office chair. 8. Steady and purposeful.",,0.85
+check_mailbox_day_seg_003,1,rgb,counting,1. How many laptops are on the desk? 2. How many chairs are in the room? 3. How many blue lamps are visible? 4. How many water bottles are on the shelves? 5. How many coffee mugs are on the desk? 6. How many flights of stairs did I climb? 7. How many posters are in the room? 8. How many windows are in the final scene? 9. How many doors did I open to get back in the room? 10. How many pillows are on the bed?,1. One. 2. One. 3. One. 4. Two. 5. One. 6. One. 7. One. 8. One. 9. Two (building door and room door). 10. One.,,0.85
+check_mailbox_day_seg_003,2,rgb,dynamic_counting,1. How many people do I pass in the hallway on the way back? 2. Are there any cars visible through the final window? 3. Does the chair move on its own? 4. Do I move any furniture? 5. Is there a fan spinning in the room? 6. Does anyone knock on the door? 7. Are there any pets in the room? 8. How many times do I move the mouse?,"1. None. 2. Yes, a few parked and one moving in the distance. 3. No. 4. Only the chair as I sit. 5. No. 6. No. 7. No. 8. None, the laptop is closed.",,0.85
+check_mailbox_day_seg_003,3,rgb,dynamic_recognition,1. When do I enter the building? 2. At what frame do I reach the top of the stairs? 3. When is the room door opened? 4. At what frame is the desk first visible on the return? 5. When do I reach the chair? 6. When does my movement stop? 7. Does the camera stop shaking once I sit? 8. How long does the return journey take?,"1. Around frame 003300. 2. Around frame 004260. 3. Around frame 005370. 4. Around frame 005400. 5. Around frame 005700. 6. At the end of the video, frame 005820. 7. Yes. 8. About 88 seconds.",,0.85
+check_mailbox_day_seg_003,4,rgb,light_change,1. Does it get darker when I enter the building? 2. Is the stairwell brighter than the interior hallway? 3. Does the room feel brighter than the hallway? 4. Is there a shadow on the desk? 5. Do the lights turn on automatically in the hallway? 6. Is there a glare on the computer screen? 7. Does the light source shift as I sit down? 8. How does the illumination change in the final seconds?,"1. Yes, significantly. 2. Yes, because it has more natural light. 3. Yes, due to the large window. 4. Yes, from the lamp and the subject. 5. They appear to be already on. 6. No, the screen is off. 7. Yes, it becomes more directional from the side. 8. It stabilizes as I sit down.",,0.85
+check_mailbox_day_seg_003,5,rgb,light_recongnition,What is the lighting like in the hallway on the return trip?,Consistent white artificial light from the ceiling.,,0.85
+check_mailbox_day_seg_003,6,rgb,navigation,1. Which way do I turn to leave the mailbox area? 2. Do I go up or down the stairs? 3. How many turns do I make in the hallway? 4. Which door is mine? 5. How do I reach the desk from the room door? 6. What is the first thing I see when I enter the room? 7. Where is the bed relative to the path I take? 8. Do I need to turn left or right to reach the desk? 9. How many steps total is the return trip? 10. What is the fastest way from the stairs to the room?,1. Around/Backwards. 2. Up. 3. One main turn into my room's section. 4. The one with '1'235' on it. 5. Walk straight toward the window. 6. The bed and the window. 7. It is on the left. 8. Left. 9. Approximately 40 steps. 10. Walk straight down the hallway and turn right into the room door.,,0.85
+check_mailbox_day_seg_003,7,rgb,non_common,Is there anything out of place on the desk?,"No, everything looks standard.",,0.85
+check_mailbox_day_seg_003,8,rgb,object_recognition,What is on the white desk at the end of the video?,"A laptop, a blue lamp, and a coffee mug.",,0.85
+check_mailbox_day_seg_003,9,rgb,scene_sequence,1. What is the first scene in this return segment? 2. What do I pass after the patio? 3. Do I go up or down the stairs to return? 4. What room do I enter after the hallway? 5. What is the last object I sit in? 6. What was the sequence of scenes? 7. What did I see before entering the building? 8. Which hallway leads to my room? 9. Where is the desk located? 10. Does the video end in the same room it started in?,"1. The outdoor patio. 2. A glass entrance door. 3. Up. 4. My bedroom or study. 5. A black office chair. 6. Patio, building entrance, stairs, hallway, room. 7. The garden area and external walls. 8. The second hallway on the left after the stairs. 9. In the corner by the window. 10. Yes.",,0.85
+check_mailbox_day_seg_003,10,rgb,spatial_reasoning,Where is the blue lamp located on the desk?,On the right side.,,0.85
+check_mailbox_day_seg_003,11,rgb,text_recognition,1. What is the room number on the door I enter? 2. Is there any text on the coffee mug? 3. What brand name is visible on the laptop? 4. What word is on the poster near the desk? 5. Does the room number appear more than once? 6. Is there text on the blue water bottle? 7. What does the room number signify? 8. What is the color of the numbers on the mailbox door?,"1. 1'235. 2. No clear text is visible. 3. Lenovo. 4. REVOLUTION. 5. Yes, once on the door and once near the window. 6. No. 7. The identity of the apartment or office. 8. White.",,0.85
+check_mailbox_day_seg_003,12,event,event_navigation,In what direction do I turn to enter my room from the hallway?,A left turn.,,0.85
+check_mailbox_day_seg_003,13,event,event_non_common,Are there any unrealistic physics or strange layouts on the return path?,No.,,0.85
+check_mailbox_day_seg_003,14,event,event_object_recognition,What is the final object I interact with at the end of the recording?,The laptop.,,0.85
+check_mailbox_day_seg_003,15,event,event_scene_sequence,Do I go up or down the stairs on my way back?,Up the stairs.,,0.85
+check_mailbox_day_seg_003,16,event,event_spatial_reasoning,Where is the laptop located when I return to my room?,In the central foreground.,,0.85
+check_mailbox_day_seg_003,17,depth,depth_navigation,How do depth cues indicate the stairs are being climbed?,Floor level rises ahead.,,0.65
+check_mailbox_day_seg_003,18,depth,depth_non_common,Is the chair intersecting with the desk in the depth view?,No.,,0.65
+check_mailbox_day_seg_003,19,depth,depth_object_recognition,What is the 3D shape of the objects at the end of the return path?,Flat desk and chair.,,0.65
+check_mailbox_day_seg_003,20,depth,depth_scene_sequence,In what order do I pass through the spaces to return to my desk?,"Entrance, stairs, hallway, room.",,0.65
+check_mailbox_day_seg_003,21,depth,depth_spatial_reasoning,Where is the chair located relative to the desk at the end?,In front of it.,,0.65
+check_mailbox_day_seg_003,22,ir,action,1. What is my final action? 2. Do I sit down at the end? 3. Do I use the laptop? 4. What do I do after entering the room? 5. Do I take off my jacket? 6. Do I put the mail down? 7. Am I walking or running on the return? 8. Do I look out the window?,"1. Closing the laptop. 2. Yes. 3. No, I close it. 4. Walk to the desk. 5. Not shown. 6. Not shown clearly. 7. Walking. 8. Briefly, before sitting.",,0.75
+check_mailbox_day_seg_003,23,ir,counting,1. How many cars are parked in the courtyard? 2. How many people are seen outside during the return? 3. How many laptops are on the desk? 4. How many mugs are near the laptop? 5. How many trash cans are seen in the room? 6. How many sofas are in the final room? 7. How many window panes are in the lobby? 8. How many doors do I pass through? 9. How many stair flights do I climb? 10. How many pillars are in the courtyard?,1. One. 2. One. 3. One. 4. One. 5. One. 6. One. 7. Several large glass panels. 8. Two main ones. 9. One. 10. At least four structural pillars.,,0.75
+check_mailbox_day_seg_003,24,ir,dynamic_counting,1. How many moving people are seen in the courtyard? 2. Are there any moving cars? 3. Does any equipment move in the room? 4. Does the laptop screen change dynamically? 5. Do any birds fly by? 6. How many people pass me in the hallway? 7. Is there dynamic motion in the trees? 8. Does the car leave its spot?,"1. One. 2. No, the car is parked. 3. No. 4. No, it is closed at the end. 5. No. 6. Zero. 7. No. 8. No.",,0.75
+check_mailbox_day_seg_003,25,ir,dynamic_recognition,1. Did a person walk in the courtyard? 2. When did the person appear? 3. Did I interact with any objects at the end? 4. Did the car start its engine? 5. Did the desk lamp turn on? 6. Was there any movement in the kitchen? 7. Did any doors open by themselves? 8. What happened to the laptop?,"1. Yes. 2. Around frame 005370. 3. Yes, the laptop. 4. No. 5. No. 6. No. 7. No. 8. I closed its lid.",,0.75
+check_mailbox_day_seg_003,26,ir,light_change,1. Is it brighter outdoors than indoors? 2. Does the light change as I enter my room? 3. When does it get darkest? 4. Is the car's paint reflecting sunlight? 5. Does the hallway light seem warm or cool thermally? 6. Is there a shadow in the bedroom? 7. Does the sunlight hit the desk directly? 8. Is the return trip darker overall?,"1. Yes. 2. Yes, it becomes softer indoor light. 3. In the indoor hallway. 4. Yes, it shows high contrast. 5. It appears as standard artificial light. 6. Yes, shadows are cast by the desk and chair. 7. Yes, it creates a bright spot on the desk surface. 8. No, the lighting is consistent with the outbound trip.",,0.75
+check_mailbox_day_seg_003,27,ir,light_recongnition,Is the final room well-lit?,"Yes, it has significant light from the window and overhead.",,0.75
+check_mailbox_day_seg_003,28,ir,navigation,1. Which way do I turn to find the stairs from the lobby? 2. How do I get back to my room? 3. Do I use the same stairs? 4. Where is the room entrance? 5. Do I turn left or right after the stairs? 6. Is the return path the same as the outbound path? 7. How many steps to reach the desk? 8. Where is the kitchen located on the way back? 9. Which door is the final destination? 10. What is the fastest way to the bedroom?,"1. Left. 2. Follow the courtyard to the stairs and the hallway to the bedroom. 3. Yes. 4. At the end of the hallway. 5. Right into the hallway. 6. Yes, it is the reverse. 7. About 30 steps total. 8. On the left side. 9. The bedroom door. 10. Go straight through the hallway from the stairs.",,0.75
+check_mailbox_day_seg_003,29,ir,non_common,Is the coffee mug floating?,"No, it is sitting on the desk.",,0.75
+check_mailbox_day_seg_003,30,ir,object_recognition,What electronic device is on the desk at the end?,A laptop.,,0.75
+check_mailbox_day_seg_003,31,ir,scene_sequence,1. Where do I start my return journey? 2. What is the first outdoor scene I pass through? 3. Do I go up or down the stairs this time? 4. What is the room I enter at the end? 5. Do I pass the kitchen again? 6. Is the car seen before or after the stairs? 7. Which hallway leads back to the room? 8. What is the last scene in the sequence? 9. Is the courtyard passed during the return? 10. Do I go back into the same building?,1. The lobby. 2. The courtyard/outside walkway. 3. Up. 4. The bedroom/study. 5. Yes. 6. Before reaching the stairs. 7. The indoor hallway. 8. Sitting at the desk in the room. 9. Yes. 10. Yes.,,0.75
+check_mailbox_day_seg_003,32,ir,spatial_reasoning,Where is the mug relative to the laptop?,The mug is to the left of the laptop on the desk.,,0.75
+check_mailbox_day_seg_003,33,ir,text_recognition,1. Does the same poster appear at the end of the video? 2. Is the text 'GAME OVER' still visible? 3. Can you see any text on the laptop? 4. Are there labels on the coffee mug? 5. Is there text on the wall in the hallway? 6. Where do I see text for the last time? 7. Does the car outside have a visible license plate pattern? 8. How many times is the poster seen in total?,"1. Yes. 2. Yes. 3. No, it is closed or not legible. 4. No. 5. No. 6. On the desk in the final room. 7. Yes, a thermal pattern for a plate is visible. 8. Twice (beginning and end).",,0.75
+check_mailbox_day_seg_003,34,audio,audio_ambient_environment_understanding,Does the environment sound different at the end of the segment compared to the beginning?,"Yes, the segment ends with the sounds of a quiet, personal workspace, such as a chair and laptop, which are distinct from the more transient sounds of hallways and stairwells.",01:45 - 03:14,0.8
+check_mailbox_day_seg_003,35,audio,audio_sound_source_identification,What sounds signal the completion of the task in this segment?,The sound of a chair moving as the user sits down and the distinct 'thud' of a laptop lid closing signal the end of the task.,01:45 - 03:14,0.8
+check_mailbox_night_seg_001,0,rgb,action,What am I doing throughout this segment?,Walking.,,0.45
+check_mailbox_night_seg_001,1,rgb,counting,How many green exit signs are visible?,One.,,0.45
+check_mailbox_night_seg_001,2,rgb,dynamic_counting,How many people are walking towards me?,Zero.,,0.45
+check_mailbox_night_seg_001,3,rgb,dynamic_recognition,Did I stop walking before reaching the stairs?,No.,,0.45
+check_mailbox_night_seg_001,4,rgb,light_change,Does the light source change when I enter the hallway?,Yes.,,0.45
+check_mailbox_night_seg_001,5,rgb,light_recongnition,What is the shape of the lights on the ceiling?,Rectangular.,,0.45
+check_mailbox_night_seg_001,6,rgb,navigation,Which way should I go to reach the stairs?,Straight down hallway.,,0.45
+check_mailbox_night_seg_001,7,rgb,non_common,Are there any items blocking the hallway path?,No.,,0.45
+check_mailbox_night_seg_001,8,rgb,object_recognition,What is the primary color of the walls in the hallway?,Grey.,,0.45
+check_mailbox_night_seg_001,9,rgb,scene_sequence,What is the sequence of scenes I passed?,"Room, hallway, stairs.",,0.45
+check_mailbox_night_seg_001,10,rgb,spatial_reasoning,Where is the emergency exit sign positioned relative to the hallway door?,Above it.,,0.45
+check_mailbox_night_seg_001,11,rgb,text_recognition,What word is written on the glowing green sign?,EXIT.,,0.45
+check_mailbox_night_seg_001,12,event,event_navigation,What path do I follow after exiting the room door?,straight down the hallway,,0.9
+check_mailbox_night_seg_001,13,event,event_non_common,Are there any floating objects or odd layouts in the hallway?,no,,0.9
+check_mailbox_night_seg_001,14,event,event_object_recognition,What grid-like structure do I approach at the end of this hallway walk?,the mailbox bank,,0.9
+check_mailbox_night_seg_001,15,event,event_scene_sequence,What is the sequence of environments I pass through before reaching the mailboxes?,"desk, door, hallway, stairs",,0.9
+check_mailbox_night_seg_001,16,event,event_spatial_reasoning,Where is the staircase positioned relative to me as I walk down the hallway?,on my right,,0.9
+check_mailbox_night_seg_001,17,depth,depth_action,What action am I performing throughout the majority of this segment?,Walking forward toward the mailboxes.,,0.65
+check_mailbox_night_seg_001,18,depth,depth_counting,How many lamps are visible on the desk at the start?,One lamp.,,0.65
+check_mailbox_night_seg_001,19,depth,depth_dynamic_counting,How many people do I pass in the corridor?,Zero.,,0.65
+check_mailbox_night_seg_001,20,depth,depth_dynamic_recognition,Is there any object moving independently of my camera motion?,No.,,0.65
+check_mailbox_night_seg_001,21,depth,depth_navigation,Does the path require turning while I am in the corridor?,"No, it is a straight path.",,0.65
+check_mailbox_night_seg_001,22,depth,depth_non_common,Are there any objects floating or intersecting unnaturally in the room?,"No, the geometry is consistent.",,0.65
+check_mailbox_night_seg_001,23,depth,depth_object_recognition,What is the spatial relationship between the desk and the corridor at the start of the video?,"The desk is closer to me within the room, while the corridor extends far into the background beyond the doorway.",,0.65
+check_mailbox_night_seg_001,24,depth,depth_scene_sequence,What is the order of navigable spaces I traverse in this segment?,"I move from the room, through a doorway, and down a long corridor to reach the mailboxes.",,0.65
+check_mailbox_night_seg_001,25,depth,depth_spatial_reasoning,"As I move down the corridor, where are the walls relative to me?",The walls are on my left and right sides.,,0.65
+check_mailbox_night_seg_001,26,ir,action,What is the first action I take? What do I do with the door handle? Where do I walk after the door? What is the purpose of walking to the lobby? Do I run or walk? Do I interact with the stairs? When do I stop? Do I reach for a key yet?,I stand up from the desk. I turn it to open the door. I walk down the hallway. To check the mailbox. I walk at a steady pace. I walk through the stair area. At the end of the segment. No interaction with a key yet.,,0.85
+check_mailbox_night_seg_001,27,ir,counting,How many monitors are on the desk? How many room doors do I exit? How many banks of mailboxes are at the end? How many staircases do I walk past? How many railings are to my left in the stair area? How many ceiling lights are passed? How many door handles are manipulated? How many chairs are in the first room? How many distinct hallways are traversed? How many mailbox slots are visible in frame 1260?,One monitor. One door. One large bank. One staircase. One long railing. At least four lights. One handle. One chair. One hallway. Dozens are visible.,,0.85
+check_mailbox_night_seg_001,28,ir,dynamic_counting,How many other people walk past me? How many animals are seen? How many cars are in the background? How many moving doors are seen (other than the one I open)? How many objects fall? How many lights move? How many insects are captured? How many robots are present?,Zero people. Zero animals. Zero cars. Zero other doors. Zero falling objects. Zero moving lights. Zero insects. Zero robots.,,0.85
+check_mailbox_night_seg_001,29,ir,dynamic_recognition,Does a person walk toward me between frames 0 and 1260? Does a door close on its own? Is there any movement in the courtyard? Does a car light appear? When does the first person appear? When does a bird fly past? Where does the moving object go? Does the mailbox bank move?,No. No. No. No. None appear. None observed. No moving object. No.,,0.85
+check_mailbox_night_seg_001,30,ir,light_change,Does the scene get brighter or darker when I leave the room? Are there multiple light sources on the ceiling? Do the lights flicker? Is the light source approaching me? Does the desk lamp remain visible? Is there a light at the end of the hallway? How many bright hotspots are passed on the ceiling? Does the floor reflect the light?,"The scene becomes brighter due to ceiling fixtures. Yes, multiple sources are present. No, they are steady. No, I am moving past them. No, it is left behind. Yes, lights are visible ahead. At least four hotspots are passed. Yes, the floor shows thermal reflections.",,0.85
+check_mailbox_night_seg_001,31,ir,light_recongnition,Where are the primary high-intensity light hotspots located in the hallway?,On the ceiling.,,0.85
+check_mailbox_night_seg_001,32,ir,navigation,Which way do I turn immediately after exiting the room? How do I reach the mailboxes from the room? What is the main direction of travel in the hallway? Do I go up or down at the stairs? Where are the mailboxes relative to the hallway? Do I turn left at any point? How many right turns are made? What is the first obstacle to navigate? How far is the mailbox lobby? Is there a door at the end of the hallway?,"I turn slightly left then straight. Walk through the hallway and past the stairs. Straight. I walk past the landing level. At the end of the path. Yes, initially to exit. One main right turn. The room door. About 30 steps. Yes, a glass door.",,0.85
+check_mailbox_night_seg_001,33,ir,non_common,Are there any objects floating in the air without support?,No.,,0.85
+check_mailbox_night_seg_001,34,ir,object_recognition,What object with a thermal signature of a screen is sitting on the desk at the beginning?,A monitor.,,0.85
+check_mailbox_night_seg_001,35,ir,scene_sequence,What is the sequence of major areas I pass through? What did I leave first? What area did I enter after the initial room? Was there a staircase involved? What was the final destination area in this segment? Did I pass a desk before the hallway? Was a railing visible before the mailboxes? How many doors did I pass through initially? What was the first object I moved away from? Is the mailbox area at the end of the segment?,"I pass from a room to a hallway, then a stair area, to the mailboxes. I left the room first. I entered the hallway. Yes, a stair area was traversed. The mailbox lobby was the final area. Yes, I passed a desk. Yes, railings were visible. I passed through one door. I moved away from the desk. Yes, it is the final area.",,0.85
+check_mailbox_night_seg_001,36,ir,spatial_reasoning,What is the approximate step count from the room's door to the start of the mailbox bank?,About twenty-five steps.,,0.85
+check_mailbox_night_seg_001,37,ir,text_recognition,What room numbers are seen on the wall in frame 1020? Which apartment numbers do the labels refer to? How many distinct digits are in the first number? Is there a vertical bar separating the numbers? Where is this text located relative to the mailboxes? What is the first character of the sequence? Are the numbers aligned horizontally? What type of surface is the text on?,"Numbers 1'233 and 1'234 are shown. They refer to specific apartment units. There are four characters in the first number. Yes, a vertical bar separates them. The text is passed before reaching the mailbox area. The first character is '1'. Yes, they are aligned horizontally. The text is on a flat wall or door surface.",,0.85
+check_mailbox_night_seg_001,38,audio,audio_acoustic_environment,What can be inferred about the environment based on the sound of the footsteps?,"The echoing footsteps suggest the user is walking in a large, hard-surfaced indoor space like a hallway or corridor.",00:10 - 00:42,0.8
+check_mailbox_night_seg_001,39,audio,audio_sound_source_identification,What is the primary sound source heard as the user travels through the building?,The primary sound source is the user's footsteps and movement through the hallway.,00:00 - 00:42,0.8
+check_mailbox_night_seg_002,0,rgb,action,What object am I picking up?,A key.,,0.45
+check_mailbox_night_seg_002,1,rgb,counting,How many large white bottles are on the cabinet?,Two.,,0.45
+check_mailbox_night_seg_002,2,rgb,dynamic_counting,How many people enter the room while I search?,Zero.,,0.45
+check_mailbox_night_seg_002,3,rgb,dynamic_recognition,Did I pick up the keys?,Yes.,,0.45
+check_mailbox_night_seg_002,4,rgb,light_change,Is it brighter in the room than the hallway?,Yes.,,0.45
+check_mailbox_night_seg_002,5,rgb,light_recongnition,What kind of light source is on the desk?,Desk lamp.,,0.45
+check_mailbox_night_seg_002,6,rgb,navigation,Where should I go to find the key?,To the desk cabinet.,,0.45
+check_mailbox_night_seg_002,7,rgb,non_common,Is any object floating in the room?,No.,,0.45
+check_mailbox_night_seg_002,8,rgb,object_recognition,What is on the desk where I find the keys?,Bottles and keys.,,0.45
+check_mailbox_night_seg_002,9,rgb,scene_sequence,What scene do I enter after the corridor?,My room.,,0.45
+check_mailbox_night_seg_002,10,rgb,spatial_reasoning,Where are the shoes relative to the cabinet?,On floor nearby.,,0.45
+check_mailbox_night_seg_002,11,rgb,text_recognition,Is there any text on the bottles?,"Yes, small labels.",,0.45
+check_mailbox_night_seg_002,12,event,event_navigation,In what direction do I turn to leave the mailboxes?,180 degrees around,,0.9
+check_mailbox_night_seg_002,13,event,event_non_common,Does the key float in the air when I find it?,no,,0.9
+check_mailbox_night_seg_002,14,event,event_object_recognition,What objects do I search among once I return to the desk?,"keyboard, lamp, and containers",,0.9
+check_mailbox_night_seg_002,15,event,event_scene_sequence,What area do I focus on after entering the room?,the desk surface,,0.9
+check_mailbox_night_seg_002,16,event,event_spatial_reasoning,Where is the lamp located relative to the desk workspace?,behind it,,0.9
+check_mailbox_night_seg_002,17,depth,depth_action,What am I doing with my hand at the desk?,Searching for the mailbox key.,,0.65
+check_mailbox_night_seg_002,18,depth,depth_counting,How many hands are visible searching the desk?,One hand.,,0.65
+check_mailbox_night_seg_002,19,depth,depth_dynamic_counting,How many moving objects are on the desk besides my hand?,Zero.,,0.65
+check_mailbox_night_seg_002,20,depth,depth_dynamic_recognition,Does my hand disappear from view while I am at the desk?,"Yes, it moves in and out of the frame while searching.",,0.65
+check_mailbox_night_seg_002,21,depth,depth_navigation,Which way do I turn to leave the mailbox area?,I turn 180 degrees to face back toward the room.,,0.65
+check_mailbox_night_seg_002,22,depth,depth_non_common,Do any objects appear to clip through the desk surface?,No.,,0.65
+check_mailbox_night_seg_002,23,depth,depth_object_recognition,What object appears at the closest depth range when I am back in the room?,My hand.,,0.65
+check_mailbox_night_seg_002,24,depth,depth_scene_sequence,In what order do I return to the desk?,"I leave the mailboxes, walk back through the corridor, and enter the room to reach the desk.",,0.65
+check_mailbox_night_seg_002,25,depth,depth_spatial_reasoning,Where is my hand moving relative to the desk surface?,It is moving directly above and across the desk surface.,,0.65
+check_mailbox_night_seg_002,26,ir,action,What am I doing at the dresser? What do I pick up? Why did I come back? Do I open any drawers? What hand do I use to reach for the keys? Do I put anything down? How do I search? Do I leave immediately?,Searching for keys. A set of keys. To get the mailbox key. No. Right hand. No. By looking and moving items. Not in this segment.,,0.85
+check_mailbox_night_seg_002,27,ir,counting,How many sets of keys do I find? How many dressers are in the room? How many bottles are on top? How many drawers does the dresser have? How many door handles are used? How many rooms do I enter? How many hallways are traversed? How many lights are in the room? How many mirrors are visible? How many chairs are seen?,One. One. About five. Three are visible. One. One. One. One lamp. Zero. Zero.,,0.85
+check_mailbox_night_seg_002,28,ir,dynamic_counting,How many people are in the room? How many moving shadows are seen? Do the bottles move? Does the door move on its own? Are any insects flying? Are there cars outside the window? Does a fan spin? Is anything falling?,Zero. Zero. No. No. No. No. No. No.,,0.85
+check_mailbox_night_seg_002,29,ir,dynamic_recognition,Did someone enter the room with me? Did an object move on the dresser? When do I find the keys? Where are the keys? Does a car pass the window? Does a light turn off? Does the door open wider? Is there any movement in the hallway?,No. No. Around frame 3600. On the dresser. No. No. No. No.,,0.85
+check_mailbox_night_seg_002,30,ir,light_change,Does it get brighter inside the room? Is there a light reflection on the bottles? Do the hallway lights stay on? Is the desk lamp on? Does the room have ceiling lights? Does the light flicker when searching? Is a flashlight used? Does the monitor light the dresser?,"No, it is relatively dimmer. Yes, reflections are visible. Yes. Yes. Not clearly visible. No. No. No.",,0.85
+check_mailbox_night_seg_002,31,ir,light_recongnition,What illuminates the bottles on the dresser when I approach?,A nearby lamp.,,0.85
+check_mailbox_night_seg_002,32,ir,navigation,What is the first turn I make from the mailboxes? How do I get back to the room? Where is the dresser located? Do I go up stairs? What direction do I travel in the hallway? How many turns are made to reach the dresser? Is the room door open or closed? Where do I stop? Is there a turn after entering the room? What is the last area reached?,"A 180-degree turn. Retrace the path. Inside the room. No. Straight. Three main turns. Closed, then I open it. At the dresser. No. The dresser.",,0.85
+check_mailbox_night_seg_002,33,ir,non_common,Is there anything unusual about the location of the keys?,No.,,0.85
+check_mailbox_night_seg_002,34,ir,object_recognition,"What small, metallic thermal signature objects am I searching for on the dresser?",Keys.,,0.85
+check_mailbox_night_seg_002,35,ir,scene_sequence,What area do I leave first? What room do I enter? What is the main object I approach inside? Did I go back the same way I came? What did I do at the mailbox? What was I looking for? What did I pass in the hallway? Is the room at the start or end of the segment? What was on the dresser? Was the hallway still lit?,The mailbox area. My room. A dresser. Yes. I found it locked. My keys. Hallway lights and stairs. At the end. Bottles and keys. Yes.,,0.85
+check_mailbox_night_seg_002,36,ir,spatial_reasoning,Where are the keys located relative to the bottles on the dresser?,To the right.,,0.85
+check_mailbox_night_seg_002,37,ir,text_recognition,What number is on the mailbox door I just left? Can the bottle labels be read clearly? How many bottles have visible text? Is there text on the dresser itself? What is the first digit of the mailbox number? Where is the text on the bottle? Is the room number visible on the interior door? What does the mailbox text signify?,"1'235. No, they are blurred. At least three. No. '1'. On the cylindrical surface. No. It identifies the box.",,0.85
+check_mailbox_night_seg_002,38,audio,audio_event_detection,How do we know the user has likely found the key?,A distinct clinking sound of metal keys being handled is heard around the two-minute mark.,01:55 - 02:05,0.8
+check_mailbox_night_seg_002,39,audio,audio_sound_source_identification,What sounds indicate the user is searching for something on the desk?,"The sounds of shuffling papers, objects being moved, and finally metal clinking indicate the user is searching for and finding the key.",01:20 - 02:00,0.8
+check_mailbox_night_seg_003,0,rgb,action,What is the purpose of this walk?,Check mailbox.,,0.45
+check_mailbox_night_seg_003,1,rgb,counting,How many keys am I carrying?,One.,,0.45
+check_mailbox_night_seg_003,2,rgb,dynamic_counting,How many other people are in the hallway?,Zero.,,0.45
+check_mailbox_night_seg_003,3,rgb,dynamic_recognition,Am I moving towards the stairs?,Yes.,,0.45
+check_mailbox_night_seg_003,4,rgb,light_change,Did the lights turn off?,No.,,0.45
+check_mailbox_night_seg_003,5,rgb,light_recongnition,Are the hallway lights on?,Yes.,,0.45
+check_mailbox_night_seg_003,6,rgb,navigation,How do I get back to the stairs?,Walk straight.,,0.45
+check_mailbox_night_seg_003,7,rgb,non_common,Is anything out of place in the hallway?,No.,,0.45
+check_mailbox_night_seg_003,8,rgb,object_recognition,What am I holding as I leave the room?,A key.,,0.45
+check_mailbox_night_seg_003,9,rgb,scene_sequence,What scene do I enter after leaving my room?,Hallway.,,0.45
+check_mailbox_night_seg_003,10,rgb,spatial_reasoning,Where is the key relative to my hand?,In it.,,0.45
+check_mailbox_night_seg_003,11,rgb,text_recognition,What word is visible on the hallway sign?,EXIT.,,0.45
+check_mailbox_night_seg_003,12,event,event_navigation,What is the primary landmark I pass before reaching the mailboxes?,the staircase,,0.9
+check_mailbox_night_seg_003,13,event,event_non_common,Are there any floating hallway lights?,no,,0.9
+check_mailbox_night_seg_003,14,event,event_object_recognition,What repeated rectangular patterns are visible at the end of the walk?,the mailbox units,,0.9
+check_mailbox_night_seg_003,15,event,event_scene_sequence,Where do I go after exiting my room for the second time?,back to the mailboxes,,0.9
+check_mailbox_night_seg_003,16,event,event_spatial_reasoning,How does the mailbox bank change in the frame as I walk?,it gets larger,,0.9
+check_mailbox_night_seg_003,17,depth,depth_action,What is the subject's primary action?,Walking to the mailboxes.,,0.65
+check_mailbox_night_seg_003,18,depth,depth_counting,How many corridors am I traversing?,One corridor.,,0.65
+check_mailbox_night_seg_003,19,depth,depth_dynamic_counting,How many other people are visible during this walk?,Zero.,,0.65
+check_mailbox_night_seg_003,20,depth,depth_dynamic_recognition,Is any object moving toward me?,No.,,0.65
+check_mailbox_night_seg_003,21,depth,depth_navigation,Is there any obstruction in the middle of the corridor?,"No, the path is clear.",,0.65
+check_mailbox_night_seg_003,22,depth,depth_non_common,Is there anything physically implausible in the corridor layout?,No.,,0.65
+check_mailbox_night_seg_003,23,depth,depth_object_recognition,What is the primary shape of the space I am walking through?,A long rectangular corridor.,,0.65
+check_mailbox_night_seg_003,24,depth,depth_scene_sequence,What area do I enter after leaving the room?,The corridor.,,0.65
+check_mailbox_night_seg_003,25,depth,depth_spatial_reasoning,How does the distance to the mailboxes change during this segment?,The distance decreases as I walk toward them.,,0.65
+check_mailbox_night_seg_003,26,ir,action,What is my current action? What am I carrying? Where am I going? Am I running? Am I using the keys? Am I opening a door? Am I looking at the floor? Am I stopping?,Walking. Keys. To the mailboxes. No. Not yet. Yes. Sometimes. Not until the end.,,0.85
+check_mailbox_night_seg_003,27,ir,counting,How many doors are exited? How many staircases are passed? How many keys are in my hand? How many lights are on the ceiling? How many railings are seen? How many rooms are passed? How many levels are there? How many people are met? How many windows are seen? How many mailboxes are visible?,One. One. One set. Multiple. One. Zero. One. Zero. Zero. Dozens at the end.,,0.85
+check_mailbox_night_seg_003,28,ir,dynamic_counting,How many people are seen? Any moving cars? Any animals? Do objects move? Is there wind movement? Are robots present? Does anything fall? Do lights change state?,Zero. Zero. Zero. No. No. No. No. No.,,0.85
+check_mailbox_night_seg_003,29,ir,dynamic_recognition,Did a person appear? Did a door move? Any background movement? Did a car pass? When? Where? How fast? Did I see a bird?,No. No. No. No. N/A. N/A. N/A. No.,,0.85
+check_mailbox_night_seg_003,30,ir,light_change,Does it get brighter as I enter the hallway? Are lights passing overhead? Is there a shadow? Does the light change color? Is the room lamp still on? Is the hallway light steady? Does the camera adjust? Is there moonlight?,Yes. Yes. Yes. No. Yes. Yes. Yes. No.,,0.85
+check_mailbox_night_seg_003,31,ir,light_recongnition,What type of light sources are in the hallway?,Ceiling lights.,,0.85
+check_mailbox_night_seg_003,32,ir,navigation,Which way do I turn? What is the destination? What do I pass? How many steps? Is there an elevator? Are there stairs? Do I go through a door? Is it straight? Where do I stop? Is it the same way back?,Left. Mailboxes. Stairs. About 30. No. Yes. Yes. Mostly. At the mailboxes. Yes.,,0.85
+check_mailbox_night_seg_003,33,ir,non_common,Are there any floating objects in the corridor?,No.,,0.85
+check_mailbox_night_seg_003,34,ir,object_recognition,What structural feature with railings is passed in the hallway?,Stairs.,,0.85
+check_mailbox_night_seg_003,35,ir,scene_sequence,Where do I start this segment? What area follows the room? What is the final scene? Did I pass the stairs? Is the hallway lit? What is in my hand? Did I pass a door? Are mailboxes visible at the end? How many major turns are there? What was the first object seen?,In the room. Hallway. Mailbox area. Yes. Yes. Keys. Yes. Yes. Two. The room door.,,0.85
+check_mailbox_night_seg_003,36,ir,spatial_reasoning,Where are the stairs located relative to the hallway path?,On the side.,,0.85
+check_mailbox_night_seg_003,37,ir,text_recognition,Are numbers seen on the wall? What do they represent? How many digits? Are they separated? Are they bright? Is the text at eye level? How many times does it appear? Is it the same text as before?,Yes. Room numbers. Four. Yes. Yes. Yes. Once in this segment. Yes.,,0.85
+check_mailbox_night_seg_003,38,audio,audio_acoustic_environment,Is the environment noisy or quiet as the user walks back?,"The environment is relatively quiet, with the user's footsteps being the most prominent sound.",02:10 - 02:30,0.8
+check_mailbox_night_seg_003,39,audio,audio_sound_source_identification,What sound confirms the user is moving between locations again?,The sound of rhythmic footsteps on a hard surface confirms the user is walking back through the corridor.,02:05 - 02:30,0.8
+check_mailbox_night_seg_004,0,rgb,action,Do I find any mail?,No.,,0.45
+check_mailbox_night_seg_004,1,rgb,counting,How many green mailboxes are visible in the close-up?,Four.,,0.45
+check_mailbox_night_seg_004,2,rgb,dynamic_counting,How many people are checking mail nearby?,Zero.,,0.45
+check_mailbox_night_seg_004,3,rgb,dynamic_recognition,Has the door fully closed?,"Yes, at the end.",,0.45
+check_mailbox_night_seg_004,4,rgb,light_change,Does it look dark inside the mailbox?,Yes.,,0.45
+check_mailbox_night_seg_004,5,rgb,light_recongnition,Is there a light in the mailbox area?,"Yes, overhead.",,0.45
+check_mailbox_night_seg_004,6,rgb,navigation,Where should I go after the stairs?,To the mailboxes.,,0.45
+check_mailbox_night_seg_004,7,rgb,non_common,Are the mailboxes floating?,No.,,0.45
+check_mailbox_night_seg_004,8,rgb,object_recognition,What are the colors of the mailboxes?,Green and grey.,,0.45
+check_mailbox_night_seg_004,9,rgb,scene_sequence,What scene comes after the stairs?,Mailbox area.,,0.45
+check_mailbox_night_seg_004,10,rgb,spatial_reasoning,Where is mailbox 1'235 relative to 1'234?,To the right.,,0.45
+check_mailbox_night_seg_004,11,rgb,text_recognition,What name is on mailbox 1'234?,S. Hollemann.,,0.45
+check_mailbox_night_seg_004,12,event,event_navigation,How much does the camera move during this segment?,very little,,0.9
+check_mailbox_night_seg_004,13,event,event_non_common,Does the mailbox door swing in an impossible direction?,no,,0.9
+check_mailbox_night_seg_004,14,event,event_object_recognition,What part of the mailbox moves as I interact with it?,the mailbox door,,0.9
+check_mailbox_night_seg_004,15,event,event_scene_sequence,What happens after I open the mailbox door?,I check inside then close it,,0.9
+check_mailbox_night_seg_004,16,event,event_spatial_reasoning,Which mailbox am I interacting with based on the numbers visible?,1235,,0.9
+check_mailbox_night_seg_004,17,depth,depth_action,What am I checking with my hand inside the mailbox?,If there is any mail.,,0.65
+check_mailbox_night_seg_004,18,depth,depth_counting,How many hands are used to open the mailbox?,One hand.,,0.65
+check_mailbox_night_seg_004,19,depth,depth_dynamic_counting,How many doors on the mailbox unit do I open?,One door.,,0.65
+check_mailbox_night_seg_004,20,depth,depth_dynamic_recognition,When does the mailbox door begin to move?,When my hand reaches out to unlock it.,,0.65
+check_mailbox_night_seg_004,21,depth,depth_navigation,Am I walking during this interaction?,"No, I am standing still.",,0.65
+check_mailbox_night_seg_004,22,depth,depth_non_common,Do the mailbox and my hand overlap in an unrealistic way?,No.,,0.65
+check_mailbox_night_seg_004,23,depth,depth_object_recognition,What happens to the shape of the mailbox when I open it?,"A door panel moves, revealing a recessed cavity.",,0.65
+check_mailbox_night_seg_004,24,depth,depth_scene_sequence,What is the final state of the mailbox door in this segment?,It is closed and flat against the unit again.,,0.65
+check_mailbox_night_seg_004,25,depth,depth_spatial_reasoning,"Relative to the front of the mailbox, where does my hand go to check for mail?","Behind the front plane, into the interior.",,0.65
+check_mailbox_night_seg_004,26,ir,action,What specific mailbox do I unlock? Do I find any mail? What do I do after checking inside? Do I take the key out? How many turns of the key? Do I use one hand or two? Is the door left open? What is the main purpose?,1'235. No. Close and lock it. Yes. One. One. No. To check for mail.,,0.85
+check_mailbox_night_seg_004,27,ir,counting,How many mailboxes am I opening? How many keys are in the lock? How many hands are visible? How many labels are on door 1'235? How many hinges are seen? How many adjacent mailboxes are clear? How many letters are found? How many fingers are seen? How many names are on the box? How many keyholes are used?,One. One. One. Two. Two. Three. Zero. Five. One. One.,,0.85
+check_mailbox_night_seg_004,28,ir,dynamic_counting,How many people walk by? Any animals? Do other boxes open? Any vehicles outside? Does a fan spin? Is there water? Any moving lights? Does a phone ring?,Zero. Zero. No. No. No. No. No. No.,,0.85
+check_mailbox_night_seg_004,29,ir,dynamic_recognition,Did a person approach? When did the door open? When did it close? Where did the key go? Did another object appear? Does the scene move? Is there movement in the background? Did the lights change?,No. Frame 5430. Frame 5520. Into the lock. No. No. No. No.,,0.85
+check_mailbox_night_seg_004,30,ir,light_change,Does the light level change? Is there a shadow inside the box? Do the hallway lights dim? Does the keyhole reflect light? Is the room dark? Are there sensor flares? Does my hand cast a shadow? Is a spotlight used?,No. Yes. No. Yes. No. No. Yes. No.,,0.85
+check_mailbox_night_seg_004,31,ir,light_recongnition,What causes the bright reflections on the mailbox door?,Overhead lights.,,0.85
+check_mailbox_night_seg_004,32,ir,navigation,Am I moving between rooms? Where am I standing? What am I facing? Is there a path ahead? Where is the exit? Are there stairs behind me? Is the room nearby? How far is the hallway? Is it an open space? Where do I go next?,No. In the mailbox lobby. The mailbox bank. Yes. Behind me. Yes. No. 10 steps. Yes. Back to the room.,,0.85
+check_mailbox_night_seg_004,33,ir,non_common,Is the mailbox door detached?,No.,,0.85
+check_mailbox_night_seg_004,34,ir,object_recognition,Which specific mailbox door is being interacted with?,Mailbox 1'235.,,0.85
+check_mailbox_night_seg_004,35,ir,scene_sequence,What was the first action at the mailbox? What mailbox was checked? Was there mail inside? Did I use a key? Did I lock it again? How many mailboxes are visible? Where are the keys? What was the last action? Was the door opened? Did I leave?,Approaching. 1'235. No. Yes. Yes. Many. In the keyhole. Locking it. Yes. No.,,0.85
+check_mailbox_night_seg_004,36,ir,spatial_reasoning,Is mailbox 1'234 to the left or right of mailbox 1'235?,To the left.,,0.85
+check_mailbox_night_seg_004,37,ir,text_recognition,What is the number of the mailbox being opened? What number is directly above 1'235? Are the numbers printed or embossed? Is there a letter prefix? How many digits in '1'235'? Is there a label name next to the number? What is the color of the text? Is the text orientation horizontal?,"1'235. 1'234. Printed labels. No. Four. Yes, names like 'S. Hollemann'. White. Yes.",,0.85
+check_mailbox_night_seg_004,38,audio,audio_event_detection,What sequence of sounds describes the interaction with the mailbox?,"The sounds include the key entering the lock, the lock turning, the door opening, checking the contents, and finally the door closing and locking.",02:35 - 03:05,0.8
+check_mailbox_night_seg_004,39,audio,audio_sound_source_identification,What is the primary sound heard during the mailbox interaction?,The primary sound is the metallic clinking and turning of the key in the mailbox lock.,02:35 - 03:00,0.8
+check_mailbox_night_seg_005,0,rgb,action,What do I do at the end?,Sit at desk.,,0.45
+check_mailbox_night_seg_005,1,rgb,counting,How many chairs are in the final scene?,One.,,0.45
+check_mailbox_night_seg_005,2,rgb,dynamic_counting,How many other people are in the room?,Zero.,,0.45
+check_mailbox_night_seg_005,3,rgb,dynamic_recognition,What is the last movement performed?,Sitting down.,,0.45
+check_mailbox_night_seg_005,4,rgb,light_change,Is it getting darker in the room?,No.,,0.45
+check_mailbox_night_seg_005,5,rgb,light_recongnition,Where is the room's brightest light?,The desk lamp.,,0.45
+check_mailbox_night_seg_005,6,rgb,navigation,What's the fastest way back to the desk?,Through the corridor.,,0.45
+check_mailbox_night_seg_005,7,rgb,non_common,Is the chair realistic?,Yes.,,0.45
+check_mailbox_night_seg_005,8,rgb,object_recognition,What is the color of the desk lamp shade?,Blue.,,0.45
+check_mailbox_night_seg_005,9,rgb,scene_sequence,What is the final scene?,The room desk.,,0.45
+check_mailbox_night_seg_005,10,rgb,spatial_reasoning,Where is the lamp relative to the monitor?,To the right.,,0.45
+check_mailbox_night_seg_005,11,rgb,text_recognition,Is there text visible on the computer screen?,"Yes, icons and windows.",,0.45
+check_mailbox_night_seg_005,12,event,event_navigation,Where does my return trip end?,at the desk,,0.9
+check_mailbox_night_seg_005,13,event,event_non_common,Is there anything physically impossible about me sitting down?,no,,0.9
+check_mailbox_night_seg_005,14,event,event_object_recognition,What is the final object the camera settles on?,the desk,,0.9
+check_mailbox_night_seg_005,15,event,event_scene_sequence,What is the last action I perform in the video?,sitting down at the desk,,0.9
+check_mailbox_night_seg_005,16,event,event_spatial_reasoning,What happens to the chair's position in the frame as I sit?,it moves up as I sit down,,0.9
+check_mailbox_night_seg_005,17,depth,depth_action,What is my final action in the video?,Sitting down at the desk.,,0.65
+check_mailbox_night_seg_005,18,depth,depth_counting,How many chairs are near the desk?,One chair.,,0.65
+check_mailbox_night_seg_005,19,depth,depth_dynamic_counting,How many people do I encounter on the way back?,Zero.,,0.65
+check_mailbox_night_seg_005,20,depth,depth_dynamic_recognition,Is any furniture moving toward me?,"No, I am moving toward the furniture.",,0.65
+check_mailbox_night_seg_005,21,depth,depth_navigation,Is the path back to the desk clear of obstacles?,"Yes, it is clear.",,0.65
+check_mailbox_night_seg_005,22,depth,depth_non_common,Is the desk at an unusual angle relative to the floor?,"No, it is flat and level.",,0.65
+check_mailbox_night_seg_005,23,depth,depth_object_recognition,What object do I pass just before sitting down?,The chair.,,0.65
+check_mailbox_night_seg_005,24,depth,depth_scene_sequence,What is the final space I am in?,"The room, sitting at the desk.",,0.65
+check_mailbox_night_seg_005,25,depth,depth_spatial_reasoning,Where is the desk relative to me at the very end?,Directly in front and at close range.,,0.65
+check_mailbox_night_seg_005,26,ir,action,What is my final action? Where am I sitting? Did I return the keys? What is on the desk? Am I walking or running? Do I close the door? Am I looking at the monitor? Do I start typing?,Sitting down. At the desk. Yes. A monitor. Walking. Yes. Yes. No.,,0.85
+check_mailbox_night_seg_005,27,ir,counting,How many chairs? How many desks? How many monitors? How many doors? How many lights? How many people? How many staircases? How many railings? How many hallways? How many windows?,One. One. One. One. Multiple. Zero. One. One. One. Zero.,,0.85
+check_mailbox_night_seg_005,28,ir,dynamic_counting,How many people are seen? Any moving cars? Any animals? Do objects move? Is there wind movement? Are robots present? Does anything fall? Do lights move?,Zero. One (indirectly). Zero. No. No. No. No. One (in background).,,0.85
+check_mailbox_night_seg_005,29,ir,dynamic_recognition,Did a person appear? Did a door move? Any background movement? Did a car pass? When? Where? How fast? Did I see a bird?,No. No. Yes. Yes (light). 5760-5880. Background. Moderate. No.,,0.85
+check_mailbox_night_seg_005,30,ir,light_change,Does it get darker? Are lights passed? Is the room lit? Is the monitor bright? Do hallway lights turn off? Is a shadow seen? Is there camera glare? Does the desk lamp flicker?,Yes. Yes. Yes. Yes. No. Yes. Yes. No.,,0.85
+check_mailbox_night_seg_005,31,ir,light_recongnition,Where is the light source in the final room?,On the desk.,,0.85
+check_mailbox_night_seg_005,32,ir,navigation,What is the path? Any turns? Where is the desk? How many steps? Any elevators? Are there stairs? Do I go through a door? Is it straight? Where do I stop? Is it the same way?,Retracing steps. Two. In the room. 25. No. Yes. Yes. Mostly. At the desk. Yes.,,0.85
+check_mailbox_night_seg_005,33,ir,non_common,Is the chair positioned normally?,Yes.,,0.85
+check_mailbox_night_seg_005,34,ir,object_recognition,What is the final object I sit on at the end of the video?,A chair.,,0.85
+check_mailbox_night_seg_005,35,ir,scene_sequence,Where do I start? Where do I finish? What room do I re-enter? Did I pass the stairs? Is the desk visible? What did I do at the desk? Is the monitor on? How many hallways? What was the last action? Was the door closed at the end?,Mailbox area. At the desk. My room. Yes. Yes. Sat down. Yes. One. Sitting down. Yes.,,0.85
+check_mailbox_night_seg_005,36,ir,spatial_reasoning,Where is the chair relative to the desk?,In front of it.,,0.85
+check_mailbox_night_seg_005,37,ir,text_recognition,What text is seen in the hallway? What does it denote? How many characters? Is it horizontal? Is it near the floor? Is it on a door? Are there other numbers? Is the text clear?,"1'233 | 1'234. Room units. Nine. Yes. No, eye level. Yes. Not clearly. Yes.",,0.85
+check_mailbox_night_seg_005,38,audio,audio_event_detection,What sound indicates the end of the task?,The sound of the chair moving and the user settling back into their seat at the desk indicates the task is complete.,03:30 - 03:36,0.8
+check_mailbox_night_seg_005,39,audio,audio_sound_source_identification,What sound source is most prominent as the user returns to their room?,The user's footsteps on the floor are the most prominent sound source as they return.,03:05 - 03:30,0.8
 cut_carrot_day_seg_001,0,rgb,action,1. What is being done with the black peeler? 2. Why is there a bowl on the counter during the peeling process? 3. What is the final style of cut for the carrot? 4. How is the knife being held? 5. What is the role of the non-cutting hand during slicing? 6. Is the peeling direction towards or away from the body? 7. What happens to the carrot skin after it's removed? 8. What is the overall purpose of the actions shown?,1. It is used to peel the skin off the carrot. 2. To catch the carrot peels as they fall. 3. It is cut into julienne strips. 4. It is held firmly by the handle. 5. It holds the carrot steady on the board. 6. It is peeled towards the bowl. 7. It is collected in the white bowl. 8. The purpose is food preparation.,,0.85
 cut_carrot_day_seg_001,1,rgb,counting,1. How many carrots are in the scene? 2. How many knives are being used? 3. How many bowls are present on the counter? 4. How many laptops can be seen? 5. How many cutting boards are being used for preparation? 6. How many vegetable peelers are on the counter? 7. How many power outlets are visible on the power strip? 8. How many circular heating zones are visible on the induction stove? 9. How many hands are visible performing the task? 10. How many main kitchen utensils are used to process the carrot?,1. There is one carrot. 2. One knife is used. 3. One bowl is present. 4. One laptop is visible. 5. One cutting board is used. 6. One peeler is present. 7. Five outlets are visible. 8. Two zones are visible. 9. Two hands are visible. 10. Two utensils (peeler and knife) are used.,,0.85
 cut_carrot_day_seg_001,2,rgb,dynamic_counting,1. How many additional people enter the frame? 2. Are there any pets seen moving in the background? 3. How many items fall off the edge of the counter? 4. Are there any moving vehicles visible through a window? 5. How many hands are moving to peel the carrot? 6. How many knives are moved during the video? 7. Is there any movement from the laptop? 8. How many times does the carrot change position on the board during cutting?,"1. Zero additional people. 2. No pets are visible. 3. Zero items fall off. 4. No window or vehicles are visible. 5. Two hands are moving. 6. One knife is moved. 7. No, the laptop is stationary. 8. It is moved multiple times as it is cut.",,0.85
@@ -39,6 +347,172 @@ cut_carrot_day_seg_001,36,ir,spatial_reasoning,Where is the white ceramic bowl p
 cut_carrot_day_seg_001,37,ir,text_recognition,What kind of pattern can be observed on the handle of the black vegetable peeler?,Manufacturer logo,,0.75
 cut_carrot_day_seg_001,38,audio,audio_sound_characteristics,What was the character of the contact sounds in the middle segment?,They were sharper contact sounds from placing or adjusting an object.,00:04 - 00:09,0.8
 cut_carrot_day_seg_001,39,audio,audio_sound_source_identification,What action most likely produced the soft handling sounds at the start?,The user's hand-object manipulation produced the sounds.,00:00 - 00:04,0.8
+cut_carrot_day_seg_002,0,rgb,action,What am I doing with my left hand while the right hand operates the knife?,Stabilizing and guiding the carrot,,0.85
+cut_carrot_day_seg_002,1,rgb,counting,How many white ceramic bowls are present on the counter?,One,,0.85
+cut_carrot_day_seg_002,2,rgb,dynamic_counting,How many other people enter the kitchen during this slicing activity?,Zero,,0.85
+cut_carrot_day_seg_002,3,rgb,dynamic_recognition,What specific object is being moved continuously in a rhythmic fashion?,The kitchen knife,,0.85
+cut_carrot_day_seg_002,4,rgb,light_change,Is there any noticeable change in the room's brightness while I am slicing the carrot?,No,,0.85
+cut_carrot_day_seg_002,5,rgb,light_recongnition,What types of light sources are visible in the outdoor mailbox area?,Recessed linear LED ceiling lights creating bright white streaks,,0.85
+cut_carrot_day_seg_002,6,rgb,navigation,How many steps do I take toward the laptop while cutting the carrot?,Zero,,0.85
+cut_carrot_day_seg_002,7,rgb,non_common,Is there any object in the scene that appears to be floating unrealistically?,No,,0.85
+cut_carrot_day_seg_002,8,rgb,object_recognition,What is the texture of the handle on the large kitchen knife?,Textured metal,,0.85
+cut_carrot_day_seg_002,9,rgb,scene_sequence,What object did I set down before picking up the knife to start slicing?,A black vegetable peeler,,0.85
+cut_carrot_day_seg_002,10,rgb,spatial_reasoning,Where is the white bowl located relative to the cutting board?,To the right,,0.85
+cut_carrot_day_seg_002,11,rgb,text_recognition,What brand name is printed on the black vegetable peeler?,Victorinox,,0.85
+cut_carrot_day_seg_002,12,event,event_navigation,Is there any significant camera translation during the slicing?,No,,0.85
+cut_carrot_day_seg_002,13,event,event_non_common,Are there any objects floating in the air?,No,,0.85
+cut_carrot_day_seg_002,14,event,event_object_recognition,What object am I moving rhythmically to create thin strips?,Kitchen knife,,0.85
+cut_carrot_day_seg_002,15,event,event_scene_sequence,What action do I take after picking up the knife but before I start slicing?,Position it against the carrot,,0.85
+cut_carrot_day_seg_002,16,event,event_spatial_reasoning,Where are the cut carrot strips accumulating relative to the carrot being held?,To the right,,0.85
+cut_carrot_day_seg_002,17,depth,depth_action,What action am I performing with the knife on the carrot?,Slicing into strips.,,0.65
+cut_carrot_day_seg_002,18,depth,depth_counting,How many cutting boards are visible in the workspace?,One.,,0.65
+cut_carrot_day_seg_002,19,depth,depth_dynamic_counting,How many tools am I actively moving to slice the carrot?,One knife.,,0.65
+cut_carrot_day_seg_002,20,depth,depth_dynamic_recognition,Which hand is moving the knife to perform the slicing?,My right hand.,,0.65
+cut_carrot_day_seg_002,21,depth,depth_navigation,In which direction relative to the board does the knife move to slice the carrot?,Downward and forward.,,0.65
+cut_carrot_day_seg_002,22,depth,depth_non_common,Are there any objects floating unnaturally in the air in this depth sequence?,No.,,0.65
+cut_carrot_day_seg_002,23,depth,depth_object_recognition,What is the 3D shape of the object I am holding in my right hand as I interact with the carrot?,"A long, tapered blade.",,0.65
+cut_carrot_day_seg_002,24,depth,depth_scene_sequence,How does the 3D structure of the carrot change over the course of the sequence?,It breaks into multiple strips.,,0.65
+cut_carrot_day_seg_002,25,depth,depth_spatial_reasoning,Is the bowl closer to or farther from me than the cutting board?,Farther away.,,0.65
+cut_carrot_day_seg_002,26,ir,action,"1. What is the primary task I am performing?
+2. What tool am I using for this task?
+3. On what surface am I cutting?
+4. What happens to the carrot as I work?
+5. Why am I performing this rhythmic motion?
+6. Which hand is holding the knife?
+7. What am I doing with my left hand?
+8. What is the end result of my actions in this segment?","1. Slicing a carrot.
+2. A kitchen knife.
+3. A white cutting board.
+4. It is being cut into thin strips.
+5. To slice the carrot consistently and efficiently.
+6. My right hand.
+7. Holding the carrot steady and guiding it.
+8. A pile of sliced carrot strips.",,0.75
+cut_carrot_day_seg_002,27,ir,counting,"1. How many cutting boards are in the video?
+2. How many laptops are on the counter?
+3. How many knives am I using?
+4. How many bowls are visible?
+5. How many power strips are shown?
+6. How many carrots am I cutting?
+7. How many main light hotspots are reflecting off the bowl?
+8. Count the number of plugs in the power strip.
+9. How many hands are visible?
+10. How many main tools (knife, bowl, board) are on the counter?","1. One.
+2. One.
+3. One.
+4. One.
+5. One.
+6. One.
+7. One.
+8. Four.
+9. Two.
+10. Three.",,0.75
+cut_carrot_day_seg_002,28,ir,dynamic_counting,"1. How many other people enter the kitchen?
+2. Do any pets move across the counter?
+3. How many moving vehicles can be seen?
+4. Are there any falling objects?
+5. How many dynamic objects other than my tools are present?
+6. Is there any movement in the background?
+7. How many people pass by?
+8. Do any objects move on their own?","1. Zero.
+2. Zero.
+3. Zero.
+4. Zero.
+5. Zero.
+6. No.
+7. Zero.
+8. No.",,0.75
+cut_carrot_day_seg_002,29,ir,dynamic_recognition,"1. Did any object suddenly disappear?
+2. When did I start slicing?
+3. Did the bowl move during the segment?
+4. Has a new person entered the frame?
+5. Is there any change in the laptop's position?
+6. What motion am I repeating with the knife?
+7. Did the carrot roll off the board?
+8. At what point did I put the knife down?","1. No.
+2. At approximately 45 seconds.
+3. No.
+4. No.
+5. No.
+6. Rhythmic downward slicing.
+7. No.
+8. I do not put the knife down in this segment.",,0.75
+cut_carrot_day_seg_002,30,ir,light_change,"1. Does the light intensity change significantly?
+2. Is the light source moving?
+3. Do any new shadows appear?
+4. Does it get darker at the end?
+5. Are there flickering lights?
+6. Does the laptop screen change its light output drastically?
+7. Is the light source approaching?
+8. Did the overhead lights turn off?","1. No.
+2. No.
+3. No.
+4. No.
+5. No.
+6. No.
+7. No.
+8. No.",,0.75
+cut_carrot_day_seg_002,31,ir,light_recongnition,From which direction is the main light source coming?,Top right.,,0.75
+cut_carrot_day_seg_002,32,ir,navigation,"1. Am I moving through different rooms?
+2. How many turns did I make?
+3. Did I move closer to the laptop?
+4. What is the path to the bowl from the knife's starting position?
+5. If I want to leave the counter, which way do I step?
+6. Is the kitchen sink visible for navigation?
+7. How many steps did I take forward?
+8. Where is the nearest exit relative to my current position?
+9. Did I move to the fridge?
+10. Is the camera following me?","1. No.
+2. Zero.
+3. No.
+4. Move right across the cutting board.
+5. Step backward.
+6. No.
+7. Zero.
+8. Likely behind me or to the side, though not visible.
+9. No.
+10. No, it is stationary.",,0.75
+cut_carrot_day_seg_002,33,ir,non_common,Is there any object floating in the air against gravity?,No.,,0.75
+cut_carrot_day_seg_002,34,ir,object_recognition,What is the main object I am using to cut the carrot?,A large kitchen knife.,,0.75
+cut_carrot_day_seg_002,35,ir,scene_sequence,"1. What sequence of actions did I perform with the carrot and knife?
+2. What was the starting state of the carrot in this segment?
+3. Did I move to a different room?
+4. What remained on the counter the whole time?
+5. What did I do after picking up the knife?
+6. How did the pile of carrot pieces change?
+7. What object was to the right throughout the segment?
+8. What did I use as a base for slicing?
+9. Did I use the peeler in this segment?
+10. Where was the carrot positioned before slicing?","1. Picking up the knife, positioning the carrot, and rhythmic slicing.
+2. It was peeled and ready for cutting.
+3. No.
+4. The cutting board, bowl, laptop, and power strip.
+5. I positioned the carrot for slicing.
+6. It grew as more strips were cut.
+7. A white bowl.
+8. A white cutting board.
+9. No.
+10. In the center of the cutting board.",,0.75
+cut_carrot_day_seg_002,36,ir,spatial_reasoning,Where is the bowl located relative to the cutting board?,To the right.,,0.75
+cut_carrot_day_seg_002,37,ir,text_recognition,"1. What is on the left side of the scene that might have text on its screen?
+2. Are there any clear words visible on the cutting board?
+3. Is there a logo on the bowl?
+4. Can you see any text on the power strip?
+5. What device is positioned to the left of the cutting area?
+6. Is the brand of the knife visible?
+7. Are there numbers on the power plugs?
+8. Is any text identifiable on the carrot itself?","1. A laptop.
+2. No.
+3. No.
+4. No legible text.
+5. A laptop.
+6. No.
+7. No.
+8. No.",,0.75
+cut_carrot_day_seg_002,38,audio,audio_contextual_relevance,How does the audio relate to the visual actions in this segment?,"The audio provides direct feedback for the visual action of slicing, with each knife stroke against the cutting board producing a corresponding chopping sound.",00:00:45 - 00:03:05,0.8
+cut_carrot_day_seg_002,39,audio,audio_percussive_sound,Describe the nature of the sound heard as the user slices the carrot.,"The sound is percussive and rhythmic, created by the blade of the knife hitting the cutting board after passing through the carrot.",00:00:45 - 00:03:05,0.8
+cut_carrot_day_seg_002,40,audio,audio_sound_source_identification,What sound can be heard from 00:45 to 03:05 in the video?,The rhythmic chopping sound of a kitchen knife slicing through a carrot on a cutting board is clearly audible.,00:00:45 - 00:03:05,0.8
+cut_carrot_day_seg_002,41,audio,audio_spatial_location,Where is the sound of the slicing coming from in the video?,"The sound is coming from the central area of the countertop, where the user is using the knife on the cutting board.",00:00:45 - 00:03:05,0.8
 cut_carrot_night_seg_001,0,rgb,action,1. What am I doing? 2. Which hand holds the knife? 3. What is the carrot being peeled into? 4. Where is the slicing occurring? 5. What is the purpose? 6. What tool is used? 7. What happens to the carrot? 8. Is the peeling complete?,1. Peeling and slicing a carrot 2. Right hand 3. A bowl 4. On the cutting board 5. Food preparation 6. A knife 7. It gets sliced 8. Yes,,0.45
 cut_carrot_night_seg_001,1,rgb,counting,1. How many carrots are there? 2. How many knives? 3. How many bowls? 4. How many cutting boards? 5. How many hands are visible? 6. How many stoves are in the scene? 7. How many sinks? 8. How many windows? 9. How many towels? 10. How many tables are shown?,1. One 2. One 3. One 4. One 5. Two 6. Zero 7. Zero 8. Zero 9. Zero 10. One,,0.45
 cut_carrot_night_seg_001,2,rgb,dynamic_counting,1. How many people are moving? 2. How many knives are moving? 3. How many cars approach? 4. How many pieces of carrot fall into the bowl? 5. How many birds fly by? 6. How many doors open? 7. How many pets appear? 8. How many bowls move?,1. One 2. One 3. Zero 4. Several 5. Zero 6. Zero 7. Zero 8. Zero,,0.45
@@ -68,6 +542,213 @@ cut_carrot_night_seg_001,25,audio,audio_contextual_and_semantic_understanding,"B
 cut_carrot_night_seg_001,26,audio,audio_sound_quality_and_characteristics,How would you describe the quality and rhythm of the chopping sounds in this segment?,"The chopping sounds are sharp, percussive, and follow a fast, consistent rhythm, indicating a practiced and rapid chopping technique.",00:39 - 01:08,0.8
 cut_carrot_night_seg_001,27,audio,audio_sound_source_identification,What is the primary source of the rhythmic sound heard during this interval?,The sound is produced by a large kitchen knife repeatedly striking a carrot and a wooden cutting board.,00:03 - 00:26,0.8
 cut_carrot_night_seg_001,28,audio,audio_temporal_reasoning,"After the initial preparation sounds, at what timestamp does the first chopping action begin?",The first chopping sound begins at approximately 00:03.,00:00 - 00:40,0.8
+cut_carrot_night_seg_002,0,rgb,action,What tool am I using to dice the carrots?,A knife.,,0.45
+cut_carrot_night_seg_002,1,rgb,counting,How many cutting boards are being used?,One.,,0.45
+cut_carrot_night_seg_002,2,rgb,dynamic_counting,How many other people are visible moving in the background?,Zero.,,0.45
+cut_carrot_night_seg_002,3,rgb,dynamic_recognition,Did any new object appear in the scene during the dicing process?,No.,,0.45
+cut_carrot_night_seg_002,4,rgb,light_change,Does the light level increase or decrease during the chopping process?,It remains consistent.,,0.45
+cut_carrot_night_seg_002,5,rgb,light_recongnition,From which direction does the primary light source originate?,From above.,,0.45
+cut_carrot_night_seg_002,6,rgb,navigation,How many steps did I take towards the sink during this segment?,Zero.,,0.45
+cut_carrot_night_seg_002,7,rgb,non_common,Is the knife being used correctly to dice the carrots?,Yes.,,0.45
+cut_carrot_night_seg_002,8,rgb,object_recognition,What vegetable is being diced on the white cutting board?,Carrot.,,0.45
+cut_carrot_night_seg_002,9,rgb,scene_sequence,What was the sequence of processing the carrot pieces in this segment?,Gathering strips then rapid dicing into small pieces.,,0.45
+cut_carrot_night_seg_002,10,rgb,spatial_reasoning,Where is the white bowl located relative to the cutting board?,To the right.,,0.45
+cut_carrot_night_seg_002,11,rgb,text_recognition,Are there any brand names visible on the white bowl?,No.,,0.45
+cut_carrot_night_seg_002,12,depth,depth_action,What is the primary action I am performing with my hands?,Gathering and chopping.,,0.65
+cut_carrot_night_seg_002,13,depth,depth_counting,How many hands are visible interacting with the objects in the depth map?,Two hands.,,0.65
+cut_carrot_night_seg_002,14,depth,depth_dynamic_counting,How many hands move between the near and mid depth layers?,Two hands.,,0.65
+cut_carrot_night_seg_002,15,depth,depth_dynamic_recognition,Are my hands moving closer or further from each other to gather the carrot?,Moving closer together.,,0.65
+cut_carrot_night_seg_002,16,depth,depth_navigation,Is the area directly above the cutting board clear of obstacles for my hands to move?,"Yes, it is clear.",,0.65
+cut_carrot_night_seg_002,17,depth,depth_non_common,Do any objects appear to float in mid-air without support?,No.,,0.65
+cut_carrot_night_seg_002,18,depth,depth_object_recognition,"What is the relative depth ordering of my hands, the carrot strips, and the cutting board?","Hands, carrot, then board.",,0.65
+cut_carrot_night_seg_002,19,depth,depth_scene_sequence,How does the volume of the carrot change from the start to the end of the segment?,Strips become a mound.,,0.65
+cut_carrot_night_seg_002,20,depth,depth_spatial_reasoning,Where are the carrot strips located in relation to the cutting board?,Directly on top.,,0.65
+cut_carrot_night_seg_002,21,ir,action,1. What am I doing with the knife? 2. Which hand holds the carrot? 3. What is the purpose of this action? 4. What happens to the carrot strips? 5. Am I peeling the carrot? 6. Am I using a food processor? 7. Is the action fast or slow? 8. What is the consequence of my dicing?,1. Dicing. 2. Left hand. 3. Food preparation. 4. They are diced. 5. No. 6. No. 7. Fast. 8. A pile of small carrot pieces.,,0.85
+cut_carrot_night_seg_002,22,ir,counting,1. How many bowls are on the counter? 2. How many knives am I using? 3. How many cutting boards are visible? 4. How many power strips are on the right? 5. How many hands are visible? 6. How many laptops are on the left? 7. How many lights are on the power strip? 8. How many piles of carrot are on the board? 9. How many knives are lying on the counter? 10. How many electrical sockets are visible?,1. One. 2. One. 3. One. 4. One. 5. Two. 6. One. 7. One. 8. One. 9. None. 10. Five.,,0.85
+cut_carrot_night_seg_002,23,ir,dynamic_counting,1. How many knives are moving? 2. How many hands are moving? 3. Is the bowl moving? 4. Is the laptop moving? 5. Is the power strip moving? 6. Are there other people moving? 7. Is a pet visible? 8. Is the carrot pile moving?,1. One. 2. Two. 3. No. 4. No. 5. No. 6. No. 7. No. 8. Yes.,,0.85
+cut_carrot_night_seg_002,24,ir,dynamic_recognition,1. Does the knife stop moving? 2. Do my hands gather the carrot strips? 3. When does the dicing start? 4. Does any other object move? 5. Do I pick up the bowl? 6. Do I close the laptop? 7. Does a new person enter? 8. Do the carrot pieces move?,1. No. 2. Yes. 3. Frame 2340. 4. No. 5. No. 6. No. 7. No. 8. Yes.,,0.85
+cut_carrot_night_seg_002,25,ir,light_change,1. Did the lights turn off? 2. Is it getting brighter? 3. Did a car's headlights pass by? 4. Is the laptop screen flickering? 5. Is the power strip light changing? 6. Does the board reflect new light? 7. Is the light source moving? 8. Is the room light on?,1. No. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. No.,,0.85
+cut_carrot_night_seg_002,26,ir,light_recongnition,How many active light indicators are visible on the power strip on the right?,One.,,0.85
+cut_carrot_night_seg_002,27,ir,navigation,1. Am I walking? 2. Am I turning? 3. How many steps did I take? 4. Which room am I in? 5. Am I leaving the kitchen? 6. Am I approaching the laptop? 7. Am I facing the window? 8. Is another room visible? 9. Where is the fridge? 10. How do I get to the sink?,1. No. 2. No. 3. Zero. 4. Kitchen. 5. No. 6. No. 7. No. 8. No. 9. Not visible. 10. Turn away from the counter.,,0.85
+cut_carrot_night_seg_002,28,ir,non_common,Is the knife seen floating in the air without being held by a hand?,No.,,0.85
+cut_carrot_night_seg_002,29,ir,object_recognition,What primary object is being used to chop the carrot strips into diced pieces?,A knife.,,0.85
+cut_carrot_night_seg_002,30,ir,scene_sequence,1. What is the carrot's state at the start? 2. What am I doing currently? 3. Where is this dicing taking place? 4. What is the final form of the carrot? 5. What object is used for the dicing? 6. What was the step before dicing? 7. Is the laptop used in this segment? 8. Are the hands moving? 9. Is there a bowl present? 10. Is the power strip plugged in?,1. It is in strips. 2. Dicing it. 3. Kitchen counter. 4. Small irregular pieces. 5. Knife. 6. Slicing it into strips. 7. No. 8. Yes. 9. Yes. 10. Yes.,,0.85
+cut_carrot_night_seg_002,31,ir,spatial_reasoning,Where is the bowl of carrot strips located relative to the cutting board?,Above the board.,,0.85
+cut_carrot_night_seg_002,32,ir,text_recognition,1. Is there text visible on the laptop screen? 2. Can you see brand labels on the power strip? 3. Is there text on the cutting board? 4. Are there any serial numbers on the knife? 5. Does the bowl have visible text? 6. Is there writing on the subject's clothing? 7. Can you see labels on the electrical sockets? 8. Is there text on the carrot strips?,1. No. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. No.,,0.85
+cut_carrot_night_seg_002,33,audio,audio_sound_event_duration,How long does the rapid chopping sound persist in this segment?,"The rapid chopping sound persists for approximately 83.9 seconds, starting from 01:18 and ending at 02:41.",01:18 - 02:41,0.8
+cut_carrot_night_seg_002,34,audio,audio_sound_source_identification,What is the primary sound source during this segment?,The primary sound source is a knife chopping through carrot strips on a wooden cutting board.,01:18 - 02:41,0.8
+cut_carrot_night_seg_002,35,audio,audio_visual_correspondence,How does the sound in this segment correspond to the visual actions observed?,The rapid percussive sound heard is perfectly synchronized with the user's quick dicing motion as the knife blade repeatedly strikes the wooden cutting board through the carrot pieces.,01:18 - 02:41,0.8
+ride_a_bike_day_seg_001,0,rgb,action,What primary activity am I performing in this segment?,Riding a bike.,,0.85
+ride_a_bike_day_seg_001,1,rgb,counting,How many parked cars do I pass on the right side before turning?,Four.,,0.85
+ride_a_bike_day_seg_001,2,rgb,dynamic_counting,How many other moving vehicles or pedestrians pass me during the ride?,Zero.,,0.85
+ride_a_bike_day_seg_001,3,rgb,dynamic_recognition,Are there any moving objects visible other than my bike?,No.,,0.85
+ride_a_bike_day_seg_001,4,rgb,light_change,Does the overall brightness of the scene change significantly during the ride?,No.,,0.85
+ride_a_bike_day_seg_001,5,rgb,light_recongnition,What is the main source of light in this outdoor segment?,Natural sunlight.,,0.85
+ride_a_bike_day_seg_001,6,rgb,navigation,In which direction do I turn to reach the building entrance?,Right.,,0.85
+ride_a_bike_day_seg_001,7,rgb,non_common,Are there any objects floating in the air or clipping through the ground incorrectly?,No.,,0.85
+ride_a_bike_day_seg_001,8,rgb,object_recognition,What is the primary color and material of the bell mounted on the bicycle's handlebars?,It is silver and blue metal.,,0.85
+ride_a_bike_day_seg_001,9,rgb,scene_sequence,What is the sequence of ground textures I traverse during this ride?,"Asphalt road, then paved brick sidewalk.",,0.85
+ride_a_bike_day_seg_001,10,rgb,spatial_reasoning,Where is the brick sidewalk positioned relative to the asphalt road I am riding on?,To the right.,,0.85
+ride_a_bike_day_seg_001,11,rgb,text_recognition,What word is written on the door or panel I approach at the end of my ride?,Fahrräder.,,0.85
+ride_a_bike_day_seg_001,12,event,event_action,What is my main action throughout this segment?,Riding a bicycle forward.,,0.85
+ride_a_bike_day_seg_001,13,event,event_counting,How many parked vehicles do I pass on the right?,12,,0.85
+ride_a_bike_day_seg_001,14,event,event_dynamic_counting,How many trees or poles pass me on the left side?,6,,0.85
+ride_a_bike_day_seg_001,15,event,event_dynamic_recognition,When do the parked cars exit the field of view after appearing?,Almost immediately.,,0.85
+ride_a_bike_day_seg_001,16,event,event_navigation,What indicates my approach to the end of the segment?,Decreased speed and a right turn.,,0.85
+ride_a_bike_day_seg_001,17,event,event_non_common,Are there any floating objects visible in the event stream?,No.,,0.85
+ride_a_bike_day_seg_001,18,event,event_object_recognition,What kind of circular object do I pass over on the road surface?,A manhole cover.,,0.85
+ride_a_bike_day_seg_001,19,event,event_scene_sequence,How does the ground texture change early in the sequence?,From tiled to asphalt.,,0.85
+ride_a_bike_day_seg_001,20,event,event_spatial_reasoning,On which side of my path are the stationary vehicles located?,To the right.,,0.85
+ride_a_bike_day_seg_001,21,depth,depth_action,What am I primarily doing with the handlebars during this segment?,Steering the bike.,,0.65
+ride_a_bike_day_seg_001,22,depth,depth_counting,How many sets of handlebars am I holding in the foreground?,1,,0.65
+ride_a_bike_day_seg_001,23,depth,depth_dynamic_counting,How many other moving cars pass me at near range?,0,,0.65
+ride_a_bike_day_seg_001,24,depth,depth_dynamic_recognition,Is there any car moving toward me from the far range?,No.,,0.65
+ride_a_bike_day_seg_001,25,depth,depth_navigation,In which direction does the 3D layout primarily support movement?,Straight ahead.,,0.65
+ride_a_bike_day_seg_001,26,depth,depth_non_common,Are there any floating objects or unnatural depth overlaps visible in this outdoor scene?,No.,,0.65
+ride_a_bike_day_seg_001,27,depth,depth_object_recognition,What object occupies the immediate near range throughout this entire segment?,The handlebars.,,0.65
+ride_a_bike_day_seg_001,28,depth,depth_scene_sequence,Does the navigable space become significantly wider or remain relatively a consistent corridor as I move forward?,Remains a consistent corridor.,,0.65
+ride_a_bike_day_seg_001,29,depth,depth_spatial_reasoning,Is the road surface positioned above or below the parked cars in my field of view?,Below.,,0.65
+ride_a_bike_day_seg_001,30,ir,action,1. What am I doing? 2. What object am I steering? 3. Am I pedaling? 4. Where am I going? 5. Am I stopping? 6. Am I turning? 7. Is the bike moving fast? 8. Am I holding anything else?,1. Riding a bike. 2. Handlebars. 3. Yes. 4. Toward a building. 5. At the end. 6. Yes. 7. Moderate. 8. No.,,0.75
+ride_a_bike_day_seg_001,31,ir,counting,1. How many manhole covers did I pass on the road? 2. How many parked cars are on the sidewalk? 3. How many campers are in the row? 4. How many trees are on the left side? 5. How many buildings are on the right? 6. How many bikes am I riding? 7. How many lanes are on the road? 8. How many curves did I take? 9. How many white cars are parked? 10. How many vans did I pass?,1. Three. 2. Six. 3. One. 4. Four. 5. Two. 6. One. 7. Two. 8. Two. 9. Three. 10. One.,,0.75
+ride_a_bike_day_seg_001,32,ir,dynamic_counting,1. How many moving cars pass me? 2. How many pedestrians are walking? 3. How many other cyclists approach? 4. Are any animals moving? 5. How many moving objects are there? 6. Does a bus drive by? 7. Is there any traffic? 8. Do any doors open?,1. Zero. 2. Zero. 3. Zero. 4. Zero. 5. Zero. 6. No. 7. No. 8. No.,,0.75
+ride_a_bike_day_seg_001,33,ir,dynamic_recognition,1. Did a car approach me? 2. Did a person walk past? 3. Has a door opened? 4. Did the camper move? 5. Was there any movement on the left? 6. Did a bird fly by? 7. Did the van start? 8. Was anyone visible in the buildings?,1. No. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. No.,,0.75
+ride_a_bike_day_seg_001,34,ir,light_change,1. Does it get brighter as I enter the sidewalk? 2. Did any car headlights pass me? 3. Is the light approaching me? 4. Did the lights turn off? 5. Is there a sudden change in brightness? 6. Do shadows shift as I turn? 7. Is the light source stationary? 8. Is the camper brighter than the car?,"1. No, darker. 2. No. 3. No. 4. No. 5. No. 6. Yes. 7. Yes. 8. Yes.",,0.75
+ride_a_bike_day_seg_001,35,ir,navigation,1. Which direction do I turn first? 2. How many steps do I ride straight on the road? 3. How do I get to the sidewalk? 4. Where are the cars located? 5. Which way do I turn to reach the building? 6. Is the path straight or curved? 7. How many steps to pass the van? 8. Where do I stop? 9. What is the fastest way to the building? 10. Which way is the row of trees?,1. Right. 2. Twenty. 3. Follow path right. 4. On the right. 5. Right. 6. Both. 7. Five. 8. Building entrance. 9. Turn right. 10. To the left.,,0.75
+ride_a_bike_day_seg_001,36,ir,non_common,Are there any floating parked cars in the scene?,No.,,0.75
+ride_a_bike_day_seg_001,37,ir,object_recognition,What type of parked vehicles do I pass on my right along the sidewalk?,"A van, a sedan, and a camper.",,0.75
+ride_a_bike_day_seg_001,38,ir,scene_sequence,1. What is the first scene I ride through? 2. What do I pass after the wide road? 3. What appears on my right after the curve? 4. What is the sequence of parked cars I pass? 5. Where do I transition to the sidewalk? 6. What do I see on the left of the sidewalk? 7. What do I pass before the camper? 8. What connects the street to the building area? 9. Which vehicle do I see first on the sidewalk? 10. Where does this segment end?,"1. Asphalt street. 2. Curved path. 3. Buildings. 4. Van, BMW, Camper. 5. Frame 1000. 6. Trees. 7. BMW sedan. 8. Paved path. 9. Dark van. 10. Building entrance.",,0.75
+ride_a_bike_day_seg_001,39,ir,spatial_reasoning,Where is the curb located relative to my bicycle's path?,To the right.,,0.75
+ride_a_bike_day_seg_001,40,ir,text_recognition,1. What is the shape of the text-like pattern on the rear of the sedan? 2. In which frame does the license plate on the camper first become prominent? 3. Are there any street signs visible? 4. What does the pattern on the car signify? 5. How many license plates are passed? 6. Is the text on the camper readable? 7. Where is the car plate located? 8. What is the purpose of these plates?,1. Rectangular. 2. Frame 1440. 3. No. 4. Vehicle identification. 5. At least three. 6. No. 7. Rear of vehicle. 8. Registration.,,0.75
+ride_a_bike_day_seg_001,41,audio,audio_sound_source_identification,What are the dominant sound sources heard while riding the bike?,The dominant sounds are the wind and the tires rolling on the pavement.,00:00 - 00:53,0.8
+ride_a_bike_day_seg_002,0,rgb,action,What am I doing with the metal rack at the end of the segment?,Parking the front wheel in it.,,0.85
+ride_a_bike_day_seg_002,1,rgb,counting,How many bikes are visible in the rack directly to the left of where I park?,At least five.,,0.85
+ride_a_bike_day_seg_002,2,rgb,dynamic_counting,How many other people are moving around in the storage room?,Zero.,,0.85
+ride_a_bike_day_seg_002,3,rgb,dynamic_recognition,Was there any movement from other bicycles in the room?,No.,,0.85
+ride_a_bike_day_seg_002,4,rgb,light_change,Does the scene become brighter or darker as I move into the room?,Darker.,,0.85
+ride_a_bike_day_seg_002,5,rgb,light_recongnition,What type of light source is used inside the storage room?,Artificial overhead lighting.,,0.85
+ride_a_bike_day_seg_002,6,rgb,navigation,Which way do I turn to find the empty parking slot?,Slightly left.,,0.85
+ride_a_bike_day_seg_002,7,rgb,non_common,Is there any furniture or object that seems out of place in this storage room?,No.,,0.85
+ride_a_bike_day_seg_002,8,rgb,object_recognition,What material covers the walls of the bike storage room?,Wooden planks.,,0.85
+ride_a_bike_day_seg_002,9,rgb,scene_sequence,What do I do after entering the storage room?,Find an empty rack and park the bike.,,0.85
+ride_a_bike_day_seg_002,10,rgb,spatial_reasoning,Where are the bicycles positioned in relation to the metal racks?,Inside the rack slots.,,0.85
+ride_a_bike_day_seg_002,11,rgb,text_recognition,What brand name is visible on the white bike frame next to mine?,TEMPT.,,0.85
+ride_a_bike_day_seg_002,12,event,event_action,What am I doing with my hands after stopping the bike?,Manipulating a lock.,,0.85
+ride_a_bike_day_seg_002,13,event,event_counting,How many distinct bike rack units do I pass?,8,,0.85
+ride_a_bike_day_seg_002,14,event,event_dynamic_counting,How many other moving people are in the storage room?,0,,0.85
+ride_a_bike_day_seg_002,15,event,event_dynamic_recognition,When do my hands first appear to secure the lock?,At 78 seconds.,,0.85
+ride_a_bike_day_seg_002,16,event,event_navigation,What is the final step in my navigation through the storage room?,Aligning the wheel with a rack.,,0.85
+ride_a_bike_day_seg_002,17,event,event_non_common,Does the bike pass through any solid objects while parking?,No.,,0.85
+ride_a_bike_day_seg_002,18,event,event_object_recognition,What text is briefly visible when I enter the room?,Fahrräder,,0.85
+ride_a_bike_day_seg_002,19,event,event_scene_sequence,What do I do after the bike stops in the rack?,Secure the lock.,,0.85
+ride_a_bike_day_seg_002,20,event,event_spatial_reasoning,Where are my hands reaching in relation to the bike rack?,Forward into the rack space.,,0.85
+ride_a_bike_day_seg_002,21,depth,depth_action,What is my final action in the segment after the bike has stopped moving?,Securing the bike.,,0.65
+ride_a_bike_day_seg_002,22,depth,depth_counting,How many other bikes are already parked in the rack when I arrive?,6,,0.65
+ride_a_bike_day_seg_002,23,depth,depth_dynamic_counting,How many times do my hands enter the immediate near field at the end?,Once.,,0.65
+ride_a_bike_day_seg_002,24,depth,depth_dynamic_recognition,When do my hands first appear at the closest depth range to interact with the rack?,Around frame 002670.,,0.65
+ride_a_bike_day_seg_002,25,depth,depth_navigation,What turn do I make to align with the parking rack?,A slight right turn.,,0.65
+ride_a_bike_day_seg_002,26,depth,depth_non_common,Are there any floating objects or unnatural depth ordering visible in the storage area?,No.,,0.65
+ride_a_bike_day_seg_002,27,depth,depth_object_recognition,What 3D structure is the primary destination at mid-range in this segment?,The bike rack.,,0.65
+ride_a_bike_day_seg_002,28,depth,depth_scene_sequence,What change in 3D structure occurs as I enter the storage area?,Transitions to an enclosed space.,,0.65
+ride_a_bike_day_seg_002,29,depth,depth_spatial_reasoning,Is the bike rack in front of or behind the back wall of the storage area?,In front of.,,0.65
+ride_a_bike_day_seg_002,30,ir,action,1. What am I doing with the bike? 2. Where am I putting it? 3. What part of the bike am I holding? 4. Am I using a lock? 5. Am I getting off the bike? 6. Am I pushing or riding? 7. What am I interacting with? 8. Am I leaving the room?,1. Parking it. 2. In a rack. 3. Handlebars. 4. Yes. 5. Yes. 6. Pushing. 7. Rack and bike. 8. No.,,0.75
+ride_a_bike_day_seg_002,31,ir,counting,1. How many bikes are in the storage room? 2. How many racks are empty near me? 3. How many signs are on the wall? 4. How many ceiling lights are visible? 5. How many wheels can you see? 6. How many white bikes are there? 7. How many handles are on the door? 8. How many bike locks are visible? 9. How many aisles are in the room? 10. How many racks do I use?,1. At least 15. 2. One. 3. One. 4. Two. 5. More than 30. 6. Three. 7. One. 8. Two. 9. One. 10. One.,,0.75
+ride_a_bike_day_seg_002,32,ir,dynamic_counting,1. How many people are in the room? 2. Are any bikes moving on their own? 3. Does anyone else enter? 4. Are there any pets moving? 5. How many doors open automatically? 6. Do any cars pass? 7. Is there any other motion? 8. Does a bike fall over?,1. Zero. 2. No. 3. No. 4. No. 5. Zero. 6. No. 7. No. 8. No.,,0.75
+ride_a_bike_day_seg_002,33,ir,dynamic_recognition,1. Did anyone walk into the room? 2. Did a bicycle move by itself? 3. Has the door fully closed? 4. Did another cyclist arrive? 5. Was there movement in the racks? 6. Did a light flicker? 7. Did an object fall? 8. Was anyone visible outside the door?,1. No. 2. No. 3. Yes. 4. No. 5. No. 6. No. 7. No. 8. No.,,0.75
+ride_a_bike_day_seg_002,34,ir,light_change,1. Did the lights turn on? 2. Is it brighter inside? 3. Does the light flicker? 4. Is the light source moving? 5. Does the room get darker? 6. Are there shadows on the floor? 7. Is the light coming from above? 8. Are the bike frames reflective?,"1. No, already on. 2. Yes. 3. No. 4. No. 5. No. 6. Yes. 7. Yes. 8. Yes.",,0.75
+ride_a_bike_day_seg_002,35,ir,navigation,1. How do I get to the racks? 2. How many steps to the empty rack? 3. Which way do I turn inside? 4. Where is the exit? 5. Where should I park? 6. Is the room narrow or wide? 7. How many steps from the door to the wall? 8. What is the path back to the door? 9. Where are the empty spaces? 10. How do I reach the far wall?,"1. Walk forward. 2. Five steps. 3. Left. 4. Behind me. 5. In a rack. 6. Narrow. 7. Three. 8. Turn around, walk. 9. Farther down. 10. Walk straight.",,0.75
+ride_a_bike_day_seg_002,36,ir,non_common,Is any bicycle floating in the air?,No.,,0.75
+ride_a_bike_day_seg_002,37,ir,object_recognition,What specific text is seen on the wall before I enter the main storage area?,Fahrräder.,,0.75
+ride_a_bike_day_seg_002,38,ir,scene_sequence,1. What room do I enter? 2. What is the first thing I see inside? 3. What do I pass before the rack? 4. Where do I park the bike? 5. What is the sequence of my movements? 6. What connects the hallway to the room? 7. Did I pass any other rooms? 8. What is the scene before I park? 9. Which bike do I see first? 10. Where am I at the end?,"1. Bike storage. 2. Bicycles. 3. Occupied racks. 4. In a rack. 5. Enter, walk, park. 6. A door. 7. No. 8. Entrance hallway. 9. A black MTB. 10. Next to my bike.",,0.75
+ride_a_bike_day_seg_002,39,ir,spatial_reasoning,Where are the bike racks located in the room?,Along the walls.,,0.75
+ride_a_bike_day_seg_002,40,ir,text_recognition,1. What word is on the wall? 2. What icon is next to it? 3. In which frame is 'TEMPT' visible? 4. What color is the bike with text? 5. Where is the room sign located? 6. How many times does 'Fahrräder' appear? 7. Is the text handwritten? 8. What does 'Fahrräder' mean?,"1. Fahrräder. 2. Bicycle icon. 3. Frame 2820. 4. White. 5. On the wall/door. 6. Once. 7. No, printed. 8. Bicycles.",,0.75
+ride_a_bike_day_seg_002,41,audio,audio_sound_event_counting,How many times are distinct metallic clinks or clangs heard as the bike is being parked?,Approximately 5 to 7 distinct metallic clinks are heard as the bike is positioned and secured.,01:00 - 01:38,0.8
+ride_a_bike_day_seg_002,42,audio,audio_sound_source_identification,What is the source of the metallic sounds heard starting around 01:00?,The metallic sounds come from the bike's wheel and frame making contact with the metal bike rack.,01:00 - 01:38,0.8
+ride_a_bike_night_seg_001,0,rgb,action,What is the primary activity being performed with the mailbox?,"Accessing the mailbox with a key, likely to retrieve or check mail",,0.45
+ride_a_bike_night_seg_001,1,rgb,counting,How many main mailbox sections are visible in the mailbox area?,2 sections - one grey and one vibrant green,,0.45
+ride_a_bike_night_seg_001,2,rgb,dynamic_counting,What dynamic action occurs with the mailbox in this video?,A blue-gloved hand approaches and interacts with the mailbox,,0.45
+ride_a_bike_night_seg_001,3,rgb,dynamic_recognition,What dynamic action involving the hand appears in the mailbox area?,A blue-gloved hand approaches and appears to insert something into the mailbox,,0.45
+ride_a_bike_night_seg_001,4,rgb,light_change,Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?,"Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area",,0.45
+ride_a_bike_night_seg_001,5,rgb,light_recongnition,What is the primary source of light illuminating the road?,Overhead street lamps.,,0.45
+ride_a_bike_night_seg_001,6,rgb,navigation,How would you navigate from the mailbox area back to the bedroom?,"Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom",,0.45
+ride_a_bike_night_seg_001,7,rgb,non_common,Is there anything floating in the air that violates common sense?,No.,,0.45
+ride_a_bike_night_seg_001,8,rgb,object_recognition,What kind of vehicles are parked along the road as I ride past?,Cars and a white van.,,0.45
+ride_a_bike_night_seg_001,9,rgb,scene_sequence,What is the sequence of major areas passed through in this video?,"Bedroom, hallway, outdoor walkway, and mailbox area",,0.45
+ride_a_bike_night_seg_001,10,rgb,spatial_reasoning,Where are the handlebars located relative to the road in the video?,Above the road surface.,,0.45
+ride_a_bike_night_seg_001,11,rgb,text_recognition,What are the visible mailbox numbers shown in the video?,"1'233, 1'234, and 1'235",,0.45
+ride_a_bike_night_seg_001,12,event,event_action,What action am I performing throughout this entire segment?,Riding a bike forward.,,0.9
+ride_a_bike_night_seg_001,13,event,event_counting,How many manhole covers do I pass near the start of the video?,2,,0.9
+ride_a_bike_night_seg_001,14,event,event_dynamic_counting,How many other moving vehicles approach me while I am riding?,0,,0.9
+ride_a_bike_night_seg_001,15,event,event_dynamic_recognition,Does any other person or bicycle pass me while I ride?,No.,,0.9
+ride_a_bike_night_seg_001,16,event,event_navigation,What is the primary direction of my motion throughout this segment?,Forward.,,0.9
+ride_a_bike_night_seg_001,17,event,event_non_common,Are there any floating objects or strange motion patterns visible as I ride?,No.,,0.9
+ride_a_bike_night_seg_001,18,event,event_object_recognition,What happens to the manhole covers in the first part of my ride?,They move quickly out of view.,,0.9
+ride_a_bike_night_seg_001,19,event,event_scene_sequence,What environmental change occurs after the camera passes the first few manhole covers?,The road surface changes to bricks.,,0.9
+ride_a_bike_night_seg_001,20,event,event_spatial_reasoning,Where is the brick-paved area located relative to the bicycle handlebars?,Farther away in the mid-ground.,,0.9
+ride_a_bike_night_seg_001,21,depth,depth_action,What is my primary action during this first segment as inferred from the 3D layout changes?,Riding forward.,,0.65
+ride_a_bike_night_seg_001,22,depth,depth_counting,How many large blocky building-like structures do I pass at mid-range during the ride?,4,,0.65
+ride_a_bike_night_seg_001,23,depth,depth_dynamic_counting,How many other moving vehicles approach me during the ride segment?,0,,0.65
+ride_a_bike_night_seg_001,24,depth,depth_dynamic_recognition,Does any object move independently toward me while I am riding?,No,,0.65
+ride_a_bike_night_seg_001,25,depth,depth_navigation,In which direction does the navigable path primarily extend throughout this segment?,Straight forward.,,0.65
+ride_a_bike_night_seg_001,26,depth,depth_non_common,Are there any floating or physically implausible objects visible in the depth stream during the ride?,No.,,0.65
+ride_a_bike_night_seg_001,27,depth,depth_object_recognition,What is the relative depth ordering of the block-like objects on the side of the road compared to the bright region at the horizon?,They are closer.,,0.65
+ride_a_bike_night_seg_001,28,depth,depth_scene_sequence,What sequence of navigable spaces do I transition through during the first minute of the ride?,Open road to building-lined street.,,0.65
+ride_a_bike_night_seg_001,29,depth,depth_spatial_reasoning,Are the parked vehicles I pass around frame 1600 in front of or behind the distant buildings in the background?,In front of.,,0.65
+ride_a_bike_night_seg_001,30,ir,action,What am I doing for the duration of this segment?,Riding a bicycle.,,0.85
+ride_a_bike_night_seg_001,31,ir,counting,How many manhole covers do I pass over on the road?,Three.,,0.85
+ride_a_bike_night_seg_001,32,ir,dynamic_counting,How many other cars approach me?,Zero.,,0.85
+ride_a_bike_night_seg_001,33,ir,dynamic_recognition,Did a car approach me?,No.,,0.85
+ride_a_bike_night_seg_001,34,ir,light_change,Do I pass through alternating areas of higher and lower illumination?,"Yes, passing lights.",,0.85
+ride_a_bike_night_seg_001,35,ir,navigation,In which direction does the road curve?,Slightly left.,,0.85
+ride_a_bike_night_seg_001,36,ir,non_common,Are there any objects floating in mid-air along the street?,No.,,0.85
+ride_a_bike_night_seg_001,37,ir,object_recognition,What are the primary objects visible on the road surface during my ride?,Manhole covers and markings.,,0.85
+ride_a_bike_night_seg_001,38,ir,scene_sequence,What is the first type of environment I pass through?,A lit street.,,0.85
+ride_a_bike_night_seg_001,39,ir,spatial_reasoning,Where are the parked cars located relative to my path as I ride?,On both sides.,,0.85
+ride_a_bike_night_seg_001,40,ir,text_recognition,Are there any street name signs with clear text visible during this segment?,No clear signs.,,0.85
+ride_a_bike_night_seg_001,41,audio,audio_ambient_sound_analysis,Describe the ambient noise present during the bike ride.,The ambient noise consists of a continuous wind sound that provides a backdrop to the rhythmic rolling of the tires.,00:00 - 01:04,0.8
+ride_a_bike_night_seg_001,42,audio,audio_sound_source_identification,What are the primary sound sources heard while the camera is moving?,The primary sound sources are the bicycle tires rolling on the road and the wind noise created by the movement.,00:00 - 01:04,0.8
+ride_a_bike_night_seg_002,0,rgb,action,What is the primary activity being performed with the mailbox?,"Accessing the mailbox with a key, likely to retrieve or check mail",,0.45
+ride_a_bike_night_seg_002,1,rgb,counting,How many main mailbox sections are visible in the mailbox area?,2 sections - one grey and one vibrant green,,0.45
+ride_a_bike_night_seg_002,2,rgb,dynamic_counting,What dynamic action occurs with the mailbox in this video?,A blue-gloved hand approaches and interacts with the mailbox,,0.45
+ride_a_bike_night_seg_002,3,rgb,dynamic_recognition,What dynamic action involving the hand appears in the mailbox area?,A blue-gloved hand approaches and appears to insert something into the mailbox,,0.45
+ride_a_bike_night_seg_002,4,rgb,light_change,Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?,"Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area",,0.45
+ride_a_bike_night_seg_002,5,rgb,light_recongnition,What type of light sources are used in the storage room?,Fluorescent ceiling lights.,,0.45
+ride_a_bike_night_seg_002,6,rgb,navigation,How would you navigate from the mailbox area back to the bedroom?,"Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom",,0.45
+ride_a_bike_night_seg_002,7,rgb,non_common,Are any of the bicycles in the rack floating above the floor?,No.,,0.45
+ride_a_bike_night_seg_002,8,rgb,object_recognition,What is the bicycle being placed into for parking?,A metal floor rack.,,0.45
+ride_a_bike_night_seg_002,9,rgb,scene_sequence,What is the sequence of major areas passed through in this video?,"Bedroom, hallway, outdoor walkway, and mailbox area",,0.45
+ride_a_bike_night_seg_002,10,rgb,spatial_reasoning,How far am I from the bicycle rack at frame 2160?,About 1 step.,,0.45
+ride_a_bike_night_seg_002,11,rgb,text_recognition,What are the visible mailbox numbers shown in the video?,"1'233, 1'234, and 1'235",,0.45
+ride_a_bike_night_seg_002,12,event,event_action,What am I doing with my hands once I reach the rack?,Manipulating a bike lock.,,0.9
+ride_a_bike_night_seg_002,13,event,event_counting,How many other bicycles can I see parked in the rack?,At least 4,,0.9
+ride_a_bike_night_seg_002,14,event,event_dynamic_counting,How many other people walk past me while I am locking the bike?,0,,0.9
+ride_a_bike_night_seg_002,15,event,event_dynamic_recognition,When do my hands first appear to start locking the bike?,Around frame 1950.,,0.9
+ride_a_bike_night_seg_002,16,event,event_navigation,Where do I direct the camera after I stop riding?,To the bike rack.,,0.9
+ride_a_bike_night_seg_002,17,event,event_non_common,Is there anything unusual about how the bike lock moves when I use it?,No.,,0.9
+ride_a_bike_night_seg_002,18,event,event_object_recognition,What object do I use to secure the bike in the rack?,A flexible bike lock.,,0.9
+ride_a_bike_night_seg_002,19,event,event_scene_sequence,What is the final action I perform in this sequence?,Securing the bike lock.,,0.9
+ride_a_bike_night_seg_002,20,event,event_spatial_reasoning,Where are the other parked bikes located relative to the rack?,Behind the rack's bars.,,0.9
+ride_a_bike_night_seg_002,21,depth,depth_action,What is my primary action in this segment based on the proximity to the bike components?,Parking and locking.,,0.65
+ride_a_bike_night_seg_002,22,depth,depth_counting,How many bicycles are visible in the rack as I approach to park?,5,,0.65
+ride_a_bike_night_seg_002,23,depth,depth_dynamic_counting,How many people walk past the parking area while I am locking the bike?,0,,0.65
+ride_a_bike_night_seg_002,24,depth,depth_dynamic_recognition,Is there any independent dynamic human visible in the background while I park?,No,,0.65
+ride_a_bike_night_seg_002,25,depth,depth_navigation,Where does the navigable path end in this final segment?,At the bike rack.,,0.65
+ride_a_bike_night_seg_002,26,depth,depth_non_common,"Are there any physically implausible 3D layouts, such as bikes intersecting with each other, in the rack?",No.,,0.65
+ride_a_bike_night_seg_002,27,depth,depth_object_recognition,What type of objects are the most prominent close-range 3D structures after the forward motion stops?,Bicycles.,,0.65
+ride_a_bike_night_seg_002,28,depth,depth_scene_sequence,What kind of space does the camera enter after the ride ends?,A bicycle parking area.,,0.65
+ride_a_bike_night_seg_002,29,depth,depth_spatial_reasoning,Is the railing located in front of or behind the parked bicycles?,Behind.,,0.65
+ride_a_bike_night_seg_002,30,ir,action,What do I do after stopping my ride?,Park the bike.,,0.85
+ride_a_bike_night_seg_002,31,ir,counting,How many fluorescent light fixtures are on the ceiling in view?,Six.,,0.85
+ride_a_bike_night_seg_002,32,ir,dynamic_counting,How many cars approach me?,Zero.,,0.85
+ride_a_bike_night_seg_002,33,ir,dynamic_recognition,Did a person walk to me?,No.,,0.85
+ride_a_bike_night_seg_002,34,ir,light_change,Does it get brighter or darker as I enter the room?,Brighter.,,0.85
+ride_a_bike_night_seg_002,35,ir,navigation,Which direction do I turn once inside the room?,Right.,,0.85
+ride_a_bike_night_seg_002,36,ir,non_common,Is there a bicycle hanging from the ceiling?,No.,,0.85
+ride_a_bike_night_seg_002,37,ir,object_recognition,What is the main sign visible on the door as I approach?,Fahrräder.,,0.85
+ride_a_bike_night_seg_002,38,ir,scene_sequence,What is on the door I approach?,A sign.,,0.85
+ride_a_bike_night_seg_002,39,ir,spatial_reasoning,"Where is the ""Fahrräder"" sign located in relation to the door?",On the door.,,0.85
+ride_a_bike_night_seg_002,40,ir,text_recognition,What word is written on the door sign?,Fahrräder.,,0.85
+ride_a_bike_night_seg_002,41,audio,audio_event_detection,What activity is occurring based on the audio cues?,"Based on the metallic handling and clicking sounds, the user is parking the bike and securing it with a lock.",01:04 - 01:44,0.8
+ride_a_bike_night_seg_002,42,audio,audio_sound_source_identification,What distinctive sounds are heard after the bike stops moving?,"Distinctive metallic clinking, rattling, and clicking sounds are heard as the bike lock is being used.",01:04 - 01:44,0.8
 wash_hands_day_seg_001,0,rgb,action,"1. What is the first action I take?
 2. Which hand do I use to open the office door?
 3. What is the purpose of opening the door?
@@ -515,6 +1196,36 @@ wash_hands_day_seg_003,35,ir,scene_sequence,1. Where do I go after rinsing my ha
 wash_hands_day_seg_003,36,ir,spatial_reasoning,How many steps away is the paper towel dispenser from my position at the sink?,About one step.,,0.75
 wash_hands_day_seg_003,37,ir,text_recognition,1. Is there a sign near the toilet? 2. What does the sign near the dispenser say? 3. Is the room number visible when I exit? 4. Which frame shows the exit sign most clearly? 5. Is there text on the paper towel dispenser? 6. Does the sign on the door appear again? 7. What is the room label seen in the hallway? 8. Are there any signs in the main office area?,"1. Yes. 2. PLEASE FLUSH THE TOILET. 3. Yes. 4. Frame 2970. 5. Yes, small markings. 6. Yes. 7. 02.B.29. 8. None are clear.",,0.75
 wash_hands_day_seg_003,38,audio,audio_sound_source_identification,What sound is prominent as the person finishes at the sink?,The crisp rustling and tearing sound of paper towels being used to dry hands.,01:21 - 01:33,0.8
+wash_hands_day_seg_004,0,rgb,action,What do I do with the paper towel after drying my hands?,I throw it into the teal trash bin under the sink.,,0.85
+wash_hands_day_seg_004,1,rgb,counting,How many blue chairs can be clearly seen in the computer lab?,At least five blue chairs are visible.,,0.85
+wash_hands_day_seg_004,2,rgb,dynamic_counting,How many other people walk past me in the hallway?,Zero.,,0.85
+wash_hands_day_seg_004,3,rgb,dynamic_recognition,When do I swipe my access card to enter the lab?,I swipe the access card between frames 116 and 118.,,0.85
+wash_hands_day_seg_004,4,rgb,light_change,Does the environment get brighter or darker when I enter the lab room?,The environment gets significantly brighter.,,0.85
+wash_hands_day_seg_004,5,rgb,light_recongnition,Where does the brightest light in the computer lab come from?,It comes from the large windows.,,0.85
+wash_hands_day_seg_004,6,rgb,navigation,How do I unlock the computer lab door to enter?,I swipe an access card on the electronic lock.,,0.85
+wash_hands_day_seg_004,7,rgb,non_common,Is there any furniture that seems to be floating or improperly placed in the rooms?,"No, all objects and furniture are properly placed.",,0.85
+wash_hands_day_seg_004,8,rgb,object_recognition,What color are the chairs in the computer lab room I enter?,The chairs are blue.,,0.85
+wash_hands_day_seg_004,9,rgb,scene_sequence,What is the sequence of main scenes I pass through in this segment?,"The sequence is: bathroom, hallway, and finally the computer lab.",,0.85
+wash_hands_day_seg_004,10,rgb,spatial_reasoning,Where is the trash bin located relative to the sink in the bathroom?,It is located directly underneath the sink.,,0.85
+wash_hands_day_seg_004,11,rgb,text_recognition,What specific action does the sign on the door ask students to perform before leaving?,The sign asks students to make sure they close the windows.,,0.85
+wash_hands_day_seg_004,12,event,event_navigation,Which way do I turn to find the final room after walking through the hallway?,to the right,,0.85
+wash_hands_day_seg_004,13,event,event_non_common,Do I see any objects floating or moving in an unrealistic manner?,no,,0.85
+wash_hands_day_seg_004,14,event,event_object_recognition,What is the first object I interact with to leave the bathroom?,door handle,,0.85
+wash_hands_day_seg_004,15,event,event_scene_sequence,What sequence of environments do I pass through after exiting the bathroom?,hallway then room,,0.85
+wash_hands_day_seg_004,16,event,event_spatial_reasoning,Where are the walls located relative to my path as I walk through the corridor?,on both sides,,0.85
+wash_hands_day_seg_004,17,ir,action,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of my action. Please ensure comprehensive video reasoning capabilities, and more challenging to be answered during a low light condition. Also it is good to come up with real world scenario open vocabulary questions. Avoid questions regarding the light condition (illumination), dynamic objects and humans exist in the video. Please provide 8 questions.",1. What am I doing at the very beginning of the segment? 2. How do I interact with the doors to open them? 3. What is my primary action while in the hallway? 4. Where am I walking towards? 5. What action do I take when I reach the door marked '02.B.29'? 6. Am I walking at a steady pace? 7. Do I stop to interact with anything in the hallway besides the door? 8. What is the consequence of opening the second door?,,0.75
+wash_hands_day_seg_004,18,ir,counting,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of counting. Avoid questions that can be answered from a few frames; instead, design questions that require understanding the entire video, ensuring comprehensive video reasoning capabilities, and more challenging to be answered during a low light condition. Ask questions that more focus on counting, for example object, room, buildings etc. Make sure the question can be answered with a precise answer. The question doesn't need to be aligned with the frames. Avoid questions regarding the light condition (illumination), dynamic objects and humans exist in the video. Please provide 10 questions.",1. How many doors did I open during the segment? 2. How many sinks did I pass? 3. How many hallways did I walk through? 4. How many mirrors were visible in the bathroom? 5. How many computers are visible in the final room? 6. How many monitors can be counted in the lab? 7. How many room identification labels did I pass in the hallway? 8. How many different rooms did I enter? 9. How many fire extinguishers are on the hallway floor? 10. How many door handles did I touch?,,0.75
+wash_hands_day_seg_004,19,ir,dynamic_counting,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of counting dynamic object or human. Please avoid questions that can be answered from a few frames and ensure comprehensive video reasoning capabilities and more challenging to be answered during a low light condition (illumination), and ask questions that more focus on the current moving object but not include me (person holding the camera). For example: How many cars approach me? Please avoid question regarding illumination. Please provide 8 questions.",1. How many other people are walking in the hallway? 2. How many dynamic objects pass by me in the corridor? 3. Do any cars appear through the windows? 4. How many people are seen inside the computer lab? 5. Are there any animals moving in the scenes? 6. How many other subjects are visible in the bathroom mirror? 7. Do any doors open on their own? 8. Are there any moving robots in the lab?,,0.75
+wash_hands_day_seg_004,20,ir,dynamic_recognition,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of dynamic object or human. Please avoid questions that can be answered from a few frames and ensure comprehensive video reasoning capabilities and more challenging to be answered during a low light condition (illumination), and ask questions that more focus on the current moving object but not include me (person holding the camera). Also it is good to come up with real world scenario open vocabulary questions. For example: Did a new object appear? Did a car approach me? Has the door fully closed? Has the bus departed? Did a person walk to me? When? Time duration where? Please avoid questions regarding illumination. Please provide 8 questions.",1. When is the first door opened? 2. Does the bathroom door fully close behind me? 3. At what point do I reach for the computer lab door handle? 4. Are there any other people moving in the video? 5. Does any object in the lab move as I enter? 6. Did a car approach the building? 7. When does the second door finish opening? 8. Does anyone else walk past me in the hallway?,,0.75
+wash_hands_day_seg_004,21,ir,light_change,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of light changing. Please avoid questions that can be answered from a few frames and ensure comprehensive video reasoning capabilities and more challenging to be answered during a low light condition (illumination), and ask questions that more focus on illumination, for example, ""Did the lights turn on/off?"" ""Is it getting darker/brighter?"" ""Is the light approaching me?"" ""Did a car's headlights just pass by?"" Please provide 8 questions.",1. Does it get darker or brighter when I first enter the hallway? 2. Is the hallway darker than the rooms it connects? 3. What happens to the light level as I enter the computer lab? 4. Are there windows in the computer lab providing light? 5. Is there a thermal hotspot on the bathroom ceiling? 6. Does the light source change from artificial to natural? 7. Is the light in the computer lab approaching me? 8. Do the lights turn off at any point?,,0.75
+wash_hands_day_seg_004,22,ir,light_recongnition,What is the main light source in the final room?,Windows.,,0.75
+wash_hands_day_seg_004,23,ir,navigation,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of navigation. Generate QA pairs regarding navigation, for example, Which way should I go to reach the kitchen? What’s the fastest way back to the living room? How do I get to the bus stop from here? Avoid questions that can be answered from a few frames; instead, design questions that require understanding the entire video, ensuring comprehensive video reasoning capabilities, and more challenging to be answered during a low light condition (illumination). Make sure the question can be answered with a precise answer. The question doesn't need to be aligned with the frames. Avoid questions regarding the light condition (illumination), dynamic objects, and humans exist in the video. Please provide 10 questions.",1. Which way should I turn after exiting the bathroom? 2. How many steps roughly should I take down the hallway? 3. On which side of the hallway is the lab door located? 4. What is the path back to the lab from the sink? 5. Is the hallway straight or does it have turns? 6. Are there any doors on the left side of the hallway? 7. Do I need to turn left at any point? 8. How do I get to the office once I'm in the hallway? 9. Is the bathroom door the first door in the hallway? 10. What is the final navigation action taken?,,0.75
+wash_hands_day_seg_004,24,ir,non_common,Is there any furniture blocking the hallway path?,No.,,0.75
+wash_hands_day_seg_004,25,ir,object_recognition,What room do I enter at the end of the video?,A computer lab.,,0.75
+wash_hands_day_seg_004,26,ir,scene_sequence,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate finegrained understanding of scene sequence. Avoid questions that can be answered from a few frames; instead, design questions that require understanding the entire video, ensuring comprehensive video reasoning capabilities, and more challenging to be answered during a low light condition (illumination). Ask questions that more focus on scene sequence, for example What’s the sequence of scenes I just passed? What did I pass before the kitchen? Which room connects the living room and the kitchen? Make sure the question can be answered with a precise answer. The question doesn't need to be aligned with the frames. Avoid questions regarding the light condition (illumination), dynamic objects and humans exist in the video. Please provide 10 questions.",1. What is the sequence of scenes I pass through? 2. Which room did I leave at the start of the segment? 3. Where did I walk immediately after leaving the bathroom? 4. What was the final destination room? 5. Which area connects the bathroom and the computer lab? 6. What did I pass before entering the computer lab? 7. Did I visit any outdoor areas? 8. How many doors did I pass through during this journey? 9. Which room was I in before entering the hallway? 10. What is the final scene shown in the video?,,0.75
+wash_hands_day_seg_004,27,ir,spatial_reasoning,Where are the office desks located relative to me upon entering the final room?,Along the walls.,,0.75
+wash_hands_day_seg_004,28,ir,text_recognition,"Please work as a VQA assistant, treat the subject (behind the camera) in the video as I and the language model as you when generate question (ask question from human perspective). By analyzing both the video and the corresponding caption, generate questions that evaluate fine-grained understanding of text recognition in thermal IR. Please ensure comprehensive video reasoning capabilities, and more challenging to be answered during a low light condition. Also it is good to come up with real world scenario open vocabulary questions. Consider both text recognition (what text-like pattern is shown), and text reasoning (Which office do I see the pattern in? How many times does the pattern appear? What does the pattern imply). Avoid questions regarding the light condition (illumination), dynamic objects and humans exist in the video. Please provide 8 questions.",1. What does the sign on the bathroom door instruct students to do? 2. What is the room number visible on the door label at frame 3570? 3. Which office number is associated with the 'Büro 19' label? 4. What code is present on the identification label near the office door? 5. Where is the sign located in the initial room? 6. What facilities are identified by the 'WC H' label? 7. How many room labels with QR codes are seen in the hallway? 8. What is the pattern on the bathroom door likely used for?,,0.75
+wash_hands_day_seg_004,29,audio,audio_sound_source_identification,What are the primary sound sources heard as the person walks back to the room?,"The primary sound sources are the person's footsteps, the sounds of doors opening and closing, and the ambient noise of the building.",00:01:44 - 00:02:04,0.8
 wash_hands_night_seg_001,0,rgb,action,What is the primary activity being performed with the mailbox?,"Accessing the mailbox with a key, likely to retrieve or check mail",,0.45
 wash_hands_night_seg_001,1,rgb,counting,How many main mailbox sections are visible in the mailbox area?,2 sections - one grey and one vibrant green,,0.45
 wash_hands_night_seg_001,2,rgb,dynamic_counting,What dynamic action occurs with the mailbox in this video?,A blue-gloved hand approaches and interacts with the mailbox,,0.45

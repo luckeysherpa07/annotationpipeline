@@ -491,7 +491,53 @@
       "end_timestamp": "00:01:04.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The sequence begins in an indoor room where a flat desk surface occupies the near-to-mid depth, with a laptop and various small items placed on it. Beyond the desk, vertical walls define the room's boundaries. As I move, the scene transitions into a narrow corridor where the walls maintain a consistent mid-range distance on both sides, while the end of the hallway appears as a brighter, distant region. I then enter a stairwell characterized by a series of horizontal steps that recede downward in depth, flanked by thin, vertical railing posts on one side and a solid wall on the other.",
+        "question": "What is the depth relationship between the stairs and the railing posts as I descend?",
+        "answer": "Stairs recede downward while posts stay lateral."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Initially, the laptop is positioned on top of the desk, closer to me than the back wall. When walking down the hallway, the left and right walls are equidistant from the center path, creating a symmetrical 3D layout. Entering the stairwell, the steps are located below my current level, and the railing is positioned to the right of the walking path. The exit doorway at the bottom of the stairs is the farthest identifiable region in the 3D space as I approach it.",
+        "question": "Where is the railing positioned relative to the path as I enter the stairwell?",
+        "answer": "To the right side."
+      },
+      "depth_scene_sequence": {
+        "caption": "The video starts in an office-like room, moving from the desk area toward a doorway. This leads into a long corridor that connects the room to a central stairwell. The 3D layout changes from a wide room to a narrow channel, then to an open, vertically-oriented space as I move onto the stairs. Finally, the path leads through a transition from the indoor stairwell to a brighter outdoor-facing threshold.",
+        "question": "What space do I enter immediately after leaving the narrow corridor?",
+        "answer": "The stairwell."
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "The path follows a clear navigable channel forward from the desk through a doorway. I then take a slight turn into the corridor which provides a straight, unobstructed route. The navigation continues down a flight of stairs where the depth cues clearly show the drop in floor height, guided by the railing on the right, ultimately leading toward the bright, distant exit.",
+        "question": "How does the 3D layout change as I move from the hallway to the stairs?",
+        "answer": "Floor height drops downward."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "The depth information shows a physically consistent environment with normal indoor geometry; no floating objects or unrealistic depth intersections are observed.",
+        "question": "Are there any floating objects visible in the hallway depth?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_day_seg_002": {
     "source_prefix": "check_mailbox_day",
@@ -505,7 +551,53 @@
       "end_timestamp": "00:01:45.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In this segment, the primary object is a large, flat vertical surface located at mid-depth, which contains a grid of rectangular mailbox units. These mailboxes have slight depth variations indicating separate compartments. I reach out toward the unit, and my hand/arm appears as a moving object at a very near depth range, partially occluding the mailbox grid as I interact with it.",
+        "question": "What occupies the near depth range as I check the mail?",
+        "answer": "My hand and arm."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The mailbox unit is positioned directly in front of me, acting as the background for the interaction. My arm is in front of the mailboxes, periodically moving closer to the camera and then toward the unit. The individual slots are adjacent to each other in a grid layout on the wall surface.",
+        "question": "Where is my arm relative to the mailbox unit?",
+        "answer": "In front of it."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera is stationary in front of the mailbox area. The 3D structure consists of a single wall plane with the mailbox grid. The only change in the 3D layout is the dynamic movement of my arm entering and exiting the near-field space during the interaction.",
+        "question": "Does the camera move between different rooms in this segment?",
+        "answer": "No, it remains stationary."
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "The scene is stationary, centered on the mailbox unit which is about an arm's length away. The 3D layout supports standing and reaching, but no further traversal through the space is shown in this segment.",
+        "question": "Is there a navigable path visible beyond the mailboxes?",
+        "answer": "No, just the wall."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "No physically implausible situations are observed; the depth interaction with the mailbox unit is geometrically consistent.",
+        "question": "Are there any unrealistic depth artifacts around the mailboxes?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_day_seg_003": {
     "source_prefix": "check_mailbox_day",
@@ -519,7 +611,53 @@
       "end_timestamp": "00:03:14.900"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The segment begins with a wide, bright exterior threshold at the far depth, leading into a stairwell where steps incline upward. Beyond the stairs, a hallway extends forward with flat vertical walls. The sequence concludes in a room where a desk surface and a chair occupy the mid-to-near depth, with walls enclosing the space.",
+        "question": "What is the 3D shape of the objects at the end of the return path?",
+        "answer": "Flat desk and chair."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Entering the building, the stairs are in front of me and incline upward. As I walk, the hallway walls are adjacent to the path. Upon reaching the room, the desk is situated in front of the back wall, and the chair is placed between me and the desk. The laptop sits above the desk surface.",
+        "question": "Where is the chair located relative to the desk at the end?",
+        "answer": "In front of it."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera moves from the building entrance, up a flight of stairs, through a long hallway, and finally into the original room. The 3D layout transitions from a wide entrance to a vertical climb, a narrow passage, and finally an enclosed office space.",
+        "question": "In what order do I pass through the spaces to return to my desk?",
+        "answer": "Entrance, stairs, hallway, room."
+      },
+      "depth_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_navigation": {
+        "caption": "The navigation path leads from the bright entrance up the stairs, where the upward incline is clearly visible in depth. The route then follows the long hallway toward the room at the end. Navigation is guided by the walls and floor levels, terminating at the workspace.",
+        "question": "How do depth cues indicate the stairs are being climbed?",
+        "answer": "Floor level rises ahead."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "depth_non_common": {
+        "caption": "The depth layout is physically plausible and realistic; no anomalies such as floating furniture or intersecting walls are present.",
+        "question": "Is the chair intersecting with the desk in the depth view?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_night_seg_001": {
     "source_prefix": "check_mailbox_night",
@@ -533,7 +671,53 @@
       "end_timestamp": "00:00:42.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The sequence begins in a room with a desk and a lamp on the right. A chair is positioned near the desk. I move toward a doorway that connects to a long, narrow corridor. As I walk down the corridor, the walls maintain a constant lateral distance while the far end gradually approaches. The segment ends as I reach a large, flat vertical unit with a grid-like structure, representing a bank of mailboxes.",
+        "question": "What is the spatial relationship between the desk and the corridor at the start of the video?",
+        "answer": "The desk is closer to me within the room, while the corridor extends far into the background beyond the doorway."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "Initially, the lamp sits atop the flat desk surface. The chair is located in front of the desk from my perspective. I pass through a doorway where the frame is adjacent to me on both sides. In the corridor, the left and right walls are equidistant and parallel. The mailbox unit is located at the far end of the corridor, perpendicular to the path of travel.",
+        "question": "As I move down the corridor, where are the walls relative to me?",
+        "answer": "The walls are on my left and right sides."
+      },
+      "depth_scene_sequence": {
+        "caption": "The video transitions from a constrained 3D space (the room) into a highly elongated 3D volume (the corridor). I start at the desk, navigate through the door frame, and proceed linearly down the hallway. The depth layout shifts from various near-field objects to a long-distance view, concluding with a near-field interaction at the mailbox unit.",
+        "question": "What is the order of navigable spaces I traverse in this segment?",
+        "answer": "I move from the room, through a doorway, and down a long corridor to reach the mailboxes."
+      },
+      "depth_counting": {
+        "caption": "In the initial room, I identify one desk, one lamp, one chair, and one door frame. Moving into the hallway, I see two long parallel walls and one ceiling surface. At the destination, the mailbox bank consists of a grid containing many rectangular compartments organized in rows and columns.",
+        "question": "How many lamps are visible on the desk at the start?",
+        "answer": "One lamp."
+      },
+      "depth_dynamic_counting": {
+        "caption": "There are no moving objects or humans visible in the depth stream other than the camera holder's own movement through the environment. The 3D geometry of the room and corridor remains static as I approach and pass through different depth layers.",
+        "question": "How many people do I pass in the corridor?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The path is a clear straight-line trajectory through the doorway and down the corridor. Depth cues show a clear floor plane for safe walking. Obstacles like the desk and chair are safely to the side at the start. The hallway provides a direct navigable route to the mailbox landmarks.",
+        "question": "Does the path require turning while I am in the corridor?",
+        "answer": "No, it is a straight path."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "No external dynamic entities are detected. The change in the scene's depth profile is solely due to the forward motion of the camera through the static 3D layout of the building.",
+        "question": "Is there any object moving independently of my camera motion?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I start by standing up from the desk, indicated by the downward shift in relative depth of the desk surface. I then perform a forward translational movement toward the door. My pace is steady as I enter and walk the length of the corridor, with the mailbox unit growing in size as I approach.",
+        "question": "What action am I performing throughout the majority of this segment?",
+        "answer": "Walking forward toward the mailboxes."
+      },
+      "depth_non_common": {
+        "caption": "The depth stream shows a standard interior layout. The long corridor appears as a deep void due to the limits of the sensor or the lack of returning light at extreme distances, which is a common artifact in dark conditions but the geometry remains plausible.",
+        "question": "Are there any objects floating or intersecting unnaturally in the room?",
+        "answer": "No, the geometry is consistent."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_night_seg_002": {
     "source_prefix": "check_mailbox_night",
@@ -547,7 +731,53 @@
       "end_timestamp": "00:02:05.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "After interacting with the flat mailbox surface, I turn 180 degrees, causing the corridor walls to swap sides in the view. I re-enter the room and approach the desk. My hand appears in the near-field depth, moving across the desk surface and shifting the position of smaller objects as I search for the key.",
+        "question": "What object appears at the closest depth range when I am back in the room?",
+        "answer": "My hand."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The hand moves above the flat plane of the desk. As I search, the hand occludes parts of the desk and items on it. The lamp remains on the right side of the desk. I move between the chair and the desk, occupying the space previously traversed.",
+        "question": "Where is my hand moving relative to the desk surface?",
+        "answer": "It is moving directly above and across the desk surface."
+      },
+      "depth_scene_sequence": {
+        "caption": "I move from the mailbox area back into the corridor. I travel the reverse path to the room entrance. Once inside, the view centers on the desk. The segment ends with a focused view on the desk area where the search is occurring.",
+        "question": "In what order do I return to the desk?",
+        "answer": "I leave the mailboxes, walk back through the corridor, and enter the room to reach the desk."
+      },
+      "depth_counting": {
+        "caption": "I count one hand entering the frame multiple times to search. On the desk, there is one lamp and several smaller rectangular forms representing items being moved. The two walls of the corridor are passed again during the return trip.",
+        "question": "How many hands are visible searching the desk?",
+        "answer": "One hand."
+      },
+      "depth_dynamic_counting": {
+        "caption": "The primary moving entity is my hand. It moves toward and away from the desk surface repeatedly. No other dynamic objects are present in the room or hallway.",
+        "question": "How many moving objects are on the desk besides my hand?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "Navigation involves a 180-degree turn followed by a straight walk back through the corridor. I use the doorway as a landmark to re-enter the room. Once inside, I navigate to the narrow space between the chair and the desk.",
+        "question": "Which way do I turn to leave the mailbox area?",
+        "answer": "I turn 180 degrees to face back toward the room."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "My hand is recognized as a dynamic object entering the near-field depth (under 0.5 meters). It performs complex reaching and grasping motions. The desk and lamp remain stationary throughout.",
+        "question": "Does my hand disappear from view while I am at the desk?",
+        "answer": "Yes, it moves in and out of the frame while searching."
+      },
+      "depth_action": {
+        "caption": "I walk back to the room and immediately start searching the desk. I use my hand to feel around and shift objects, looking for the key. The depth of the desk surface remains constant as I lean over it to look closer.",
+        "question": "What am I doing with my hand at the desk?",
+        "answer": "Searching for the mailbox key."
+      },
+      "depth_non_common": {
+        "caption": "The scene is physically consistent. The hand's motion follows natural trajectories over the desk plane.",
+        "question": "Do any objects appear to clip through the desk surface?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_night_seg_003": {
     "source_prefix": "check_mailbox_night",
@@ -561,7 +791,53 @@
       "end_timestamp": "00:02:30.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "I exit the room once more, walking past the door frame into the corridor. The long rectangular volume of the hallway is again visible, stretching into the distance. The mailbox bank reappears as a flat vertical barrier at the end of the path.",
+        "question": "What is the primary shape of the space I am walking through?",
+        "answer": "A long rectangular corridor."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The door frame passes on either side of me as I exit. I move deeper into the corridor, with the room receding behind me. The mailbox unit is initially at a far distance and gradually occupies more of the field of view as I approach.",
+        "question": "How does the distance to the mailboxes change during this segment?",
+        "answer": "The distance decreases as I walk toward them."
+      },
+      "depth_scene_sequence": {
+        "caption": "This segment is a repeat transition from the room, through the doorway, into the corridor, and ending at the mailbox station.",
+        "question": "What area do I enter after leaving the room?",
+        "answer": "The corridor."
+      },
+      "depth_counting": {
+        "caption": "I see one door frame, two corridor walls, and one large mailbox unit. The grid of the mailbox unit contains numerous individual compartments.",
+        "question": "How many corridors am I traversing?",
+        "answer": "One corridor."
+      },
+      "depth_dynamic_counting": {
+        "caption": "There are no external moving objects. The only change in depth relates to my steady walking gait through the hall.",
+        "question": "How many other people are visible during this walk?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "The path is identical to the first trip, utilizing the floor plane and corridor walls as guidance toward the mailbox landmark.",
+        "question": "Is there any obstruction in the middle of the corridor?",
+        "answer": "No, the path is clear."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The scene is static except for my forward movement. No dynamic entities are detected within the corridor.",
+        "question": "Is any object moving toward me?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I am walking with the key, though the key itself is too small to be clearly resolved in the depth map. My movement intent is clearly to reach the mailboxes for a second time.",
+        "question": "What is the subject's primary action?",
+        "answer": "Walking to the mailboxes."
+      },
+      "depth_non_common": {
+        "caption": "No unnatural geometric anomalies are present in this segment.",
+        "question": "Is there anything physically implausible in the corridor layout?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_night_seg_004": {
     "source_prefix": "check_mailbox_night",
@@ -575,7 +851,53 @@
       "end_timestamp": "00:03:05.000"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "I am at a very close distance to the mailbox unit. My hand reaches out to interact with a specific rectangular segment. One of these segments (the door) swings outward, creating a dark rectangular recess in the mailbox unit's otherwise flat surface. My hand then enters this recess.",
+        "question": "What happens to the shape of the mailbox when I open it?",
+        "answer": "A door panel moves, revealing a recessed cavity."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "My hand is positioned between me and the mailbox door. When the door opens, the interior space of the mailbox becomes visible as a deeper area behind the front plane. The hand moves from the front into that deeper interior volume.",
+        "question": "Relative to the front of the mailbox, where does my hand go to check for mail?",
+        "answer": "Behind the front plane, into the interior."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera is stationary in front of the mailbox bank. The sequence is defined by the interaction: approaching the lock, opening the door, checking inside, and closing the door.",
+        "question": "What is the final state of the mailbox door in this segment?",
+        "answer": "It is closed and flat against the unit again."
+      },
+      "depth_counting": {
+        "caption": "I count one hand and one moving mailbox door. The mailbox unit itself contains several visible grid lines separating different boxes.",
+        "question": "How many hands are used to open the mailbox?",
+        "answer": "One hand."
+      },
+      "depth_dynamic_counting": {
+        "caption": "The mailbox door is a dynamic object that moves through one depth arc. My hand moves back and forth twice—once to open and once to check/close.",
+        "question": "How many doors on the mailbox unit do I open?",
+        "answer": "One door."
+      },
+      "depth_navigation": {
+        "caption": "I remain stationary at the end of the corridor. The 3D layout shows the mailbox unit as an immediate wall in front of me.",
+        "question": "Am I walking during this interaction?",
+        "answer": "No, I am standing still."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The mailbox door is recognized as a rotating dynamic object. The hand is a complex dynamic object interacting with it.",
+        "question": "When does the mailbox door begin to move?",
+        "answer": "When my hand reaches out to unlock it."
+      },
+      "depth_action": {
+        "caption": "I perform a sequence of manual interactions: reaching for the lock, swinging the mailbox door open, reaching into the cavity to check for mail, pulling my hand out, and pushing the door shut.",
+        "question": "What am I checking with my hand inside the mailbox?",
+        "answer": "If there is any mail."
+      },
+      "depth_non_common": {
+        "caption": "The interaction is common-sense. No geometric anomalies are observed.",
+        "question": "Do the mailbox and my hand overlap in an unrealistic way?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\check_mailbox_split\\check_mailbox_night_seg_005": {
     "source_prefix": "check_mailbox_night",
@@ -589,7 +911,53 @@
       "end_timestamp": "00:03:36.600"
     },
     "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "I turn away from the mailboxes and head back down the corridor. Upon reaching the end, I enter the room, walk past the chair, and approach the desk. The desk, lamp, and chair are again resolved at mid-to-near range. I conclude by sitting down, which brings the desk surface closer and more centered in the frame.",
+        "question": "What object do I pass just before sitting down?",
+        "answer": "The chair."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The corridor walls recede as I move back to the room. I pass through the doorway adjacency again. The chair is between me and the desk until I sit, at which point the desk surface becomes the primary near-field object in front of me.",
+        "question": "Where is the desk relative to me at the very end?",
+        "answer": "Directly in front and at close range."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence is: Mailboxes -> Corridor -> Doorway -> Room -> Desk Area -> Seated position.",
+        "question": "What is the final space I am in?",
+        "answer": "The room, sitting at the desk."
+      },
+      "depth_counting": {
+        "caption": "I count one corridor, one doorway, one chair, and one desk with a lamp on it.",
+        "question": "How many chairs are near the desk?",
+        "answer": "One chair."
+      },
+      "depth_dynamic_counting": {
+        "caption": "No other dynamic entities are present. My own movement is the sole source of change in the depth map.",
+        "question": "How many people do I encounter on the way back?",
+        "answer": "Zero."
+      },
+      "depth_navigation": {
+        "caption": "I follow the return path through the corridor and into the room. The chair is a near-field landmark used to guide my approach to the desk.",
+        "question": "Is the path back to the desk clear of obstacles?",
+        "answer": "Yes, it is clear."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The scene is static. The relative motion between me and objects like the chair or desk indicates my movement speed and final stopping point.",
+        "question": "Is any furniture moving toward me?",
+        "answer": "No, I am moving toward the furniture."
+      },
+      "depth_action": {
+        "caption": "I walk back to my starting point. I finish by performing the action of sitting down, evidenced by the sudden stabilization of the camera height and proximity to the desk surface.",
+        "question": "What is my final action in the video?",
+        "answer": "Sitting down at the desk."
+      },
+      "depth_non_common": {
+        "caption": "The environment and my movements through it are geometrically normal and plausible.",
+        "question": "Is the desk at an unusual angle relative to the floor?",
+        "answer": "No, it is flat and level."
+      }
+    }
   },
   "dataset\\cut_carrot_split\\cut_carrot_day_seg_002": {
     "source_prefix": "cut_carrot_day",
@@ -603,7 +971,53 @@
       "end_timestamp": "00:03:05.000"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The depth stream shows a workspace on a flat horizontal plane. A rectangular cutting board occupies the central foreground. On it lies a cylindrical carrot and a long, tapered kitchen knife held by an organic hand shape. To the upper right, a circular concave region represents a bowl. A Y-shaped peeler is set aside on the right. As time progresses, the large cylindrical carrot is decomposed into numerous thin, elongated rectangular strips that pile up on the board. The hands maintain a consistent near-range position, manipulating the objects with rhythmic vertical and horizontal movements.",
+        "question": "What is the 3D shape of the object I am holding in my right hand as I interact with the carrot?",
+        "answer": "A long, tapered blade."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "In the depth view, the carrot is positioned on top of the rectangular cutting board, making it closer to the camera than the board's surface. My right hand and the knife are in front of the carrot during the cutting strokes. The left hand is placed beside the carrot to stabilize it. The circular bowl is located at a greater distance in the upper-right background compared to the central cutting board. As strips are cut, they land on the board, resting behind the remaining carrot body from the camera's perspective.",
+        "question": "Is the bowl closer to or farther from me than the cutting board?",
+        "answer": "Farther away."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence begins with a static arrangement of kitchen tools on a flat surface. Transitioning into the main activity, the camera remains stable while the 3D layout changes through the movement of my hands. The knife moves through a repeating cycle of rising away from and descending toward the cutting board. The carrot's volume on the board shifts as it is transformed from a single solid entity into a collection of smaller, distinct depth regions representing julienne strips.",
+        "question": "How does the 3D structure of the carrot change over the course of the sequence?",
+        "answer": "It breaks into multiple strips."
+      },
+      "depth_counting": {
+        "caption": "Within the depth frames, I can identify one large rectangular cutting board, one primary carrot body, one Y-shaped peeler on the right, one circular bowl in the background, and one long kitchen knife. My two hands are visible as moving depth regions. Over time, the count of individual carrot strips on the board increases from zero to more than twenty distinct small depth segments by the end of the slicing task.",
+        "question": "How many cutting boards are visible in the workspace?",
+        "answer": "One."
+      },
+      "depth_dynamic_counting": {
+        "caption": "The primary dynamic objects are the knife and my two hands. The knife undergoes approximately 40-50 vertical oscillations as it slices through the carrot. Each slice results in a new strip moving from the carrot's main body to the surface of the cutting board. The hands remain continuously active in the near-field depth layer throughout the entire 140-second segment.",
+        "question": "How many tools am I actively moving to slice the carrot?",
+        "answer": "One knife."
+      },
+      "depth_navigation": {
+        "caption": "The depth layout defines a clear workspace with the cutting board as the accessible area for the task. The knife's path is a restricted vertical and forward motion within the central 3D space above the board. There is a clear boundary between the board and the surrounding table surface. The bowl serves as a destination landmark in the upper-right corner of the reachable 3D environment.",
+        "question": "In which direction relative to the board does the knife move to slice the carrot?",
+        "answer": "Downward and forward."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The knife is a dynamic object that repeatedly moves between a high depth position (further from the board) to a low depth position (touching the board). My right hand tracks with the knife's handle, while my left hand moves incrementally along the carrot's length as it is processed. Individual carrot strips appear as they are detached and fall onto the board, remaining static after their initial displacement.",
+        "question": "Which hand is moving the knife to perform the slicing?",
+        "answer": "My right hand."
+      },
+      "depth_action": {
+        "caption": "I am performing a rhythmic slicing action. My right hand grips the knife handle and executes a repeating downward-forward stroke, while my left hand holds the carrot, moving slightly backward as each section is sliced. The spatial consequence is the reduction of the carrot's main volume and the accumulation of strips on the board. The distance between the knife and the board constantly cycles during this process.",
+        "question": "What action am I performing with the knife on the carrot?",
+        "answer": "Slicing into strips."
+      },
+      "depth_non_common": {
+        "caption": "The depth stream accurately reflects standard physical interactions. Objects remain grounded on the table or cutting board. The hand's manipulation of the knife and carrot follows realistic 3D constraints without any observed floating or intersecting geometry artifacts.",
+        "question": "Are there any objects floating unnaturally in the air in this depth sequence?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\cut_carrot_split\\cut_carrot_night_seg_002": {
     "source_prefix": "cut_carrot_night",
@@ -677,7 +1091,53 @@
       "end_timestamp": "00:00:53.000"
     },
     "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In the immediate foreground, the handlebars and a portion of the front bike frame are clearly visible as a dark, close-up shape. Below them, the asphalt road surface extends continuously from the bottom of the frame into the far distance. Parked cars are lined up on both the left and right sides of the road, appearing as distinct mid-range volumetric blocks. Beyond the cars, the vertical shapes of trees and building facades define the far-range boundaries of the outdoor scene, creating a deep, corridor-like layout.",
+        "question": "What object occupies the immediate near range throughout this entire segment?",
+        "answer": "The handlebars."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The handlebars are the closest objects to me, positioned directly in front of the receding road. The road is situated below the camera's perspective. Parked cars are positioned beside the road on both sides, and they partially occlude the lower parts of the trees and buildings behind them. The trees are located further away than the cars, and the building structures are the farthest visible elements in the 3D layout.",
+        "question": "Is the road surface positioned above or below the parked cars in my field of view?",
+        "answer": "Below."
+      },
+      "depth_scene_sequence": {
+        "caption": "The video opens with the camera moving forward along a wide, asphalt-covered street. As the ride continues, the 3D layout remains relatively consistent with parked cars flanking the path. The camera eventually transitions onto a different paved area, possibly a sidewalk or a slightly narrower street section, as it approaches an entrance or building complex at the end of the segment.",
+        "question": "Does the navigable space become significantly wider or remain relatively a consistent corridor as I move forward?",
+        "answer": "Remains a consistent corridor."
+      },
+      "depth_counting": {
+        "caption": "I can identify 1 set of handlebars in the immediate near field. Along the sides of the road, there are approximately 12 parked cars at mid-range. I count roughly 8 trees along the sidewalk. The scene features 1 continuous road surface. In the background, there are at least 5 identifiable building clusters at a far distance. No humans or other moving vehicles are present to be counted.",
+        "question": "How many sets of handlebars am I holding in the foreground?",
+        "answer": "1"
+      },
+      "depth_dynamic_counting": {
+        "caption": "There are no moving humans or other vehicles identifiable in the depth stream during this segment. The only perceived motion is the camera holder's own forward movement relative to the static environment. Consequently, zero dynamic entities approach or recede from my position at any depth range.",
+        "question": "How many other moving cars pass me at near range?",
+        "answer": "0"
+      },
+      "depth_navigation": {
+        "caption": "The primary navigable path is a straight-ahead corridor on the road surface. The path is bounded by parked cars on the left and right, which act as static obstacles. The 3D layout indicates a clear, unobstructed route forward towards a distant building entrance. There are no steps or steep inclines, suggesting a flat, paved traversal area.",
+        "question": "In which direction does the 3D layout primarily support movement?",
+        "answer": "Straight ahead."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "The environment consists entirely of static objects: parked cars, trees, buildings, and the road. My own forward motion is recognized by the road surface moving closer in depth over time. No external moving objects appear or disappear throughout the sequence.",
+        "question": "Is there any car moving toward me from the far range?",
+        "answer": "No."
+      },
+      "depth_action": {
+        "caption": "I am riding a bike, which is inferred from the constant presence of the handlebars in the near field and the forward-moving perspective across the road surface. My interaction is primarily steering, keeping the handlebars centered as I navigate the straight path. The movement intent is a continuous forward traversal at a steady speed.",
+        "question": "What am I primarily doing with the handlebars during this segment?",
+        "answer": "Steering the bike."
+      },
+      "depth_non_common": {
+        "caption": "The 3D structure of the outdoor street is entirely realistic and consistent with real-world geometry. No floating objects, intersecting geometries, or depth artifacts are visible. The ordering of objects from near handlebars to far buildings follows a plausible spatial logic.",
+        "question": "Are there any floating objects or unnatural depth overlaps visible in this outdoor scene?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002": {
     "source_prefix": "ride_a_bike_day",
@@ -691,7 +1151,53 @@
       "end_timestamp": "00:01:38.500"
     },
     "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "As the segment begins, a metallic bike rack structure appears at mid-range. Several other bikes are already parked within the rack, their frames and wheels appearing as complex, thin 3D shapes at various mid-distances. Wooden vertical posts and a back wall define the boundaries of the storage area. The handlebars remain in the near field until the bike is brought to a stop near the rack.",
+        "question": "What 3D structure is the primary destination at mid-range in this segment?",
+        "answer": "The bike rack."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "I move between the vertical support posts to reach the parking area. The bike rack is positioned in front of the back wall of the storage room. Other parked bikes are situated beside my intended parking slot. At the end of the segment, my hands appear at a very close range, interacting with the space between the bike and the rack.",
+        "question": "Is the bike rack in front of or behind the back wall of the storage area?",
+        "answer": "In front of."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera transitions from the outdoor path into a semi-enclosed storage room. I maneuver the bike through a narrow entrance defined by vertical posts and approach the bike rack. The 3D layout changes from a wide-open view to an enclosed space with many intersecting metal and wooden surfaces. The segment concludes with the bike stationary in a rack slot.",
+        "question": "What change in 3D structure occurs as I enter the storage area?",
+        "answer": "Transitions to an enclosed space."
+      },
+      "depth_counting": {
+        "caption": "I count 1 set of handlebars. The bike rack has approximately 10 distinct slots. I can identify 6 other bikes already parked in the rack. There are 4 main vertical wooden support posts visible. At the very end of the video, 2 hands appear in the near foreground to secure the bike.",
+        "question": "How many other bikes are already parked in the rack when I arrive?",
+        "answer": "6"
+      },
+      "depth_dynamic_counting": {
+        "caption": "No other humans or vehicles are present. The dynamic elements are my own movement as I park the bike and then the appearance of my hands in the near field (from frame 002670) as I begin to secure it to the rack. My hands move back and forth between very close and mid-near range during the locking process.",
+        "question": "How many times do my hands enter the immediate near field at the end?",
+        "answer": "Once."
+      },
+      "depth_navigation": {
+        "caption": "I navigate into the storage area by turning slightly to the right to align with an available slot in the rack. The route involves moving forward through the posts and stopping once the front of the bike enters the rack slot. The enclosed 3D layout guides the movement into the specific parking position.",
+        "question": "What turn do I make to align with the parking rack?",
+        "answer": "A slight right turn."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "My hands appear at the very close range starting around frame 002670, moving towards the stationary bike frame and rack. They interact with these static objects to secure the bike and then disappear as the segment ends. No other dynamic objects are recognized.",
+        "question": "When do my hands first appear at the closest depth range to interact with the rack?",
+        "answer": "Around frame 002670."
+      },
+      "depth_action": {
+        "caption": "I steer the bike into the storage area, align it with a rack slot, and come to a complete stop. I then release the handlebars and move my hands into the scene to interact with the rack and the bike frame, performing the action of securing or locking the bike. This is indicated by the changing distance and presence of my hands relative to the stationary rack.",
+        "question": "What is my final action in the segment after the bike has stopped moving?",
+        "answer": "Securing the bike."
+      },
+      "depth_non_common": {
+        "caption": "The depth information is consistent with a complex indoor environment. Some artifacts appear as 'webbing' around the thin spokes of the parked bikes, which is a common sensor limitation, but no physical impossibilities or floating objects are present in the scene.",
+        "question": "Are there any floating objects or unnatural depth ordering visible in the storage area?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001": {
     "source_prefix": "ride_a_bike_night",
@@ -705,7 +1211,53 @@
       "end_timestamp": "00:01:04.000"
     },
     "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "The video starts with a forward-moving perspective through an outdoor environment. Depth frames (0-1920) reveal a flat ground plane representing a navigable road surface, with distant horizontal structures and vertical elements like poles or trees appearing in the far distance. As the camera advances, larger 3D masses corresponding to buildings and parked vehicles become more defined. Between frames 720 and 1500, several block-like objects are passed at a moderate distance on both sides, while the distant horizon remains a bright, far-off region. The spatial layout is consistent with a ride along a street with occasional structures and trees flanking the path.",
+        "question": "What is the relative depth ordering of the block-like objects on the side of the road compared to the bright region at the horizon?",
+        "answer": "They are closer."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "In this sequence, I am moving forward along a ground plane. The ground is consistently the closest identifiable feature below the camera. Distant vertical poles are farther away than the large blocky structures passed between frames 900 and 1500. There is a clear occlusion where closer structures hide parts of the distant horizon. Pairs of objects, such as a pole and a nearby building (around frame 1200), show the pole is closer to my path. Later, several parked cars appear beside the road at frame 1600, positioned between me and more distant buildings. The 3D layout is a deep corridor with objects layered from near to far.",
+        "question": "Are the parked vehicles I pass around frame 1600 in front of or behind the distant buildings in the background?",
+        "answer": "In front of."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence begins on an open, flat road with minimal immediate obstacles. The 3D structure evolves as I pass through a transition area from frame 600 to 1200 where more defined 3D masses like buildings appear on the periphery. Following this, I enter a more confined navigable space flanked by parked vehicles and vertical poles from frame 1500 to 1900. This transition leads from an open outdoor area into what appears to be a more urban street layout with dense spatial structures before the camera eventually slows down toward a parking area.",
+        "question": "What sequence of navigable spaces do I transition through during the first minute of the ride?",
+        "answer": "Open road to building-lined street."
+      },
+      "depth_counting": {
+        "caption": "Throughout this riding segment, multiple distinct objects can be counted using depth separation. I observe at least 4 large blocky structures (buildings) passed at mid-range. Approximately 6 vertical poles are identifiable on the right side of my path. At frame 1650, a cluster of 3 parked vehicles becomes visible at a closer depth layer. The distant horizon counts as one unified far-field region. Additionally, I identify 2 distinct depth layers: the near ground and the mid-distance objects like buildings and poles.",
+        "question": "How many large blocky building-like structures do I pass at mid-range during the ride?",
+        "answer": "4"
+      },
+      "depth_dynamic_counting": {
+        "caption": "The primary motion in this segment is the camera's forward movement. No other moving humans or distinct dynamic vehicles are identifiable within the depth range. All observed 3D structures, including buildings, poles, and parked cars, maintain static positions relative to the ground plane as I approach and recede from them.",
+        "question": "How many other moving vehicles approach me during the ride segment?",
+        "answer": "0"
+      },
+      "depth_navigation": {
+        "caption": "I am navigating a straight path along a flat ground plane that extends to a bright, distant horizon. Buildings are located approximately 5 to 10 meters on either side, providing clear lateral boundaries. Parked vehicles appear at frame 1600 on the right, narrowing the navigable corridor. There are no immediate obstacles on the road surface, indicating a safe walking or riding area. The 3D layout supports steady forward progression with occasional landmarks like vertical poles used to gauge speed and distance.",
+        "question": "In which direction does the navigable path primarily extend throughout this segment?",
+        "answer": "Straight forward."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "This segment is characterized by ego-motion rather than independent object motion. The camera advances through the scene, causing all static objects like the streetlights (frames 600-1800) and buildings (frames 900-1500) to move from far to near depth and then out of the field of view. No independent dynamic humans or objects appear or disappear during the ride.",
+        "question": "Does any object move independently toward me while I am riding?",
+        "answer": "No"
+      },
+      "depth_action": {
+        "caption": "My action is clearly riding a bicycle forward at a steady pace. This is inferred from the continuous, smooth approach toward distant 3D structures and the static ground plane below. Between frame 1800 and 1920, the rate of distance change to the objects ahead decreases, indicating a slowing intent. There is no direct manipulation of external objects, only steady navigation through the environment.",
+        "question": "What is my primary action during this first segment as inferred from the 3D layout changes?",
+        "answer": "Riding forward."
+      },
+      "depth_non_common": {
+        "caption": "The depth information depicts a standard, physically plausible outdoor environment. The ground is flat, and buildings and poles are properly anchored to it. There are no floating objects, intersecting geometries, or unrealistic depth artifacts present in this segment.",
+        "question": "Are there any floating or physically implausible objects visible in the depth stream during the ride?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002": {
     "source_prefix": "ride_a_bike_night",
@@ -719,7 +1271,53 @@
       "end_timestamp": "00:01:44.000"
     },
     "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
-    "annotations": {}
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "As the forward motion stops, the scene transitions into a parking area. From frame 1920 onwards, the depth view is dominated by a collection of bikes in a rack. The bikes are complex, wire-like 3D structures at close range (within 2 meters). A vertical fence or railing is visible behind them from frame 2000 to 2400. In the final frames (2800-3090), the camera moves extremely close to individual bike components, showing wheels, handlebars, and frames with high 3D detail and varied distance layers between components.",
+        "question": "What type of objects are the most prominent close-range 3D structures after the forward motion stops?",
+        "answer": "Bicycles."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "After stopping, the spatial layout changes to a crowded foreground. Multiple bikes are arranged side-by-side in a rack; those on the left are slightly farther away than the ones I am directly approaching. The railing is behind the bikes, acting as a background boundary. My hands and a bike lock (not explicitly detailed but inferred from interaction) move in front of the bike frame around frame 2700. In the extreme close-ups, individual bike spokes are in front of the tire on the opposite side of the wheel, and the handlebars are closer to me than the seat.",
+        "question": "Is the railing located in front of or behind the parked bicycles?",
+        "answer": "Behind."
+      },
+      "depth_scene_sequence": {
+        "caption": "The sequence transitions from the navigable street into a static parking zone. I stop in front of a row of bikes. The space becomes very constrained as I maneuver closer to a specific bike. From frame 2400, the camera orientation shifts as I park, and the final sequence (2700-3090) shows a very tight interaction space where the 3D structure is composed of overlapping bike parts and nearby vertical supports of the rack.",
+        "question": "What kind of space does the camera enter after the ride ends?",
+        "answer": "A bicycle parking area."
+      },
+      "depth_counting": {
+        "caption": "In the parking area, I can count several distinct objects. There are at least 5 bicycles arranged in the rack (visible from frame 1950 to 2300). I can identify approximately 12 vertical bars in the railing behind the bikes. During the locking action, I observe 2 handlebars and 2 wheels in the immediate foreground. There are also 3 identifiable horizontal supports for the bike rack.",
+        "question": "How many bicycles are visible in the rack as I approach to park?",
+        "answer": "5"
+      },
+      "depth_dynamic_counting": {
+        "caption": "The motion in this segment is primarily camera repositioning and manual interaction. I don't see any other moving humans or vehicles. The only dynamic changes in depth are caused by the camera's close approach to the bikes and the movement of the bike being parked as I position it within the rack. No other external dynamic objects pass through the scene.",
+        "question": "How many people walk past the parking area while I am locking the bike?",
+        "answer": "0"
+      },
+      "depth_navigation": {
+        "caption": "Navigation becomes very localized as I move into a parking space. I approach the row of bikes, and the path ends at the rack. The 3D layout of the bikes and rack creates narrow gaps. I maneuver into one such gap, stopping approximately 0.5 meters from the railing. The scene is now a dead-end for forward transit, requiring careful alignment within the complex geometry of the parked bikes.",
+        "question": "Where does the navigable path end in this final segment?",
+        "answer": "At the bike rack."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "There are no independent dynamic entities in this segment. The 'motion' is entirely ego-motion and manual positioning. Static bikes in the rack (frames 1920-2400) appear closer as I approach. The specific bike I am locking becomes the dominant foreground object from frame 2700 onwards, with its parts moving very close to the camera lens.",
+        "question": "Is there any independent dynamic human visible in the background while I park?",
+        "answer": "No"
+      },
+      "depth_action": {
+        "caption": "My action is parking and locking a bike. This is identified by the camera stopping near the 3D structures of the bike rack (frame 1920), then maneuvering even closer to a specific set of complex geometries (the bike frame and wheels). The proximity to these objects remains very high (less than 0.5 meters) from frame 2700 to the end, suggesting manual interaction with the lock and bike components at close range.",
+        "question": "What is my primary action in this segment based on the proximity to the bike components?",
+        "answer": "Parking and locking."
+      },
+      "depth_non_common": {
+        "caption": "The depth stream shows a realistic parking scene. The bikes and the rack are correctly positioned on the ground and show proper 3D perspective. There are no floating or intersecting objects that would violate common-sense physics.",
+        "question": "Are there any physically implausible 3D layouts, such as bikes intersecting with each other, in the rack?",
+        "answer": "No."
+      }
+    }
   },
   "dataset\\wash_hand_split\\wash_hands_day_seg_004": {
     "source_prefix": "wash_hands_day",
