@@ -27,6 +27,7 @@ from annotation_feature.reasoning import (
     normalize_all_modalities,
     run_export_grouped_qa,
     run_export_segmented_grouped_qa,
+    run_export_segmented_normalized_evidence_csv,
     run_group_evidence,
 )
 from annotation_feature.segmented_pipeline import estimate_segmented_work
@@ -341,9 +342,11 @@ def main():
         print("35. Normalize evidence units from existing modality JSON results")
         print("36. Group normalized evidence units by reasoning category")
         print("37. Export Q/A pairs from grouped QA into JSON")
-        print("\n38. Exit")
+        print("\n--- CSV EXPORT ---")
+        print("38. Export segmented normalized evidence units to CSV")
+        print("\n39. Exit")
 
-        choice = input("\nEnter choice (1-38): ").strip()
+        choice = input("\nEnter choice (1-39): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -690,6 +693,15 @@ def main():
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
         elif choice == "38":
+            print("\n" + "-" * 60)
+            print("Running: export segmented normalized evidence units to CSV")
+            print("-" * 60)
+            print("This step reads segmented_normalized_evidence_units.json.")
+            print("It writes segmented_normalized_evidence_units.csv.\n")
+            row_count = run_export_segmented_normalized_evidence_csv()
+            print(f"Exported {row_count} row(s) into segmented_normalized_evidence_units.csv")
+
+        elif choice == "39":
             print("\nExiting.")
             break
 

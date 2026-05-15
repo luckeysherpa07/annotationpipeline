@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 import re
 from pathlib import Path
@@ -13,6 +14,16 @@ from .normalizer import MODALITY_ORDER, normalize_all_modalities, normalize_samp
 
 
 NUMBERED_ITEM_RE = re.compile(r"(?:^|\s)(\d+)[.)]\s+")
+SEGMENTED_EVIDENCE_CSV_FIELDS = [
+    "segment_id",
+    "unit_index",
+    "modality",
+    "section",
+    "question",
+    "answer",
+    "timestamp",
+    "confidence",
+]
 
 
 def _as_text(value: Any) -> str:
@@ -175,6 +186,55 @@ def save_json_file(data: dict, path: str | Path) -> None:
 
     with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2, ensure_ascii=False)
+
+
+def run_export_segmented_normalized_evidence_csv(
+    input_path: str | Path = "segmented_normalized_evidence_units.json",
+    output_path: str | Path = "segmented_normalized_evidence_units.csv",
+) -> int:
+    """Export segmented normalized evidence units to a compact CSV."""
+    normalized_data = load_json_file(input_path)
+    print(f"Loaded segmented normalized evidence from: {Path(input_path)}")
+
+    rows: list[dict[str, Any]] = []
+    for segment_id in sorted(normalized_data):
+        segment_data = normalized_data[segment_id]
+        if not isinstance(segment_data, dict):
+            continue
+
+        evidence_units = segment_data.get("evidence_units", [])
+        if not isinstance(evidence_units, list):
+            continue
+
+        for unit_index, unit in enumerate(evidence_units):
+            if not isinstance(unit, dict):
+                continue
+
+            rows.append(
+                {
+                    "segment_id": segment_id,
+                    "unit_index": unit_index,
+                    "modality": unit.get("modality", ""),
+                    "section": unit.get("section", ""),
+                    "question": unit.get("question", ""),
+                    "answer": unit.get("answer", ""),
+                    "timestamp": unit.get("timestamp") or "",
+                    "confidence": unit.get("confidence", ""),
+                }
+            )
+
+    output_csv_path = Path(output_path)
+    if output_csv_path.parent != Path("."):
+        output_csv_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_csv_path, "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=SEGMENTED_EVIDENCE_CSV_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Segmented normalized evidence CSV written to: {output_csv_path}")
+    print(f"Total CSV rows: {len(rows)}")
+    return len(rows)
 
 
 def run_export_grouped_qa(
