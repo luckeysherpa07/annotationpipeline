@@ -598,5 +598,1130 @@
         "answer": "Green."
       }
     }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_001": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_001",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In this segment, I am in a brightly lit room featuring white walls and a large window that offers a view of a grassy outdoor area. A bed with a light green duvet is situated near a desk. On the window sill, there is a black and white poster with the Guy Fawkes mask and the text 'REVOLUTION GAME OVER'. As I move out of the room, I transition into a hallway with grey doors and a white ceiling. A green emergency exit sign with a running man symbol is visible above a doorway. I then encounter a metal stairwell made of galvanized steel grating, leading downwards.",
+        "question": "What color is the duvet on the bed in the initial room?",
+        "answer": "Light green."
+      },
+      "spatial_reasoning": {
+        "caption": "The bed is positioned to the left of the doorway as I exit the room, about 3 steps away. The desk is situated directly in front of the large window, approximately 2 steps from the bed. The exit sign is mounted on the ceiling above the doors leading to the stairwell, roughly 15 steps from my starting position. The metal stairs are located past the second hallway door, about 5 steps further. The Guy Fawkes poster lies flat on the window sill next to a small lamp.",
+        "question": "Where is the bed located in relation to the door when I leave the room?",
+        "answer": "To the left."
+      },
+      "text_recognition": {
+        "caption": "In frame 000000, a poster on the window sill displays 'REVOLUTION' and 'GAME OVER' in bold capital letters, likely a decorative or political print. In frame 001140, a green sign above the door shows a running man and an arrow, signifying an emergency exit. In frame 001230, numbers '1'233 | 1'234 | 1'235' are printed on a grey door, indicating the apartment or room numbers accessible through that entrance.",
+        "question": "1. What word is written at the top of the poster on the window sill? 2. What phrase is at the bottom of that same poster? 3. What room numbers are listed on the grey door in the hallway? 4. What is the color of the text on the exit sign? 5. Where is the room number text located on the door? 6. What symbol is depicted next to the arrow on the exit sign? 7. What is the orientation of the text on the Guy Fawkes poster? 8. What does the text on the green sign indicate?",
+        "answer": "1. REVOLUTION. 2. GAME OVER. 3. 1'233, 1'234, and 1'235. 4. White. 5. Centered on the door panel. 6. A running man. 7. Vertical along the edges. 8. An emergency exit route."
+      },
+      "scene_sequence": {
+        "caption": "The sequence begins in a private room (bedroom or study), then moves into a sterile hallway with grey walls. I pass several closed doors before reaching an internal building junction. I then proceed through a doorway to an outdoor-style hallway or balcony that leads to a metal external stairwell. I walk down the stairs to reach the ground level.",
+        "question": "1. What scene is shown at the very beginning of the video? 2. What environment do I enter immediately after leaving the bedroom? 3. Do I pass any doors in the hallway? 4. What is the texture of the walls in the hallway? 5. Where do I go after walking through the hallway? 6. What type of stairs do I descend? 7. What did I pass just before reaching the stairs? 8. Is the stairwell inside or outside the main building structure? 9. What is the sequence of floor types I walk on? 10. Which area connects the indoor hallway to the stairwell?",
+        "answer": "1. A bedroom or study. 2. A hallway. 3. Yes, several grey doors. 4. Smooth and white. 5. Toward a stairwell. 6. Metal grating stairs. 7. A doorway with an exit sign. 8. It appears to be an external or semi-enclosed stairwell. 9. Carpet or linoleum to concrete to metal grating. 10. A doorway with an exit sign."
+      },
+      "light_recongnition": {
+        "caption": "The primary light source in the first scene is natural daylight streaming in from the large window. In the hallway, recessed fluorescent or LED strip lights on the white ceiling provide even, cool-toned illumination. The stairwell area is lit by ambient daylight from the open sides of the structure.",
+        "question": "What is the primary source of light in the starting room?",
+        "answer": "Natural daylight from the window."
+      },
+      "light_change": {
+        "caption": "The video starts with bright natural light in the room. As I move into the hallway, the lighting shifts to a more artificial, consistent white light. Entering the stairwell area introduces a mix of shade and bright outdoor light. The intensity increases as I move closer to the building exit.",
+        "question": "1. Does the room get darker as I move away from the window? 2. Is the hallway brighter than the room? 3. Does the lighting color change when entering the hallway? 4. Does a shadow fall over the camera in the stairwell? 5. Is there a glare on any surface in the hallway? 6. Does the light appear to come from above in the hallway? 7. Is the stairwell more dimly lit than the hallway? 8. How does the light change as I approach the exit door?",
+        "answer": "1. Yes, slightly. 2. No, it is more consistent but slightly less intense than the window area. 3. Yes, it changes from warm natural light to cool artificial light. 4. Yes, as I move under the overhang. 5. Yes, on the polished floor and door handles. 6. Yes, from ceiling strips. 7. Yes, it has more shadows. 8. It becomes much brighter."
+      },
+      "counting": {
+        "caption": "I can identify several key objects: 1 bed, 1 desk, at least 4 grey doors in the hallway, 1 exit sign, and 1 metal stairwell. I also count 2 light switches near the bedroom door and 1Guy Fawkes poster on the window sill.",
+        "question": "1. How many beds are in the starting room? 2. How many desks are visible? 3. How many grey doors do I pass in the hallway? 4. How many exit signs are visible in this segment? 5. How many flights of stairs do I go down? 6. How many posters are on the window sill? 7. How many windows are in the first room? 8. How many light switches are seen near the first door? 9. How many black chairs are in the room? 10. How many handles are visible on the first grey door?",
+        "answer": "1. One. 2. One. 3. Four. 4. One. 5. One. 6. One. 7. One large window. 8. Two. 9. One. 10. One."
+      },
+      "dynamic_counting": {
+        "caption": "In this segment, there are no other humans or dynamic objects moving independently of my own motion. The environment is static as I walk through it.",
+        "question": "1. How many people pass me in the hallway? 2. Do any doors open on their own? 3. Are there any cars moving outside the window? 4. How many pets are seen in the hallway? 5. Do any objects fall over as I walk? 6. Are there any birds visible through the window? 7. How many other people are using the stairs? 8. Does anyone else walk into the room?",
+        "answer": "1. None. 2. No. 3. None are visible moving. 4. None. 5. No. 6. No. 7. None. 8. No."
+      },
+      "non_common": {
+        "caption": "The layout is standard for a modern residential or office building. The placement of a Guy Fawkes poster on a window sill is a personal decorative choice rather than a violation of physical laws. The metal stairs are typical for external fire escapes or modern architectural designs.",
+        "question": "Is there anything in the room that violates the laws of physics?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "To leave the room, I turn right from the desk and walk through the door. In the hallway, I continue straight for about 10 steps. I then turn slightly left to pass through the exit door. Finally, I walk straight ahead to reach the stairs and begin my descent.",
+        "question": "1. Which direction do I turn to leave the room? 2. Do I walk straight or turn in the first hallway? 3. How many doors do I pass before turning toward the exit? 4. Is the exit door on the left or right? 5. To reach the stairs, do I need to go through another door? 6. Which way do I turn after the exit sign? 7. Are the stairs located directly ahead of the exit door? 8. How many steps do I take in the hallway? 9. Do I go up or down to reach the mailbox? 10. What is the shortest path to the stairs from the bedroom?",
+        "answer": "1. Right. 2. Straight. 3. Four. 4. Straight ahead. 5. Yes. 6. Slightly left. 7. Yes. 8. Approximately 10. 9. Down. 10. Exit the room, walk down the hallway, and go through the door with the exit sign."
+      },
+      "dynamic_recognition": {
+        "caption": "I begin walking away from the desk at frame 000120 and continue until the end of the segment at frame 001920. I reach the first hallway door at frame 000330 and the exit door at frame 001230. My descent down the stairs starts at frame 001470.",
+        "question": "1. When do I start moving? 2. At what point do I reach the hallway? 3. When do I pass the first grey door? 4. When is the exit sign first visible? 5. When do I walk through the door into the stairwell area? 6. When do my feet touch the metal grating of the stairs? 7. Does the camera angle shift as I go down the stairs? 8. How long does it take to walk the length of the hallway?",
+        "answer": "1. Around frame 000120. 2. Around frame 000330. 3. Around frame 000450. 4. Around frame 001110. 5. Around frame 001260. 6. Around frame 001470. 7. Yes, it tilts downward. 8. About 30 seconds."
+      },
+      "action": {
+        "caption": "I stand up from the desk, likely to go check the mail. I walk across the room, navigate through the apartment door, and traverse the building's hallway. I then push open the exit door to reach the stairwell and carefully walk down the metal steps. The purpose is to exit the building and reach the mailbox area outside.",
+        "question": "1. What is my first action in the video? 2. Why am I leaving the room? 3. What do I do when I reach the door in frame 001260? 4. How do I navigate the hallway? 5. What is the result of me walking down the stairs? 6. Am I carrying anything in my hands? 7. Do I stop at any point in the hallway? 8. What is the final action in this segment?",
+        "answer": "1. Standing up from the desk. 2. To check the mailbox. 3. I push it open. 4. By walking straight down its center. 5. I reach the ground level outside. 6. It doesn't appear so. 7. No. 8. Descending the stairs."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_002": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_002",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "This segment shows an outdoor mailbox station with several grey and green metal boxes. The mailboxes are numbered with white digits. The ground is made of grey concrete tiles. I am holding a set of keys to unlock a specific mailbox. The background consists of a building with red and grey panels and a small garden area with bushes and dry leaves.",
+        "question": "What colors are the mailboxes?",
+        "answer": "Grey and green."
+      },
+      "spatial_reasoning": {
+        "caption": "I am standing directly in front of the mailbox bank, about 1 step away. The keys are in my hand, held close to the mailbox lock, about 0.5 steps from the unit. The building with red panels is situated behind the mailbox area, approximately 15 steps away. A concrete planter box is to the left of the walkway, about 4 steps from me. A person in a pink shirt is walking in the background, about 10 steps away from the mailbox unit.",
+        "question": "Where are the keys in relation to the mailbox?",
+        "answer": "They are held right in front of the lock."
+      },
+      "text_recognition": {
+        "caption": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors. In frame 002490, name labels like 'Wiebusch' and 'F. Festa' are seen on individual mailboxes, used to identify the residents. In frame 002970, another set of mailboxes shows numbers starting with '1'001'.",
+        "question": "1. What is the specific number on the green mailbox I am checking? 2. What name is on the label of mailbox 1'234? 3. What name is on the label of mailbox 1'223? 4. What other numbers are listed on the grey sign beside the mailboxes? 5. Are the numbers written in a stylized font? 6. What is the first number seen in the 1'000 series? 7. How many room numbers are listed on the door I pass earlier? 8. What is the background color for the name labels?",
+        "answer": "1. 1'234. 2. Wiebusch. 3. F. Festa. 4. 1'233, 1'234, 1'235. 5. Yes, they look like hand-drawn or stencil-style white digits. 6. 1'001. 7. Three. 8. White."
+      },
+      "scene_sequence": {
+        "caption": "The scene remains focused on the outdoor mailbox area. I approach the mailboxes from the walkway, stand in front of them to locate my unit, and then use my keys. People are seen walking along the perimeter of the courtyard in the background.",
+        "question": "1. Where is the subject at the start of this segment? 2. What is the primary focus of this scene? 3. Do I move away from the mailboxes at any point? 4. What is behind the subject? 5. What is the subject facing? 6. Are there any other people in the scene? 7. What environment is shown in the background? 8. What is the sequence of actions I perform? 9. Where do the other people go? 10. Does the scene change from outdoors to indoors?",
+        "answer": "1. On an outdoor patio. 2. Checking the mailbox. 3. No, I stay in front of them. 4. A building with red panels. 5. A bank of mailboxes. 6. Yes, two people are walking in the distance. 7. A courtyard with grass and bushes. 8. Approaching, searching for the number, and preparing the key. 9. They walk across the background courtyard. 10. No, it remains outdoors."
+      },
+      "light_recongnition": {
+        "caption": "The scene is illuminated by bright, overcast daylight. The light is diffused, creating soft shadows on the concrete ground and the mailbox unit. There are no visible artificial light sources in this outdoor area.",
+        "question": "What is the lighting condition in this outdoor segment?",
+        "answer": "Bright, diffused daylight."
+      },
+      "light_change": {
+        "caption": "The light remains very stable throughout this segment as it is natural daylight. There are no sudden shadows or changes in brightness as I stand still in front of the mailboxes.",
+        "question": "1. Does the sun come out during this segment? 2. Is there any flickering light? 3. Does my shadow move significantly? 4. Is the area near the mailboxes shaded? 5. Does the light change when I move closer to the mailbox? 6. Is it getting brighter toward the end? 7. Are there any reflections on the glass or metal surfaces? 8. How consistent is the illumination?",
+        "answer": "1. No, it stays overcast. 2. No. 3. No. 4. It is under a slight overhang, so it is in soft shadow. 5. No. 6. No. 7. Yes, some soft reflections on the mailbox doors. 8. Very consistent."
+      },
+      "counting": {
+        "caption": "I count over 30 individual mailboxes in the main bank. There are 2 people walking in the background. I have 1 set of keys. There are at least 5 green mailboxes in the center column. I also see 1 concrete planter nearby.",
+        "question": "1. How many people are walking in the background? 2. How many mailbox units are visible in the green column? 3. How many keys am I holding? 4. How many concrete tiles do I stand on? 5. How many red panels are on the building in the distance? 6. How many bushes are in the garden area? 7. How many name labels can you read? 8. How many columns of mailboxes are there? 9. How many trees are in the background? 10. How many times do I try the key?",
+        "answer": "1. Two. 2. At least five. 3. One set. 4. About four. 5. Many, at least twenty. 6. About three main clusters. 7. At least two (Wiebusch, F. Festa). 8. At least five. 9. Two. 10. Once."
+      },
+      "dynamic_counting": {
+        "caption": "Two people are walking across the background courtyard from right to left between frame 002730 and 002940. My hands are moving to position the key near the mailbox lock.",
+        "question": "1. How many people walk across the courtyard? 2. Is there any vehicle moving in the background? 3. Do the bushes move in the wind? 4. Does anyone approach me? 5. How many objects do I move with my hands? 6. Do the people in the background stop to talk? 7. Are there any flying insects visible? 8. Does a bird fly by?",
+        "answer": "1. Two. 2. No. 3. No, they are still. 4. No. 5. One set of keys. 6. No, they continue walking. 7. No. 8. No."
+      },
+      "non_common": {
+        "caption": "Everything appears realistic. The mailboxes are properly mounted, and the surrounding environment matches a typical housing complex. There are no signs of floating objects or unrealistic textures.",
+        "question": "Are there any design flaws in the mailbox area shown?",
+        "answer": "No, it looks normal."
+      },
+      "navigation": {
+        "caption": "I am already at the destination. I move about 2 steps forward to reach the specific mailbox labeled 1'234. I remain stationary while interacting with the box.",
+        "question": "1. How many steps do I take to reach the mailboxes? 2. Am I standing or walking during most of this segment? 3. Which column is my mailbox in? 4. Do I need to turn to see the other people? 5. How do I get back into the building? 6. Is the mailbox at eye level? 7. Do I move to the left or right to find the keyhole? 8. What is the distance between me and the garden? 9. How do I exit this area? 10. Is there a clear path back to the stairs?",
+        "answer": "1. Two. 2. Standing. 3. The second column from the left in the green section. 4. No, they are straight ahead. 5. Turn around and walk back the way I came. 6. Yes, approximately. 7. No, it is directly in front. 8. About 4 steps. 9. Walk back toward the building entrance. 10. Yes."
+      },
+      "dynamic_recognition": {
+        "caption": "The two people in the background start moving at frame 002730 and exit the frame around 002940. My hand moves toward the mailbox at frame 003000 and the key is positioned by 003150.",
+        "question": "1. When do the people first appear in the background? 2. When do they disappear from view? 3. At what frame do my hands reach for the mailbox? 4. Does the person in the pink shirt move faster than the other? 5. When do I stop walking toward the mailboxes? 6. How long are the people visible for? 7. Does anyone else appear after they leave? 8. Is there any movement from inside the mailboxes?",
+        "answer": "1. Around frame 002730. 2. Around frame 002940. 3. Around frame 003000. 4. No, they walk at a similar pace. 5. Around frame 002160. 6. About 7 seconds. 7. No. 8. No."
+      },
+      "action": {
+        "caption": "I approach the mailbox bank and scan the labels to find room 1'234. I then take out my keys and attempt to insert one into the lock to check for mail. The purpose is to retrieve any correspondence.",
+        "question": "1. What is my primary action at the mailboxes? 2. Which mailbox number am I looking for? 3. What object do I use to interact with the mailbox? 4. Do I successfully open the mailbox in this segment? 5. What am I doing with my eyes? 6. Do I talk to the people in the background? 7. How do I hold the keys? 8. What is the consequence of me finding the right box?",
+        "answer": "1. Checking for mail. 2. 1'234. 3. Keys. 4. I am in the process of inserting the key. 5. Scanning the numbers on the boxes. 6. No. 7. Between my thumb and forefinger. 8. I can now unlock it."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_003": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_003",
+      "task_label": "return from mailbox",
+      "start_seconds": 105.0,
+      "end_seconds": 194.9,
+      "start_timestamp": "00:01:45.000",
+      "end_timestamp": "00:03:14.900"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In this final segment, I walk back through the same environments. I pass the garden and building exterior, then enter a glass door. I walk back through the grey hallway and up the metal stairs. I eventually enter a room with white walls, containing a desk with a laptop, a blue desk lamp, a black office chair, and a coffee mug. A large window shows the same outdoor area from the beginning.",
+        "question": "What is on the white desk at the end of the video?",
+        "answer": "A laptop, a blue lamp, and a coffee mug."
+      },
+      "spatial_reasoning": {
+        "caption": "The desk is positioned against the wall next to the large window, about 2 steps away. The office chair is pulled up to the desk, 0 steps from it. The blue lamp is on the right side of the desk, about 1 foot from the laptop. The stairs are about 30 steps from the final desk position. The hallway doors are spaced about 5 steps apart.",
+        "question": "Where is the blue lamp located on the desk?",
+        "answer": "On the right side."
+      },
+      "text_recognition": {
+        "caption": "In frame 003660, the number '1'235' is seen on the door as I enter the room. In frame 004860, the Guy Fawkes poster with 'REVOLUTION' is visible again as I approach the window. In frame 003210, name labels on the grey mailboxes are briefly seen again.",
+        "question": "1. What is the room number on the door I enter? 2. Is there any text on the coffee mug? 3. What brand name is visible on the laptop? 4. What word is on the poster near the desk? 5. Does the room number appear more than once? 6. Is there text on the blue water bottle? 7. What does the room number signify? 8. What is the color of the numbers on the mailbox door?",
+        "answer": "1. 1'235. 2. No clear text is visible. 3. Lenovo. 4. REVOLUTION. 5. Yes, once on the door and once near the window. 6. No. 7. The identity of the apartment or office. 8. White."
+      },
+      "scene_sequence": {
+        "caption": "The journey is a complete reversal: Patio -> Exterior stairs -> Entrance door -> Hallway junction -> Hallway -> Bedroom/Study. I end by sitting back down at the desk.",
+        "question": "1. What is the first scene in this return segment? 2. What do I pass after the patio? 3. Do I go up or down the stairs to return? 4. What room do I enter after the hallway? 5. What is the last object I sit in? 6. What was the sequence of scenes? 7. What did I see before entering the building? 8. Which hallway leads to my room? 9. Where is the desk located? 10. Does the video end in the same room it started in?",
+        "answer": "1. The outdoor patio. 2. A glass entrance door. 3. Up. 4. My bedroom or study. 5. A black office chair. 6. Patio, building entrance, stairs, hallway, room. 7. The garden area and external walls. 8. The second hallway on the left after the stairs. 9. In the corner by the window. 10. Yes."
+      },
+      "light_recongnition": {
+        "caption": "As I move from outside to inside, the light transitions from bright natural daylight to the interior artificial hallway lighting. Upon entering the final room, the scene is again lit primarily by the large window's daylight, which is warm and directional.",
+        "question": "What is the lighting like in the hallway on the return trip?",
+        "answer": "Consistent white artificial light from the ceiling."
+      },
+      "light_change": {
+        "caption": "There is a significant drop in brightness when I move from the sunny patio into the building's interior hallway at frame 003300. The light becomes brighter again as I enter my room and approach the window at frame 005070.",
+        "question": "1. Does it get darker when I enter the building? 2. Is the stairwell brighter than the interior hallway? 3. Does the room feel brighter than the hallway? 4. Is there a shadow on the desk? 5. Do the lights turn on automatically in the hallway? 6. Is there a glare on the computer screen? 7. Does the light source shift as I sit down? 8. How does the illumination change in the final seconds?",
+        "answer": "1. Yes, significantly. 2. Yes, because it has more natural light. 3. Yes, due to the large window. 4. Yes, from the lamp and the subject. 5. They appear to be already on. 6. No, the screen is off. 7. Yes, it becomes more directional from the side. 8. It stabilizes as I sit down."
+      },
+      "counting": {
+        "caption": "I count 1 set of stairs, 3 hallways doors on the way back, 1 desk, 1 chair, and 1 laptop. There are also 2 water bottles (one pink, one red) in the room. I see 1 coffee mug and 1 blue lamp.",
+        "question": "1. How many laptops are on the desk? 2. How many chairs are in the room? 3. How many blue lamps are visible? 4. How many water bottles are on the shelves? 5. How many coffee mugs are on the desk? 6. How many flights of stairs did I climb? 7. How many posters are in the room? 8. How many windows are in the final scene? 9. How many doors did I open to get back in the room? 10. How many pillows are on the bed?",
+        "answer": "1. One. 2. One. 3. One. 4. Two. 5. One. 6. One. 7. One. 8. One. 9. Two (building door and room door). 10. One."
+      },
+      "dynamic_counting": {
+        "caption": "I am the only dynamic subject moving in this segment. There are no other people or objects moving in the building as I return to my room.",
+        "question": "1. How many people do I pass in the hallway on the way back? 2. Are there any cars visible through the final window? 3. Does the chair move on its own? 4. Do I move any furniture? 5. Is there a fan spinning in the room? 6. Does anyone knock on the door? 7. Are there any pets in the room? 8. How many times do I move the mouse?",
+        "answer": "1. None. 2. Yes, a few parked and one moving in the distance. 3. No. 4. Only the chair as I sit. 5. No. 6. No. 7. No. 8. None, the laptop is closed."
+      },
+      "non_common": {
+        "caption": "The room layout is very logical. The desk is placed near the window for light, and the chair is correctly oriented. The objects on the desk (laptop, lamp, mug) are common household items in expected places.",
+        "question": "Is there anything out of place on the desk?",
+        "answer": "No, everything looks standard."
+      },
+      "navigation": {
+        "caption": "From the mailboxes, I turn around and walk 10 steps back to the glass door. I enter and turn left to go up the stairs. At the top, I walk straight through the hallway for 15 steps. I then turn right to enter room 1'235 and walk 5 steps to reach the desk.",
+        "question": "1. Which way do I turn to leave the mailbox area? 2. Do I go up or down the stairs? 3. How many turns do I make in the hallway? 4. Which door is mine? 5. How do I reach the desk from the room door? 6. What is the first thing I see when I enter the room? 7. Where is the bed relative to the path I take? 8. Do I need to turn left or right to reach the desk? 9. How many steps total is the return trip? 10. What is the fastest way from the stairs to the room?",
+        "answer": "1. Around/Backwards. 2. Up. 3. One main turn into my room's section. 4. The one with '1'235' on it. 5. Walk straight toward the window. 6. The bed and the window. 7. It is on the left. 8. Left. 9. Approximately 40 steps. 10. Walk straight down the hallway and turn right into the room door."
+      },
+      "dynamic_recognition": {
+        "caption": "I start walking back at frame 003180 and arrive at the room door at frame 005370. I sit down in the chair at frame 005700 and the video ends at frame 005820.",
+        "question": "1. When do I enter the building? 2. At what frame do I reach the top of the stairs? 3. When is the room door opened? 4. At what frame is the desk first visible on the return? 5. When do I reach the chair? 6. When does my movement stop? 7. Does the camera stop shaking once I sit? 8. How long does the return journey take?",
+        "answer": "1. Around frame 003300. 2. Around frame 004260. 3. Around frame 005370. 4. Around frame 005400. 5. Around frame 005700. 6. At the end of the video, frame 005820. 7. Yes. 8. About 88 seconds."
+      },
+      "action": {
+        "caption": "I finish at the mailbox, turn back, and re-enter the building. I climb the stairs, walk back to my room, and open the door. Finally, I walk to my desk and sit down in my chair, completing the task of checking the mail and returning to work/rest.",
+        "question": "1. What is my first action in this segment? 2. What do I do when I reach the door to my room? 3. Do I close the door behind me? 4. What is the purpose of sitting in the chair? 5. What do I do with the keys? 6. Do I pick up the coffee mug? 7. What is the final action of the video? 8. How would you describe my walking pace?",
+        "answer": "1. Turning around from the mailboxes. 2. I open it and enter. 3. It's not clearly shown, but I walk past it. 4. To return to my desk activities. 5. I likely put them in my pocket or on the desk. 6. No. 7. Sitting down in the office chair. 8. Steady and purposeful."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_001": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_001",
+      "task_label": "walking to mailboxes",
+      "start_seconds": 0.0,
+      "end_seconds": 42.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:42.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The scene begins in a room with a white desk and a black chair, transitioning through a light wooden door into a long, dimly lit grey corridor. The corridor ceiling is lined with several long rectangular fluorescent lights. At the end of the hallway, a green emergency exit sign glows above a metal-framed glass door. Metal mesh stairs are located at the end of the corridor.",
+        "question": "What is the primary color of the walls in the hallway?",
+        "answer": "Grey."
+      },
+      "spatial_reasoning": {
+        "caption": "A black office chair is situated in front of a white desk. A wooden door is positioned to the right of the desk. Rectangular light fixtures are mounted along the center of the ceiling. An exit sign is located directly above the glass door at the far end of the corridor. The stairs are about 20 steps from the room door.",
+        "question": "Where is the emergency exit sign positioned relative to the hallway door?",
+        "answer": "Above it."
+      },
+      "text_recognition": {
+        "caption": "In frame 25, an illuminated green sign with white text is seen. The word 'EXIT' and a graphic of a person walking towards a door are visible. This is used to indicate the building's emergency exit path.",
+        "question": "What word is written on the glowing green sign?",
+        "answer": "EXIT."
+      },
+      "scene_sequence": {
+        "caption": "The user starts in a room at a desk, exits into a long hallway, walks the full length of the corridor, and finally reaches a metal staircase leading down.",
+        "question": "What is the sequence of scenes I passed?",
+        "answer": "Room, hallway, stairs."
+      },
+      "light_recongnition": {
+        "caption": "The main illumination comes from a series of fixed rectangular ceiling lights along the corridor. The green exit sign at the end of the hall provides a secondary, colored light source.",
+        "question": "What is the shape of the lights on the ceiling?",
+        "answer": "Rectangular."
+      },
+      "light_change": {
+        "caption": "The video shows a transition from the warmer, more concentrated light of the room to the cooler, more diffuse fluorescent lighting of the corridor. The hallway lighting is steady.",
+        "question": "Does the light source change when I enter the hallway?",
+        "answer": "Yes."
+      },
+      "counting": {
+        "caption": "I can identify one desk, one office chair, one wooden door, one glowing exit sign, and seven rectangular ceiling lights passed in the hallway.",
+        "question": "How many green exit signs are visible?",
+        "answer": "One."
+      },
+      "dynamic_counting": {
+        "caption": "There are no dynamic humans or moving objects identifiable in this segment besides the subject holding the camera.",
+        "question": "How many people are walking towards me?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The layout of the corridor and the placement of the stairs follow standard building codes. No unrealistic objects or artifacts are present.",
+        "question": "Are there any items blocking the hallway path?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "To get to the stairs, exit the room, turn right into the corridor, walk straight for approximately 25 steps, and go forward through the opening.",
+        "question": "Which way should I go to reach the stairs?",
+        "answer": "Straight down hallway."
+      },
+      "dynamic_recognition": {
+        "caption": "I am walking forward through the corridor from the start until about frame 1100, where I reach the top of the stairs.",
+        "question": "Did I stop walking before reaching the stairs?",
+        "answer": "No."
+      },
+      "action": {
+        "caption": "I am walking out of a room, proceeding down a long hallway, and approaching a staircase with the intent of reaching the mailboxes on a lower floor.",
+        "question": "What am I doing throughout this segment?",
+        "answer": "Walking."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_002": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_002",
+      "task_label": "returning to room to find key",
+      "start_seconds": 42.0,
+      "end_seconds": 125.0,
+      "start_timestamp": "00:00:42.000",
+      "end_timestamp": "00:02:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The user returns to their room. On a grey cabinet, there are several large white bottles with blue caps, a yellow-capped bottle, and some keys. A pair of black sandals and black sneakers are on the floor. A metal shoe rack holds multiple pairs of shoes.",
+        "question": "What is on the desk where I find the keys?",
+        "answer": "Bottles and keys."
+      },
+      "spatial_reasoning": {
+        "caption": "The bottles are sitting on top of a grey drawer unit. A pair of black sandals is on the floor to the left of a shoe rack. The keys are located on the left side of the cabinet surface. The user is standing about 2 steps from the shoe rack.",
+        "question": "Where are the shoes relative to the cabinet?",
+        "answer": "On floor nearby."
+      },
+      "text_recognition": {
+        "caption": "The labels on the white bottles contain small text, likely instructional. A key with a white rectangular plastic tag is picked up at frame 3720.",
+        "question": "Is there any text on the bottles?",
+        "answer": "Yes, small labels."
+      },
+      "scene_sequence": {
+        "caption": "The user moves from the mailbox area, back up the stairs, through the corridor, and finally into the room to find the key on the desk.",
+        "question": "What scene do I enter after the corridor?",
+        "answer": "My room."
+      },
+      "light_recongnition": {
+        "caption": "The room is lit by an overhead fixture and a desk lamp, providing a brighter environment than the hallway. The desk lamp is on the right side of the desk.",
+        "question": "What kind of light source is on the desk?",
+        "answer": "Desk lamp."
+      },
+      "light_change": {
+        "caption": "The lighting level increases significantly upon entering the room compared to the dimly lit corridor.",
+        "question": "Is it brighter in the room than the hallway?",
+        "answer": "Yes."
+      },
+      "counting": {
+        "caption": "I count two large white bottles, one yellow-capped bottle, four pairs of shoes on the floor, and one key ring on the cabinet.",
+        "question": "How many large white bottles are on the cabinet?",
+        "answer": "Two."
+      },
+      "dynamic_counting": {
+        "caption": "The only movement is from the user's hand reaching for and picking up the keys from the cabinet.",
+        "question": "How many people enter the room while I search?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The arrangement of shoes and bottles appears to be a normal domestic storage setup. No physics violations are observed.",
+        "question": "Is any object floating in the room?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "To find the key, re-enter the room and go to the grey cabinet against the wall on the left.",
+        "question": "Where should I go to find the key?",
+        "answer": "To the desk cabinet."
+      },
+      "dynamic_recognition": {
+        "caption": "My hand moves into the frame at approximately frame 3690 and picks up the keys by frame 3750.",
+        "question": "Did I pick up the keys?",
+        "answer": "Yes."
+      },
+      "action": {
+        "caption": "I am searching the room for a forgotten mailbox key, eventually locating it on a cabinet surface and picking it up to go back outside.",
+        "question": "What object am I picking up?",
+        "answer": "A key."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_003": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_003",
+      "task_label": "walking to mailboxes again",
+      "start_seconds": 125.0,
+      "end_seconds": 150.0,
+      "start_timestamp": "00:02:05.000",
+      "end_timestamp": "00:02:30.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The user exits the room again, holding a key with a white tag. They walk back into the grey corridor with the same rectangular ceiling lights. The metal stairs are visible again at the end of the hall.",
+        "question": "What am I holding as I leave the room?",
+        "answer": "A key."
+      },
+      "spatial_reasoning": {
+        "caption": "The user's hand is holding the key in front of them. The hallway walls are on either side. The stairs are about 25 steps ahead.",
+        "question": "Where is the key relative to my hand?",
+        "answer": "In it."
+      },
+      "text_recognition": {
+        "caption": "The green 'EXIT' sign is seen again above the doorway at the end of the hallway at frame 4200.",
+        "question": "What word is visible on the hallway sign?",
+        "answer": "EXIT."
+      },
+      "scene_sequence": {
+        "caption": "The sequence repeats the previous journey: room, hallway, and arrival at the top of the stairs.",
+        "question": "What scene do I enter after leaving my room?",
+        "answer": "Hallway."
+      },
+      "light_recongnition": {
+        "caption": "The corridor is illuminated by the series of overhead fluorescent lights, same as before.",
+        "question": "Are the hallway lights on?",
+        "answer": "Yes."
+      },
+      "light_change": {
+        "caption": "There is no significant change in the hallway lighting during this passage.",
+        "question": "Did the lights turn off?",
+        "answer": "No."
+      },
+      "counting": {
+        "caption": "I identify one key, one hallway, and the same seven ceiling lights passed previously.",
+        "question": "How many keys am I carrying?",
+        "answer": "One."
+      },
+      "dynamic_counting": {
+        "caption": "No other moving objects or humans are present in the hallway.",
+        "question": "How many other people are in the hallway?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The hallway layout is consistent and realistic.",
+        "question": "Is anything out of place in the hallway?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "Follow the same path as before: walk straight through the corridor to reach the stairs at the end.",
+        "question": "How do I get back to the stairs?",
+        "answer": "Walk straight."
+      },
+      "dynamic_recognition": {
+        "caption": "The user is walking forward from frame 3780 to 4470, when they start descending the stairs.",
+        "question": "Am I moving towards the stairs?",
+        "answer": "Yes."
+      },
+      "action": {
+        "caption": "I am walking back to the mailbox area, now prepared with the necessary key to open the box.",
+        "question": "What is the purpose of this walk?",
+        "answer": "Check mailbox."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_004": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_004",
+      "task_label": "unlocking and checking mailbox",
+      "start_seconds": 150.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:02:30.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "A bank of mailboxes is shown. Some boxes are green, while others are grey metal. Each has a small white label with a name and a number. Mailbox 1'235 is the one targeted. A small silver key is used to open it.",
+        "question": "What are the colors of the mailboxes?",
+        "answer": "Green and grey."
+      },
+      "spatial_reasoning": {
+        "caption": "The mailboxes are arranged in a grid. Mailbox 1'234 is to the left of 1'235. The keyhole is in the center-left of the door of box 1'235.",
+        "question": "Where is mailbox 1'235 relative to 1'234?",
+        "answer": "To the right."
+      },
+      "text_recognition": {
+        "caption": "Labels on the boxes show numbers like '1'233', '1'234', and '1'235'. Names such as 'R. Festa', 'S. Hollemann', 'L. Wiebusch', and 'Y. Huang' are visible on the name tags.",
+        "question": "What name is on mailbox 1'234?",
+        "answer": "S. Hollemann."
+      },
+      "scene_sequence": {
+        "caption": "The user reaches the mailbox area at the bottom of the stairs and interacts with their specific box.",
+        "question": "What scene comes after the stairs?",
+        "answer": "Mailbox area."
+      },
+      "light_recongnition": {
+        "caption": "The area is dimly lit by overhead lights, causing reflections on the metallic mailbox surfaces.",
+        "question": "Is there a light in the mailbox area?",
+        "answer": "Yes, overhead."
+      },
+      "light_change": {
+        "caption": "When the mailbox is opened, the interior remains quite dark as external light doesn't penetrate deeply.",
+        "question": "Does it look dark inside the mailbox?",
+        "answer": "Yes."
+      },
+      "counting": {
+        "caption": "I can identify six mailboxes in the immediate view, one silver key, and zero letters inside the mailbox.",
+        "question": "How many green mailboxes are visible in the close-up?",
+        "answer": "Four."
+      },
+      "dynamic_counting": {
+        "caption": "The only dynamic action is the opening and closing of the mailbox door by the user's hand.",
+        "question": "How many people are checking mail nearby?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The mailboxes appear to be standard apartment-style units. No abnormalities are noted.",
+        "question": "Are the mailboxes floating?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "Step forward to reach the mailboxes from the bottom of the stairs.",
+        "question": "Where should I go after the stairs?",
+        "answer": "To the mailboxes."
+      },
+      "dynamic_recognition": {
+        "caption": "The mailbox door opens at frame 5520 and is closed by frame 5580.",
+        "question": "Has the door fully closed?",
+        "answer": "Yes, at the end."
+      },
+      "action": {
+        "caption": "I am inserting a key into mailbox 1'235, turning it, opening the door to check for mail, and then closing and relocking the door after finding it empty.",
+        "question": "Do I find any mail?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_005": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_005",
+      "task_label": "returning to room and sitting down",
+      "start_seconds": 185.0,
+      "end_seconds": 216.6,
+      "start_timestamp": "00:03:05.000",
+      "end_timestamp": "00:03:36.600"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The user returns to their room. A large glass window with light curtains is visible. A white desk holds a monitor, a desk lamp with a blue shade, and several containers. A black chair is placed at the desk.",
+        "question": "What is the color of the desk lamp shade?",
+        "answer": "Blue."
+      },
+      "spatial_reasoning": {
+        "caption": "The desk lamp is on the right side of the desk. The monitor is in the center. The chair is in front of the desk. The window is behind the desk area.",
+        "question": "Where is the lamp relative to the monitor?",
+        "answer": "To the right."
+      },
+      "text_recognition": {
+        "caption": "The monitor screen shows some windows and icons, suggesting it is powered on and in use.",
+        "question": "Is there text visible on the computer screen?",
+        "answer": "Yes, icons and windows."
+      },
+      "scene_sequence": {
+        "caption": "The user walks back through the corridor, enters the room, and sits back down at the desk where the task began.",
+        "question": "What is the final scene?",
+        "answer": "The room desk."
+      },
+      "light_recongnition": {
+        "caption": "The room is well-lit by several sources, including a bright desk lamp that illuminates the workspace.",
+        "question": "Where is the room's brightest light?",
+        "answer": "The desk lamp."
+      },
+      "light_change": {
+        "caption": "The light level stays consistently high in the room after the user returns and sits down.",
+        "question": "Is it getting darker in the room?",
+        "answer": "No."
+      },
+      "counting": {
+        "caption": "I count one monitor, one desk lamp, one chair, one desk, and two curtains at the window.",
+        "question": "How many chairs are in the final scene?",
+        "answer": "One."
+      },
+      "dynamic_counting": {
+        "caption": "No other dynamic entities are present as the subject finishes the task.",
+        "question": "How many other people are in the room?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The room layout and furniture placement are perfectly normal for an office or bedroom.",
+        "question": "Is the chair realistic?",
+        "answer": "Yes."
+      },
+      "navigation": {
+        "caption": "Follow the hallway back and enter the first door on the left to reach the desk.",
+        "question": "What's the fastest way back to the desk?",
+        "answer": "Through the corridor."
+      },
+      "dynamic_recognition": {
+        "caption": "The user sits down into the black chair at frame 6300 and remains there until the end of the video.",
+        "question": "What is the last movement performed?",
+        "answer": "Sitting down."
+      },
+      "action": {
+        "caption": "I am walking back to my room, entering, and sitting down at my desk to resume previous activities.",
+        "question": "What do I do at the end?",
+        "answer": "Sit at desk."
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_day_seg_002": {
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_002",
+      "task_label": "slicing a carrot",
+      "start_seconds": 45.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:00:45.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In this kitchen scene, I can identify a white plastic cutting board positioned in the center of the frame. On the board sits an orange carrot and a large silver kitchen knife with a textured metal handle. To the right of the board is a plain white ceramic bowl containing orange carrot peels. To the left of the board, a dark grey laptop is resting on a black glass induction cooktop. Behind the bowl, there is a white power strip with several circular sockets and a black power cord plugged in. The countertop surface has a brushed metallic appearance.",
+        "question": "What is the texture of the handle on the large kitchen knife?",
+        "answer": "Textured metal"
+      },
+      "spatial_reasoning": {
+        "caption": "The white cutting board is at the center of the workspace. The orange carrot is placed horizontally on the cutting board. The large kitchen knife is positioned diagonally across the board, being held by my hands. The white bowl is located about half a step to the right of the cutting board. The dark grey laptop is situated approximately one step to the left of the cutting board, resting on the induction surface. The power strip is located at the back right corner of the metallic counter.",
+        "question": "Where is the white bowl located relative to the cutting board?",
+        "answer": "To the right"
+      },
+      "text_recognition": {
+        "caption": "Several pieces of text are visible in this segment. On the black peeler resting to the left of the cutting board (seen around frame 1350), the brand 'VICTORINOX' is printed in white alongside their logo. On the bottom left corner of the dark grey laptop (frame 1350), there is a small blue and white sticker with the 'intel CORE' logo, likely indicating the processor type inside the machine.",
+        "question": "What brand name is printed on the black vegetable peeler?",
+        "answer": "Victorinox"
+      },
+      "scene_sequence": {
+        "caption": "The segment begins with the carrot already peeled and the peeler placed to the left. I then pick up the large kitchen knife and start slicing the carrot into long planks. Once several planks are cut, I stack them and begin slicing them into thin julienne strips. This process continues rhythmically, with a pile of strips growing on the cutting board. The bowl of peels remains stationary on the right throughout the entire process.",
+        "question": "What object did I set down before picking up the knife to start slicing?",
+        "answer": "A black vegetable peeler"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "Throughout the entire carrot slicing process, the lighting remains perfectly stable. There are no sudden flickers, and the ambient brightness does not increase or decrease. No additional light sources, such as car headlights or flashlight beams, interfere with the scene. The reflections on the knife blade shift as the angle of the knife changes during the rhythmic chopping, but the source light is constant.",
+        "question": "Is there any noticeable change in the room's brightness while I am slicing the carrot?",
+        "answer": "No"
+      },
+      "counting": {
+        "caption": "Within the kitchen area, I can count 1 white cutting board, 1 large kitchen knife used for slicing, 1 orange carrot being processed, 1 white ceramic bowl containing peels, 1 dark grey laptop, 1 black induction cooktop, and 1 white power strip with 4 visible sockets.",
+        "question": "How many white ceramic bowls are present on the counter?",
+        "answer": "One"
+      },
+      "dynamic_counting": {
+        "caption": "The primary movement in the video is the repetitive up-and-down motion of the large kitchen knife and the minor adjustments I make to the carrot's position with my left hand. There are no other dynamic objects, such as sliding drawers, swinging doors, or moving pets, and no other humans enter the frame during this segment.",
+        "question": "How many other people enter the kitchen during this slicing activity?",
+        "answer": "Zero"
+      },
+      "non_common": {
+        "caption": "The scene depicts a standard food preparation activity. The arrangement of the cutting board, knife, bowl for waste, and the nearby laptop on a flat surface is logical for someone following a recipe or watching a video while cooking. No physical laws are violated, and no objects are seen floating or clipping through surfaces.",
+        "question": "Is there any object in the scene that appears to be floating unrealistically?",
+        "answer": "No"
+      },
+      "navigation": {
+        "caption": "I am standing in a fixed position in front of the kitchen counter for the duration of this task. No steps are taken in any direction. My movement is limited to my arms and hands performing the slicing action. There are no turns or navigational changes made during this segment.",
+        "question": "How many steps do I take toward the laptop while cutting the carrot?",
+        "answer": "Zero"
+      },
+      "dynamic_recognition": {
+        "caption": "The large silver kitchen knife is the most prominent moving object, oscillating vertically from the start of the segment at frame 1350 until the end. The orange carrot is shifted slightly by my left hand to align for slicing. Carrot slices are moved to the side of the board as they are finished, particularly between frames 2100 and 5400.",
+        "question": "What specific object is being moved continuously in a rhythmic fashion?",
+        "answer": "The kitchen knife"
+      },
+      "action": {
+        "caption": "I am performing the action of slicing a carrot. I use my right hand to grip the handle of the large kitchen knife and my left hand to stabilize and guide the carrot. First, I cut the carrot into flat slices, and then I stack them to cut long julienne strips. The purpose is to prepare the carrot into uniform pieces for a dish. The consequence is a pile of finely sliced carrot strips on the cutting board.",
+        "question": "What am I doing with my left hand while the right hand operates the knife?",
+        "answer": "Stabilizing and guiding the carrot"
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_002": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_002",
+      "task_label": "chopping carrot",
+      "start_seconds": 78.0,
+      "end_seconds": 161.9,
+      "start_timestamp": "00:01:18.000",
+      "end_timestamp": "00:02:41.900"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In a dimly lit kitchen setting, a white rectangular cutting board sits centered on a dark countertop. A pile of orange carrot pieces, which have been diced from previous strips, is gathered in the middle of the board. A metallic knife with a dark handle is actively used by my hands to further mince the vegetables. To the right of the board, a white bowl is partially visible in the low-light background. The texture of the chopped carrots appears irregular and damp.",
+        "question": "What vegetable is being diced on the white cutting board?",
+        "answer": "Carrot."
+      },
+      "spatial_reasoning": {
+        "caption": "The carrot pieces are clustered in the center of the white cutting board. The cutting board is positioned directly in front of me on a dark counter. A white bowl is located to the right of the cutting board, approximately 1 step away. The knife is held above and moves vertically relative to the cutting board. My hands are positioned on either side of the knife blade above the board.",
+        "question": "Where is the white bowl located relative to the cutting board?",
+        "answer": "To the right."
+      },
+      "text_recognition": {
+        "caption": "The video is recorded under very low light conditions, making it impossible to discern any text on the tools, the bowl, or in the background environment. There are no labels, brand names, or written instructions visible on the cutting board or the countertop.",
+        "question": "Are there any brand names visible on the white bowl?",
+        "answer": "No."
+      },
+      "scene_sequence": {
+        "caption": "The segment begins with carrot strips already prepared on the cutting board. I then use a knife to gather these strips and start a rapid dicing motion. Throughout the sequence, the carrot strips are gradually reduced to a smaller, more uniform pile of minced pieces. The environment remains static, centered on the countertop with the bowl to the right.",
+        "question": "What was the sequence of processing the carrot pieces in this segment?",
+        "answer": "Gathering strips then rapid dicing into small pieces."
+      },
+      "light_recongnition": {
+        "caption": "The scene is illuminated by a single, dim light source located above the subject. This overhead lighting casts soft shadows of my hands and the knife onto the white cutting board. The light reflects faintly off the metallic blade of the knife and the damp surface of the chopped carrots.",
+        "question": "From which direction does the primary light source originate?",
+        "answer": "From above."
+      },
+      "light_change": {
+        "caption": "The illumination level is consistent and very low throughout the entire segment. There are no noticeable changes in brightness, nor do any lights turn on or off. The only variations in light are the moving shadows cast by my hands as I chop and the brief glints of light reflecting off the moving knife blade.",
+        "question": "Does the light level increase or decrease during the chopping process?",
+        "answer": "It remains consistent."
+      },
+      "counting": {
+        "caption": "In this kitchen scene, I can identify one white cutting board, one chef's knife, and one white bowl. The carrot consists of many small diced pieces on the board. There is one countertop surface visible.",
+        "question": "How many cutting boards are being used?",
+        "answer": "One."
+      },
+      "dynamic_counting": {
+        "caption": "The only moving objects in the scene are the knife and my hands. The carrot pieces shift slightly as they are being chopped. There are no other dynamic elements such as other people, animals, or moving appliances in the background.",
+        "question": "How many other people are visible moving in the background?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The arrangement of the kitchen tools and the action of dicing carrots are standard and follow common sense. There are no floating objects, unrealistic layouts, or physical anomalies present in the video, even under low-light conditions.",
+        "question": "Is the knife being used correctly to dice the carrots?",
+        "answer": "Yes."
+      },
+      "navigation": {
+        "caption": "I am standing in a fixed position in front of the kitchen counter for the duration of the task. No movement or turns between different rooms occur. The camera remains focused on the cutting board.",
+        "question": "How many steps did I take towards the sink during this segment?",
+        "answer": "Zero."
+      },
+      "dynamic_recognition": {
+        "caption": "The chef's knife is in constant motion, moving up and down to dice the carrots starting from frame 2340 through to frame 4830. My hands also move continuously as they manipulate the knife and gather the carrot pieces. The carrots themselves shift as the blade cuts through them.",
+        "question": "Did any new object appear in the scene during the dicing process?",
+        "answer": "No."
+      },
+      "action": {
+        "caption": "I am performing a rapid cross-cutting motion with a knife to dice carrot strips. My right hand operates the knife while my left hand (mostly off-screen or providing stability) manages the pile of vegetables. The purpose is to prepare small, uniform carrot pieces for cooking. The consequence is the visible transition from long strips to a minced pile on the board.",
+        "question": "What tool am I using to dice the carrots?",
+        "answer": "A knife."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 53.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:53.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The video opens with a first-person view of a bicycle being ridden along a smooth, grey asphalt road. To the right is a sidewalk constructed from light-colored rectangular paving stones. As I progress, the scene reveals a modern urban environment with several dark-colored, multi-story buildings and a series of parked vehicles along the curbside, including a black Volkswagen van and a white BMW. Bare trees line the path, casting intricate, leafless shadows across the asphalt and pavement. The bicycle itself features black handlebars, a silver bell with a blue center, and a black front tire. The lighting is bright and clear, characteristic of a sunny day, creating high-contrast shadows of both the rider and stationary objects.",
+        "question": "What is the primary color and material of the bell mounted on the bicycle's handlebars?",
+        "answer": "It is silver and blue metal."
+      },
+      "spatial_reasoning": {
+        "caption": "From my perspective, the silver bell is located on the right side of the black handlebars. The paved brick sidewalk remains consistently to the right of the asphalt road. The parked cars are positioned between the sidewalk and the modern buildings on the right. The shadows of the trees extend from the left side of the frame across to the right onto the road surface. I estimate it is about 15 steps from the initial road position to the point where I turn onto the sidewalk, and another 5 steps to reach the entrance of the building area.",
+        "question": "Where is the brick sidewalk positioned relative to the asphalt road I am riding on?",
+        "answer": "To the right."
+      },
+      "text_recognition": {
+        "caption": "During the ride, several license plates are visible on parked cars: 'WÜ DO 2101' on a black car (frame 1440), 'WÜ RN 38' on another black car (frame 1500), and 'WÜ WL 60' on a silver van (frame 1560). These plates are used for official vehicle registration. Near the end of the segment as I approach the building, the word 'Fahrräder' (German for 'Bicycles') is clearly visible on a dark grey door or wall panel (frame 1650), indicating the location of the bike storage area.",
+        "question": "What word is written on the door or panel I approach at the end of my ride?",
+        "answer": "Fahrräder."
+      },
+      "scene_sequence": {
+        "caption": "The sequence begins on an open asphalt road, transitioning to a shared path with a paved brick sidewalk on the right. I pass a row of parked cars and modern office or residential buildings on the right side. Finally, the scene ends as I steer the bike off the main path toward a building entrance marked for bicycle storage.",
+        "question": "What is the sequence of ground textures I traverse during this ride?",
+        "answer": "Asphalt road, then paved brick sidewalk."
+      },
+      "light_recongnition": {
+        "caption": "The scene is illuminated by direct, bright natural sunlight from a clear sky. The light source is high and slightly to the left, which is evident from the sharp, elongated shadows of the trees and the bike cast across the ground towards the right.",
+        "question": "What is the main source of light in this outdoor segment?",
+        "answer": "Natural sunlight."
+      },
+      "light_change": {
+        "caption": "The illumination remains very consistent throughout the ride, with steady, bright daylight. There are no sudden changes in light intensity or direction, although the subject passes through patches of tree shadows that temporarily darken the immediate ground view.",
+        "question": "Does the overall brightness of the scene change significantly during the ride?",
+        "answer": "No."
+      },
+      "counting": {
+        "caption": "While riding, I pass at least 4 distinct parked cars on the right. I also cross over 3 circular manhole covers embedded in the asphalt and pass several young, leafless trees planted along the sidewalk.",
+        "question": "How many parked cars do I pass on the right side before turning?",
+        "answer": "Four."
+      },
+      "dynamic_counting": {
+        "caption": "Throughout the entire outdoor sequence, no other moving vehicles, pedestrians, or animals are observed. The environment is exceptionally quiet and still, with only the subject's bike in motion.",
+        "question": "How many other moving vehicles or pedestrians pass me during the ride?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The layout of the street, including the separation of the road and sidewalk, the placement of parked cars, and the architectural design of the buildings, is perfectly standard and follows common urban planning. No unrealistic or 'glitchy' visual elements like floating objects are present.",
+        "question": "Are there any objects floating in the air or clipping through the ground incorrectly?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "The route involves riding straight forward along the asphalt road for most of the duration. Towards the end, I make a slight right turn to transition onto the paved sidewalk area, heading directly towards the building marked for bicycles.",
+        "question": "In which direction do I turn to reach the building entrance?",
+        "answer": "Right."
+      },
+      "dynamic_recognition": {
+        "caption": "Aside from the movement of the bicycle itself from frame 000000 to frame 001590, there are no other dynamic or moving objects in the scene. The parked cars and buildings remain stationary.",
+        "question": "Are there any moving objects visible other than my bike?",
+        "answer": "No."
+      },
+      "action": {
+        "caption": "I am riding a bicycle with the purpose of reaching a designated parking area. My hands are visible gripping the handlebars to steer and maintain balance. The consequence of this action is the arrival at a bicycle storage facility.",
+        "question": "What primary activity am I performing in this segment?",
+        "answer": "Riding a bike."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_002",
+      "task_label": "parking and securing the bike",
+      "start_seconds": 53.0,
+      "end_seconds": 98.5,
+      "start_timestamp": "00:00:53.000",
+      "end_timestamp": "00:01:38.500"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The scene shifts to the interior of a bicycle storage room. The walls are covered with vertical light-colored wooden planks, and the floor is a dull grey concrete. Several silver metal bicycle racks are installed along the walls. Numerous bicycles of various types and colors (red, white, black, blue) are parked within these racks. My bike, which is silver and black, is moved into one of the empty slots. The room is enclosed and appears to be part of a modern apartment or office complex.",
+        "question": "What material covers the walls of the bike storage room?",
+        "answer": "Wooden planks."
+      },
+      "spatial_reasoning": {
+        "caption": "The metal racks are anchored to the ground and positioned directly against the wooden walls. The bikes are placed within the parallel metal bars of the racks. My bike is moved from the center of the room into a specific rack slot on the left. I am standing about 2 steps away from the rack before placing the bike inside.",
+        "question": "Where are the bicycles positioned in relation to the metal racks?",
+        "answer": "Inside the rack slots."
+      },
+      "text_recognition": {
+        "caption": "Several brand names are visible on the frames of the parked bikes: 'GIANT' on a black frame (frame 2250), 'HERCULES' on a dark city bike (frame 2310), and 'TEMPT' on a white mountain bike (frame 2550). These labels identify the manufacturers of the bicycles stored in the facility.",
+        "question": "What brand name is visible on the white bike frame next to mine?",
+        "answer": "TEMPT."
+      },
+      "scene_sequence": {
+        "caption": "I enter the storage room, walk past several rows of already parked bicycles, and identify an empty space in the metal rack. I then guide my front wheel into the rack to secure the bike.",
+        "question": "What do I do after entering the storage room?",
+        "answer": "Find an empty rack and park the bike."
+      },
+      "light_recongnition": {
+        "caption": "The room is lit by artificial overhead lights, which appear to be circular ceiling fixtures. The light is diffused, creating soft shadows. The overall illumination level is lower than the outdoor bright sunlight in the previous segment.",
+        "question": "What type of light source is used inside the storage room?",
+        "answer": "Artificial overhead lighting."
+      },
+      "light_change": {
+        "caption": "As I move deeper into the room, the lighting becomes slightly more dim compared to the area near the entrance. There is a noticeable shift in light quality from the harsh sunlight outside to the softer, cooler indoor light.",
+        "question": "Does the scene become brighter or darker as I move into the room?",
+        "answer": "Darker."
+      },
+      "counting": {
+        "caption": "There are at least 15 bikes parked in this section of the room. I can count 10 metal rack slots in the immediate area where I park my bike. There are also several black bike locks visible hanging from frames or racks.",
+        "question": "How many bikes are visible in the rack directly to the left of where I park?",
+        "answer": "At least five."
+      },
+      "dynamic_counting": {
+        "caption": "Only the subject's hands and the bicycle being moved (frames 1620-2940) are dynamic in this segment. No other people or bikes are moving within the storage room during this time.",
+        "question": "How many other people are moving around in the storage room?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The bike storage room is arranged logically, with racks and bikes placed appropriately for the space. There are no common-sense violations or unrealistic physical phenomena observed in the environment's layout.",
+        "question": "Is there any furniture or object that seems out of place in this storage room?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "Upon entering, I walk forward about 5 steps and then maneuver the bike slightly to the left to align it with an open rack slot.",
+        "question": "Which way do I turn to find the empty parking slot?",
+        "answer": "Slightly left."
+      },
+      "dynamic_recognition": {
+        "caption": "The movement of the subject's bike as it is pushed into the rack occurs from frame 001620 to 002940. No other dynamic objects are detected in the room.",
+        "question": "Was there any movement from other bicycles in the room?",
+        "answer": "No."
+      },
+      "action": {
+        "caption": "I am parking and securing my bicycle. I push the front wheel into the metal rack and then begin to interact with a folding lock to secure the frame to the rack. This ensures the bike is stored safely and protected from theft.",
+        "question": "What am I doing with the metal rack at the end of the segment?",
+        "answer": "Parking the front wheel in it."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "I am riding a bicycle at night through a quiet residential or semi-industrial area. The road is paved and mostly smooth. On either side, there are parked vehicles, including several passenger cars and a distinct white van. Buildings with multiple stories line the right side of the street. Street lamps are the primary source of light, casting a cool, blue-white glow on the pavement and handlebars. Handlebars are visible at the bottom of the frame throughout the segment. Some trees and low shrubs are visible near the sidewalks.",
+        "question": "What kind of vehicles are parked along the road as I ride past?",
+        "answer": "Cars and a white van."
+      },
+      "spatial_reasoning": {
+        "caption": "The handlebars are positioned at the bottom center of the view, relative to my body. The road extends directly ahead of me. To the right, parked cars are lined up parallel to the sidewalk, which is adjacent to buildings. Street lamps are spaced regularly along both sides of the path. I am roughly 15 steps away from the white van at frame 1350, 5 steps away at frame 1440, and past it by frame 1560.",
+        "question": "Where are the handlebars located relative to the road in the video?",
+        "answer": "Above the road surface."
+      },
+      "text_recognition": {
+        "caption": "Text elements visible in video:\n1. Mailbox labels (Frame 15-20): \"R. Festa\", \"L. Wiebusch\", \"S. Hollemann\" - resident names on mailbox sections\n2. Mailbox numbers (Frame 20-25): \"1'233\", \"1'234\", \"1'235\" - unit numbers, used for postal identification\n3. Emergency sign (Frame 18-22): \"EXIT\" with running man symbol - indicates emergency evacuation route\n4. Fire safety markings - visible on wall signage indicating building code compliance",
+        "question": "What are the visible mailbox numbers shown in the video?",
+        "answer": "1'233, 1'234, and 1'235"
+      },
+      "scene_sequence": {
+        "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
+        "question": "What is the sequence of major areas passed through in this video?",
+        "answer": "Bedroom, hallway, outdoor walkway, and mailbox area"
+      },
+      "light_recongnition": {
+        "caption": "The scene is illuminated by multiple overhead street lamps that emit a cool, bluish-white light. These light sources are elevated on poles. There is minimal ambient light from the sky, making the areas between lamps significantly darker. Some faint light also reflects off the windows of the buildings on the right.",
+        "question": "What is the primary source of light illuminating the road?",
+        "answer": "Overhead street lamps."
+      },
+      "light_change": {
+        "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+        "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+        "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area"
+      },
+      "counting": {
+        "caption": "Objects Counted in Video:\n1. Chairs: 1 (black swivel desk chair)\n2. Shoes: 4+ pairs visible in room\n3. Doors: 1 blue door\n4. Mailbox sections: 2 main sections (grey and green)\n5. Mailbox units: Approximately 9-12 individual mailbox compartments visible\n6. Staircase sections: 2 visible staircase runs\n7. Light fixtures: 1 desk lamp, 1 overhead ceiling light, recessed LEDs (multiple)\n8. Storage containers: 2+ (blue bin, dresser)",
+        "question": "How many main mailbox sections are visible in the mailbox area?",
+        "answer": "2 sections - one grey and one vibrant green"
+      },
+      "dynamic_counting": {
+        "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+        "question": "What dynamic action occurs with the mailbox in this video?",
+        "answer": "A blue-gloved hand approaches and interacts with the mailbox"
+      },
+      "non_common": {
+        "caption": "The layout of the street, including the placement of parked cars, street lamps, and buildings, appears normal and follows common urban design. There are no unrealistic or floating objects, and no mesh clipping is visible in the video frames.",
+        "question": "Is there anything floating in the air that violates common sense?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "Navigation Path Documentation:\n1. Starting point: Inside bedroom/room area\n2. Action 1: Open blue door and move through doorway (1-2 steps)\n3. Action 2: Navigate through dark hallway (3-4 meters, straight path)\n4. Action 3: Exit to outdoor area (1-2 steps)\n5. Action 4: Move to mailbox area (2-3 meters, slight left turn toward staircase)\n6. Final position: Standing in front of mailbox section 1'233-1'235\n7. Total navigation: Indoor room -> Hallway -> Outdoor walkway -> Mailbox cluster",
+        "question": "How would you navigate from the mailbox area back to the bedroom?",
+        "answer": "Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom"
+      },
+      "dynamic_recognition": {
+        "caption": "Dynamic Elements Recognition:\n1. Primary moving object: The camera operator's hand (blue gloved) - appears around frame 20 and persists to frame 30\n2. Hand trajectory: Approaches mailbox horizontally, extends toward mailbox slot area\n3. Camera movement: Continuous forward and lateral movement throughout entire video (0-35 frames)\n4. Camera perspective: First-person view showing hand interactions and path navigation\n5. Hand-object interaction: Insert key/hand into mailbox area, appears to be accessing mailbox\n6. No other dynamic elements: No people, vehicles, or animals visible besides camera operator",
+        "question": "What dynamic action involving the hand appears in the mailbox area?",
+        "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox"
+      },
+      "action": {
+        "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
+        "question": "What is the primary activity being performed with the mailbox?",
+        "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_002",
+      "task_label": "parking and locking the bike",
+      "start_seconds": 64.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:44.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "I am inside a brightly lit indoor bicycle storage area. The space has a concrete floor, stone-tiled walls, and a wooden wall section with vertical metal supports. Multiple bicycles of various colors (red, white, black) are already parked in metal floor racks. My own bicycle is positioned into one of these metal racks. I am using a bicycle lock, which is being manipulated by my hands to secure the bike to the rack.",
+        "question": "What is the bicycle being placed into for parking?",
+        "answer": "A metal floor rack."
+      },
+      "spatial_reasoning": {
+        "caption": "I am standing directly in front of the bike rack. My bicycle is pushed forward into the metal slot of the rack. Several other bikes are parked to my left and right within the same long rack structure. The wooden wall is located behind the racks. I am about 5 steps from the entrance sign at frame 1950, and 1 step from the rack by frame 2160.",
+        "question": "How far am I from the bicycle rack at frame 2160?",
+        "answer": "About 1 step."
+      },
+      "text_recognition": {
+        "caption": "Text elements visible in video:\n1. Mailbox labels (Frame 15-20): \"R. Festa\", \"L. Wiebusch\", \"S. Hollemann\" - resident names on mailbox sections\n2. Mailbox numbers (Frame 20-25): \"1'233\", \"1'234\", \"1'235\" - unit numbers, used for postal identification\n3. Emergency sign (Frame 18-22): \"EXIT\" with running man symbol - indicates emergency evacuation route\n4. Fire safety markings - visible on wall signage indicating building code compliance",
+        "question": "What are the visible mailbox numbers shown in the video?",
+        "answer": "1'233, 1'234, and 1'235"
+      },
+      "scene_sequence": {
+        "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
+        "question": "What is the sequence of major areas passed through in this video?",
+        "answer": "Bedroom, hallway, outdoor walkway, and mailbox area"
+      },
+      "light_recongnition": {
+        "caption": "The interior storage room is brightly illuminated by long fluorescent light fixtures attached to the ceiling. The light is even and white, making all objects in the room clearly visible. There are no significant dark areas or shadows, unlike the outdoor street scene.",
+        "question": "What type of light sources are used in the storage room?",
+        "answer": "Fluorescent ceiling lights."
+      },
+      "light_change": {
+        "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+        "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+        "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area"
+      },
+      "counting": {
+        "caption": "Objects Counted in Video:\n1. Chairs: 1 (black swivel desk chair)\n2. Shoes: 4+ pairs visible in room\n3. Doors: 1 blue door\n4. Mailbox sections: 2 main sections (grey and green)\n5. Mailbox units: Approximately 9-12 individual mailbox compartments visible\n6. Staircase sections: 2 visible staircase runs\n7. Light fixtures: 1 desk lamp, 1 overhead ceiling light, recessed LEDs (multiple)\n8. Storage containers: 2+ (blue bin, dresser)",
+        "question": "How many main mailbox sections are visible in the mailbox area?",
+        "answer": "2 sections - one grey and one vibrant green"
+      },
+      "dynamic_counting": {
+        "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+        "question": "What dynamic action occurs with the mailbox in this video?",
+        "answer": "A blue-gloved hand approaches and interacts with the mailbox"
+      },
+      "non_common": {
+        "caption": "The bicycle storage room layout and the function of the racks are realistic and common. No objects are floating or out of place. The scene appears to be a real-world environment.",
+        "question": "Are any of the bicycles in the rack floating above the floor?",
+        "answer": "No."
+      },
+      "navigation": {
+        "caption": "Navigation Path Documentation:\n1. Starting point: Inside bedroom/room area\n2. Action 1: Open blue door and move through doorway (1-2 steps)\n3. Action 2: Navigate through dark hallway (3-4 meters, straight path)\n4. Action 3: Exit to outdoor area (1-2 steps)\n5. Action 4: Move to mailbox area (2-3 meters, slight left turn toward staircase)\n6. Final position: Standing in front of mailbox section 1'233-1'235\n7. Total navigation: Indoor room -> Hallway -> Outdoor walkway -> Mailbox cluster",
+        "question": "How would you navigate from the mailbox area back to the bedroom?",
+        "answer": "Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom"
+      },
+      "dynamic_recognition": {
+        "caption": "Dynamic Elements Recognition:\n1. Primary moving object: The camera operator's hand (blue gloved) - appears around frame 20 and persists to frame 30\n2. Hand trajectory: Approaches mailbox horizontally, extends toward mailbox slot area\n3. Camera movement: Continuous forward and lateral movement throughout entire video (0-35 frames)\n4. Camera perspective: First-person view showing hand interactions and path navigation\n5. Hand-object interaction: Insert key/hand into mailbox area, appears to be accessing mailbox\n6. No other dynamic elements: No people, vehicles, or animals visible besides camera operator",
+        "question": "What dynamic action involving the hand appears in the mailbox area?",
+        "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox"
+      },
+      "action": {
+        "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
+        "question": "What is the primary activity being performed with the mailbox?",
+        "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_004": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_004",
+      "task_label": "walking back to room",
+      "start_seconds": 104.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:44.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In the initial frames, the subject is in a bathroom, finishing drying their hands with a paper towel. A white sink with a chrome faucet is visible, and a teal trash bin is located underneath. The subject then moves toward a white door with a silver handle, exits, and walks down a hallway with dark wood-grain flooring and white walls. They approach another white door which has a printed sign about closing windows and an electronic lock system. After swiping an access card, the subject enters a computer lab. This room contains several workstations with light-colored wooden desks, black monitors, black PC towers, and blue padded chairs. Large windows are visible at the far side of the room, letting in bright daylight.",
+        "question": "What color are the chairs in the computer lab room I enter?",
+        "answer": "The chairs are blue."
+      },
+      "spatial_reasoning": {
+        "caption": "1. The teal trash bin is located directly underneath the white bathroom sink. 2. The chrome faucet is positioned on the rear center of the sink basin. 3. A mirror is mounted on the wall above the sink. 4. Computer monitors are placed on top of the desks in the lab. 5. Blue chairs are pushed in under the desks. Distance estimates: The trash bin is 0 steps away while drying hands, the bathroom door is about 4 steps away, the hallway walk is approximately 15 steps, and the final workstation is 8 steps from the lab entrance door.",
+        "question": "Where is the trash bin located relative to the sink in the bathroom?",
+        "answer": "It is located directly underneath the sink."
+      },
+      "text_recognition": {
+        "caption": "1. In frame 114, a small white sticker on the door frame features a QR code and the text '02.B.20 WC H' above the word 'ZUBLIN' in red and black, likely a room identifier for maintenance or tracking. 2. In frame 115, a larger printed sign on the white door reads: 'Dear students! Please make sure to close the windows upon leaving our student rooms. Thank you.' which is an instructional notice for the lab users.",
+        "question": "What specific action does the sign on the door ask students to perform before leaving?",
+        "answer": "The sign asks students to make sure they close the windows."
+      },
+      "scene_sequence": {
+        "caption": "The video starts in a bathroom scene at the sink. I then move to the bathroom exit door. Upon opening it, I transition into a hallway scene. I walk the length of the hallway and arrive at the entry door for the computer lab. After swiping an access card, I enter the computer lab room. The final part of the sequence involves walking through the computer lab and approaching a specific workstation.",
+        "question": "What is the sequence of main scenes I pass through in this segment?",
+        "answer": "The sequence is: bathroom, hallway, and finally the computer lab."
+      },
+      "light_recongnition": {
+        "caption": "The bathroom and hallway are illuminated by artificial indoor lighting from ceiling fixtures, appearing as a neutral white. As I enter the computer lab, the illumination shifts significantly to bright, natural white light coming from the large windows on the right side of the room.",
+        "question": "Where does the brightest light in the computer lab come from?",
+        "answer": "It comes from the large windows."
+      },
+      "light_change": {
+        "caption": "The lighting stays relatively consistent as I move from the bathroom to the hallway. However, there is a noticeable increase in brightness when I open the door to the computer lab, as the natural daylight from the windows fills the space.",
+        "question": "Does the environment get brighter or darker when I enter the lab room?",
+        "answer": "The environment gets significantly brighter."
+      },
+      "counting": {
+        "caption": "1. Sink (1 seen in bathroom). 2. Faucet (1 seen in bathroom). 3. Trash bin (1 seen under sink). 4. Bathroom door (1 passed through). 5. Lab entry door (1 passed through). 6. Blue chairs (at least 5 seen in the lab). 7. PC towers (at least 3 seen on or under desks). 8. Monitors (at least 5 seen across the lab workstations).",
+        "question": "How many blue chairs can be clearly seen in the computer lab?",
+        "answer": "At least five blue chairs are visible."
+      },
+      "dynamic_counting": {
+        "caption": "Besides the person holding the camera, there are no other moving people or animals in the bathroom, hallway, or computer lab during this segment.",
+        "question": "How many other people walk past me in the hallway?",
+        "answer": "Zero."
+      },
+      "non_common": {
+        "caption": "The layout of the bathroom, hallway, and computer lab follows a logical and realistic design. All furniture and computer equipment are correctly placed on the floor or desks, and no physical laws are violated.",
+        "question": "Is there any furniture that seems to be floating or improperly placed in the rooms?",
+        "answer": "No, all objects and furniture are properly placed."
+      },
+      "navigation": {
+        "caption": "Starting from the sink, I move 4 steps forward to the bathroom door, push the handle down and pull the door open to exit. I then walk straight down the hallway for roughly 15 steps. I reach the lab door on the left at the end of the hall, swipe my card, and enter. Inside, I walk another 8 steps towards a desk workstation near the windows.",
+        "question": "How do I unlock the computer lab door to enter?",
+        "answer": "I swipe an access card on the electronic lock."
+      },
+      "dynamic_recognition": {
+        "caption": "The subject finishes drying their hands (frames 104-106). The subject opens the bathroom door (frames 109-111). The subject walks through the hallway (frames 111-114). The subject swipes the access card on the reader (frames 116-118). The lab door opens (frames 119-120). The subject walks into the room towards the desk (frames 121-124).",
+        "question": "When do I swipe my access card to enter the lab?",
+        "answer": "I swipe the access card between frames 116 and 118."
+      },
+      "action": {
+        "caption": "I finish drying my hands and discard the paper towel in the trash bin. I then open the bathroom door and exit into the hallway. I walk down the hall, swipe my access card on the electronic lock of the computer lab door, open it, and enter. Finally, I walk through the lab to reach my workstation.",
+        "question": "What do I do with the paper towel after drying my hands?",
+        "answer": "I throw it into the teal trash bin under the sink."
+      }
+    }
   }
 }

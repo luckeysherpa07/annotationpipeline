@@ -64,7 +64,7 @@
     "side": "day",
     "segment": {
       "segment_id": "cut_carrot_day_seg_002",
-      "task_label": "slicing carrot",
+      "task_label": "slicing a carrot",
       "start_seconds": 45.0,
       "end_seconds": 185.0,
       "start_timestamp": "00:00:45.000",
@@ -73,19 +73,19 @@
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The event stream highlights the rhythmic motion of a large kitchen knife held in the right hand as it slices through a carrot. The carrot is held by the left hand on a cutting board. Frequent, sharp event spikes correspond to the knife striking the board after each cut. The resulting julienne strips pile up on the right side of the board. The peeler is seen resting at the top of the cutting board without further movement.",
+        "question": "What object am I moving rhythmically to create thin strips?",
+        "answer": "Kitchen knife"
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The carrot is held on the left side of the cutting board, while the knife operates in the center. As the knife slices, the cut strips are shifted to the right, creating a spatial separation between the whole carrot and the processed pieces. The hands are positioned on opposite sides of the blade's path. The cutting board remains stationary beneath the objects. The peeler is placed further away at the top edge of the board.",
+        "question": "Where are the cut carrot strips accumulating relative to the carrot being held?",
+        "answer": "To the right"
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The sequence begins with the right hand entering the frame and picking up the kitchen knife. Immediately after, the knife is positioned against the carrot. A continuous phase of rhythmic slicing follows, where the knife moves up and down while the carrot is fed from left to right. This chopping activity dominates the segment until the carrot is almost entirely sliced. The piles of strips on the board grow steadily throughout the process.",
+        "question": "What action do I take after picking up the knife but before I start slicing?",
+        "answer": "Position it against the carrot"
       },
       "event_counting": {
         "caption": "",
@@ -98,9 +98,9 @@
         "answer": ""
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The viewpoint is fixed on the cutting board. Motion is restricted to the manual task of slicing. No translational movement of the camera or route-following is depicted in this segment.",
+        "question": "Is there any significant camera translation during the slicing?",
+        "answer": "No"
       },
       "event_dynamic_recognition": {
         "caption": "",
@@ -113,9 +113,9 @@
         "answer": ""
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "No unusual or physically implausible situations are present in the event stream. All motions follow standard culinary practices and gravitational physics.",
+        "question": "Are there any objects floating in the air?",
+        "answer": "No"
       }
     }
   },
@@ -124,11 +124,11 @@
     "side": "night",
     "segment": {
       "segment_id": "cut_carrot_night_seg_001",
-      "task_label": "semantic task",
+      "task_label": "slicing carrot",
       "start_seconds": 0.0,
-      "end_seconds": 161.933,
+      "end_seconds": 78.0,
       "start_timestamp": "00:00:00.000",
-      "end_timestamp": "00:02:41.933"
+      "end_timestamp": "00:01:18.000"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
     "annotations": {}
@@ -138,60 +138,14 @@
     "side": "night",
     "segment": {
       "segment_id": "cut_carrot_night_seg_002",
-      "task_label": "julienning carrots",
-      "start_seconds": 40.0,
-      "end_seconds": 140.0,
-      "start_timestamp": "00:00:40.000",
-      "end_timestamp": "00:02:20.000"
+      "task_label": "chopping carrot",
+      "start_seconds": 78.0,
+      "end_seconds": 161.9,
+      "start_timestamp": "00:01:18.000",
+      "end_timestamp": "00:02:41.900"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
-    "annotations": {
-      "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      }
-    }
+    "annotations": {}
   },
   "dataset\\cut_carrot_split\\cut_carrot_night_seg_003": {
     "source_prefix": "cut_carrot_night",
@@ -564,6 +518,786 @@
         "caption": "The transition from the bathroom back to the main room is smooth and consistent with the floor plan established earlier. No unusual or non-common-sense events are detected in the stream.",
         "question": "Do I walk through any walls or solid objects during the return trip?",
         "answer": "No."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_001": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_001",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream begins with significant motion activity as the camera rotates away from a desk. A book titled 'Revolution' and a laptop are the first distinct boundaries. As the camera moves, the edges of a doorway emerge, followed by the high-frequency event patterns of a textured carpet transition. Entering the hallway, the vertical lines of door frames and the horizontal boundaries of baseboards provide structural cues. A major transition occurs as the subject enters a stairwell, where the repeated parallel lines of metal railings and the sharp edges of steps create dense event clusters. Footsteps are inferred by rhythmic vertical shifts in the scene's structure. Finally, a large glass door boundary is approached and opened, leading to an outdoor walkway where the architectural features of the building's exterior become visible.",
+        "question": "What distinct structural features create dense event clusters as I descend the stairs?",
+        "answer": "Parallel metal railings and steps."
+      },
+      "event_spatial_reasoning": {
+        "caption": "Initially, the desk and laptop occupy the lower foreground. As I turn, the doorway enters from the right and eventually surrounds the field of view. In the hallway, door frames are aligned on the left and right walls. Upon reaching the stairs, the handrail is closer to the camera on the right side, while the steps are located below the central point of the frame. The wall of the building stays to the left as I walk along the balcony. The distance between the camera and the floor remains constant, but the floor texture changes from carpet to metal grating, which is more visually distinct in the event stream.",
+        "question": "Where are the metal railings relative to my position as I walk down the stairs?",
+        "answer": "On my right side."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence starts in an interior room with a desk. Transition 1: Moving from the room into a long, dimly lit hallway. Transition 2: Passing through a door into a stairwell area. Transition 3: Descending the metal stairs while turning. Transition 4: Exiting the building through a glass door onto an exterior walkway. The event activity intensity peaks during door interactions and stair descent due to complex textures and rapid perspective changes.",
+        "question": "What is the first environment I transition into after leaving my room?",
+        "answer": "A long interior hallway."
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "Navigation begins with a 90-degree right turn from the workstation. I follow a straight path through the room into the hallway. I maintain a forward direction until reaching a door on the right. After opening the door, I turn right to enter the stairwell. The path follows a downward spiral, with the camera viewpoint rotating as the subject descends. Finally, a left turn leads to the exit door, followed by a straight path along the building's exterior walkway.",
+        "question": "What direction do I turn to enter the stairwell after passing through the hallway door?",
+        "answer": "A right turn."
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The motion patterns and scene layout observed in the event stream are consistent with a standard building interior and stairwell. There are no instances of clipping, floating objects, or physically implausible motion. The environment remains stable and structured throughout the walk.",
+        "question": "Are there any floating objects or unrealistic motion patterns visible in the stairwell?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_002": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_002",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "This segment shows the camera stopping in front of a mailbox unit. The event stream highlights the grid-like structure of the mailbox array. Visually salient numbers '1'233', '1'234', and '1'235' are clearly recognized due to their raised, sharp edges. A hand enters the field of view, creating dynamic event trails as it reaches for the lock of mailbox 1'234. The metallic sound characteristic of checking mail coincides with localized high-intensity event activity around the keyhole. The door of the mailbox swings open, revealing a change in the internal occlusion boundary. After the door is opened, a hand reaches in to retrieve an item. Finally, the door is closed, indicated by a sharp, sudden burst of events across the contact line.",
+        "question": "Which specific mailbox number is the focus of my interaction?",
+        "answer": "Mailbox 1'234."
+      },
+      "event_spatial_reasoning": {
+        "caption": "The mailbox wall unit occupies the entire background. The hand enters the lower foreground and moves closer to the central mailbox (1'234). Mailbox 1'233 is located to the left, and 1'235 is to the right of the target. When the mailbox door is opened, it swings toward the camera, momentarily overlapping the neighboring slots. The retrieved mail item moves from inside the dark cavity of the mailbox to the foreground, held by the subject's hand.",
+        "question": "Where is mailbox 1'233 relative to the target mailbox 1'234?",
+        "answer": "To the left."
+      },
+      "event_scene_sequence": {
+        "caption": "The scene is static as I approach the mailboxes. 1. Arrival and focus on mailbox 1'234. 2. Hand enters frame and inserts a key. 3. Mailbox door swings open. 4. Hand retrieves contents. 5. Mailbox door is closed. 6. I turn away from the wall to start the return journey. The event stream is most active during the manual manipulation of the lock and door.",
+        "question": "What is the very first action I perform after reaching the mailbox wall?",
+        "answer": "Reach for mailbox 1'234."
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "The navigation task reaches its destination at the mailbox wall. I stop moving forward and rotate my viewpoint slightly to align with slot 1'234. After the interaction, I perform a 180-degree turn to face the opposite direction, preparing to follow the return path.",
+        "question": "What turn do I make after finishing the mailbox check?",
+        "answer": "A 180-degree turn."
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "No unusual situations or common sense violations are detected. The mailbox interaction follows normal physical expectations. The mailboxes are arranged in a standard logical grid.",
+        "question": "Does anything unusual happen while I am opening the mailbox?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_003": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_003",
+      "task_label": "return from mailbox",
+      "start_seconds": 105.0,
+      "end_seconds": 194.9,
+      "start_timestamp": "00:01:45.000",
+      "end_timestamp": "00:03:14.900"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The return journey begins with significant motion as I turn away from the mailboxes. The event stream captures the familiar structural lines of the exterior walkway and the large glass door. Re-entering the building, the camera viewpoint moves upwards as I ascend the metal stairs, with the railings creating repetitive patterns. Hallway door frames and corridor walls are the primary static boundaries. Upon returning to the original room, the desk, chair, and laptop lid are recognized. The final distinct motion is the closing of the laptop, which generates a large, sweeping horizontal event front across the top of the frame as the screen moves towards the base.",
+        "question": "What is the final object I interact with at the end of the recording?",
+        "answer": "The laptop."
+      },
+      "event_spatial_reasoning": {
+        "caption": "During the return, objects previously passed reappear in reverse order. I move closer to the glass door, which then passes behind me. Ascending the stairs, the steps move from the center-bottom to the lower-edge of the frame. In the final scene, the desk is in the mid-ground, and the laptop occupies the central foreground. My hands move into the space between my body and the laptop to close the lid, creating a temporary occlusion of the keyboard.",
+        "question": "Where is the laptop located when I return to my room?",
+        "answer": "In the central foreground."
+      },
+      "event_scene_sequence": {
+        "caption": "The return sequence follows the reverse of the walk: 1. Leaving mailbox area. 2. Exterior walkway. 3. Re-entering building through glass door. 4. Ascending stairs. 5. Hallway traversal. 6. Entering the interior room. 7. Sitting at desk and closing the laptop. Motion activity is high during climbing and door interactions.",
+        "question": "Do I go up or down the stairs on my way back?",
+        "answer": "Up the stairs."
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "Navigation cues include following the walkway straight to the glass door, turning right to re-enter, ascending the stairs while rotating, following the corridor straight, and turning left into the original room to reach the desk. Landmarks like the metal railing and specific door markers guide the route.",
+        "question": "In what direction do I turn to enter my room from the hallway?",
+        "answer": "A left turn."
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "No unusual situations or violations of physics are observed. The environment and the subject's interactions with it are entirely standard and expected for an office return journey.",
+        "question": "Are there any unrealistic physics or strange layouts on the return path?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_001": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_001",
+      "task_label": "walking to mailboxes",
+      "start_seconds": 0.0,
+      "end_seconds": 42.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:42.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream begins with the camera at a desk, showing the edges of a monitor and a chair as I stand up. Motion is captured as I move through a door frame and into a dimly lit hallway. The walls of the corridor create distinct vertical edge events. I proceed past a staircase where the handrails and steps are clearly delineated by my forward motion. The segment concludes as the camera approaches a large, structured wall of mailboxes, characterized by a grid-like pattern of horizontal and vertical edges.",
+        "question": "What grid-like structure do I approach at the end of this hallway walk?",
+        "answer": "the mailbox bank"
+      },
+      "event_spatial_reasoning": {
+        "caption": "As I move, the desk and chair recede and eventually leave the field of view. I pass through a door frame that momentarily occludes the hallway beyond. In the corridor, the wall to my left is closer than the far end of the hallway. The staircase appears on my right, with its handrail overlapping the steps from my perspective. Finally, the mailbox bank enters the frame, positioned directly ahead of me and occupying the central field of view.",
+        "question": "Where is the staircase positioned relative to me as I walk down the hallway?",
+        "answer": "on my right"
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence starts at a desk area, followed by a transition through a room door into a long hallway. The visual activity shifts from close-range desk edges to the longitudinal edges of the corridor. I then pass a staircase on the right before the scene transitions to the mailbox area at the end of the walk.",
+        "question": "What is the sequence of environments I pass through before reaching the mailboxes?",
+        "answer": "desk, door, hallway, stairs"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "I begin by turning away from the desk and walking straight toward the door. After exiting, I maintain a forward motion path down the center of the hallway. A slight adjustment is made to pass the stairs on the right. The route is linear, guided by the parallel lines of the hallway walls leading directly to the mailboxes.",
+        "question": "What path do I follow after exiting the room door?",
+        "answer": "straight down the hallway"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The event activity shows a standard navigation sequence through an indoor environment. There are no unusual motion patterns, clipping, or physically implausible behaviors observed in this segment.",
+        "question": "Are there any floating objects or odd layouts in the hallway?",
+        "answer": "no"
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_002": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_002",
+      "task_label": "returning to room to find key",
+      "start_seconds": 42.0,
+      "end_seconds": 125.0,
+      "start_timestamp": "00:00:42.000",
+      "end_timestamp": "00:02:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The segment begins with the camera turning away from the mailboxes. As I walk back, the hallway walls and stairs reappear with reversed motion flow. Entering the room, the door frame is clearly visible. The camera then focuses on the desk surface, where various items like a keyboard, a lamp, and small containers are detected by their high-contrast boundaries as I move the camera to search for the key.",
+        "question": "What objects do I search among once I return to the desk?",
+        "answer": "keyboard, lamp, and containers"
+      },
+      "event_spatial_reasoning": {
+        "caption": "Leaving the mailboxes, they quickly recede and exit the view. The hallway walls are now on my left and right again. Entering the room, the desk is positioned directly in front of me, with the lamp sitting behind the main workspace. My hand enters the frame close to the camera as I move objects on the desk, creating occlusion changes over the surface of the desk.",
+        "question": "Where is the lamp located relative to the desk workspace?",
+        "answer": "behind it"
+      },
+      "event_scene_sequence": {
+        "caption": "The camera transitions from the mailbox area back into the hallway, passes the stairs, and enters the room. Once inside, the view shifts from the doorway to a close-up of the desk area. Visual activity becomes dense and localized as I begin searching through items on the desk surface.",
+        "question": "What area do I focus on after entering the room?",
+        "answer": "the desk surface"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "I execute a 180-degree turn from the mailboxes and follow the previous path in reverse. I walk straight down the hallway, enter the room through the open door, and move directly to the desk. The navigation concludes with a stationary position at the desk.",
+        "question": "In what direction do I turn to leave the mailboxes?",
+        "answer": "180 degrees around"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The search and movement are entirely consistent with normal human behavior. No physically implausible events occur.",
+        "question": "Does the key float in the air when I find it?",
+        "answer": "no"
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_003": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_003",
+      "task_label": "walking to mailboxes again",
+      "start_seconds": 125.0,
+      "end_seconds": 150.0,
+      "start_timestamp": "00:02:05.000",
+      "end_timestamp": "00:02:30.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream captures me leaving the desk area with the key. The doorway and hallway walls are delineated again as I walk. I pass the staircase, and the mailbox bank comes into clear view at the end of the hallway, showing its repetitive rectangular units.",
+        "question": "What repeated rectangular patterns are visible at the end of the walk?",
+        "answer": "the mailbox units"
+      },
+      "event_spatial_reasoning": {
+        "caption": "As I walk, the room interior is occluded by the door frame as I exit. The hallway opens up ahead. The stairs on the right appear and then pass behind me. The mailbox bank gets larger in the frame as I approach it, eventually filling most of the view.",
+        "question": "How does the mailbox bank change in the frame as I walk?",
+        "answer": "it gets larger"
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence starts with an exit from the desk area, followed by a transition through the room door. I move back down the long hallway, passing the stairs on the right, and arrive once more at the mailbox area.",
+        "question": "Where do I go after exiting my room for the second time?",
+        "answer": "back to the mailboxes"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "I navigate out of the room, turn into the hallway, and follow a direct path towards the mailboxes. Landmarks like the doorway and stairs help orient the route back to the mailbox bank.",
+        "question": "What is the primary landmark I pass before reaching the mailboxes?",
+        "answer": "the staircase"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The traversal is normal with no physically impossible occurrences.",
+        "question": "Are there any floating hallway lights?",
+        "answer": "no"
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_004": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_004",
+      "task_label": "unlocking and checking mailbox",
+      "start_seconds": 150.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:02:30.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The camera is now close to the mailboxes. My hand and a key are visible as they move towards a specific lock. The event stream clearly shows the rectangular boundary of the mailbox door as it swings open. Inside the box, a few horizontal edges suggest the presence of mail or empty shelf space. The segment ends with the door swinging shut and the key being removed.",
+        "question": "What part of the mailbox moves as I interact with it?",
+        "answer": "the mailbox door"
+      },
+      "event_spatial_reasoning": {
+        "caption": "My hand is closest to the camera, overlapping the lock of mailbox '1235'. As the door opens, its edge moves from the plane of the wall into the foreground space. The interior of the mailbox becomes visible behind the opening door. My hand remains in front of the mailbox throughout the unlocking and checking process.",
+        "question": "Which mailbox am I interacting with based on the numbers visible?",
+        "answer": "1235"
+      },
+      "event_scene_sequence": {
+        "caption": "The scene begins with a close-up of the mailboxes. Next, my hand enters to insert the key. The door swings open, stays open for a moment while I check inside, and then swings closed. Finally, the key is pulled out, and the hand leaves the frame.",
+        "question": "What happens after I open the mailbox door?",
+        "answer": "I check inside then close it"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "The camera remains mostly stationary in front of the mailbox bank. Navigation cues are limited to the hand's reach toward the target box and the slight forward/backward tilting of the camera to view the interior.",
+        "question": "How much does the camera move during this segment?",
+        "answer": "very little"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The mechanical operation of the mailbox and lock is standard. There are no unusual or implausible situations.",
+        "question": "Does the mailbox door swing in an impossible direction?",
+        "answer": "no"
+      }
+    }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_005": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_005",
+      "task_label": "returning to room and sitting down",
+      "start_seconds": 185.0,
+      "end_seconds": 216.6,
+      "start_timestamp": "00:03:05.000",
+      "end_timestamp": "00:03:36.600"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The segment follows my walk back to the room. The hallway walls and stairs provide consistent edges as I move. I enter the room, and the desk and chair reappear. The segment ends with the camera settling in a fixed position as I sit down at the desk, showing the workspace edges again.",
+        "question": "What is the final object the camera settles on?",
+        "answer": "the desk"
+      },
+      "event_spatial_reasoning": {
+        "caption": "As I return, the mailbox bank leaves the field of view. The hallway walls enclose the space again. I move through the doorway, and the desk once more occupies the central space, getting closer until I sit down. The chair edges move up in the frame as I lower myself onto it.",
+        "question": "What happens to the chair's position in the frame as I sit?",
+        "answer": "it moves up as I sit down"
+      },
+      "event_scene_sequence": {
+        "caption": "The final sequence goes from the mailbox area back through the hallway, past the stairs, through the room door, and ends at the desk. The motion settles as I sit down, and the edge activity decreases significantly.",
+        "question": "What is the last action I perform in the video?",
+        "answer": "sitting down at the desk"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "The route is a direct return from the mailboxes down the hallway and into the room. I navigate straight to the desk area where the trip began.",
+        "question": "Where does my return trip end?",
+        "answer": "at the desk"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The entire return sequence is normal. No unusual motion or layouts are detected.",
+        "question": "Is there anything physically impossible about me sitting down?",
+        "answer": "no"
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 53.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:53.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream captures constant forward motion over changing ground textures. Initially, a tiled surface with distinct rectangular boundaries passes under the camera, followed by a transition to a rougher asphalt road surface. On the right periphery, a series of stationary rectangular blocks representing parked vehicles enter and leave the field of view with steady relative motion. On the left, vertical structures and their branching shadows intermittently appear, indicating trees and poles. Manhole covers and sewer grates appear as circular or rectangular patterns of event activity on the road surface as I pass over them.",
+        "question": "What kind of circular object do I pass over on the road surface?",
+        "answer": "A manhole cover."
+      },
+      "event_spatial_reasoning": {
+        "caption": "As I move forward, the road surface stays directly below me. Stationary vehicles are positioned consistently to my right, creating a clear occlusion boundary between the road and the sidewalk. Trees and vertical posts are located on my left. Shadows from these trees extend across my path from left to right, their complex patterns changing rapidly as I pass them. The distance to the parked cars remains relatively constant as I maintain a parallel path.",
+        "question": "On which side of my path are the stationary vehicles located?",
+        "answer": "To the right."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence begins with high-frequency event activity over a tiled ground. At approximately 10 seconds, the ground texture changes to a more uniform asphalt pattern. I then proceed along a straight path flanked by parked cars on the right. Around 40 seconds, the path curves slightly, and more trees appear on the left. The segment ends as the forward motion slows and I turn towards a building entrance.",
+        "question": "How does the ground texture change early in the sequence?",
+        "answer": "From tiled to asphalt."
+      },
+      "event_counting": {
+        "caption": "Over the full duration of this segment, several distinct scene elements can be counted from the relative motion. I pass approximately 12 parked vehicles on the right side of the street. At least 5 circular manhole covers are passed on the asphalt. Around 4 rectangular sewer grates are visible near the curb. On the left side, I pass 6 distinct trees or poles. I also traverse one clear transition from a tiled sidewalk to an asphalt road.",
+        "question": "How many parked vehicles do I pass on the right?",
+        "answer": "12"
+      },
+      "event_dynamic_counting": {
+        "caption": "Relative to my motion, numerous objects move past the camera. Approximately 12 parked cars enter and leave the frame on the right. On the left, about 6 trees or utility poles pass by. Several small ground features like manhole covers (5) and grates (4) move rapidly towards the bottom of the frame as I ride over them. No other moving humans or vehicles appear in the scene.",
+        "question": "How many trees or poles pass me on the left side?",
+        "answer": "6"
+      },
+      "event_navigation": {
+        "caption": "I follow a straight navigation path along a street. The initial phase involves moving from a tiled pedestrian zone onto a main asphalt roadway. The motion is predominantly forward with minimal steering adjustments. Parked cars act as landmarks on the right, defining the edge of the travel lane. The approach to the end of the segment is marked by a decrease in forward velocity and a deliberate right-hand turn toward a storage structure.",
+        "question": "What indicates my approach to the end of the segment?",
+        "answer": "Decreased speed and a right turn."
+      },
+      "event_dynamic_recognition": {
+        "caption": "Stationary objects exhibit dynamic behavior relative to the camera. Parked cars on the right enter the FOV at the front-right and exit at the rear-right throughout the segment. Trees and poles on the left behave similarly. Manhole covers appear centrally at the bottom of the frame and disappear quickly. Around 52 seconds, a wall-like structure enters the FOV as I turn toward it.",
+        "question": "When do the parked cars exit the field of view after appearing?",
+        "answer": "Almost immediately."
+      },
+      "event_action": {
+        "caption": "I am riding a bicycle forward. The steady, repetitive vibrations and the stream of ground events indicate pedaling and forward travel. My hands occasionally move on the handlebars to make minor steering corrections. At the end of the segment, my action changes from high-speed travel to a controlled braking and turning maneuver to enter a building.",
+        "question": "What is my main action throughout this segment?",
+        "answer": "Riding a bicycle forward."
+      },
+      "event_non_common": {
+        "caption": "The motion and scene progression are consistent with standard bicycle travel on a paved street. No unusual object behavior, clipping, or physically impossible events are detected in the stream.",
+        "question": "Are there any floating objects visible in the event stream?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_002",
+      "task_label": "parking and securing the bike",
+      "start_seconds": 53.0,
+      "end_seconds": 98.5,
+      "start_timestamp": "00:00:53.000",
+      "end_timestamp": "00:01:38.500"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "Upon entering the structure, the event activity is dominated by static indoor geometries and close-range interactions. I pass through a doorway where the word 'Fahrräder' is briefly visible as a static pattern. Inside, rows of vertical and horizontal metal racks create a dense grid of event boundaries. My bike's front wheel and handlebars move into one of these racks. Later, my hands enter the frame, exhibiting complex motion as they interact with a lock and the rack, indicated by bursts of event activity around the point of contact.",
+        "question": "What text is briefly visible when I enter the room?",
+        "answer": "Fahrräder"
+      },
+      "event_spatial_reasoning": {
+        "caption": "I maneuver the bike into a narrow space between existing bike racks. Racks are positioned on both sides, with other bikes already stored in them. My bike moves closer to a specific rack directly in front of the camera. My hands reach forward into the space between the handlebars and the rack to secure the lock. This action involves close proximity and overlapping event regions as the hands manipulate the lock around the rack's frame.",
+        "question": "Where are my hands reaching in relation to the bike rack?",
+        "answer": "Forward into the rack space."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence starts with entering an indoor space through a door. From 53 to 65 seconds, I navigate slowly between rows of racks. Around 70 seconds, the bike comes to a stop as the front wheel enters a rack. From 75 to 98 seconds, the motion is centered on the handlebars and the area immediately in front, as I use my hands to secure the bike. The video ends with a close-up view of the locked bike frame.",
+        "question": "What do I do after the bike stops in the rack?",
+        "answer": "Secure the lock."
+      },
+      "event_counting": {
+        "caption": "Inside the storage area, I pass several rows of bike racks, approximately 8 distinct rack units. I pass about 12 other parked bicycles. My own bicycle consists of two main moving regions in the frame: the handlebars and the front wheel. I perform one continuous locking action involving a metal cable lock. The storage area has two main walls visible as large static boundaries.",
+        "question": "How many distinct bike rack units do I pass?",
+        "answer": "8"
+      },
+      "event_dynamic_counting": {
+        "caption": "The primary dynamic entities are my hands and my bike. My hands move into and out of the center frame approximately 4 times while fiddling with the lock. The bike's handlebars move as I position the wheel into the rack. No other moving humans or objects are present in the storage area during this segment.",
+        "question": "How many other moving people are in the storage room?",
+        "answer": "0"
+      },
+      "event_navigation": {
+        "caption": "Navigation in this segment is confined to a tight indoor space. I enter through a clear portal on the right and move into a corridor between rows of racks. The path is short and requires precise slow-speed steering to align the front wheel with a vacant rack slot. After positioning the bike, all navigation ceases as I transition to a stationary state for locking.",
+        "question": "What is the final step in my navigation through the storage room?",
+        "answer": "Aligning the wheel with a rack."
+      },
+      "event_dynamic_recognition": {
+        "caption": "My bike's wheel moves forward and enters a rack slot at 72 seconds. My left and right hands appear in the frame starting at 78 seconds, performing fine-motor tasks. The hands manipulate a lock around the rack, with the activity concluding as the hands pull away from the secure bike around 97 seconds. The other bikes in the room remain completely stationary.",
+        "question": "When do my hands first appear to secure the lock?",
+        "answer": "At 78 seconds."
+      },
+      "event_action": {
+        "caption": "I am parking and securing a bicycle. I steer the bike into a designated rack slot, bringing it to a halt. I then release the handlebars and reach forward with both hands to manipulate a lock. The event activity shows a sequence of reaching, gripping, threading the lock through the bike and rack, and finally clicking it shut. My body position remains steady over the bike throughout this process.",
+        "question": "What am I doing with my hands after stopping the bike?",
+        "answer": "Manipulating a lock."
+      },
+      "event_non_common": {
+        "caption": "The parking and locking process is physically plausible and follows standard logic for a bike storage area. No unusual events are observed.",
+        "question": "Does the bike pass through any solid objects while parking?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream begins with a clear depiction of the ground surface as the camera moves forward, with manhole covers appearing and moving quickly out of the frame. The handlebars and front fork of a bicycle are prominent in the lower portion of the field of view, exhibiting small vibrations as I ride. As I move forward, the scene transitions from a smooth paved road to a textured brick-paved area, where individual bricks become visible through high-frequency event activity. Streetlights and building structures on either side generate significant event activity due to my forward motion, appearing as tall, shifting vertical regions. Parked cars and a large van on the side of the road are identified by their distinct static-like outlines that shift relative to my motion. A large building with rows of windows comes into view on the right, with the window frames creating repetitive vertical event patterns as I pass by.",
+        "question": "What happens to the manhole covers in the first part of my ride?",
+        "answer": "They move quickly out of view."
+      },
+      "event_spatial_reasoning": {
+        "caption": "From the perspective of the moving camera, the bicycle handlebars are in the immediate foreground, maintaining a relatively constant distance from the lens. The road surface occupies the mid-ground and foreground, with its texture changing spatially from smooth to bricked as I progress. The manhole covers on the left side of the road are positioned between the camera and the road edge. Parked cars on the right are initially distant but grow in size as I approach them, eventually passing along my right side. A large building on the right side of the path is farther away than the parked cars, creating an occlusion boundary behind them. Streetlights are spaced periodically along the path, moving from the distant background into the mid-ground and then out of the top of the frame as I pass underneath them. Towards the end of the segment, a large van parked on the right momentarily occludes the background building structure.",
+        "question": "Where is the brick-paved area located relative to the bicycle handlebars?",
+        "answer": "Farther away in the mid-ground."
+      },
+      "event_scene_sequence": {
+        "caption": "The sequence starts with the camera traveling over a smooth road surface, punctuated by the appearance of manhole covers. Next, a transition occurs as the road surface changes to a distinct brick texture. Following this, the camera navigates a path flanked by buildings and streetlights, with several parked cars coming into view on the right. A large building with multiple windows then dominates the right side of the frame as I continue to move forward. The segment concludes with the camera approaching a larger parked vehicle, a white van, while passing along a continuous wall or building on the right side.",
+        "question": "What environmental change occurs after the camera passes the first few manhole covers?",
+        "answer": "The road surface changes to bricks."
+      },
+      "event_counting": {
+        "caption": "Throughout the ride, several distinct objects and regions can be counted based on their motion patterns. At least 2 manhole covers are passed in the initial seconds. Approximately 5 streetlights appear and move out of the frame as the ride progresses. On the right side, there are roughly 4-5 parked cars that I pass by. The large building on the right features at least 10 repetitive window sections that generate event activity. The transition in the ground surface from smooth pavement to a brick-paved area is a single major environmental event. Finally, the bicycle handlebars and front fork are counted as 1 persistent foreground object.",
+        "question": "How many manhole covers do I pass near the start of the video?",
+        "answer": "2"
+      },
+      "event_dynamic_counting": {
+        "caption": "Aside from my own forward motion as the camera holder, there are no other dynamic humans or independently moving objects visible in the event stream. All observed motion is ego-motion relative to the static environment, including the parked cars on the right, the streetlights, and the large building facade. No other cyclists or moving vehicles approach or pass by during this segment.",
+        "question": "How many other moving vehicles approach me while I am riding?",
+        "answer": "0"
+      },
+      "event_navigation": {
+        "caption": "The navigation path is a straightforward forward progression along a paved roadway. The motion begins on a smooth asphalt road, which then transitions into a textured brick-paved area, serving as a clear navigational marker. The camera maintains a consistent heading, passing streetlights on the left and a series of parked cars and a large building on the right. The constant presence of the bicycle handlebars at the bottom of the frame confirms my role as the navigator. The path is guided by the parallel lines of the road edge and the building facade on the right, indicating a clear route through a urban environment.",
+        "question": "What is the primary direction of my motion throughout this segment?",
+        "answer": "Forward."
+      },
+      "event_dynamic_recognition": {
+        "caption": "In this segment, the only significant motion is my own ego-motion as I ride the bike. The handlebars and front fork of the bike are visible from frame 0 until the end of the segment at frame 1920, experiencing slight jitter due to the road surface. The manhole covers on the road appear and pass by quickly, with the first one visible between frames 0 and 150. A large building on the right side generates consistent event activity from approximately frame 900 as I ride past its facade. There are no other independently moving people or vehicles identified during this ride.",
+        "question": "Does any other person or bicycle pass me while I ride?",
+        "answer": "No."
+      },
+      "event_action": {
+        "caption": "I am riding a bicycle forward through a urban environment at night. My hands are holding the handlebars, which are visible in the foreground, and my motion is steady with minor vibrations from the ground. I ride from a smooth surface onto a bricked area, maintaining speed. My intention is clearly to travel along this road, as evidenced by the consistent forward motion and the passing of environmental landmarks like parked cars, streetlights, and a large building facade. The scene responds with shifting perspective and moving shadows of streetlights as I pass through the environment.",
+        "question": "What action am I performing throughout this entire segment?",
+        "answer": "Riding a bike forward."
+      },
+      "event_non_common": {
+        "caption": "The event stream depicts a completely normal and common-sense urban cycling scenario at night. The motion of the ground, the appearance of static objects like cars and buildings relative to the camera, and the constant presence of the handlebars are all physically plausible. There are no unusual patterns, floating objects, or unrealistic behaviors detected in the scene.",
+        "question": "Are there any floating objects or strange motion patterns visible as I ride?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_002",
+      "task_label": "parking and locking the bike",
+      "start_seconds": 64.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:44.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "Forward motion stops and the camera's perspective shifts downward and to the right. A metal bike rack appears as I move towards it. My hands enter the lower frame, interacting with a flexible bike lock, which is clearly visible as a thin, moving cable. The rack is composed of several vertical and horizontal metal bars, which create high-frequency event activity as they are approached. In the background, several other bicycles are already parked in the rack, their frames and wheels creating complex, overlapping event outlines. I position the lock around the bike frame and the metal rack, with the locking mechanism being manipulated in the center of the frame. The segment concludes with a close-up view of the handlebars of the already parked bikes and the metal bars of the rack.",
+        "question": "What object do I use to secure the bike in the rack?",
+        "answer": "A flexible bike lock."
+      },
+      "event_spatial_reasoning": {
+        "caption": "As the bike stops, the camera moves closer to the metal rack, which transition from the background into the foreground. My hands and the bike lock are in the absolute foreground, interacting directly with the bike's frame and the rack's bars. The other bicycles in the rack are positioned just behind my bike, creating a dense spatial layer of overlapping structures. The wall of the building is in the background, providing a static boundary for the scene. I move the lock cable through the gap between the bike frame and a bar of the rack, indicating precise spatial coordination. The rack's bars are closer to the camera than the frames of the parked bikes.",
+        "question": "Where are the other parked bikes located relative to the rack?",
+        "answer": "Behind the rack's bars."
+      },
+      "event_scene_sequence": {
+        "caption": "The segment begins with the end of the forward ride as the bike comes to a halt. Then, the viewpoint shifts towards a bike rack located near a building wall. Next, my hands appear in the frame, bringing a bike lock into the center of view. I spend the remainder of the sequence positioning the bike against the rack and threading the lock through the frame and around the rack's metal bars. The event activity focuses tightly on these close-range manual manipulations until the bike is secured and the camera comes to rest near the other parked bicycles.",
+        "question": "What is the final action I perform in this sequence?",
+        "answer": "Securing the bike lock."
+      },
+      "event_counting": {
+        "caption": "In the parking area, several objects are separable and countable. I am interacting with 1 metal bike rack consisting of multiple bars. I am using 1 flexible bike lock cable. There are at least 4 other bicycles already parked in the rack, evidenced by their visible wheels and handlebars. My 2 hands are briefly visible as they manipulate the lock. The area is enclosed by 1 main building wall in the background.",
+        "question": "How many other bicycles can I see parked in the rack?",
+        "answer": "At least 4"
+      },
+      "event_dynamic_counting": {
+        "caption": "During this segment, my hands are the primary dynamic entities as they move to lock the bike. The bike lock cable is also a moving object that I manipulate. No other people or dynamic objects enter the scene while I am parking. The motion is concentrated in the foreground as I secure the bike to the stationary metal rack.",
+        "question": "How many other people walk past me while I am locking the bike?",
+        "answer": "0"
+      },
+      "event_navigation": {
+        "caption": "Navigation in this segment consists of a short approach and final positioning at a bike rack. I stop riding and turn the camera towards the right, targeting the metal structure of the rack. The route ends at the specific bar of the rack where I place the bike. There are no further turns or direction changes, as the goal is to park and secure the vehicle at this fixed landmark.",
+        "question": "Where do I direct the camera after I stop riding?",
+        "answer": "To the bike rack."
+      },
+      "event_dynamic_recognition": {
+        "caption": "My hands appear at the start of the parking process (around frame 1950) and continue to move as I secure the lock. The bike lock cable moves dynamically from frame 2000 until frame 3000 as it is threaded through the rack and frame. The metal bars of the rack become clearly identifiable as I approach them between frames 1920 and 2100. No other dynamic objects or humans are detected in this parking area.",
+        "question": "When do my hands first appear to start locking the bike?",
+        "answer": "Around frame 1950."
+      },
+      "event_action": {
+        "caption": "I stop the bicycle and proceed to park it in a designated rack. My hands reach out to grab a flexible bike lock, and I meticulously thread it through the frame of my bike and around one of the metal bars of the rack. This action requires close-up interaction with the lock and the rack, shown through detailed event activity of the cable and my hand movements. The final part of the segment shows me confirming the lock is secure before the video ends.",
+        "question": "What am I doing with my hands once I reach the rack?",
+        "answer": "Manipulating a bike lock."
+      },
+      "event_non_common": {
+        "caption": "This segment shows a perfectly normal and physically plausible action of parking and locking a bicycle. The manual manipulation of the lock, the presence of a metal rack, and the other bicycles in the background are all consistent with standard real-world expectations. No strange or implausible event patterns are detected.",
+        "question": "Is there anything unusual about how the bike lock moves when I use it?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_004": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_004",
+      "task_label": "walking back to room",
+      "start_seconds": 104.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:44.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+    "annotations": {
+      "event_object_recognition": {
+        "caption": "The event stream captures the motion of the subject turning away from a sink area and walking toward a door. Visual transients clearly outline the door handle as a hand reaches for and turns it. The door then swings open, revealing a hallway with vertical boundaries indicating walls and doorways. As the camera moves forward, the lateral motion of walls and static objects like posters creates a clear flow of events. A second door handle becomes salient when the hand reaches for it, followed by the swinging motion of another door. Finally, the scene transitions into a room where multiple rectangular boundaries of computer monitors and horizontal desk surfaces emerge from the motion flow.",
+        "question": "What is the first object I interact with to leave the bathroom?",
+        "answer": "door handle"
+      },
+      "event_spatial_reasoning": {
+        "caption": "Initially, the sink and faucet are closest to the camera, with the bathroom door appearing at a distance. As the camera moves, the door and its handle enter the immediate foreground. Upon opening the door, the hallway layout emerges with walls on both sides defining a narrow path. Posters and signs on the walls pass from far to near as I walk. The second door handle is initially far but quickly occupies the central foreground during interaction. After entering the final room, multiple desks and monitors appear distributed across the spatial layout, with the nearest desk directly ahead and others further back and to the sides.",
+        "question": "Where are the walls located relative to my path as I walk through the corridor?",
+        "answer": "on both sides"
+      },
+      "event_scene_sequence": {
+        "caption": "The video sequence begins inside a bathroom, characterized by sink-related motion. It transitions to a door interaction where a handle is turned and a door swings open. This leads to a hallway scene where the camera moves forward through a narrow corridor. A second transition occurs when another door is approached and opened. The final sequence shows the camera entering a computer lab or office room, with the motion settling as it approaches several desks and monitors.",
+        "question": "What sequence of environments do I pass through after exiting the bathroom?",
+        "answer": "hallway then room"
+      },
+      "event_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_dynamic_counting": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_navigation": {
+        "caption": "Navigation begins with a turn away from the sink towards the bathroom exit. I walk straight toward the door, turn the handle, and exit into a hallway. I then follow a straight path down the hallway, with no major turns shown. I approach a door on the right, reach for its handle, and enter. Inside the room, I navigate toward the left where several desks are positioned.",
+        "question": "Which way do I turn to find the final room after walking through the hallway?",
+        "answer": "to the right"
+      },
+      "event_dynamic_recognition": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_action": {
+        "caption": "",
+        "question": "",
+        "answer": ""
+      },
+      "event_non_common": {
+        "caption": "The event stream reflects standard human motion and a typical indoor environment layout. Doors respond correctly to handle manipulation, and the transition between rooms through the hallway is physically consistent. There are no instances of clipping, floating objects, or unusual motion patterns observed.",
+        "question": "Do I see any objects floating or moving in an unrealistic manner?",
+        "answer": "no"
       }
     }
   }

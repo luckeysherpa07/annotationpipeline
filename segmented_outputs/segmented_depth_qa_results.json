@@ -478,5 +478,261 @@
         "answer": "No."
       }
     }
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_001": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_001",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_002": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_002",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_day_seg_003": {
+    "source_prefix": "check_mailbox_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "check_mailbox_day_seg_003",
+      "task_label": "return from mailbox",
+      "start_seconds": 105.0,
+      "end_seconds": 194.9,
+      "start_timestamp": "00:01:45.000",
+      "end_timestamp": "00:03:14.900"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_001": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_001",
+      "task_label": "walking to mailboxes",
+      "start_seconds": 0.0,
+      "end_seconds": 42.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:42.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_002": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_002",
+      "task_label": "returning to room to find key",
+      "start_seconds": 42.0,
+      "end_seconds": 125.0,
+      "start_timestamp": "00:00:42.000",
+      "end_timestamp": "00:02:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_003": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_003",
+      "task_label": "walking to mailboxes again",
+      "start_seconds": 125.0,
+      "end_seconds": 150.0,
+      "start_timestamp": "00:02:05.000",
+      "end_timestamp": "00:02:30.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_004": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_004",
+      "task_label": "unlocking and checking mailbox",
+      "start_seconds": 150.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:02:30.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\check_mailbox_split\\check_mailbox_night_seg_005": {
+    "source_prefix": "check_mailbox_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "check_mailbox_night_seg_005",
+      "task_label": "returning to room and sitting down",
+      "start_seconds": 185.0,
+      "end_seconds": 216.6,
+      "start_timestamp": "00:03:05.000",
+      "end_timestamp": "00:03:36.600"
+    },
+    "source_file": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_day_seg_002": {
+    "source_prefix": "cut_carrot_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "cut_carrot_day_seg_002",
+      "task_label": "slicing a carrot",
+      "start_seconds": 45.0,
+      "end_seconds": 185.0,
+      "start_timestamp": "00:00:45.000",
+      "end_timestamp": "00:03:05.000"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_002": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_002",
+      "task_label": "chopping carrot",
+      "start_seconds": 78.0,
+      "end_seconds": 161.9,
+      "start_timestamp": "00:01:18.000",
+      "end_timestamp": "00:02:41.900"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+    "annotations": {
+      "depth_object_recognition": {
+        "caption": "In this overhead view, the scene layout is defined by a primary horizontal plane—the cutting board—resting on a slightly farther background surface. Upon the board, carrot strips are initially visible as small, elongated volumes. My hands appear as larger, rounded dynamic volumes that occupy a layer closer to the camera than the board. A circular container, likely a bowl, is situated in the upper right, its rim defining a distinct depth boundary. As the video progresses, the elongated carrot shapes are transformed into a mound of much smaller, granular depth points reflecting the minced pieces.",
+        "question": "What is the relative depth ordering of my hands, the carrot strips, and the cutting board?",
+        "answer": "Hands, carrot, then board."
+      },
+      "depth_spatial_reasoning": {
+        "caption": "The spatial arrangement shows the cutting board as the base surface, with carrot pieces placed directly above it. My hands are positioned closer to the camera, frequently occluding portions of the carrot and the board as they move. The bowl in the top right corner is adjacent to the board, positioned slightly further back in the camera's lateral view but at a similar depth layer to the board. The carrot strips are initially clustered in the center of the board, and as I chop, they remain on top of the board's surface but their 3D distribution becomes more compact and localized.",
+        "question": "Where are the carrot strips located in relation to the cutting board?",
+        "answer": "Directly on top."
+      },
+      "depth_scene_sequence": {
+        "caption": "The camera remains stationary, providing a consistent view of the workspace sequence. The video starts with a collection of carrot strips on the cutting board. My hands then descend into the near-field depth layer to begin the chopping process. This creates a sequence where the 3D volume in the center of the frame is occupied by alternating layers of hands and tools. By the end of the segment, the scene has transitioned from a set of discrete elongated strips to a consolidated pile of finely diced pieces, all while maintaining the same background and board layout.",
+        "question": "How does the volume of the carrot change from the start to the end of the segment?",
+        "answer": "Strips become a mound."
+      },
+      "depth_counting": {
+        "caption": "Within the depth stream, several distinct entities and layers can be identified: one rectangular cutting board providing a flat depth reference, one circular bowl in the background layer, and two dynamic hands moving through the foreground. The carrot pieces themselves start as roughly eight to ten individual strips and eventually number dozens of small minced fragments. The scene can also be divided into three primary depth layers: the background table, the mid-ground board, and the foreground interaction zone occupied by my hands.",
+        "question": "How many hands are visible interacting with the objects in the depth map?",
+        "answer": "Two hands."
+      },
+      "depth_dynamic_counting": {
+        "caption": "The dynamic entities in this segment are primarily my hands and the changing carrot pieces. My two hands move into and out of the near-field depth range repeatedly as I adjust the carrot strips. The carrot pieces undergo a high frequency of motion as they are gathered together at the 78-second mark and subsequently split into many more pieces through rapid chopping. I count at least four major gathering motions where my hands bring the disparate strips into a single central pile before the dicing continues.",
+        "question": "How many hands move between the near and mid depth layers?",
+        "answer": "Two hands."
+      },
+      "depth_navigation": {
+        "caption": "The 3D layout is oriented around a clear, unobstructed workspace. The cutting board serves as a safe horizontal plane for manipulation. Navigation is purely vertical and lateral within a small range; there is a clear path for the knife and my hands to move from the foreground layer down to the board surface. The bowl in the upper right provides a landmark for the edge of the active chopping zone, helping define the navigable workspace for my hands without hitting other objects.",
+        "question": "Is the area directly above the cutting board clear of obstacles for my hands to move?",
+        "answer": "Yes, it is clear."
+      },
+      "depth_dynamic_recognition": {
+        "caption": "My hands are the most prominent dynamic elements, consistently appearing as close-range depth volumes that move laterally across the board. The carrot pieces exhibit motion as they are sliced, shifting position on the board. At approximately frame 2340, my hands move closer together to gather the strips, and throughout the rest of the segment, they maintain a high-frequency rhythmic movement associated with rapid cross-cutting. The carrot strips gradually disappear from their original elongated shapes, replaced by a jittery cloud of smaller pieces on the board surface.",
+        "question": "Are my hands moving closer or further from each other to gather the carrot?",
+        "answer": "Moving closer together."
+      },
+      "depth_action": {
+        "caption": "I am gathering carrot strips and performing a rapid dicing action. This is inferred from the rhythmic changes in distance as my hands and the knife move up and down toward the board. My movement intent is focused on the central pile of carrots; my hands repeatedly approach each other to consolidate the pieces and then retreat as the chopping occurs. The consequence of this action is the transformation of the carrot strips' depth profile from long, thin shapes to a single, irregular mound of small pieces.",
+        "question": "What is the primary action I am performing with my hands?",
+        "answer": "Gathering and chopping."
+      },
+      "depth_non_common": {
+        "caption": "The depth stream shows a standard kitchen environment with physically plausible interactions. All objects, including the board, bowl, and carrot pieces, maintain consistent depth ordering and do not intersect unnaturally. There are no floating artifacts or clipped geometries that violate real-world physics during the rapid chopping motion.",
+        "question": "Do any objects appear to float in mid-air without support?",
+        "answer": "No."
+      }
+    }
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 53.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:53.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002": {
+    "source_prefix": "ride_a_bike_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "ride_a_bike_day_seg_002",
+      "task_label": "parking and securing the bike",
+      "start_seconds": 53.0,
+      "end_seconds": 98.5,
+      "start_timestamp": "00:00:53.000",
+      "end_timestamp": "00:01:38.500"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_001",
+      "task_label": "riding a bike",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002": {
+    "source_prefix": "ride_a_bike_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "ride_a_bike_night_seg_002",
+      "task_label": "parking and locking the bike",
+      "start_seconds": 64.0,
+      "end_seconds": 104.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:44.000"
+    },
+    "source_file": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+    "annotations": {}
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_004": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_004",
+      "task_label": "walking back to room",
+      "start_seconds": 104.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:44.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+    "annotations": {}
   }
 }
