@@ -4,28 +4,28 @@
     "side": "day",
     "segment": {
       "segment_id": "cut_carrot_day_seg_001",
-      "task_label": "peeling carrot",
+      "task_label": "semantic task",
       "start_seconds": 0.0,
-      "end_seconds": 45.0,
+      "end_seconds": 185.0,
       "start_timestamp": "00:00:00.000",
-      "end_timestamp": "00:00:45.000"
+      "end_timestamp": "00:03:05.000"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The video shows a sequence of food preparation activities on a kitchen counter, captured through motion and object interactions. Initially, a cutting board is visible with a carrot, a chef's knife, and a Y-peeler placed on it. Hands enter the frame from the bottom, picking up the peeler and engaging in a repeated longitudinal stroking motion along the carrot, indicating peeling. As this progresses, small shavings appear and accumulate on the board. After the peeling is complete, the subject sets the peeler down and picks up the knife. The activity then shifts to a series of rhythmic, vertical chopping motions as the knife slices through the carrot, creating several distinct segments that are moved slightly to the side after each cut. By the end of the sequence, the single carrot has been transformed into a pile of shavings and a row of slices.",
+        "question": "What object do I use to remove the outer layer of the carrot?",
+        "answer": "A peeler."
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The video provides several spatial cues through object interactions. My hands enter from the bottom and move above the cutting board to grasp tools. The peeler is moved from a position below the carrot to overlap with its surface, moving back and forth along its length. The carrot is held steady by one hand while the other hand manipulates the peeler. When the knife is used, it moves from a resting position on the board to a position vertically above the carrot, repeatedly descending to intersect with the carrot's volume. Carrot shavings accumulate in the space immediately surrounding the carrot. As slices are made, they are pushed away from the main body of the carrot, creating a row of pieces to the right. Throughout the video, the cutting board remains the central platform for all interactions, with hands, tools, and carrot segments constantly moving and overlapping within its boundaries.",
+        "question": "Where do I place the carrot slices relative to the main carrot body after cutting them?",
+        "answer": "To the right."
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The sequence begins with a static view of a carrot and utensils on a cutting board. The first major motion change occurs when my hands enter the frame and pick up the peeler. A prolonged phase of repetitive, longitudinal motion follows as the carrot is peeled. This is followed by a transition where the peeler is set down and the knife is picked up, shifting the focal point of movement. The next phase consists of rhythmic, vertical chopping motions. Each chop results in a new segment of carrot appearing and being moved. The video concludes with the final slices being made and the knife coming to rest, leaving a scene of a fully processed carrot on the board.",
+        "question": "What action do I perform immediately after I finish peeling the carrot?",
+        "answer": "Slicing with a knife."
       },
       "event_counting": {
         "caption": "",
@@ -38,9 +38,9 @@
         "answer": ""
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The camera remains stationary, but navigation is expressed through the path of my hands and the tools they control. Hands enter from the bottom and navigate to the tools located on either side of the carrot. During peeling, the peeler follows a linear, repetitive path along the longitudinal axis of the carrot. When transitioning between tools, the hand navigates from the carrot back to the counter surface to swap the peeler for the knife. During slicing, the knife follows a series of vertical paths, with the hand holding the carrot navigating it incrementally forward along the cutting board to position it for each subsequent cut. The flow of movement is confined to the area of the cutting board.",
+        "question": "In which direction do my hands mainly navigate the tools during the peeling process?",
+        "answer": "Longitudinally along the carrot."
       },
       "event_dynamic_recognition": {
         "caption": "",
@@ -53,9 +53,9 @@
         "answer": ""
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The event stream depicts a standard and physically plausible kitchen task. The motion of the hands, the interaction of the peeler with the carrot surface, and the subsequent slicing with the knife all follow expected physical laws and common-sense logic for food preparation. There are no instances of floating objects, clipping through geometry, or unrealistic motion patterns.",
+        "question": "Is there any physically implausible motion or behavior visible in the video?",
+        "answer": "No."
       }
     }
   },
@@ -124,60 +124,14 @@
     "side": "night",
     "segment": {
       "segment_id": "cut_carrot_night_seg_001",
-      "task_label": "slicing carrot rounds",
+      "task_label": "semantic task",
       "start_seconds": 0.0,
-      "end_seconds": 40.0,
+      "end_seconds": 161.933,
       "start_timestamp": "00:00:00.000",
-      "end_timestamp": "00:00:40.000"
+      "end_timestamp": "00:02:41.933"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
-    "annotations": {
-      "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      },
-      "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
-      }
-    }
+    "annotations": {}
   },
   "dataset\\cut_carrot_split\\cut_carrot_night_seg_002": {
     "source_prefix": "cut_carrot_night",
@@ -267,19 +221,19 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The sequence begins with the subject seated at a computer desk with multiple monitors and peripherals. As the subject stands up, the chair moves backward, and the desk surface shifts within the frame. The camera then tracks a walking motion through a hallway. Identifiable motion-based boundaries include the rectangular outlines of computer monitors, the edge of a desk, and the linear structure of a hallway. A hand enters the frame to interact with a door handle, causing the door plane to rotate open. This is followed by a second door interaction, indicating entry into a new room, with the door frame becoming more prominent as it is approached and passed.",
+        "question": "What is the first moving object I interact with after standing up from the desk?",
+        "answer": "The office chair"
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Initially, the keyboard is positioned closer to me than the monitors. The computer towers are located to the side of the monitors. When I stand up, the desk moves further away in the visual field. During the transition through the hallway, the walls on either side define a narrow path. A hand reaches out to a door handle which is closer to the camera than the door itself. As the door opens, it overlaps part of the hallway scene. Finally, I move through the doorway, making the bathroom environment closer and the hallway disappear behind the closing door.",
+        "question": "How does the distance between me and the desk change as I begin my walk?",
+        "answer": "The distance increases"
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The video starts at a workstation with multiple displays. The first major transition is the upward motion of standing and the backward sliding of the chair. Next, the camera follows a linear path through a corridor. A transition occurs when a door is reached; the hand turns the handle, and the door swings open to reveal a hallway section. A second transition happens as another door is approached and opened, leading into the bathroom where the motion settles in front of the sink.",
+        "question": "What sequence of environments do I pass through before reaching the sink?",
+        "answer": "Workstation, hallway, then bathroom"
       },
       "event_counting": {
         "caption": "",
@@ -292,9 +246,9 @@
         "answer": ""
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Starting at the desk, I perform a backward motion and stand up. I then rotate approximately 90 degrees to the left and walk forward. I reach a door, open it by turning the handle, and exit the room into a hallway. I walk straight down the hallway and approach a second door on the right. I turn the handle of this door, push it open, and enter the bathroom, coming to a stop directly in front of the sink basin.",
+        "question": "Which way do I turn after standing up to begin walking toward the door?",
+        "answer": "Left"
       },
       "event_dynamic_recognition": {
         "caption": "",
@@ -307,9 +261,9 @@
         "answer": ""
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The motion patterns and spatial interactions follow expected physical laws. The doors open predictably upon handle rotation, and the walk through the hallway matches a standard indoor environment. No floating objects or clipping through walls are observed.",
+        "question": "Do I see any objects behaving in a way that defies gravity?",
+        "answer": "No"
       }
     }
   },
@@ -327,19 +281,19 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "This segment focuses on handwashing activities at the sink. Hands enter the basin area, showing rapid rubbing and intertwined finger movements. A faucet is visible as a vertical structure from which a stream of water emerges when activated. A soap dispenser is located near the sink's edge, and its pump mechanism moves downward when pressed. The sink basin itself is a large, static boundary within which most hand motion occurs.",
+        "question": "What specific part of the faucet moves to start the water flow?",
+        "answer": "The lever handle"
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The hands are positioned centrally within the sink basin. The faucet is located above the hands. The soap dispenser is to the side of the faucet. When rinsing, the hands move directly under the water stream. The mirror is behind the faucet area. Throughout the process, the hands move closer to and further from the camera as they scrub different areas.",
+        "question": "Where are my hands in relation to the water stream during rinsing?",
+        "answer": "Directly underneath it"
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The scene begins with hands reaching for the soap dispenser. After a downward pump motion, the hands move to the center of the sink to rub together. The rubbing motion continues for an extended period, covering palms and fingers. Next, a hand reaches for the faucet lever, and a vertical stream of water appears. The final sequence involves the hands moving repeatedly through the water stream to rinse off soap before the water is turned off.",
+        "question": "Does soap application happen before or after the water is turned on?",
+        "answer": "Before"
       },
       "event_counting": {
         "caption": "",
@@ -352,9 +306,9 @@
         "answer": ""
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Navigation is minimal as I remain stationary in front of the sink. Small lateral shifts in viewpoint occur as I reach for soap or adjust the faucet, but no progression through the room takes place.",
+        "question": "Do I move to a different sink during this process?",
+        "answer": "No"
       },
       "event_dynamic_recognition": {
         "caption": "",
@@ -367,9 +321,9 @@
         "answer": ""
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The handwashing sequence follows normal physical behavior. Water flows downward, soap dispenses correctly, and hand interactions are realistic. No anomalies are detected.",
+        "question": "Does the soap float in the air after being dispensed?",
+        "answer": "No"
       }
     }
   },
@@ -387,19 +341,19 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The scene shifts to a paper towel dispenser. The subject's hands reach for a towel, pulling it downward, which causes the towel roll to rotate or the dispenser mechanism to move. A trash can is identified by its open circular boundary at the bottom of the frame. As the subject exits, the door handle is gripped and turned, and the door rotates on its hinges. Walking back through the hallway reveals static wall boundaries and doorway frames before reaching the original desk and chair.",
+        "question": "What object am I pulling a towel from?",
+        "answer": "Paper towel dispenser"
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The paper towel dispenser is located on the wall, higher than the sink. The trash can is positioned on the floor below the dispenser. Hands move from the sink to the dispenser, then to the trash can. The exit door is opposite the sink area. In the original room, the chair is positioned in front of the desk. As I sit down, the desk moves closer to the camera and fills more of the field of view.",
+        "question": "Where is the trash can located relative to the towel dispenser?",
+        "answer": "Directly below it"
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The sequence starts at the paper towel dispenser. First, towels are pulled and hands are dried. Then, the used towel is dropped into the trash can. The subject walks to the door, opens it, and enters the hallway. After retracing the path through the hallway, the subject enters the original room, approaches the desk, and sits back down in the office chair, ending the sequence.",
+        "question": "What is the final action I perform in the video?",
+        "answer": "Sitting down at the desk"
       },
       "event_counting": {
         "caption": "",
@@ -412,9 +366,9 @@
         "answer": ""
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "I turn away from the sink toward the towel dispenser. After drying, I walk to the bathroom door, turn the handle, and exit. I walk straight down the hallway, turn left into the original room, walk toward the workstation, turn around, and sit in the chair.",
+        "question": "What direction do I turn to enter the room with the computer desk?",
+        "answer": "Left"
       },
       "event_dynamic_recognition": {
         "caption": "",
@@ -427,9 +381,9 @@
         "answer": ""
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The return trip and drying process are physically consistent. Paper towels pull downward as expected, and the seating action is standard. No unrealistic interactions are observed.",
+        "question": "Did the paper towel dispenser release towels without me pulling them?",
+        "answer": "No"
       }
     }
   },
@@ -447,49 +401,49 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The event stream captures the motion of the camera moving through an indoor environment. Linear event clusters define the boundaries of doorways, wall corners, and furniture as I walk. A rectangular doorway frame becomes prominent in the center as I approach and pass through it into a hallway. The scene transitions as I navigate past vertical edges of walls and reach a second doorway leading into the bathroom.",
+        "question": "What primary rectangular structure do I navigate through in the first half of this segment?",
+        "answer": "A doorway."
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "As I move, the distance between me and the hallway walls decreases, with the walls appearing on the periphery. The doorway ahead is initially centered and small, growing larger as I approach it. The camera interacts with the doorway boundary as I pass through, momentarily occluding parts of the hallway. Object pairs include the camera and the doorway, the camera and the hallway walls, the left wall and the right wall, and the camera and the bathroom door.",
+        "question": "In relation to the walls, where is the doorway located as I walk down the hallway?",
+        "answer": "In front."
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The sequence begins with broad motion across an initial room. Then, a sharp transition occurs as I move through a doorway into a narrow hallway. Visual event activity becomes more concentrated on the side walls. Finally, I turn slightly and pass through another boundary, entering the bathroom environment where the sink area begins to emerge.",
+        "question": "Which environment do I enter immediately after walking through the hallway?",
+        "answer": "The bathroom."
       },
       "event_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Over the course of the walk, several scene elements are identifiable through motion: 2 doorways, 1 hallway section, at least 4 vertical wall corners, and 1 sink fixture at the end. Additionally, motion against the floor reveals approximately 8 visible floor-wall junctions.",
+        "question": "How many total door frames do I pass through during this navigation?",
+        "answer": "Two."
       },
       "event_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "During this segment, there are no other moving entities or humans visible besides my own forward progression. The environment remains static, with all event activity generated by my movement relative to the fixed structures of the room and hallway.",
+        "question": "How many other moving people pass by me in the hallway?",
+        "answer": "Zero."
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The navigation path is a straight forward walk followed by a subtle turn. I start in a room, move directly toward a doorway, traverse a short hallway, and turn into the bathroom door. Viewpoint changes correspond to steps and slight head movements, indicated by shifting vertical lines of the walls and doors.",
+        "question": "What is the general direction of my path through the hallway?",
+        "answer": "Straight forward."
       },
       "event_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The only dynamic element is the camera's egocentric motion. It appears at frame 0 and continues until frame 1020, moving steadily at a walking pace. No external objects move independently within the field of view during this time.",
+        "question": "Does any object in the scene move on its own while I am walking?",
+        "answer": "No."
       },
       "event_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "I am walking from one room to another with the intention of reaching the sink. I interact with the environment by navigating through door boundaries. The motion is smooth and continuous, showing the transition from a living area into a service area like a bathroom.",
+        "question": "What am I doing throughout this segment?",
+        "answer": "Walking to the bathroom."
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The motion patterns are consistent with a typical person walking through a house at night. There are no unrealistic behaviors, floating objects, or clipping errors visible in the event activity.",
+        "question": "Are there any physically implausible events occurring as I walk?",
+        "answer": "No."
       }
     }
   },
@@ -507,49 +461,49 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "High-intensity event activity is localized around the sink and faucet area. I reach for the faucet handle, causing a focused burst of events. Once turned, a vertical column of event activity represents the running water. My hands then enter the view, creating complex, overlapping motion patterns as they rub together under the water stream inside the sink basin.",
+        "question": "What vertical moving column appears in the sink after I move my hand near the faucet?",
+        "answer": "Running water."
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "My hands move closer to the faucet, then descend into the sink basin. The running water stream is positioned between the faucet and the hands. The sink bowl edges define the outer spatial limit of the action. Object pairs include the hands and the water stream, the faucet handle and my hand, the water and the sink basin, and my left hand and right hand interacting.",
+        "question": "Where are my hands located relative to the water stream?",
+        "answer": "Under it."
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "First, the camera stabilizes in front of the sink. Next, a hand reaches for and turns the faucet. This is followed by the appearance of falling water. Finally, both hands interlock and rub together continuously within the stream, maintaining a high level of event activity until the end of the segment.",
+        "question": "What is the very first thing I do once I reach the sink?",
+        "answer": "Reach for the faucet."
       },
       "event_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "In this washing sequence, I can count 1 faucet fixture, 2 moving hands, 1 continuous water stream, 1 sink basin, and 1 faucet handle. Approximately 20 distinct rapid hand-rubbing motions occur.",
+        "question": "How many hands are involved in the washing activity?",
+        "answer": "Two."
       },
       "event_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The hands are the primary moving entities. They rub together approximately 15-20 times over the 52-second span. The water stream is a constant dynamic feature from the moment the faucet is turned until the end of the segment.",
+        "question": "How many times do my hands come together and separate while washing?",
+        "answer": "About twenty times."
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Navigation is minimal as the viewpoint is fixed on the sink. The only navigational cue is the initial approach which positions the sink basin centrally in the frame, followed by stationary activity as I perform the task.",
+        "question": "Am I moving between rooms during this hand-washing task?",
+        "answer": "No."
       },
       "event_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Hands appear in the foreground at approximately 36 seconds and remain until 86 seconds. They exhibit rubbing, twisting, and rinsing motions. The water stream starts at 35 seconds and remains a constant dynamic element until the end of the segment.",
+        "question": "What dynamic interaction is happening in the center of the frame?",
+        "answer": "Hands washing together."
       },
       "event_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "I turn the faucet handle to start the water flow. I then place my hands into the stream and rub them together vigorously to clean them. The motion is deliberate and repetitive, suggesting a thorough cleaning process.",
+        "question": "Which specific objects am I interacting with to clean my hands?",
+        "answer": "Faucet and water."
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The event activity perfectly matches the physical reality of washing hands. The water flow originates from the faucet and hands move naturally within the basin. No common-sense violations are present.",
+        "question": "Does the water appear to flow in an unusual direction?",
+        "answer": "No."
       }
     }
   },
@@ -567,49 +521,49 @@
     "source_file": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
     "annotations": {
       "event_object_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "A hand moves to the faucet, causing the vertical water column to disappear. Next, motion events occur near the side of the sink as I reach for a towel. The towel exhibits soft, broad motion patterns as it is used to dry the hands. Finally, the scene transitions back to the hallway and initial room, with doorway frames and furniture edges reappearing as I return.",
+        "question": "What object do I interact with after turning off the water?",
+        "answer": "A towel."
       },
       "event_spatial_reasoning": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "My hands move from the sink basin to the towel rack. The towel overlaps the hands during the drying process. As I walk away, the sink recedes into the distance while the bathroom doorway grows closer. Object pairs include the hand and the towel, the towel and the towel rack, the camera and the bathroom door, and the camera and the final PC setup.",
+        "question": "What happens to the size of the sink in my view as I start walking back?",
+        "answer": "It gets smaller."
       },
       "event_scene_sequence": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The segment starts with the cessation of water flow. Then, hand drying occurs using a towel. After that, I turn and exit the bathroom. I navigate back through the same hallway and enter the original room, ending the video as I approach a desk with computer equipment.",
+        "question": "What is the final destination I reach at the end of the video?",
+        "answer": "The PC room."
       },
       "event_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "In this final segment, I count 1 faucet handle interaction, 1 towel, 2 hands drying, 2 door frames passed through on return, and at least 3 monitors at the final desk setup.",
+        "question": "How many monitors can be counted at the desk when I return?",
+        "answer": "Three."
       },
       "event_dynamic_counting": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "My hands move dynamically while drying for about 10 seconds. After that, no other dynamic entities are present as I walk back through the static apartment environment.",
+        "question": "Are there any pets or other people moving in the hallway on my way back?",
+        "answer": "No."
       },
       "event_navigation": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The navigation is a reversal of the first segment. I turn 180 degrees from the sink, walk through the bathroom door, travel straight down the hallway, and enter the main room through the final doorway, eventually approaching a desk.",
+        "question": "Which way do I turn to leave the sink and begin my return?",
+        "answer": "About 180 degrees."
       },
       "event_dynamic_recognition": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "Hands drying motion is visible from approximately 88 to 98 seconds. Walking motion restarts at 100 seconds and continues until the video ends at 138.5 seconds as I re-enter the room with the desk setup.",
+        "question": "Does the water start running again after I dry my hands?",
+        "answer": "No."
       },
       "event_action": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "I turn off the faucet, reach for a towel, and dry my hands thoroughly. Following this, I walk back to the room I started in, presumably to return to my activities at the computer desk.",
+        "question": "What action am I performing with the towel?",
+        "answer": "Drying my hands."
       },
       "event_non_common": {
-        "caption": "",
-        "question": "",
-        "answer": ""
+        "caption": "The transition from the bathroom back to the main room is smooth and consistent with the floor plan established earlier. No unusual or non-common-sense events are detected in the stream.",
+        "question": "Do I walk through any walls or solid objects during the return trip?",
+        "answer": "No."
       }
     }
   }

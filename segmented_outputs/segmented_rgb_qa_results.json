@@ -4,18 +4,468 @@
     "side": "day",
     "segment": {
       "segment_id": "cut_carrot_day_seg_001",
-      "task_label": "peeling carrot",
+      "task_label": "semantic task",
       "start_seconds": 0.0,
-      "end_seconds": 45.0,
+      "end_seconds": 185.0,
       "start_timestamp": "00:00:00.000",
-      "end_timestamp": "00:00:45.000"
+      "end_timestamp": "00:03:05.000"
     },
     "source_file": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
     "annotations": {
       "object_recognition": {
-        "caption": "1. Indoor Starting Area (The Room)\nScene: A domestic interior, likely a dorm or studio apartment.\nObjects: Furniture includes a white desk with a black swivel chair, a small white dresser/nightstand, and a shoe rack. Footwear visible includes black sneakers, white-and-purple athletic shoes, and black slides. Household items include cleaning bottles and a blue storage container.\nColor & Texture: White walls with matte texture. Blue-grey linoleum floor. Lighting is a mix of overhead light and warm desk lamp.\n\n2. Transition & Hallway\nScene: Camera moves from room into a dark hallway.\nObjects: A solid blue door leads out of the room. Metal door handles, light switches visible.\nColor & Texture: High contrast between bright interior room and nearly black hallway. Blue door provides sharp pop of color.\n\n3. Building Exterior & Mailbox Area\nScene: Outdoor walkway in modern apartment complex at night.\nObjects: Large bank of mailboxes (metallic grey with vibrant green section). Metal staircases with vertical slat railings. Green-and-white emergency exit sign visible.\nColor & Texture: Dominant dark greys and blacks. Green mailboxes most significant visual anchor.",
-        "question": "What is the color of the door I pass through to exit the room and enter the dark hallway?",
+        "caption": "The frames depict a kitchen workspace featuring a stainless steel countertop. On the counter, there's a white plastic cutting board, an orange carrot, a silver kitchen knife with a black textured handle, a black Y-shaped vegetable peeler, and a white ceramic bowl. To the left of the prep area is a black induction stovetop and a dark grey laptop. On the far right, a white power strip with multiple sockets is visible against a red wall.",
+        "question": "I want to know the color of the vegetable peeler used in the video.",
+        "answer": "The vegetable peeler has a black handle."
+      },
+      "spatial_reasoning": {
+        "caption": "The carrot is positioned in the center of the cutting board. Initially, the peeler is to the left of the carrot, and the knife is to its right. The bowl is situated to the right of the cutting board. The induction stove is to the left of the workspace, with the laptop further left. The power strip is located in the background to the right. I am standing approximately one step away from the counter, directly in front of the cutting board.",
+        "question": "Where is the white bowl positioned in relation to the cutting board?",
+        "answer": "The white bowl is to the right of the cutting board."
+      },
+      "text_recognition": {
+        "caption": "On the handle of the black vegetable peeler, the brand name 'VICTORINOX' is clearly visible in frames such as 000300 through 000510. This identifies the manufacturer of the kitchen tool. No other clear text is identifiable on the other objects in the scene.",
+        "question": "1. What is the brand name printed on the vegetable peeler? 2. In which part of the video is the brand name on the peeler most legible? 3. Can any text be seen on the blade of the knife? 4. What does the text on the peeler indicate? 5. Where on the peeler is the text located? 6. Is there any readable text on the laptop? 7. Is the brand name written in capital letters? 8. How many unique brand names are found in the video?",
+        "answer": "1. The brand name is VICTORINOX. 2. It is most legible in the early frames, around frame 000300. 3. No, the blade appears plain. 4. It identifies the manufacturer of the tool. 5. On the handle. 6. No, any text on the laptop is too small or blurred to read. 7. Yes, it is in capital letters. 8. Only one brand name is clearly identifiable."
+      },
+      "scene_sequence": {
+        "caption": "The video sequence begins with a static shot of the ingredients and tools. Then, I pick up the carrot and peeler to begin preparation. The carrot is peeled over the white bowl. Once peeled, the peeler is set aside, and the knife is used to slice the carrot into rounds and subsequently into julienne strips on the cutting board. The camera maintains a top-down perspective throughout.",
+        "question": "1. What is the sequence of tasks performed? 2. What action was taken immediately before cutting the carrot? 3. Which tool was used for the initial preparation of the carrot? 4. Where were the carrot skins placed? 5. What happened after the carrot was fully peeled? 6. What objects are to the left of the prep area? 7. How was the carrot prepared before slicing? 8. What type of knife cuts were made? 9. Which tool was used first, the peeler or the knife? 10. Where did I put the peeler after I finished using it?",
+        "answer": "1. Peeling followed by cutting. 2. The carrot was peeled. 3. A vegetable peeler was used. 4. The skins were peeled into the white bowl. 5. The knife was picked up to start slicing. 6. An induction stove and a laptop. 7. It was peeled with a vegetable peeler. 8. The carrot was cut into rounds and then julienne strips. 9. The peeler was used first. 10. It was placed back on the counter to the right."
+      },
+      "light_recongnition": {
+        "caption": "The scene is lit by overhead indoor kitchen lighting combined with ambient daylight. The light comes from above and slightly in front of the subject, creating clear shadows behind the objects on the cutting board. The metallic surface of the counter and the knife blade reflect the light source.",
+        "question": "From what general direction is the primary light source coming?",
+        "answer": "The primary light source is coming from above."
+      },
+      "light_change": {
+        "caption": "The lighting remains stable and consistent throughout the entire video. There are no instances of lights flickering, turning off, or changing in intensity or color. The reflections on the stainless steel counter stay constant as well.",
+        "question": "1. Did any of the lights turn off during the video? 2. Is there a noticeable increase in brightness at any point? 3. Does the light appear to be moving? 4. Were there any external light changes, like car headlights passing by? 5. Was there any flicker in the illumination? 6. Did the overall color temperature of the room change? 7. Is the shadow of the hand consistent while cutting? 8. Do the reflections on the counter surface fluctuate?",
+        "answer": "1. No, the lights stayed on. 2. No, the brightness level was constant. 3. No, the light source is stationary. 4. No such changes were observed. 5. No, the light was steady. 6. No, the color remained the same. 7. Yes, the shadow direction and intensity are consistent. 8. No, the reflections remained stable."
+      },
+      "counting": {
+        "caption": "The video shows 1 orange carrot, 1 silver knife, 1 black peeler, 1 white bowl, 1 white cutting board, 1 grey laptop, and 1 power strip with 5 visible outlets. There are 2 induction burner circles visible on the stove.",
+        "question": "1. How many carrots are in the scene? 2. How many knives are being used? 3. How many bowls are present on the counter? 4. How many laptops can be seen? 5. How many cutting boards are being used for preparation? 6. How many vegetable peelers are on the counter? 7. How many power outlets are visible on the power strip? 8. How many circular heating zones are visible on the induction stove? 9. How many hands are visible performing the task? 10. How many main kitchen utensils are used to process the carrot?",
+        "answer": "1. There is one carrot. 2. One knife is used. 3. One bowl is present. 4. One laptop is visible. 5. One cutting board is used. 6. One peeler is present. 7. Five outlets are visible. 8. Two zones are visible. 9. Two hands are visible. 10. Two utensils (peeler and knife) are used."
+      },
+      "dynamic_counting": {
+        "caption": "The main dynamic elements are my hands moving to peel and cut the carrot. The carrot itself is moved and rotated. Peels fall into the bowl. The knife and peeler are picked up and set down. No other moving people, animals, or objects enter the frame.",
+        "question": "1. How many additional people enter the frame? 2. Are there any pets seen moving in the background? 3. How many items fall off the edge of the counter? 4. Are there any moving vehicles visible through a window? 5. How many hands are moving to peel the carrot? 6. How many knives are moved during the video? 7. Is there any movement from the laptop? 8. How many times does the carrot change position on the board during cutting?",
+        "answer": "1. Zero additional people. 2. No pets are visible. 3. Zero items fall off. 4. No window or vehicles are visible. 5. Two hands are moving. 6. One knife is moved. 7. No, the laptop is stationary. 8. It is moved multiple times as it is cut."
+      },
+      "non_common": {
+        "caption": "The scene appears quite standard for a kitchen. The most notable layout choice is placing a laptop directly next to an induction stovetop, which could be a hazard in a real cooking scenario due to heat or moisture.",
+        "question": "Is there anything about the placement of objects that contradicts common kitchen safety practices?",
+        "answer": "Yes, the laptop is placed very close to the induction stove, which is usually avoided to prevent damage from heat or spills."
+      },
+      "navigation": {
+        "caption": "I am standing at the kitchen counter. To reach the stove, I would have to turn slightly to the left. The bowl is just a few inches to the right of the cutting board. The laptop is situated to the far left of my standing position. No complex navigation through rooms is shown.",
+        "question": "1. Which direction should I turn to face the induction stove? 2. How far is the bowl from the stove? 3. Where is the laptop relative to the cutting board? 4. Is the kitchen sink visible from this angle? 5. In which direction is the power strip from the prep area? 6. Am I moving closer to or further from the counter? 7. What object is directly in front of me at the start? 8. How would I get to the other side of this counter? 9. Is there any door visible in the background? 10. Can the path to another room be determined from the video?",
+        "answer": "1. Turn to the left. 2. It is about half a step away across the workspace. 3. It is to the far left. 4. No, it is not in the frame. 5. It is to the back right. 6. I am standing stationary at the counter. 7. The cutting board and carrot. 8. By walking around the counter island. 9. No door is visible. 10. No, the view is limited to the countertop."
+      },
+      "dynamic_recognition": {
+        "caption": "Hands reach in and pick up the peeler and carrot starting at frame 000540. The peeling motion continues until frame 001200. Slicing the carrot into rounds begins at 001230 and ends at 001500. The julienne cutting process starts at frame 001530 and continues until the end of the video at frame 005520.",
+        "question": "Between which frames does the peeling action take place?",
+        "answer": "The peeling of the carrot occurs from frame 000660 to frame 001200."
+      },
+      "action": {
+        "caption": "I am preparing a carrot. I begin by peeling the carrot with a vegetable peeler, allowing the skins to fall into a white bowl for easy disposal. After peeling, I switch to a kitchen knife to cut the carrot into rounds and then into thin, uniform julienne strips. This is likely preparation for a stir-fry, salad, or garnish.",
+        "question": "1. What is being done with the black peeler? 2. Why is there a bowl on the counter during the peeling process? 3. What is the final style of cut for the carrot? 4. How is the knife being held? 5. What is the role of the non-cutting hand during slicing? 6. Is the peeling direction towards or away from the body? 7. What happens to the carrot skin after it's removed? 8. What is the overall purpose of the actions shown?",
+        "answer": "1. It is used to peel the skin off the carrot. 2. To catch the carrot peels as they fall. 3. It is cut into julienne strips. 4. It is held firmly by the handle. 5. It holds the carrot steady on the board. 6. It is peeled towards the bowl. 7. It is collected in the white bowl. 8. The purpose is food preparation."
+      }
+    }
+  },
+  "dataset\\cut_carrot_split\\cut_carrot_night_seg_001": {
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "cut_carrot_night_seg_001",
+      "task_label": "semantic task",
+      "start_seconds": 0.0,
+      "end_seconds": 161.933,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:02:41.933"
+    },
+    "source_file": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The video displays a close-up view of a kitchen counter at night. I am preparing a bright orange carrot on a white cutting board. To the right of the board, there is a white bowl. I use a knife with a dark handle and a silver blade to first peel the carrot and then slice it into multiple small segments. The scene is very dark with the only light focusing on the workspace.",
+        "question": "What is the color of the vegetable I am cutting?",
+        "answer": "Orange"
+      },
+      "spatial_reasoning": {
+        "caption": "In the scene, the orange carrot is positioned on top of the white cutting board. The white bowl is placed to the right of the cutting board. My hands are centered over the board, holding the carrot and the knife. The knife is held in my right hand, making contact with the carrot. I am standing directly at the counter, so the distance is 0 steps.",
+        "question": "Where is the bowl located relative to the cutting board?",
+        "answer": "To the right"
+      },
+      "text_recognition": {
+        "caption": "No text is visible on the carrot, the cutting board, the knife, or the bowl. The low illumination and the plain surfaces of the kitchen tools result in a complete absence of readable text.",
+        "question": "1. Is there any text visible on the cutting board? 2. Are there any brand labels on the carrot? 3. Can you see text on the knife handle? 4. Is there any writing on the bowl? 5. Are there words visible on my clothing? 6. Is any text visible in the background? 7. Can you see a brand name on the cutting board? 8. Is there any text on the kitchen counter?",
+        "answer": "1. No 2. No 3. No 4. No 5. No 6. No 7. No 8. No"
+      },
+      "scene_sequence": {
+        "caption": "The sequence takes place entirely at a kitchen counter. I begin by peeling the carrot over a white bowl to catch the shavings. Once peeled, I place the carrot on the white cutting board and proceed to slice it into several round pieces. The video ends with the carrot fully sliced on the board.",
+        "question": "1. What sequence of actions did I perform? 2. What did I do before slicing? 3. Where was the peeling done? 4. Where was the slicing done? 5. What tool was used? 6. Did I change rooms? 7. Was the bowl moved? 8. What was prepared? 9. Is there a sink visible? 10. What is the final state of the carrot?",
+        "answer": "1. Peeling then slicing 2. Peeling 3. Over the bowl 4. On the cutting board 5. A knife 6. No 7. No 8. A carrot 9. No 10. Sliced"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "The lighting remains consistently dark throughout the video. There are no instances of lights turning on or off, and the brightness level does not fluctuate significantly.",
+        "question": "1. Did the lights turn on? 2. Did it get darker? 3. Is light approaching me? 4. Did a car's headlights pass? 5. Did the lighting flicker? 6. Is the scene brighter at the end? 7. Was a flash used? 8. Did the illumination intensity change?",
+        "answer": "1. No 2. No 3. No 4. No 5. No 6. No 7. No 8. No"
+      },
+      "counting": {
+        "caption": "I can identify several objects: one carrot, one cutting board, one bowl, and one knife. Additionally, my two hands are visible as they interact with the tools and the vegetable.",
+        "question": "1. How many carrots are there? 2. How many knives? 3. How many bowls? 4. How many cutting boards? 5. How many hands are visible? 6. How many stoves are in the scene? 7. How many sinks? 8. How many windows? 9. How many towels? 10. How many tables are shown?",
+        "answer": "1. One 2. One 3. One 4. One 5. Two 6. Zero 7. Zero 8. Zero 9. Zero 10. One"
+      },
+      "dynamic_counting": {
+        "caption": "The moving elements are my hands and the knife. Carrot peels are seen falling into the bowl, and carrot slices move as they are separated from the main root.",
+        "question": "1. How many people are moving? 2. How many knives are moving? 3. How many cars approach? 4. How many pieces of carrot fall into the bowl? 5. How many birds fly by? 6. How many doors open? 7. How many pets appear? 8. How many bowls move?",
+        "answer": "1. One 2. One 3. Zero 4. Several 5. Zero 6. Zero 7. Zero 8. Zero"
+      },
+      "non_common": {
+        "caption": "The kitchen setup appears normal and follows common logic. All objects are resting on the counter as expected, and there is no mesh clipping or unrealistic object behavior.",
+        "question": "Is there any object floating in the air against gravity?",
+        "answer": "No"
+      },
+      "navigation": {
+        "caption": "The camera is fixed, and I remain in one spot at the counter. No steps are taken, and no navigation through the house occurs during the video.",
+        "question": "1. How many steps to the bowl? 2. Which way to the sink? 3. Did I turn left? 4. Did I turn right? 5. How many steps taken? 6. Is there a door nearby? 7. Fastest way to the living room? 8. Am I moving forward? 9. Am I stationary? 10. Where is the exit?",
+        "answer": "1. Zero 2. Not visible 3. No 4. No 5. Zero 6. Not visible 7. Not shown 8. No 9. Yes 10. Not shown"
+      },
+      "dynamic_recognition": {
+        "caption": "The right hand holding the knife starts peeling the carrot at frame 330 and finishes around frame 1500. Slicing begins at frame 1530 and continues until the end of the recording. No other dynamic objects enter the frame.",
+        "question": "Did a new object appear in the frame while I was cutting?",
+        "answer": "No"
+      },
+      "action": {
+        "caption": "I am performing the action of preparing a carrot. First, I peel the carrot into a white bowl using a knife. Then, I place the carrot on a cutting board and slice it into pieces. The purpose is food preparation, resulting in chopped vegetables.",
+        "question": "1. What am I doing? 2. Which hand holds the knife? 3. What is the carrot being peeled into? 4. Where is the slicing occurring? 5. What is the purpose? 6. What tool is used? 7. What happens to the carrot? 8. Is the peeling complete?",
+        "answer": "1. Peeling and slicing a carrot 2. Right hand 3. A bowl 4. On the cutting board 5. Food preparation 6. A knife 7. It gets sliced 8. Yes"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_001": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_001",
+      "task_label": "leave room and go to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 38.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:38.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The scene begins in a brightly lit office room containing multiple workstations. Each desk features a black computer monitor, a keyboard, a mouse, and a PC tower. A green LED strip is visible on the PC case at the starting desk. The chairs are blue with black frames. The floor is light-colored wood. A white door with a silver handle and a room tag is located at the edge of the office area, leading to a hallway with white walls and grey doors.",
+        "question": "What is the color of the glowing light strip on the computer tower at the first desk?",
+        "answer": "Green"
+      },
+      "spatial_reasoning": {
+        "caption": "The keyboard is positioned directly in front of the monitor, approximately 1 step away. The mouse sits to the right of the keyboard. The blue office chair is pushed under the desk. The room exit door is ahead and slightly to the right, about 6 steps from the initial sitting position. The room tag is mounted on the wall to the left of the door handle.",
+        "question": "Relative to my starting monitor, where is the PC tower located?",
+        "answer": "To the right"
+      },
+      "text_recognition": {
+        "caption": "In frame 13, a room identification tag on the wall reads '02.B.29 Büro 19 ZUBLIN'. This tag is likely used for building management. Between frames 15 and 38, a white paper note is taped to the door. It reads 'Dear students! Please make sure to close the windows upon leaving our student rooms. Thank you.' This note serves as a reminder for students to secure the facility.",
+        "question": "1. What is the room number shown on the wall tag?\n2. What does the note on the door tell students to close?\n3. To whom is the note on the door addressed?\n4. What company name is printed in red on the room tag?\n5. What is the code at the top left of the room tag?\n6. What is the first word of the note?\n7. What is the last word of the note?\n8. Where is the room tag placed relative to the door?",
+        "answer": "1. 19\n2. The windows\n3. Students\n4. ZUBLIN\n5. 02.B.29\n6. Dear\n7. you\n8. To the left of the door frame"
+      },
+      "scene_sequence": {
+        "caption": "I begin seated at an office desk, get up and walk through the office room past several other desks, reach a room door, open it to enter a hallway, and finally proceed through a second door into a bathroom.",
+        "question": "1. Where do I start in this video?\n2. What is the sequence of areas I pass through?\n3. What do I pass immediately after leaving my desk?\n4. What is the destination of this trip?\n5. What room do I enter after the hallway?\n6. What do I walk over to leave the office?\n7. Which room connects the office and the bathroom?\n8. What type of floor is in the first room?\n9. Do I enter a kitchen?\n10. What do I pass just before reaching the bathroom door?",
+        "answer": "1. At an office desk\n2. Office room, hallway, bathroom\n3. Other office workstations and chairs\n4. The bathroom\n5. The bathroom\n6. The wooden floor area leading to the door\n7. The hallway\n8. Wooden panels\n9. No\n10. A white hallway wall"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "The lighting transitions from bright natural light in the office to cooler, artificial light in the hallway and bathroom as I move away from the windows.",
+        "question": "1. Is the office getting brighter or darker as I walk away from the window?\n2. Did I turn any lights on manually?\n3. Is the hallway brighter than the office interior?\n4. Is the light source in the office natural or artificial?\n5. Does the lighting color shift when entering the hallway?\n6. Is there sunlight visible in the office?\n7. Is the bathroom well-lit?\n8. Does the intensity of light change when opening the door?",
+        "answer": "1. Darker\n2. No\n3. No\n4. Natural\n5. Yes, to a cooler white\n6. Yes\n7. Yes\n8. Yes"
+      },
+      "counting": {
+        "caption": "The office contains 4 blue chairs at the desks. I pass 1 PC tower with a green light. There is 1 door leading out of the room. At least 4 computer monitors are visible across the room. There is 1 silver door handle on the white door.",
+        "question": "1. How many blue chairs are in the office?\n2. How many computer monitors can be seen at the desks?\n3. How many doors do I open to leave the room?\n4. How many PC towers have a green light strip?\n5. How many keyboards are visible on the desks?\n6. How many mice are on the first desk?\n7. How many room tags are next to the door?\n8. How many door handles do I touch?\n9. How many windows are on the left side of the room?\n10. How many hallways do I walk through?",
+        "answer": "1. Four\n2. Four\n3. One\n4. One\n5. Four\n6. One\n7. One\n8. One\n9. Three\n10. One"
+      },
+      "dynamic_counting": {
+        "caption": "No moving people or dynamic objects other than me are visible in the office or hallway during this segment.",
+        "question": "1. How many other people walk past me?\n2. How many cars are seen through the windows?\n3. How many doors close automatically?\n4. How many objects fall off the desks?\n5. How many pets are in the hallway?\n6. How many robots move in the scene?\n7. How many items are being thrown?\n8. How many dynamic lights pass by?",
+        "answer": "1. Zero\n2. Zero\n3. Zero\n4. Zero\n5. Zero\n6. Zero\n7. Zero\n8. Zero"
+      },
+      "non_common": {
+        "caption": "The layout of the office and hallway is realistic and standard. There are no common-sense violations or unrealistic object placement.",
+        "question": "Are there any office objects floating in mid-air?",
+        "answer": "No"
+      },
+      "navigation": {
+        "caption": "From the desk, I walk approximately 6 steps forward and slightly right to the door. I turn the handle to open the door, step into the hallway, turn right, and walk 3 steps to the bathroom door.",
+        "question": "1. Which direction do I walk to leave my desk?\n2. What is the first turn I make?\n3. How do I get into the hallway?\n4. What turn do I make once in the hallway?\n5. How many steps is it to the office door?\n6. What floor surface do I walk on in the hallway?\n7. Is the hallway straight or curved?\n8. Where is the bathroom relative to the office door?\n9. What do I interact with to exit the office?\n10. Is the bathroom door open or closed initially?",
+        "answer": "1. Forward\n2. A slight right toward the door\n3. Open the office door\n4. Right\n5. Six steps\n6. Tile or linoleum\n7. Straight\n8. To the right down the hall\n9. The door handle\n10. Closed"
+      },
+      "dynamic_recognition": {
+        "caption": "The main dynamic event is the office door opening (frames 330-1110) as I push the handle and walk through.",
+        "question": "Has the office door been opened completely?",
+        "answer": "Yes"
+      },
+      "action": {
+        "caption": "I get up from my chair at the desk, walk across the office, use my right hand to pull down the silver door handle, open the door, and step into the hallway to reach the bathroom.",
+        "question": "1. What is the first action I take?\n2. Which hand do I use to open the office door?\n3. What is the purpose of opening the door?\n4. Do I walk or run to the door?\n5. What object is interacted with to exit the room?\n6. Do I close the door behind me?\n7. Where am I going after leaving the desk?\n8. What is the consequence of pressing the door handle?",
+        "answer": "1. Standing up\n2. Right hand\n3. To exit the office\n4. Walk\n5. Door handle\n6. No\n7. The bathroom\n8. The door latch releases and the door opens"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_002": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 38.0,
+      "end_seconds": 81.0,
+      "start_timestamp": "00:00:38.000",
+      "end_timestamp": "00:01:21.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "I am standing at a white ceramic sink in a bathroom. There is a chrome faucet over the sink. To the right of the sink is a white soap dispenser containing pink liquid soap. Above the sink is a large mirror reflecting the wall and ceiling.",
+        "question": "What color is the soap inside the dispenser?",
+        "answer": "Pink"
+      },
+      "spatial_reasoning": {
+        "caption": "The faucet is mounted directly above the drain of the sink. The soap dispenser is attached to the wall on the right side of the sink. The mirror is positioned behind the faucet on the wall. I am standing less than 1 step from the sink.",
+        "question": "Where is the soap dispenser relative to the mirror?",
+        "answer": "To the right"
+      },
+      "text_recognition": {
+        "caption": "There are no clear, legible text elements visible on the bathroom fixtures in this segment.",
+        "question": "1. Is there a sign above the sink?\n2. What text is on the soap dispenser?\n3. Are there instructions on the faucet?\n4. Is there a room number inside the bathroom?\n5. Does the mirror have a logo?\n6. Is there a warning sign on the toilet?\n7. What text is on the wall tiles?\n8. Is there any writing on the sink?",
+        "answer": "1. No\n2. None visible\n3. No\n4. No\n5. No\n6. No\n7. None\n8. No"
+      },
+      "scene_sequence": {
+        "caption": "I am at the bathroom sink. I first move my arm to the soap dispenser, then place my hands under the faucet to start the water, and finally rub my hands together to wash them.",
+        "question": "1. What is the first object I interact with in the bathroom?\n2. Where am I standing?\n3. What comes after using the soap dispenser?\n4. What scene is shown throughout this segment?\n5. Is the sink used in this part?\n6. What happens after the water is turned on?\n7. Is there a mirror in the scene?\n8. What am I doing at the sink?\n9. Do I use a towel in this segment?\n10. What is the last part of this sequence?",
+        "answer": "1. Soap dispenser\n2. At the sink\n3. Using the faucet\n4. Bathroom sink area\n5. Yes\n6. I rub my hands together\n7. Yes\n8. Washing my hands\n9. No\n10. Rinsing my hands under the water"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "The light level remains constant throughout the handwashing process. Reflections in the water and mirror change as I move my hands.",
+        "question": "1. Do the lights turn off while I am washing?\n2. Is the lighting intensity changing?\n3. Does the mirror reflect the ceiling light?\n4. Is it getting brighter at the sink?\n5. Does a car light pass through a window?\n6. Is there any shadow change from my hands?\n7. Is the light source moving?\n8. Are there flickering lights?",
+        "answer": "1. No\n2. No\n3. Yes\n4. No\n5. No\n6. Yes, as I move my hands\n7. No\n8. No"
+      },
+      "counting": {
+        "caption": "There is 1 sink, 1 chrome faucet, 1 soap dispenser, 1 mirror, and 1 toilet visible in the background. I have 2 hands involved in the washing process.",
+        "question": "1. How many sinks are I using?\n2. How many faucets are on the sink?\n3. How many soap dispensers are visible?\n4. How many hands are being washed?\n5. How many toilets are in the bathroom?\n6. How many mirrors are above the sink?\n7. How many drains are in the sink?\n8. How many tiles are on the wall area visible?\n9. How many lights are reflected in the mirror?\n10. How many soap bottles are on the counter?",
+        "answer": "1. One\n2. One\n3. One\n4. Two\n5. One\n6. One\n7. One\n8. Many\n9. One primary source\n10. Zero, it is wall-mounted"
+      },
+      "dynamic_counting": {
+        "caption": "No other people or dynamic objects are moving in the bathroom during this segment.",
+        "question": "1. How many other people enter the bathroom?\n2. How many items fall into the sink?\n3. How many dynamic shadows pass the door?\n4. How many faucets turn on by themselves?\n5. How many soap bubbles move out of the sink?\n6. How many insects are flying around?\n7. How many dynamic lights are seen?\n8. How many birds pass the window?",
+        "answer": "1. Zero\n2. Zero\n3. Zero\n4. One (sensor-activated)\n5. Zero\n6. Zero\n7. Zero\n8. Zero"
+      },
+      "non_common": {
+        "caption": "The bathroom layout is typical and there are no unrealistic or non-common-sense elements.",
+        "question": "Is the sink attached to the ceiling?",
+        "answer": "No"
+      },
+      "navigation": {
+        "caption": "I am stationary at the sink, facing forward toward the mirror and faucet.",
+        "question": "1. Am I moving between rooms?\n2. Which way am I facing?\n3. Is there an obstacle in front of the sink?\n4. How many steps do I take during washing?\n5. Can I see the exit door from the sink?\n6. Is the toilet behind me?\n7. Where is the mirror located?\n8. Am I standing or sitting?\n9. Which direction is the soap dispenser?\n10. Is the sink accessible?",
+        "answer": "1. No, I stay at the sink\n2. Forward\n3. No\n4. Zero\n5. Yes, in the reflection\n6. Yes\n7. On the wall in front\n8. Standing\n9. To the right\n10. Yes"
+      },
+      "dynamic_recognition": {
+        "caption": "The main dynamic elements are my hands moving to rub and rinse, and the water flowing from the faucet.",
+        "question": "Has the water started flowing?",
+        "answer": "Yes"
+      },
+      "action": {
+        "caption": "I use my right forearm to press the lever on the soap dispenser, receiving a pump of pink soap in my left hand. I then move both hands under the faucet to activate the sensor. I rub my palms together, rub the backs of each hand, and rub between my fingers before thoroughly rinsing them under the stream of water.",
+        "question": "1. How do I activate the soap dispenser?\n2. Which hand receives the soap first?\n3. What color is the soap used?\n4. What is the purpose of rubbing my hands together?\n5. Do I rub the backs of my hands?\n6. How is the faucet activated?\n7. What is the final action in the washing sequence?\n8. What is the consequence of putting my hands under the faucet?",
+        "answer": "1. Pressing with my right forearm\n2. Left hand\n3. Pink\n4. To lather the soap and clean the skin\n5. Yes\n6. Automatically by sensor\n7. Rinsing with water\n8. The water turns on"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_day_seg_003": {
+    "source_prefix": "wash_hands_day",
+    "side": "day",
+    "segment": {
+      "segment_id": "wash_hands_day_seg_003",
+      "task_label": "dry hands and return to desk",
+      "start_seconds": 81.0,
+      "end_seconds": 124.7,
+      "start_timestamp": "00:01:21.000",
+      "end_timestamp": "00:02:04.700"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The scene moves from the bathroom back to the office. In the bathroom, a white paper towel dispenser is on the wall. A blue trash bin is underneath it. In the office, the same desks with black monitors, keyboards, and blue chairs are visible. A black backpack is worn by me, seen in the mirror reflection.",
+        "question": "What color is the trash bin in the bathroom?",
         "answer": "Blue"
+      },
+      "spatial_reasoning": {
+        "caption": "The paper towel dispenser is mounted on the wall to the left of the sink area. The trash bin is on the floor below the dispenser. The exit door is 2 steps from the sink. The workstation is about 10 steps back from the bathroom door.",
+        "question": "Where is the trash bin located relative to the paper towel dispenser?",
+        "answer": "Below it"
+      },
+      "text_recognition": {
+        "caption": "The reminder note 'Dear students...' is seen again on the office side of the door as I re-enter. The room tag is visible briefly upon exiting the bathroom hallway.",
+        "question": "1. What text is seen on the door note again?\n2. What is the room tag number seen earlier?\n3. Is there text on the paper towel dispenser?\n4. What does the note suggest about windows?\n5. To whom is the note addressed?\n6. What company name is on the room tag?\n7. Is there a sign on the trash bin?\n8. Is there writing on my backpack?",
+        "answer": "1. Dear students!\n2. 19\n3. No clear text\n4. To close them\n5. Students\n6. ZUBLIN\n7. No\n8. None visible"
+      },
+      "scene_sequence": {
+        "caption": "I finish at the sink, move to the paper towel dispenser, dry my hands, exit the bathroom, walk through the hallway, enter the office room, and return to sit at the desk.",
+        "question": "1. What is the first scene in this segment?\n2. What do I do after drying my hands?\n3. Where do I go after the bathroom?\n4. What room do I enter last?\n5. What is the final scene?\n6. What do I pass in the hallway?\n7. What connects the bathroom and the office?\n8. Do I return to the same desk?\n9. Where do I sit down at the end?\n10. What is the sequence of scenes passed?",
+        "answer": "1. Bathroom sink area\n2. Exit the bathroom\n3. The hallway\n4. Office room\n5. Office room desk area\n6. White walls and a grey door\n7. The hallway\n8. Yes\n9. On a blue chair at the desk\n10. Bathroom, hallway, office"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "The light transitions from cool white artificial light in the bathroom and hallway back to the bright natural daylight of the office.",
+        "question": "1. Does it get brighter when I enter the office?\n2. Are the lights in the office on?\n3. Is the hallway lighting consistent?\n4. Does the mirror reflect light as I move away?\n5. Is it darker under the desks?\n6. Does the window light glare?\n7. Is there a change in light color between rooms?\n8. Is the bathroom brighter than the hallway?",
+        "answer": "1. Yes, due to natural light\n2. No, mostly window light\n3. Yes\n4. Yes\n5. Yes\n6. Slightly\n7. Yes, from cool white to warm natural light\n8. Yes"
+      },
+      "counting": {
+        "caption": "There is 1 paper towel dispenser. I use 1 paper towel. I pass 1 hallway. In the office, there are 4 blue chairs and 2 large windows visible.",
+        "question": "1. How many paper towel dispensers are used?\n2. How many trash bins are in the bathroom?\n3. How many doors are passed through?\n4. How many desks are in the final office scene?\n5. How many monitors are on the desk I sit at?\n6. How many blue chairs are in the final room?\n7. How many backpacks am I wearing?\n8. How many hallways do I walk through?\n9. How many windows are on the wall?\n10. How many paper towels do I pull?",
+        "answer": "1. One\n2. One\n3. Two\n4. Two long desks\n5. One\n6. Four\n7. One\n8. One\n9. Two large ones\n10. One"
+      },
+      "dynamic_counting": {
+        "caption": "No other people or dynamic objects are moving during the return trip.",
+        "question": "1. How many people pass me in the hallway?\n2. How many cars drive by outside?\n3. How many items fall off the desks?\n4. How many doors close behind me automatically?\n5. How many birds are outside the window?\n6. How many dynamic shadows are on the office floor?\n7. How many flickering lights are in the hallway?\n8. How many objects are moving on the desk?",
+        "answer": "1. Zero\n2. Zero\n3. Zero\n4. Zero\n5. Zero\n6. Zero\n7. Zero\n8. Zero"
+      },
+      "non_common": {
+        "caption": "The layout is logical. There are no unrealistic elements in the return journey.",
+        "question": "Is the chair floating above the desk?",
+        "answer": "No"
+      },
+      "navigation": {
+        "caption": "From the sink, I walk 2 steps left to the towel dispenser, then 2 steps to the bathroom exit. I turn left into the hallway, walk 3 steps to the office door, enter the office, and walk 6 steps to the first workstation.",
+        "question": "1. How do I get back to the office?\n2. What is the first turn after leaving the bathroom?\n3. Where do I sit down?\n4. How many steps to the workstation?\n5. Is the hallway path clear?\n6. Which room is to the left of the hallway?\n7. How do I find my desk?\n8. What way should I go to return to the desk?\n9. What is the fastest way back to the chair?\n10. Do I go upstairs?",
+        "answer": "1. Walk through the hallway and enter the office door\n2. Left\n3. At the workstation desk\n4. About six steps from the office door\n5. Yes\n6. The office\n7. By walking straight to the first workstation on the left\n8. Left out of the bathroom, then into the office\n9. Follow the hallway to the office door\n10. No"
+      },
+      "dynamic_recognition": {
+        "caption": "The main dynamic action is pulling a paper towel from the dispenser (frames 2730-2910) and then walking back to the desk.",
+        "question": "Have I pulled a paper towel from the dispenser?",
+        "answer": "Yes"
+      },
+      "action": {
+        "caption": "I reach for a white paper towel from the dispenser, rub my hands to dry them, discard the towel in the blue bin, exit the bathroom, walk through the hallway, open the office door, walk to my workstation, and sit down in the blue chair.",
+        "question": "1. What do I use to dry my hands?\n2. Where do I throw the paper towel?\n3. What is the purpose of walking through the hallway?\n4. Do I sit down at the end?\n5. Which chair do I sit in?\n6. Do I interact with the office door handle again?\n7. Do I put on my backpack?\n8. What is the consequence of sitting down?",
+        "answer": "1. A paper towel\n2. In the blue trash bin\n3. To return to the office room\n4. Yes\n5. The blue office chair\n6. Yes, to open the door\n7. No, I am already wearing it\n8. I am back at my workstation to resume tasks"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_001": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_001",
+      "task_label": "walk to bathroom",
+      "start_seconds": 0.0,
+      "end_seconds": 34.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:34.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "In the initial dark sequence, I identify several computer workstations indicated by glowing pink and blue LED strips on tower cases and the faint light of monitors. As I move forward, a white door with a silver metallic handle becomes visible. On the door, there is a white rectangular identification label featuring a QR code and printed text. The floor transitions from dark carpet or wood to a brighter surface as I enter the hallway.",
+        "question": "What kind of light sources are visible in the room before I reach the door?",
+        "answer": "Computer tower LED strips and monitors."
+      },
+      "spatial_reasoning": {
+        "caption": "Spatial Relationships Identified:\n1. Desk is approximately 2 meters from the room entrance\n2. The mailbox is positioned above eye level, roughly 1.5 meters from the approach area\n3. The staircase is located to the left of the mailbox area, about 3 meters away\n4. The fire exit sign is mounted on the wall above and to the right of the mailboxes\n5. The hallway extends approximately 5 meters before reaching the outdoor area\n6. The blue door frame is positioned centrally between the room and hallway",
+        "question": "Which room section is closest to the mailbox area when exiting through the blue door?",
+        "answer": "The hallway and staircase area"
+      },
+      "text_recognition": {
+        "caption": "On the door label seen clearly around frame_001020, the text identifies the room. The first line reads '02.B.20'. Below it, 'WC H' is printed, which typically stands for 'Water Closet - Herren' (Men's Restroom). At the bottom, the logo 'ZÜBLIN' is visible. This label is used for facility management and room identification.",
+        "question": "What is the specific room code shown on the door label?",
+        "answer": "02.B.20"
+      },
+      "scene_sequence": {
+        "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
+        "question": "What is the sequence of major areas passed through in this video?",
+        "answer": "Bedroom, hallway, outdoor walkway, and mailbox area"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+        "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+        "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area"
+      },
+      "counting": {
+        "caption": "Objects Counted in Video:\n1. Chairs: 1 (black swivel desk chair)\n2. Shoes: 4+ pairs visible in room\n3. Doors: 1 blue door\n4. Mailbox sections: 2 main sections (grey and green)\n5. Mailbox units: Approximately 9-12 individual mailbox compartments visible\n6. Staircase sections: 2 visible staircase runs\n7. Light fixtures: 1 desk lamp, 1 overhead ceiling light, recessed LEDs (multiple)\n8. Storage containers: 2+ (blue bin, dresser)",
+        "question": "How many main mailbox sections are visible in the mailbox area?",
+        "answer": "2 sections - one grey and one vibrant green"
+      },
+      "dynamic_counting": {
+        "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+        "question": "What dynamic action occurs with the mailbox in this video?",
+        "answer": "A blue-gloved hand approaches and interacts with the mailbox"
+      },
+      "non_common": {
+        "caption": "Potential Non-Common Scene Elements:\n1. High-ISO grain: Significant video noise due to extremely low-light recording conditions\n2. Unusual lighting: The LED ceiling lights create artificial patterns in an outdoor residential area\n3. Color inconsistency: The vibrant green mailbox section contrasts sharply with standard grey sections\n4. Hand appearance: Blue gloves in a residential mailbox area - possible protective gear or environmental adaptation\n5. Layout observation: Modern residential building with outdoor mailbox cluster rather than interior boxes\n6. No obvious floating objects or mesh clipping issues detected",
+        "question": "Are there any unusual design elements visible in the mailbox area?",
+        "answer": "Yes, one mailbox section is painted vibrant green which contrasts sharply with the standard metallic grey sections"
+      },
+      "navigation": {
+        "caption": "I begin by walking approximately 10 steps through a dark office space towards a visible doorway. After opening the door, I take about 5 more steps into a brightly lit corridor to reach the bathroom entrance.",
+        "question": "In which direction do I turn after passing through the first door?",
+        "answer": "I walk straight ahead into the corridor."
+      },
+      "dynamic_recognition": {
+        "caption": "Dynamic Elements Recognition:\n1. Primary moving object: The camera operator's hand (blue gloved) - appears around frame 20 and persists to frame 30\n2. Hand trajectory: Approaches mailbox horizontally, extends toward mailbox slot area\n3. Camera movement: Continuous forward and lateral movement throughout entire video (0-35 frames)\n4. Camera perspective: First-person view showing hand interactions and path navigation\n5. Hand-object interaction: Insert key/hand into mailbox area, appears to be accessing mailbox\n6. No other dynamic elements: No people, vehicles, or animals visible besides camera operator",
+        "question": "What dynamic action involving the hand appears in the mailbox area?",
+        "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox"
+      },
+      "action": {
+        "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
+        "question": "What is the primary activity being performed with the mailbox?",
+        "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_002": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_002",
+      "task_label": "wash hands",
+      "start_seconds": 34.0,
+      "end_seconds": 86.0,
+      "start_timestamp": "00:00:34.000",
+      "end_timestamp": "00:01:26.000"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "Within the bathroom, I identify a white ceramic sink and a polished chrome faucet. Mounted on the wall is a white soap dispenser containing a pink liquid soap. Above the sink is a large mirror. A clear plastic spray bottle with a bright red spray nozzle is sitting on top of the soap dispenser. The walls are covered in white square tiles with gray grout.",
+        "question": "What color is the soap inside the wall-mounted dispenser?",
+        "answer": "Pink."
       },
       "spatial_reasoning": {
         "caption": "Spatial Relationships Identified:\n1. Desk is approximately 2 meters from the room entrance\n2. The mailbox is positioned above eye level, roughly 1.5 meters from the approach area\n3. The staircase is located to the left of the mailbox area, about 3 meters away\n4. The fire exit sign is mounted on the wall above and to the right of the mailboxes\n5. The hallway extends approximately 5 meters before reaching the outdoor area\n6. The blue door frame is positioned centrally between the room and hallway",
@@ -31,6 +481,81 @@
         "caption": "Scene Progression:\n1. Start - Bedroom/Room interior with white walls, desk, and personal items\n2. Room Transition - Moving toward the blue door with hallway visible beyond\n3. Hallway Passage - Dark corridor with metal railings and light switches\n4. Outdoor Area - Outdoor walkway with modern apartment building architecture\n5. Mailbox Zone - Approach to mailbox area with green and grey mailbox sections\n6. Staircase Area - Metal staircase visible with industrial design\n7. End Position - Standing in front of mailbox section, looking at unit numbers",
         "question": "What is the sequence of major areas passed through in this video?",
         "answer": "Bedroom, hallway, outdoor walkway, and mailbox area"
+      },
+      "light_recongnition": {
+        "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
+        "question": "What types of light sources are visible in the outdoor mailbox area?",
+        "answer": "Recessed linear LED ceiling lights creating bright white streaks"
+      },
+      "light_change": {
+        "caption": "Light Changes Throughout Video:\n1. Beginning (0-5s): Warm, relatively bright interior lighting from desk and ceiling\n2. Door transition (5-8s): Abrupt drop in illumination as entering hallway\n3. Hallway progression (8-15s): Very dim with minimal ambient light, some reflections from door\n4. Outdoor entry (15-18s): Sudden brightness increase from recessed ceiling LED lights\n5. Mailbox area (18-30s): Consistent bright LED lighting with high contrast dark shadows\n6. End scene (30-35s): Similar bright LED conditions with gloved hand interaction with mailbox",
+        "question": "Did the lighting change significantly when moving from the hallway to the outdoor mailbox area?",
+        "answer": "Yes, there was a dramatic increase in brightness from the very dim hallway to the bright LED-lit outdoor area"
+      },
+      "counting": {
+        "caption": "In the sink area, I identify 1 ceramic sink, 1 chrome faucet, 1 soap dispenser, 1 spray bottle with a red cap, and 2 mirrors (one actual, one reflected).",
+        "question": "How many faucets are in the sink I am using?",
+        "answer": "One."
+      },
+      "dynamic_counting": {
+        "caption": "Dynamic Objects/Movement:\n1. Camera motion: Handheld FPV movement from room through hallway to mailbox area\n2. Hand movement (Frame 20-30): Blue-gloved hand approach and interaction with mailbox (opening/inserting key)\n3. Door opening: Blue door transition showing movement from interior to exterior\n4. Camera pan: Follows the action of the person navigating through the space\n5. No other moving objects: No vehicles, people, or animals visible in the video besides the camera operator",
+        "question": "What dynamic action occurs with the mailbox in this video?",
+        "answer": "A blue-gloved hand approaches and interacts with the mailbox"
+      },
+      "non_common": {
+        "caption": "Potential Non-Common Scene Elements:\n1. High-ISO grain: Significant video noise due to extremely low-light recording conditions\n2. Unusual lighting: The LED ceiling lights create artificial patterns in an outdoor residential area\n3. Color inconsistency: The vibrant green mailbox section contrasts sharply with standard grey sections\n4. Hand appearance: Blue gloves in a residential mailbox area - possible protective gear or environmental adaptation\n5. Layout observation: Modern residential building with outdoor mailbox cluster rather than interior boxes\n6. No obvious floating objects or mesh clipping issues detected",
+        "question": "Are there any unusual design elements visible in the mailbox area?",
+        "answer": "Yes, one mailbox section is painted vibrant green which contrasts sharply with the standard metallic grey sections"
+      },
+      "navigation": {
+        "caption": "Navigation Path Documentation:\n1. Starting point: Inside bedroom/room area\n2. Action 1: Open blue door and move through doorway (1-2 steps)\n3. Action 2: Navigate through dark hallway (3-4 meters, straight path)\n4. Action 3: Exit to outdoor area (1-2 steps)\n5. Action 4: Move to mailbox area (2-3 meters, slight left turn toward staircase)\n6. Final position: Standing in front of mailbox section 1'233-1'235\n7. Total navigation: Indoor room -> Hallway -> Outdoor walkway -> Mailbox cluster",
+        "question": "How would you navigate from the mailbox area back to the bedroom?",
+        "answer": "Retrace steps by moving back to the outdoor walkway, enter the hallway, and go through the blue door back to the bedroom"
+      },
+      "dynamic_recognition": {
+        "caption": "Dynamic Elements Recognition:\n1. Primary moving object: The camera operator's hand (blue gloved) - appears around frame 20 and persists to frame 30\n2. Hand trajectory: Approaches mailbox horizontally, extends toward mailbox slot area\n3. Camera movement: Continuous forward and lateral movement throughout entire video (0-35 frames)\n4. Camera perspective: First-person view showing hand interactions and path navigation\n5. Hand-object interaction: Insert key/hand into mailbox area, appears to be accessing mailbox\n6. No other dynamic elements: No people, vehicles, or animals visible besides camera operator",
+        "question": "What dynamic action involving the hand appears in the mailbox area?",
+        "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox"
+      },
+      "action": {
+        "caption": "I place my hands under the faucet to wet them, then press the lever of the soap dispenser to get soap. I rub my palms together, interlace my fingers, and scrub the backs of my hands thoroughly for several seconds before rinsing them clean under the steady stream of water from the faucet.",
+        "question": "What is the first step I take after turning on the water?",
+        "answer": "I wet my hands."
+      }
+    }
+  },
+  "dataset\\wash_hand_split\\wash_hands_night_seg_003": {
+    "source_prefix": "wash_hands_night",
+    "side": "night",
+    "segment": {
+      "segment_id": "wash_hands_night_seg_003",
+      "task_label": "dry hands and return",
+      "start_seconds": 86.0,
+      "end_seconds": 138.5,
+      "start_timestamp": "00:01:26.000",
+      "end_timestamp": "00:02:18.500"
+    },
+    "source_file": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "1. Indoor Starting Area (The Room)\nScene: A domestic interior, likely a dorm or studio apartment.\nObjects: Furniture includes a white desk with a black swivel chair, a small white dresser/nightstand, and a shoe rack. Footwear visible includes black sneakers, white-and-purple athletic shoes, and black slides. Household items include cleaning bottles and a blue storage container.\nColor & Texture: White walls with matte texture. Blue-grey linoleum floor. Lighting is a mix of overhead light and warm desk lamp.\n\n2. Transition & Hallway\nScene: Camera moves from room into a dark hallway.\nObjects: A solid blue door leads out of the room. Metal door handles, light switches visible.\nColor & Texture: High contrast between bright interior room and nearly black hallway. Blue door provides sharp pop of color.\n\n3. Building Exterior & Mailbox Area\nScene: Outdoor walkway in modern apartment complex at night.\nObjects: Large bank of mailboxes (metallic grey with vibrant green section). Metal staircases with vertical slat railings. Green-and-white emergency exit sign visible.\nColor & Texture: Dominant dark greys and blacks. Green mailboxes most significant visual anchor.",
+        "question": "What is the color of the door I pass through to exit the room and enter the dark hallway?",
+        "answer": "Blue"
+      },
+      "spatial_reasoning": {
+        "caption": "I observe the paper towel dispenser mounted on the white tiled wall approximately 2 steps to the left of the sink. The exit door is located about 3 steps behind me. On the door frame, an electronic badge reader is positioned about shoulder height on the right side.",
+        "question": "Where is the paper towel dispenser located relative to the sink?",
+        "answer": "To the left on the wall."
+      },
+      "text_recognition": {
+        "caption": "Text elements visible in video:\n1. Mailbox labels (Frame 15-20): \"R. Festa\", \"L. Wiebusch\", \"S. Hollemann\" - resident names on mailbox sections\n2. Mailbox numbers (Frame 20-25): \"1'233\", \"1'234\", \"1'235\" - unit numbers, used for postal identification\n3. Emergency sign (Frame 18-22): \"EXIT\" with running man symbol - indicates emergency evacuation route\n4. Fire safety markings - visible on wall signage indicating building code compliance",
+        "question": "What are the visible mailbox numbers shown in the video?",
+        "answer": "1'233, 1'234, and 1'235"
+      },
+      "scene_sequence": {
+        "caption": "The sequence of scenes I pass through includes the bathroom sink area, a short section of the hallway, a white door equipped with an electronic lock, and finally an office room containing multiple desks, monitors, and blue chairs.",
+        "question": "Which room do I enter at the very end of the video?",
+        "answer": "The office room."
       },
       "light_recongnition": {
         "caption": "Light Source Analysis:\n1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination\n2. Transition zone: Dramatic shift to very low ambient light in the hallway\n3. Outdoor area: Recessed linear LED ceiling lights creating bright white streaks in the darkness\n4. Overall condition: Night-time recording with high ISO noise due to low-light conditions\n5. Light reflection: Visible on glass windows and door surfaces, showing indoor light spilling into dark areas\n6. Contrast level: Extreme contrast between lit interior room and dark outdoor areas",
@@ -68,9 +593,9 @@
         "answer": "A blue-gloved hand approaches and appears to insert something into the mailbox"
       },
       "action": {
-        "caption": "Camera Operator Actions:\n1. Initial action: Gets up from desk area (implied by first-person view change)\n2. Action 1: Opens blue door to exit room (Frame 5-8)\n3. Action 2: Walks through dark hallway with steady deliberate steps (Frame 8-15)\n4. Action 3: Exits to outdoor area and approaches mailbox cluster (Frame 15-25)\n5. Action 4: Reaches toward mailbox with blue-gloved hand (Frame 20-30)\n6. Action 5: Performs mailbox interaction - writing, inserting, or retrieving item (Frame 25-35)\n7. Purpose: Retrieving mail or accessing mailbox - suggested by key interaction and deliberate approach\n8. Consequence: Successfully completes mailbox task and remains at location",
-        "question": "What is the primary activity being performed with the mailbox?",
-        "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
+        "caption": "I reach for a paper towel from the dispenser to dry my hands. I then walk to the door, hold my ID badge against the electronic reader which flashes green, turn the handle to open the door, and walk back into the office to sit at my computer station.",
+        "question": "What color does the electronic lock flash when I present my card?",
+        "answer": "Green."
       }
     }
   }

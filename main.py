@@ -29,6 +29,7 @@ from annotation_feature.reasoning import (
     run_export_segmented_grouped_qa,
     run_group_evidence,
 )
+from annotation_feature.segmented_pipeline import estimate_segmented_work
 from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -152,13 +153,23 @@ def _run_all_pipelines(test_mode: bool, skip_api: bool) -> None:
 
 
 def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
+    estimate = estimate_segmented_work(
+        dataset_folder="dataset",
+        output_folder="segmented_outputs",
+        modalities=modalities,
+        resume=True,
+        batch_segments=True,
+        batch_audio=True,
+    )
     print("\n" + "-" * 60)
     print(f"Running: {label}")
     print("-" * 60)
     print("This step reads dataset/**/**_task_segments.json.")
     print("It writes selected segmented modality results to segmented_outputs/.")
     print(f"Selected modality/modalities: {', '.join(modalities)}")
-    print("WARNING: This will use Gemini API quota for each selected segment and modality.")
+    print(f"Found {estimate['total_segments']} task segment(s). Resume + batched mode is enabled.")
+    _print_segmented_work_estimate(estimate)
+    print("Quota controls: source-batched Gemini calls, max_concurrent=1, delay_between_batches=12s.")
     print("-" * 60)
     if _confirm():
         output_paths = run_segmented_pipeline(
@@ -166,12 +177,106 @@ def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
             output_folder="segmented_outputs",
             skip_api=False,
             modalities=modalities,
+            resume=True,
+            max_concurrent=1,
+            delay_between_segments=12,
+            batch_segments=True,
+            batch_audio=True,
         )
         print("Segmented outputs:")
         for modality, path in sorted(output_paths.items()):
             print(f"  {modality}: {path}")
     else:
         print("Cancelled.")
+
+
+def _print_segmented_work_estimate(estimate: dict) -> None:
+    modality_counts = estimate.get("modality_counts", {})
+    for modality, counts in modality_counts.items():
+        print(
+            f"  {modality}: "
+            f"{counts.get('pending_segments', 0)} pending, "
+            f"{counts.get('skipped_segments', 0)} skipped, "
+            f"{counts.get('source_batches', 0)} source batch(es), "
+            f"~{counts.get('estimated_calls', 0)} Gemini call(s)"
+        )
+    print(f"Estimated remaining Gemini calls: ~{estimate.get('estimated_gemini_calls', 0)}")
+
+
+def _run_all_segmented_qa_menu_option() -> None:
+    visual_modalities = ["rgb", "event", "depth", "ir"]
+    audio_modalities = ["audio"]
+
+    print("\n" + "-" * 60)
+    print("Running: ALL QA pipelines on task segments")
+    print("-" * 60)
+    print("Default quota-friendly flow: run visual modalities first, then optionally run AUDIO.")
+    print("Resume mode is enabled, so completed segment results are skipped.")
+    print("Batched mode is enabled: Gemini calls are grouped by source segment manifest.")
+    print("Depth segmented QA uses Marigold maps from dataset/.frames_cache_marigold.")
+    print("Quota controls: max_concurrent=1, delay_between_batches=12s.")
+    print("\nVisual pass estimate:")
+    visual_estimate = estimate_segmented_work(
+        dataset_folder="dataset",
+        output_folder="segmented_outputs",
+        modalities=visual_modalities,
+        resume=True,
+        batch_segments=True,
+        batch_audio=True,
+    )
+    _print_segmented_work_estimate(visual_estimate)
+    print("-" * 60)
+
+    if not _confirm("Run visual segmented QA now? (yes/no): "):
+        print("Cancelled.")
+        return
+
+    output_paths = run_segmented_pipeline(
+        dataset_folder="dataset",
+        output_folder="segmented_outputs",
+        skip_api=False,
+        modalities=visual_modalities,
+        resume=True,
+        max_concurrent=1,
+        delay_between_segments=12,
+        batch_segments=True,
+        batch_audio=True,
+    )
+    print("Visual segmented outputs:")
+    for modality, path in sorted(output_paths.items()):
+        print(f"  {modality}: {path}")
+
+    print("\nAudio pass estimate:")
+    audio_estimate = estimate_segmented_work(
+        dataset_folder="dataset",
+        output_folder="segmented_outputs",
+        modalities=audio_modalities,
+        resume=True,
+        batch_segments=True,
+        batch_audio=True,
+    )
+    _print_segmented_work_estimate(audio_estimate)
+    print("AUDIO uses one Gemini call per pending source batch in batched mode.")
+    print("-" * 60)
+
+    if not _confirm("Run AUDIO segmented QA too? (yes/no): "):
+        print("Skipped AUDIO segmented QA.")
+        return
+
+    audio_paths = run_segmented_pipeline(
+        dataset_folder="dataset",
+        output_folder="segmented_outputs",
+        skip_api=False,
+        modalities=audio_modalities,
+        resume=True,
+        max_concurrent=1,
+        delay_between_segments=12,
+        batch_segments=True,
+        batch_audio=True,
+    )
+    print("Audio segmented outputs:")
+    for modality, path in sorted(audio_paths.items()):
+        print(f"  {modality}: {path}")
 
 
 def main():
@@ -227,7 +332,7 @@ def main():
         print("27. Generate semantic task segment suggestions")
         print("28. Run RGB QA after task segment")
         print("29. Run EVENT QA after task segment")
-        print("30. Run DEPTH QA after task segment")
+        print("30. Run MARIGOLD DEPTH QA after task segment")
         print("31. Run IR QA after task segment")
         print("32. Run AUDIO QA after task segment")
         print("33. Run ALL QA pipelines on task segments")
@@ -534,7 +639,7 @@ def main():
             _run_segmented_qa_menu_option(["event"], "EVENT QA after task segment")
 
         elif choice == "30":
-            _run_segmented_qa_menu_option(["depth"], "DEPTH QA after task segment")
+            _run_segmented_qa_menu_option(["depth"], "MARIGOLD DEPTH QA after task segment")
 
         elif choice == "31":
             _run_segmented_qa_menu_option(["ir"], "IR QA after task segment")
@@ -543,10 +648,7 @@ def main():
             _run_segmented_qa_menu_option(["audio"], "AUDIO QA after task segment")
 
         elif choice == "33":
-            _run_segmented_qa_menu_option(
-                ["rgb", "event", "depth", "ir", "audio"],
-                "ALL QA pipelines on task segments",
-            )
+            _run_all_segmented_qa_menu_option()
 
         elif choice == "34":
             print("\n" + "-" * 60)

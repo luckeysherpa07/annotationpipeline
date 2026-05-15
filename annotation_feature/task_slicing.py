@@ -262,10 +262,20 @@ async def _call_gemini_with_retry(client, contents: list, max_retries: int = 3) 
                 contents=contents,
             )
             return response.text
-        except Exception:
+        except Exception as exc:
             if attempt == max_retries:
                 raise
-            await asyncio.sleep(2)
+            text = str(exc).lower()
+            is_quota_error = any(
+                token in text
+                for token in ("quota", "rate limit", "rate_limit", "429", "resource_exhausted")
+            )
+            wait_seconds = 30 * attempt if is_quota_error else 2 * attempt
+            print(
+                f"  Gemini task-slicing call failed on attempt {attempt}/{max_retries}; "
+                f"retrying in {wait_seconds}s: {exc}"
+            )
+            await asyncio.sleep(wait_seconds)
     raise RuntimeError("Gemini call failed")
 
 
