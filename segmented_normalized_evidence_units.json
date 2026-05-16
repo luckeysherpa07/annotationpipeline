@@ -1,5 +1,36 @@
 {
   "check_mailbox_day_seg_001": {
+    "segment_id": "check_mailbox_day_seg_001",
+    "file_name": "check_mailbox_day_rgb.mp4",
+    "source_prefix": "check_mailbox_day",
+    "split_dir": "check_mailbox_split",
+    "side": "day",
+    "task_label": "walk to mailbox",
+    "start_seconds": 0.0,
+    "end_seconds": 64.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:01:04.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "depth"
+    ],
+    "notes": "The recording begins with the user inside, transitioning to walking down hallways and through stairwells to exit the building. RGB and depth frames show the changing environment, while the audio captures consistent footsteps and the sound of opening doors.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_seg_001",
       "event": "dataset\\check_mailbox_split\\check_mailbox_day_seg_001",
@@ -335,6 +366,37 @@
     ]
   },
   "check_mailbox_day_seg_002": {
+    "segment_id": "check_mailbox_day_seg_002",
+    "file_name": "check_mailbox_day_rgb.mp4",
+    "source_prefix": "check_mailbox_day",
+    "split_dir": "check_mailbox_split",
+    "side": "day",
+    "task_label": "check mailbox",
+    "start_seconds": 64.0,
+    "end_seconds": 105.0,
+    "start_timestamp": "00:01:04.000",
+    "end_timestamp": "00:01:45.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event"
+    ],
+    "notes": "The user reaches the mailbox area. The RGB video shows interaction with the mailbox unit, and the audio contains metallic sounds characteristic of checking mail. Event data shows high activity during the manual manipulation of the mailbox.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_seg_002",
       "event": "dataset\\check_mailbox_split\\check_mailbox_day_seg_002",
@@ -670,6 +732,37 @@
     ]
   },
   "check_mailbox_day_seg_003": {
+    "segment_id": "check_mailbox_day_seg_003",
+    "file_name": "check_mailbox_day_rgb.mp4",
+    "source_prefix": "check_mailbox_day",
+    "split_dir": "check_mailbox_split",
+    "side": "day",
+    "task_label": "return from mailbox",
+    "start_seconds": 105.0,
+    "end_seconds": 194.9,
+    "start_timestamp": "00:01:45.000",
+    "end_timestamp": "00:03:14.900",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "ir"
+    ],
+    "notes": "The user walks back through the building, following the same path in reverse, and finally returns to the original desk. RGB and IR capture the transition from outdoors back to the interior lighting. The audio records the return journey's footsteps and the final sounds of sitting back down and closing the laptop.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_day.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_day_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_day_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_day_seg_003",
       "event": "dataset\\check_mailbox_split\\check_mailbox_day_seg_003",
@@ -1005,6 +1098,39 @@
     ]
   },
   "check_mailbox_night_seg_001": {
+    "segment_id": "check_mailbox_night_seg_001",
+    "file_name": "check_mailbox_night_rgb.mp4",
+    "source_prefix": "check_mailbox_night",
+    "split_dir": "check_mailbox_split",
+    "side": "night",
+    "task_label": "walking to mailboxes",
+    "start_seconds": 0.0,
+    "end_seconds": 42.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:00:42.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "event",
+      "depth",
+      "ir",
+      "audio"
+    ],
+    "notes": "The user starts at their desk, walks out of the room, and proceeds down a dark corridor to the mailboxes for the first attempt.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_seg_001",
       "event": "dataset\\check_mailbox_split\\check_mailbox_night_seg_001",
@@ -1376,6 +1502,39 @@
     ]
   },
   "check_mailbox_night_seg_002": {
+    "segment_id": "check_mailbox_night_seg_002",
+    "file_name": "check_mailbox_night_rgb.mp4",
+    "source_prefix": "check_mailbox_night",
+    "split_dir": "check_mailbox_split",
+    "side": "night",
+    "task_label": "returning to room to find key",
+    "start_seconds": 42.0,
+    "end_seconds": 125.0,
+    "start_timestamp": "00:00:42.000",
+    "end_timestamp": "00:02:05.000",
+    "confidence": 0.85,
+    "evidence_modalities": [
+      "rgb",
+      "event",
+      "depth",
+      "ir",
+      "audio"
+    ],
+    "notes": "After finding the mailbox locked, the user walks back to their room and searches the desk area for the key.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_seg_002",
       "event": "dataset\\check_mailbox_split\\check_mailbox_night_seg_002",
@@ -1747,6 +1906,39 @@
     ]
   },
   "check_mailbox_night_seg_003": {
+    "segment_id": "check_mailbox_night_seg_003",
+    "file_name": "check_mailbox_night_rgb.mp4",
+    "source_prefix": "check_mailbox_night",
+    "split_dir": "check_mailbox_split",
+    "side": "night",
+    "task_label": "walking to mailboxes again",
+    "start_seconds": 125.0,
+    "end_seconds": 150.0,
+    "start_timestamp": "00:02:05.000",
+    "end_timestamp": "00:02:30.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "event",
+      "depth",
+      "ir",
+      "audio"
+    ],
+    "notes": "With the key in hand, the user exits the room again and walks back to the mailbox area.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_seg_003",
       "event": "dataset\\check_mailbox_split\\check_mailbox_night_seg_003",
@@ -2118,6 +2310,39 @@
     ]
   },
   "check_mailbox_night_seg_004": {
+    "segment_id": "check_mailbox_night_seg_004",
+    "file_name": "check_mailbox_night_rgb.mp4",
+    "source_prefix": "check_mailbox_night",
+    "split_dir": "check_mailbox_split",
+    "side": "night",
+    "task_label": "unlocking and checking mailbox",
+    "start_seconds": 150.0,
+    "end_seconds": 185.0,
+    "start_timestamp": "00:02:30.000",
+    "end_timestamp": "00:03:05.000",
+    "confidence": 0.95,
+    "evidence_modalities": [
+      "rgb",
+      "event",
+      "depth",
+      "ir",
+      "audio"
+    ],
+    "notes": "The user reaches the mailboxes, uses the key to unlock their box, checks inside for mail, then closes and relocks it.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_seg_004",
       "event": "dataset\\check_mailbox_split\\check_mailbox_night_seg_004",
@@ -2489,6 +2714,39 @@
     ]
   },
   "check_mailbox_night_seg_005": {
+    "segment_id": "check_mailbox_night_seg_005",
+    "file_name": "check_mailbox_night_rgb.mp4",
+    "source_prefix": "check_mailbox_night",
+    "split_dir": "check_mailbox_split",
+    "side": "night",
+    "task_label": "returning to room and sitting down",
+    "start_seconds": 185.0,
+    "end_seconds": 216.6,
+    "start_timestamp": "00:03:05.000",
+    "end_timestamp": "00:03:36.600",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "event",
+      "depth",
+      "ir",
+      "audio"
+    ],
+    "notes": "The user walks back through the corridor, enters their room, and returns to sitting at the desk.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+        "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+        "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4",
+        "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4"
+      },
+      "audio": "dataset\\check_mailbox_split\\check_mailbox_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_rgb.mp4",
+      "event": "dataset\\check_mailbox_split\\check_mailbox_night_event.mp4",
+      "depth": "dataset\\check_mailbox_split\\check_mailbox_night_depth.mp4",
+      "ir": "dataset\\check_mailbox_split\\check_mailbox_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\check_mailbox_split\\check_mailbox_night_seg_005",
       "event": "dataset\\check_mailbox_split\\check_mailbox_night_seg_005",
@@ -2860,6 +3118,39 @@
     ]
   },
   "cut_carrot_day_seg_001": {
+    "segment_id": "cut_carrot_day_seg_001",
+    "file_name": "cut_carrot_day_rgb_with_audio.mp4",
+    "source_prefix": "cut_carrot_day",
+    "split_dir": "cut_carrot_split",
+    "side": "day",
+    "task_label": "peeling a carrot",
+    "start_seconds": 0.0,
+    "end_seconds": 45.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:00:45.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event",
+      "depth",
+      "ir"
+    ],
+    "notes": "The recording begins with the user picking up a peeler and a bowl. They then peel a whole carrot over the bowl, which is clearly visible in the RGB, depth, and IR frames and accompanied by the distinctive scraping sound of the peeler in the audio.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+        "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+        "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4",
+        "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4"
+      },
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_day.m4a",
+      "with_audio": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
       "event": "dataset\\cut_carrot_split\\cut_carrot_day_seg_001",
@@ -3231,6 +3522,39 @@
     ]
   },
   "cut_carrot_day_seg_002": {
+    "segment_id": "cut_carrot_day_seg_002",
+    "file_name": "cut_carrot_day_rgb_with_audio.mp4",
+    "source_prefix": "cut_carrot_day",
+    "split_dir": "cut_carrot_split",
+    "side": "day",
+    "task_label": "slicing a carrot",
+    "start_seconds": 45.0,
+    "end_seconds": 185.0,
+    "start_timestamp": "00:00:45.000",
+    "end_timestamp": "00:03:05.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event",
+      "depth",
+      "ir"
+    ],
+    "notes": "After setting the peeler down and moving the bowl, the user picks up a large kitchen knife and begins slicing the carrot into julienne strips. This rhythmic chopping activity is visible across all visual modalities and produces clear percussive sounds in the audio recording until the end of the video.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+        "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+        "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4",
+        "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4"
+      },
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_day.m4a",
+      "with_audio": "dataset\\cut_carrot_split\\cut_carrot_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_rgb.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_day_event.mp4",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_day_depth.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\cut_carrot_split\\cut_carrot_day_seg_002",
       "event": "dataset\\cut_carrot_split\\cut_carrot_day_seg_002",
@@ -3620,6 +3944,38 @@
     ]
   },
   "cut_carrot_night_seg_001": {
+    "segment_id": "cut_carrot_night_seg_001",
+    "file_name": "cut_carrot_night_rgb.mp4",
+    "source_prefix": "cut_carrot_night",
+    "split_dir": "cut_carrot_split",
+    "side": "night",
+    "task_label": "slicing carrot",
+    "start_seconds": 0.0,
+    "end_seconds": 78.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:01:18.000",
+    "confidence": 0.85,
+    "evidence_modalities": [
+      "ir",
+      "depth",
+      "audio",
+      "event"
+    ],
+    "notes": "The user starts by cutting the carrot into long, thin strips (julienne). This is characterized by slower, more deliberate knife strokes which are clearly audible and visible in the IR and depth streams despite the dark RGB environment.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+        "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+        "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4",
+        "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4"
+      },
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_seg_001",
       "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_001",
@@ -3892,6 +4248,38 @@
     ]
   },
   "cut_carrot_night_seg_002": {
+    "segment_id": "cut_carrot_night_seg_002",
+    "file_name": "cut_carrot_night_rgb.mp4",
+    "source_prefix": "cut_carrot_night",
+    "split_dir": "cut_carrot_split",
+    "side": "night",
+    "task_label": "chopping carrot",
+    "start_seconds": 78.0,
+    "end_seconds": 161.9,
+    "start_timestamp": "00:01:18.000",
+    "end_timestamp": "00:02:41.900",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "ir",
+      "depth",
+      "audio",
+      "event"
+    ],
+    "notes": "At approximately 78 seconds, the user gathers the strips and begins a rapid cross-cutting motion to dice or mince the carrot. The frequency of the cutting sounds increases significantly, and IR frames show the transition from long strips to a pile of small pieces.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+        "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+        "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4",
+        "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4"
+      },
+      "audio": "dataset\\cut_carrot_split\\cut_carrot_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_rgb.mp4",
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "depth": "dataset\\cut_carrot_split\\cut_carrot_night_depth.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\cut_carrot_split\\cut_carrot_night_seg_002",
       "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_002",
@@ -4227,6 +4615,19 @@
     ]
   },
   "cut_carrot_night_seg_003": {
+    "segment_id": "cut_carrot_night_seg_003",
+    "file_name": "cut_carrot_night_event.mp4",
+    "source_prefix": "cut_carrot_night",
+    "side": "night",
+    "task_label": "gathering julienned carrots",
+    "start_seconds": 140.0,
+    "end_seconds": 161.933,
+    "start_timestamp": "00:02:20.000",
+    "end_timestamp": "00:02:41.933",
+    "source_files": {
+      "event": "dataset\\cut_carrot_split\\cut_carrot_night_event.mp4",
+      "ir": "dataset\\cut_carrot_split\\cut_carrot_night_ir.mp4"
+    },
     "source_keys": {
       "event": "dataset\\cut_carrot_split\\cut_carrot_night_seg_003",
       "ir": "dataset\\cut_carrot_split\\cut_carrot_night_seg_003"
@@ -4234,6 +4635,37 @@
     "evidence_units": []
   },
   "ride_a_bike_day_seg_001": {
+    "segment_id": "ride_a_bike_day_seg_001",
+    "file_name": "ride_a_bike_day_rgb.mp4",
+    "source_prefix": "ride_a_bike_day",
+    "split_dir": "ride_a_bike_split",
+    "side": "day",
+    "task_label": "riding a bike",
+    "start_seconds": 0.0,
+    "end_seconds": 53.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:00:53.000",
+    "confidence": 0.95,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event"
+    ],
+    "notes": "The video starts with the user riding the bike on asphalt and then onto a paved sidewalk. Wind noise and tire-to-pavement sounds are prominent in the audio.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+        "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+        "ir": "dataset\\ride_a_bike_split\\ride_a_bike_day_ir.mp4",
+        "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4"
+      },
+      "audio": "dataset\\ride_a_bike_split\\ride_a_bike_day.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4",
+      "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+      "depth": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+      "ir": "dataset\\ride_a_bike_split\\ride_a_bike_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001",
       "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_001",
@@ -4623,6 +5055,37 @@
     ]
   },
   "ride_a_bike_day_seg_002": {
+    "segment_id": "ride_a_bike_day_seg_002",
+    "file_name": "ride_a_bike_day_rgb.mp4",
+    "source_prefix": "ride_a_bike_day",
+    "split_dir": "ride_a_bike_split",
+    "side": "day",
+    "task_label": "parking and securing the bike",
+    "start_seconds": 53.0,
+    "end_seconds": 98.5,
+    "start_timestamp": "00:00:53.000",
+    "end_timestamp": "00:01:38.500",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "depth"
+    ],
+    "notes": "At around 53 seconds, the rider enters a wooden bike storage area. They maneuver the bike into a metal rack and engage in securing it, indicated by the sound of metal clicking and the visual of the bike rack.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+        "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+        "ir": "dataset\\ride_a_bike_split\\ride_a_bike_day_ir.mp4",
+        "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4"
+      },
+      "audio": "dataset\\ride_a_bike_split\\ride_a_bike_day.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_rgb.mp4",
+      "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_event.mp4",
+      "depth": "dataset\\ride_a_bike_split\\ride_a_bike_day_depth.mp4",
+      "ir": "dataset\\ride_a_bike_split\\ride_a_bike_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002",
       "event": "dataset\\ride_a_bike_split\\ride_a_bike_day_seg_002",
@@ -5021,6 +5484,39 @@
     ]
   },
   "ride_a_bike_night_seg_001": {
+    "segment_id": "ride_a_bike_night_seg_001",
+    "file_name": "ride_a_bike_night_rgb.mp4",
+    "source_prefix": "ride_a_bike_night",
+    "split_dir": "ride_a_bike_split",
+    "side": "night",
+    "task_label": "riding a bike",
+    "start_seconds": 0.0,
+    "end_seconds": 64.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:01:04.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event",
+      "depth",
+      "ir"
+    ],
+    "notes": "The video starts with the camera moving forward at a steady pace. Audio contains significant wind noise and the rhythmic sound of bicycle tires on the road. IR and depth modalities clearly show the road and surrounding environment during the ride.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+        "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+        "ir": "dataset\\ride_a_bike_split\\ride_a_bike_night_ir.mp4",
+        "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4"
+      },
+      "audio": "dataset\\ride_a_bike_split\\ride_a_bike_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4",
+      "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+      "depth": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+      "ir": "dataset\\ride_a_bike_split\\ride_a_bike_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001",
       "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_001",
@@ -5419,6 +5915,39 @@
     ]
   },
   "ride_a_bike_night_seg_002": {
+    "segment_id": "ride_a_bike_night_seg_002",
+    "file_name": "ride_a_bike_night_rgb.mp4",
+    "source_prefix": "ride_a_bike_night",
+    "split_dir": "ride_a_bike_split",
+    "side": "night",
+    "task_label": "parking and locking the bike",
+    "start_seconds": 64.0,
+    "end_seconds": 104.0,
+    "start_timestamp": "00:01:04.000",
+    "end_timestamp": "00:01:44.000",
+    "confidence": 0.95,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event",
+      "depth",
+      "ir"
+    ],
+    "notes": "At around 64 seconds, the forward motion stops. The audio captures the sound of the bicycle being positioned and the distinct metallic rattling and clicking of a bike lock being used. IR and depth frames show the bike being placed into a rack and the hands manipulating the lock.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+        "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+        "ir": "dataset\\ride_a_bike_split\\ride_a_bike_night_ir.mp4",
+        "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4"
+      },
+      "audio": "dataset\\ride_a_bike_split\\ride_a_bike_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_rgb.mp4",
+      "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_event.mp4",
+      "depth": "dataset\\ride_a_bike_split\\ride_a_bike_night_depth.mp4",
+      "ir": "dataset\\ride_a_bike_split\\ride_a_bike_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002",
       "event": "dataset\\ride_a_bike_split\\ride_a_bike_night_seg_002",
@@ -5817,6 +6346,36 @@
     ]
   },
   "wash_hands_day_seg_001": {
+    "segment_id": "wash_hands_day_seg_001",
+    "file_name": "wash_hands_day_rgb_with_audio.mp4",
+    "source_prefix": "wash_hands_day",
+    "split_dir": "wash_hand_split",
+    "side": "day",
+    "task_label": "walking to bathroom",
+    "start_seconds": 0.0,
+    "end_seconds": 28.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:00:28.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio"
+    ],
+    "notes": "The person leaves the computer lab, walks through the hallway, and arrives at the bathroom door.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_day.m4a",
+      "with_audio": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_day_seg_001",
       "event": "dataset\\wash_hand_split\\wash_hands_day_seg_001",
@@ -6179,6 +6738,39 @@
     ]
   },
   "wash_hands_day_seg_002": {
+    "segment_id": "wash_hands_day_seg_002",
+    "file_name": "wash_hands_day_rgb_with_audio.mp4",
+    "source_prefix": "wash_hands_day",
+    "split_dir": "wash_hand_split",
+    "side": "day",
+    "task_label": "washing hands",
+    "start_seconds": 28.0,
+    "end_seconds": 84.0,
+    "start_timestamp": "00:00:28.000",
+    "end_timestamp": "00:01:24.000",
+    "confidence": 1.0,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "depth",
+      "ir",
+      "event"
+    ],
+    "notes": "The person enters the bathroom, applies soap, scrubs their hands under running water, and then rinses them. Multimodal evidence clearly shows the interaction with the sink and soap dispenser.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_day.m4a",
+      "with_audio": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_day_seg_002",
       "event": "dataset\\wash_hand_split\\wash_hands_day_seg_002",
@@ -6541,6 +7133,36 @@
     ]
   },
   "wash_hands_day_seg_003": {
+    "segment_id": "wash_hands_day_seg_003",
+    "file_name": "wash_hands_day_rgb_with_audio.mp4",
+    "source_prefix": "wash_hands_day",
+    "split_dir": "wash_hand_split",
+    "side": "day",
+    "task_label": "drying hands",
+    "start_seconds": 84.0,
+    "end_seconds": 104.0,
+    "start_timestamp": "00:01:24.000",
+    "end_timestamp": "00:01:44.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio"
+    ],
+    "notes": "The person pulls paper towels from the dispenser and dries their hands thoroughly before disposing of the towel.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_day.m4a",
+      "with_audio": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_day_seg_003",
       "event": "dataset\\wash_hand_split\\wash_hands_day_seg_003",
@@ -6903,6 +7525,36 @@
     ]
   },
   "wash_hands_day_seg_004": {
+    "segment_id": "wash_hands_day_seg_004",
+    "file_name": "wash_hands_day_rgb_with_audio.mp4",
+    "source_prefix": "wash_hands_day",
+    "split_dir": "wash_hand_split",
+    "side": "day",
+    "task_label": "walking back to room",
+    "start_seconds": 104.0,
+    "end_seconds": 124.7,
+    "start_timestamp": "00:01:44.000",
+    "end_timestamp": "00:02:04.700",
+    "confidence": 0.8,
+    "evidence_modalities": [
+      "rgb",
+      "audio"
+    ],
+    "notes": "The person leaves the bathroom and walks back through the hallway to the initial computer lab room.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_day.m4a",
+      "with_audio": "dataset\\wash_hand_split\\wash_hands_day_rgb_with_audio.mp4",
+      "rgb": "dataset\\wash_hand_split\\wash_hands_day_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_day_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_day_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_day_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_day_seg_004",
       "event": "dataset\\wash_hand_split\\wash_hands_day_seg_004",
@@ -7184,6 +7836,37 @@
     ]
   },
   "wash_hands_night_seg_001": {
+    "segment_id": "wash_hands_night_seg_001",
+    "file_name": "wash_hands_night_rgb.mp4",
+    "source_prefix": "wash_hands_night",
+    "split_dir": "wash_hand_split",
+    "side": "night",
+    "task_label": "entering bathroom and approaching sink",
+    "start_seconds": 0.0,
+    "end_seconds": 54.0,
+    "start_timestamp": "00:00:00.000",
+    "end_timestamp": "00:00:54.000",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "ir"
+    ],
+    "notes": "The recording begins in darkness. IR and depth modalities show movement through a hallway. At approximately 52 seconds, a light switch click is heard, and the RGB camera shows the user entering a bathroom and reaching for the faucet.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_night_seg_001",
       "event": "dataset\\wash_hand_split\\wash_hands_night_seg_001",
@@ -7591,6 +8274,37 @@
     ]
   },
   "wash_hands_night_seg_002": {
+    "segment_id": "wash_hands_night_seg_002",
+    "file_name": "wash_hands_night_rgb.mp4",
+    "source_prefix": "wash_hands_night",
+    "split_dir": "wash_hand_split",
+    "side": "night",
+    "task_label": "washing hands with soap",
+    "start_seconds": 54.0,
+    "end_seconds": 94.0,
+    "start_timestamp": "00:00:54.000",
+    "end_timestamp": "00:01:34.000",
+    "confidence": 0.95,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "event"
+    ],
+    "notes": "At 54 seconds, the user turns on the water (audible and visible in RGB). They apply soap and scrub their hands over the sink. High motion activity is captured in the event stream.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_night_seg_002",
       "event": "dataset\\wash_hand_split\\wash_hands_night_seg_002",
@@ -7998,6 +8712,37 @@
     ]
   },
   "wash_hands_night_seg_003": {
+    "segment_id": "wash_hands_night_seg_003",
+    "file_name": "wash_hands_night_rgb.mp4",
+    "source_prefix": "wash_hands_night",
+    "split_dir": "wash_hand_split",
+    "side": "night",
+    "task_label": "rinsing and drying hands",
+    "start_seconds": 94.0,
+    "end_seconds": 138.5,
+    "start_timestamp": "00:01:34.000",
+    "end_timestamp": "00:02:18.500",
+    "confidence": 0.9,
+    "evidence_modalities": [
+      "rgb",
+      "audio",
+      "depth"
+    ],
+    "notes": "The user finishes scrubbing and rinses their hands under the running water. The water is turned off around 94 seconds (visible in RGB and marked by the cessation of water noise in audio). The user then reaches for a towel to dry their hands before exiting the room.",
+    "source_files": {
+      "videos": {
+        "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+        "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+        "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4",
+        "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4"
+      },
+      "audio": "dataset\\wash_hand_split\\wash_hands_night.m4a",
+      "with_audio": null,
+      "rgb": "dataset\\wash_hand_split\\wash_hands_night_rgb.mp4",
+      "event": "dataset\\wash_hand_split\\wash_hands_night_event.mp4",
+      "depth": "dataset\\wash_hand_split\\wash_hands_night_depth.mp4",
+      "ir": "dataset\\wash_hand_split\\wash_hands_night_ir.mp4"
+    },
     "source_keys": {
       "rgb": "dataset\\wash_hand_split\\wash_hands_night_seg_003",
       "event": "dataset\\wash_hand_split\\wash_hands_night_seg_003",

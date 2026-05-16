@@ -15,6 +15,11 @@ from .normalizer import MODALITY_ORDER, normalize_all_modalities, normalize_samp
 
 NUMBERED_ITEM_RE = re.compile(r"(?:^|\s)(\d+)[.)]\s+")
 SEGMENTED_EVIDENCE_CSV_FIELDS = [
+    "file_name",
+    "task_label",
+    "start_timestamp",
+    "end_timestamp",
+    "segment_confidence",
     "segment_id",
     "unit_index",
     "modality",
@@ -23,6 +28,22 @@ SEGMENTED_EVIDENCE_CSV_FIELDS = [
     "answer",
     "timestamp",
     "confidence",
+]
+SEGMENT_DETAIL_FIELDS = [
+    "segment_id",
+    "file_name",
+    "source_prefix",
+    "split_dir",
+    "side",
+    "task_label",
+    "start_seconds",
+    "end_seconds",
+    "start_timestamp",
+    "end_timestamp",
+    "confidence",
+    "evidence_modalities",
+    "notes",
+    "source_files",
 ]
 
 
@@ -188,6 +209,101 @@ def save_json_file(data: dict, path: str | Path) -> None:
         json.dump(data, handle, indent=2, ensure_ascii=False)
 
 
+def _source_file_candidates(source_files: Any) -> list[str]:
+    """Return source-file paths in preferred display order."""
+    if not isinstance(source_files, dict):
+        return []
+
+    candidates: list[str] = []
+    value = source_files.get("with_audio")
+    if isinstance(value, str) and value:
+        candidates.append(value)
+
+    videos = source_files.get("videos")
+    if isinstance(videos, dict):
+        for key in ("rgb", "event", "depth", "ir"):
+            value = videos.get(key)
+            if isinstance(value, str) and value:
+                candidates.append(value)
+
+    for key in MODALITY_ORDER:
+        value = source_files.get(key)
+        if isinstance(value, str) and value:
+            candidates.append(value)
+
+    value = source_files.get("audio")
+    if isinstance(value, str) and value:
+        candidates.append(value)
+
+    return candidates
+
+
+def _derive_file_name(source_files: Any, source_prefix: str = "") -> str:
+    """Derive a stable file name from source files, falling back to source prefix."""
+    for candidate in _source_file_candidates(source_files):
+        return Path(candidate).name
+    return source_prefix
+
+
+def _normalize_task_segment_metadata(
+    task_data: dict[str, Any],
+    segment: dict[str, Any],
+) -> dict[str, Any]:
+    """Build export metadata for one task segment."""
+    source_prefix = _as_text(task_data.get("source_prefix", ""))
+    source_files = task_data.get("source_files", {})
+
+    metadata = {
+        "segment_id": _as_text(segment.get("segment_id", "")),
+        "file_name": _derive_file_name(source_files, source_prefix),
+        "source_prefix": source_prefix,
+        "split_dir": _as_text(task_data.get("split_dir", "")),
+        "side": _as_text(task_data.get("side", "")),
+        "task_label": _as_text(segment.get("task_label", "")),
+        "start_seconds": segment.get("start_seconds"),
+        "end_seconds": segment.get("end_seconds"),
+        "start_timestamp": _as_text(segment.get("start_timestamp", "")),
+        "end_timestamp": _as_text(segment.get("end_timestamp", "")),
+        "confidence": segment.get("confidence"),
+        "evidence_modalities": segment.get("evidence_modalities", [])
+        if isinstance(segment.get("evidence_modalities", []), list)
+        else [],
+        "notes": _as_text(segment.get("notes", "")),
+        "source_files": source_files if isinstance(source_files, dict) else {},
+    }
+
+    return metadata
+
+
+def collect_task_segment_metadata(
+    segmented_folder: str | Path = "segmented_outputs",
+) -> dict[str, dict[str, Any]]:
+    """Collect rich segment details from task-segment suggestion files."""
+    segmented_dir = Path(segmented_folder)
+    metadata_by_sample: dict[str, dict[str, Any]] = {}
+
+    for task_path in sorted((segmented_dir / "dataset").glob("**/*_task_segments.json")):
+        task_data = load_json_file(task_path)
+        segments = task_data.get("segments", [])
+        if not isinstance(segments, list):
+            continue
+
+        for segment in segments:
+            if not isinstance(segment, dict):
+                continue
+
+            segment_id = _as_text(segment.get("segment_id", ""))
+            if not segment_id:
+                continue
+
+            metadata_by_sample[segment_id] = _normalize_task_segment_metadata(
+                task_data,
+                segment,
+            )
+
+    return metadata_by_sample
+
+
 def run_export_segmented_normalized_evidence_csv(
     input_path: str | Path = "segmented_normalized_evidence_units.json",
     output_path: str | Path = "segmented_normalized_evidence_units.csv",
@@ -212,6 +328,11 @@ def run_export_segmented_normalized_evidence_csv(
 
             rows.append(
                 {
+                    "file_name": segment_data.get("file_name", ""),
+                    "task_label": segment_data.get("task_label", ""),
+                    "start_timestamp": segment_data.get("start_timestamp", ""),
+                    "end_timestamp": segment_data.get("end_timestamp", ""),
+                    "segment_confidence": segment_data.get("confidence", ""),
                     "segment_id": segment_id,
                     "unit_index": unit_index,
                     "modality": unit.get("modality", ""),
@@ -262,9 +383,14 @@ def run_export_grouped_qa(
     return exported
 
 
-def collect_segment_metadata(modality_paths: dict[str, str | Path]) -> dict[str, dict[str, Any]]:
+def collect_segment_metadata(
+    modality_paths: dict[str, str | Path],
+    segmented_folder: str | Path = "segmented_outputs",
+) -> dict[str, dict[str, Any]]:
     """Collect segment metadata from segmented modality result files."""
-    metadata_by_sample: dict[str, dict[str, Any]] = {}
+    metadata_by_sample: dict[str, dict[str, Any]] = collect_task_segment_metadata(
+        segmented_folder
+    )
 
     for modality in MODALITY_ORDER:
         path = modality_paths.get(modality)
@@ -285,13 +411,34 @@ def collect_segment_metadata(modality_paths: dict[str, str | Path]) -> dict[str,
                 },
             )
 
-            for field in ("source_prefix", "side", "segment"):
+            for field in ("source_prefix", "side"):
                 if field not in sample_metadata and field in sample_data:
                     sample_metadata[field] = sample_data[field]
 
+            segment = sample_data.get("segment")
+            if isinstance(segment, dict):
+                for field in (
+                    "segment_id",
+                    "task_label",
+                    "start_seconds",
+                    "end_seconds",
+                    "start_timestamp",
+                    "end_timestamp",
+                ):
+                    if field not in sample_metadata and field in segment:
+                        sample_metadata[field] = segment[field]
+
             source_file = sample_data.get("source_file")
             if isinstance(source_file, str) and source_file:
-                sample_metadata["source_files"][modality] = source_file
+                source_files = sample_metadata.setdefault("source_files", {})
+                if isinstance(source_files, dict) and modality not in source_files:
+                    source_files[modality] = source_file
+
+            if "file_name" not in sample_metadata:
+                sample_metadata["file_name"] = _derive_file_name(
+                    sample_metadata.get("source_files", {}),
+                    _as_text(sample_metadata.get("source_prefix", "")),
+                )
 
     return metadata_by_sample
 
@@ -300,26 +447,40 @@ def attach_segment_metadata(
     exported: dict[str, dict[str, Any]],
     segment_metadata: dict[str, dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
-    """Attach collected segment metadata to exported grouped Q/A samples."""
+    """Attach collected segment metadata and keep large content blocks last."""
     for sample_id, sample_output in exported.items():
         if not isinstance(sample_output, dict):
             continue
 
         metadata = segment_metadata.get(sample_id, {})
         if not isinstance(metadata, dict):
-            continue
+            metadata = {}
 
-        for field in ("source_prefix", "side", "segment"):
-            if field in metadata:
-                sample_output[field] = metadata[field]
+        ordered_sample: dict[str, Any] = {}
 
-        source_files = metadata.get("source_files", {})
-        if isinstance(source_files, dict):
-            sample_output["source_files"] = {
-                modality: source_files[modality]
-                for modality in MODALITY_ORDER
-                if modality in source_files
-            }
+        for field in SEGMENT_DETAIL_FIELDS:
+            if field == "segment_id" and field not in metadata and field not in sample_output:
+                ordered_sample[field] = sample_id
+            elif field in metadata:
+                ordered_sample[field] = metadata[field]
+            elif field in sample_output:
+                ordered_sample[field] = sample_output[field]
+
+        if "source_keys" in sample_output:
+            ordered_sample["source_keys"] = sample_output["source_keys"]
+
+        content_fields = {"reasoning_groups", "evidence_units"}
+        handled_fields = set(SEGMENT_DETAIL_FIELDS) | {"source_keys", "segment"} | content_fields
+        for field, value in sample_output.items():
+            if field not in handled_fields:
+                ordered_sample[field] = value
+
+        for field in ("reasoning_groups", "evidence_units"):
+            if field in sample_output:
+                ordered_sample[field] = sample_output[field]
+
+        sample_output.clear()
+        sample_output.update(ordered_sample)
 
     return exported
 
@@ -336,7 +497,7 @@ def run_export_segmented_grouped_qa(
         for modality in MODALITY_ORDER
     }
 
-    segment_metadata = collect_segment_metadata(modality_paths)
+    segment_metadata = collect_segment_metadata(modality_paths, segmented_dir)
 
     normalized_data = normalize_all_modalities(
         rgb_path=modality_paths["rgb"],
@@ -346,6 +507,8 @@ def run_export_segmented_grouped_qa(
         audio_path=modality_paths["audio"],
         output_path=normalized_output_path,
     )
+    normalized_data = attach_segment_metadata(normalized_data, segment_metadata)
+    save_json_file(normalized_data, normalized_output_path)
 
     grouped_data = group_all_evidence(normalized_data)
     exported = export_grouped_qa_pairs(grouped_data)
