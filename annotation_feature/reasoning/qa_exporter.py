@@ -26,6 +26,7 @@ SEGMENTED_EVIDENCE_CSV_FIELDS = [
     "pair_index",
     "modality",
     "section",
+    "evidence",
     "question",
     "answer",
     "timestamp",
@@ -158,6 +159,9 @@ def split_evidence_units(evidence_units: list[dict]) -> list[dict[str, Any]]:
 
         for pair_index, pair in enumerate(pairs, start=1):
             split_unit = dict(unit)
+            split_unit["evidence"] = _as_text(
+                unit.get("evidence", unit.get("caption", ""))
+            )
             split_unit["question"] = pair["question"]
             split_unit["answer"] = pair["answer"]
             split_unit["source_unit_index"] = source_unit_index
@@ -243,6 +247,9 @@ def export_grouped_qa_pairs(grouped_data: dict) -> dict:
                             "question": pair["question"],
                             "answer": pair["answer"],
                             "caption": _as_text(unit.get("caption", "")),
+                            "evidence": _as_text(
+                                unit.get("evidence", unit.get("caption", ""))
+                            ),
                             "confidence": unit.get("confidence"),
                             "timestamp": unit.get("timestamp"),
                             "source_unit_index": source_unit_index,
@@ -413,6 +420,7 @@ def run_export_segmented_normalized_evidence_csv(
                     "pair_index": unit.get("pair_index", 1),
                     "modality": unit.get("modality", ""),
                     "section": unit.get("section", ""),
+                    "evidence": unit.get("evidence", unit.get("caption", "")),
                     "question": unit.get("question", ""),
                     "answer": unit.get("answer", ""),
                     "timestamp": unit.get("timestamp") or "",
