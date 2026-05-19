@@ -14,6 +14,7 @@ from .normalizer import MODALITY_ORDER, normalize_all_modalities, normalize_samp
 
 
 NUMBERED_ITEM_RE = re.compile(r"(?:^|\s)(\d+)[.)]\s+")
+ANSWER_SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 SEGMENTED_EVIDENCE_CSV_FIELDS = [
     "file_name",
     "task_label",
@@ -22,6 +23,7 @@ SEGMENTED_EVIDENCE_CSV_FIELDS = [
     "segment_confidence",
     "segment_id",
     "unit_index",
+    "pair_index",
     "modality",
     "section",
     "question",
@@ -73,30 +75,60 @@ def split_numbered_text(text: str) -> list[str]:
     return items
 
 
+def split_question_text(text: str) -> list[str]:
+    """Split numbered or repeated question-mark text into question items."""
+    text = _as_text(text).strip()
+    if not text:
+        return []
+
+    numbered_items = split_numbered_text(text)
+    if len(numbered_items) > 1:
+        return numbered_items
+
+    question_items = [
+        f"{item.strip()}?"
+        for item in text.split("?")
+        if item.strip()
+    ]
+    return question_items if len(question_items) > 1 else [text]
+
+
+def split_answer_text(text: str) -> list[str]:
+    """Split numbered or sentence-delimited answer text into answer items."""
+    text = _as_text(text).strip()
+    if not text:
+        return []
+
+    numbered_items = split_numbered_text(text)
+    if len(numbered_items) > 1:
+        return numbered_items
+
+    sentence_items = [
+        item.strip()
+        for item in ANSWER_SENTENCE_RE.split(text)
+        if item.strip()
+    ]
+    return sentence_items if len(sentence_items) > 1 else [text]
+
+
 def split_qa_pairs(question: str, answer: str) -> list[dict[str, str]]:
     """Split a unit's question and answer strings into paired Q/A records."""
-    question_items = split_numbered_text(question)
-    answer_items = split_numbered_text(answer)
+    question_items = split_question_text(question)
+    answer_items = (
+        split_answer_text(answer)
+        if len(question_items) > 1
+        else split_numbered_text(answer)
+    )
 
     if not question_items and not answer_items:
         return []
 
     pair_count = max(len(question_items), len(answer_items), 1)
-    question_fallback = _as_text(question).strip()
-    answer_fallback = _as_text(answer).strip()
     pairs: list[dict[str, str]] = []
 
     for index in range(pair_count):
-        question_text = (
-            question_items[index]
-            if index < len(question_items)
-            else question_fallback
-        )
-        answer_text = (
-            answer_items[index]
-            if index < len(answer_items)
-            else answer_fallback
-        )
+        question_text = question_items[index] if index < len(question_items) else ""
+        answer_text = answer_items[index] if index < len(answer_items) else ""
 
         if question_text or answer_text:
             pairs.append(
@@ -107,6 +139,49 @@ def split_qa_pairs(question: str, answer: str) -> list[dict[str, str]]:
             )
 
     return pairs
+
+
+def split_evidence_units(evidence_units: list[dict]) -> list[dict[str, Any]]:
+    """Split evidence units with numbered Q/A text into one unit per pair."""
+    split_units: list[dict[str, Any]] = []
+
+    for source_unit_index, unit in enumerate(evidence_units):
+        if not isinstance(unit, dict):
+            continue
+
+        pairs = split_qa_pairs(
+            _as_text(unit.get("question", "")),
+            _as_text(unit.get("answer", "")),
+        )
+        if not pairs:
+            continue
+
+        for pair_index, pair in enumerate(pairs, start=1):
+            split_unit = dict(unit)
+            split_unit["question"] = pair["question"]
+            split_unit["answer"] = pair["answer"]
+            split_unit["source_unit_index"] = source_unit_index
+            split_unit["pair_index"] = pair_index
+            split_units.append(split_unit)
+
+    return split_units
+
+
+def split_normalized_evidence_units(
+    normalized_data: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Split each sample's evidence units into one Q/A pair per unit."""
+    for sample_data in normalized_data.values():
+        if not isinstance(sample_data, dict):
+            continue
+
+        evidence_units = sample_data.get("evidence_units", [])
+        if not isinstance(evidence_units, list):
+            continue
+
+        sample_data["evidence_units"] = split_evidence_units(evidence_units)
+
+    return normalized_data
 
 
 def create_empty_grouped_qa() -> dict[str, list]:
@@ -334,7 +409,8 @@ def run_export_segmented_normalized_evidence_csv(
                     "end_timestamp": segment_data.get("end_timestamp", ""),
                     "segment_confidence": segment_data.get("confidence", ""),
                     "segment_id": segment_id,
-                    "unit_index": unit_index,
+                    "unit_index": unit.get("source_unit_index", unit_index),
+                    "pair_index": unit.get("pair_index", 1),
                     "modality": unit.get("modality", ""),
                     "section": unit.get("section", ""),
                     "question": unit.get("question", ""),
@@ -508,6 +584,7 @@ def run_export_segmented_grouped_qa(
         output_path=normalized_output_path,
     )
     normalized_data = attach_segment_metadata(normalized_data, segment_metadata)
+    normalized_data = split_normalized_evidence_units(normalized_data)
     save_json_file(normalized_data, normalized_output_path)
 
     grouped_data = group_all_evidence(normalized_data)
