@@ -35,7 +35,10 @@ from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
 )
-from annotation_feature.temporal_alignment import run_day_night_temporal_alignment
+from annotation_feature.temporal_alignment import (
+    export_day_night_rgb_event_depth_ir_alignment_grids,
+    run_day_night_temporal_alignment,
+)
 
 
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
@@ -330,26 +333,27 @@ def main():
         print("25. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- TEMPORAL ALIGNMENT ---")
         print("26. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
+        print("27. Export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
         print("\n--- LATE FUSION ---")
-        print("27. Run late fusion on existing modality JSON results")
+        print("28. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
-        print("28. Generate semantic task segment suggestions")
-        print("29. Run RGB QA after task segment")
-        print("30. Run EVENT QA after task segment")
-        print("31. Run MARIGOLD DEPTH QA after task segment")
-        print("32. Run IR QA after task segment")
-        print("33. Run AUDIO QA after task segment")
-        print("34. Run ALL QA pipelines on task segments")
-        print("35. Export grouped Q/A pairs from segmented modality results")
+        print("29. Generate semantic task segment suggestions")
+        print("30. Run RGB QA after task segment")
+        print("31. Run EVENT QA after task segment")
+        print("32. Run MARIGOLD DEPTH QA after task segment")
+        print("33. Run IR QA after task segment")
+        print("34. Run AUDIO QA after task segment")
+        print("35. Run ALL QA pipelines on task segments")
+        print("36. Export grouped Q/A pairs from segmented modality results")
         print("\n--- HOLISTIC QA ---")
-        print("36. Normalize evidence units from existing modality JSON results")
-        print("37. Group normalized evidence units by reasoning category")
-        print("38. Export Q/A pairs from grouped QA into JSON")
+        print("37. Normalize evidence units from existing modality JSON results")
+        print("38. Group normalized evidence units by reasoning category")
+        print("39. Export Q/A pairs from grouped QA into JSON")
         print("\n--- CSV EXPORT ---")
-        print("39. Export segmented normalized evidence units to CSV")
-        print("\n40. Exit")
+        print("40. Export segmented normalized evidence units to CSV")
+        print("\n41. Exit")
 
-        choice = input("\nEnter choice (1-40): ").strip()
+        choice = input("\nEnter choice (1-41): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -635,6 +639,31 @@ def main():
 
         elif choice == "27":
             print("\n" + "-" * 60)
+            print("Running: export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
+            print("-" * 60)
+            print("Reads temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
+            print("Uses stored EVENT, DEPTH, and IR offset_seconds for each sample.")
+            print("Writes low-resolution preview grids under temporal_alignment_exports/.")
+            print("Tries GPU h264_nvenc first, then falls back to CPU libx264 if needed.\n")
+            export_summary = export_day_night_rgb_event_depth_ir_alignment_grids(
+                day_alignment_input_path="temporal_alignment_day_results.json",
+                night_alignment_input_path="temporal_alignment_night_results.json",
+                output_folder="temporal_alignment_exports",
+                prefer_gpu=True,
+            )
+            print(f"Exported {export_summary['exported_count']} aligned preview video(s).")
+            print(f"Skipped {export_summary['skipped_count']} sample(s).")
+            print(f"Summary saved to {export_summary['summary_file']}")
+            for item in export_summary["exported"]:
+                print(
+                    f"- {item['sample']} {item['side']}: {item['output_file']} "
+                    f"({item['duration_seconds']}s, {item['encoder']})"
+                )
+            for item in export_summary["skipped"]:
+                print(f"- skipped {item['sample']} {item['side']}: {item['reason']}")
+
+        elif choice == "28":
+            print("\n" + "-" * 60)
             print("Running: late fusion on existing modality JSON results")
             print("-" * 60)
             print("This step reads the current RGB, IR, event, audio, and depth result files.")
@@ -643,7 +672,7 @@ def main():
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
             print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
 
-        elif choice == "28":
+        elif choice == "29":
             print("\n" + "-" * 60)
             print("Running: generate semantic task segment suggestions")
             print("-" * 60)
@@ -657,25 +686,25 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "29":
+        elif choice == "30":
             _run_segmented_qa_menu_option(["rgb"], "RGB QA after task segment")
 
-        elif choice == "30":
+        elif choice == "31":
             _run_segmented_qa_menu_option(["event"], "EVENT QA after task segment")
 
-        elif choice == "31":
+        elif choice == "32":
             _run_segmented_qa_menu_option(["depth"], "MARIGOLD DEPTH QA after task segment")
 
-        elif choice == "32":
+        elif choice == "33":
             _run_segmented_qa_menu_option(["ir"], "IR QA after task segment")
 
-        elif choice == "33":
+        elif choice == "34":
             _run_segmented_qa_menu_option(["audio"], "AUDIO QA after task segment")
 
-        elif choice == "34":
+        elif choice == "35":
             _run_all_segmented_qa_menu_option()
 
-        elif choice == "35":
+        elif choice == "36":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs from segmented modality results")
             print("-" * 60)
@@ -687,7 +716,7 @@ def main():
                 "into segmented_grouped_qa_pairs.json"
             )
 
-        elif choice == "36":
+        elif choice == "37":
             print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
@@ -696,7 +725,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "37":
+        elif choice == "38":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -705,7 +734,7 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "38":
+        elif choice == "39":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs to separate JSON")
             print("-" * 60)
@@ -714,7 +743,7 @@ def main():
             grouped_qa_results = run_export_grouped_qa()
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
-        elif choice == "39":
+        elif choice == "40":
             print("\n" + "-" * 60)
             print("Running: export segmented normalized evidence units to CSV")
             print("-" * 60)
@@ -723,7 +752,7 @@ def main():
             row_count = run_export_segmented_normalized_evidence_csv()
             print(f"Exported {row_count} row(s) into segmented_normalized_evidence_units.csv")
 
-        elif choice == "40":
+        elif choice == "41":
             print("\nExiting.")
             break
 

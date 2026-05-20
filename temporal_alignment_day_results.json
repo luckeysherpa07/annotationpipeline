@@ -12,58 +12,249 @@
         "modality": "event",
         "file": "dataset/check_mailbox_split/check_mailbox_day_event.mp4",
         "duration_seconds": 180.231531,
-        "offset_seconds": -14.033333333333333,
-        "offset_frames": -421,
-        "peak_correlation": 0.26162561774253845,
-        "confidence_label": "low",
+        "offset_seconds": -0.9,
+        "offset_frames": -27,
+        "peak_correlation": 0.319881796836853,
+        "confidence_label": "medium",
         "overlap_reference_seconds": {
-          "start": 14.033333,
-          "end": 194.264864
+          "start": 0.9,
+          "end": 181.131531
         },
         "overlap_target_seconds": {
           "start": 0.0,
           "end": 180.231531
         },
         "activity_plot_file": "temporal_alignment_plots/check_mailbox_day_rgb_event_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.9,
+            "offset_frames": -27,
+            "correlation": 0.319882,
+            "score": 0.430882,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.866667,
+            "offset_frames": -26,
+            "correlation": 0.319512,
+            "score": 0.430845,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.933333,
+            "offset_frames": -28,
+            "correlation": 0.319973,
+            "score": 0.430639,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.833333,
+            "offset_frames": -25,
+            "correlation": 0.318798,
+            "score": 0.430465,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.966667,
+            "offset_frames": -29,
+            "correlation": 0.319924,
+            "score": 0.430257,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.8,
+            "offset_frames": -24,
+            "correlation": 0.317816,
+            "score": 0.429816,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -1.0,
+            "offset_frames": -30,
+            "correlation": 0.319768,
+            "score": 0.429768,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -1.033333,
+            "offset_frames": -31,
+            "correlation": 0.319423,
+            "score": 0.42909,
+            "overlap_ratio": 1.0
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [
+          "Selected offset uses modality prior because the raw highest-correlation lag was less plausible."
+        ],
+        "raw_best_offset_seconds": -14.2,
+        "raw_best_correlation": 0.3411594331264496,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "ir": {
         "modality": "ir",
         "file": "dataset/check_mailbox_split/check_mailbox_day_ir.mp4",
         "duration_seconds": 194.86666666666667,
-        "offset_seconds": -0.16666666666666666,
-        "offset_frames": -5,
-        "peak_correlation": 0.8655344843864441,
+        "offset_seconds": -0.13333333333333333,
+        "offset_frames": -4,
+        "peak_correlation": 0.9120678901672363,
         "confidence_label": "high",
         "overlap_reference_seconds": {
-          "start": 0.166667,
+          "start": 0.133333,
           "end": 194.9
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 194.733333
+          "end": 194.766667
         },
         "activity_plot_file": "temporal_alignment_plots/check_mailbox_day_rgb_ir_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.912068,
+            "score": 1.002673,
+            "overlap_ratio": 0.999487
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.904613,
+            "score": 1.002572,
+            "overlap_ratio": 0.999658
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.892724,
+            "score": 0.998037,
+            "overlap_ratio": 0.999829
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.913426,
+            "score": 0.996677,
+            "overlap_ratio": 0.999316
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.877245,
+            "score": 0.989912,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.90815,
+            "score": 0.984047,
+            "overlap_ratio": 0.999145
+          },
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.858609,
+            "score": 0.978609,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.233333,
+            "offset_frames": -7,
+            "correlation": 0.89787,
+            "score": 0.966413,
+            "overlap_ratio": 0.998973
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.166667,
+        "raw_best_correlation": 0.9134255647659302,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "depth": {
         "modality": "depth",
         "file": "dataset/check_mailbox_split/check_mailbox_day_depth.mp4",
         "duration_seconds": 194.86666666666667,
-        "offset_seconds": -0.16666666666666666,
-        "offset_frames": -5,
-        "peak_correlation": 0.5687575340270996,
-        "confidence_label": "high",
+        "offset_seconds": 0.0,
+        "offset_frames": 0,
+        "peak_correlation": 0.5725246667861938,
+        "confidence_label": "medium",
         "overlap_reference_seconds": {
-          "start": 0.166667,
-          "end": 194.9
+          "start": 0.0,
+          "end": 194.866667
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 194.733333
+          "end": 194.866667
         },
         "activity_plot_file": "temporal_alignment_plots/check_mailbox_day_rgb_depth_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.572525,
+            "score": 0.692525,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.578827,
+            "score": 0.69216,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.583964,
+            "score": 0.69061,
+            "overlap_ratio": 0.999829
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.587795,
+            "score": 0.687754,
+            "overlap_ratio": 0.999658
+          },
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.589972,
+            "score": 0.683244,
+            "overlap_ratio": 0.999487
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.565425,
+            "score": 0.678738,
+            "overlap_ratio": 0.999829
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.589772,
+            "score": 0.676357,
+            "overlap_ratio": 0.999316
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.586924,
+            "score": 0.666821,
+            "overlap_ratio": 0.999145
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.133333,
+        "raw_best_correlation": 0.5899719595909119,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       }
     }
   },
@@ -80,20 +271,83 @@
         "modality": "event",
         "file": "dataset/cut_carrot_split/cut_carrot_day_event.mp4",
         "duration_seconds": 185.03148299999998,
-        "offset_seconds": 0.8333333333333334,
-        "offset_frames": 25,
-        "peak_correlation": 0.7544050216674805,
+        "offset_seconds": 0.8,
+        "offset_frames": 24,
+        "peak_correlation": 0.8887405395507812,
         "confidence_label": "high",
         "overlap_reference_seconds": {
           "start": 0.0,
-          "end": 184.19815
+          "end": 184.231483
         },
         "overlap_target_seconds": {
-          "start": 0.833333,
+          "start": 0.8,
           "end": 185.031483
         },
         "activity_plot_file": "temporal_alignment_plots/cut_carrot_day_rgb_event_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": 0.8,
+            "offset_frames": 24,
+            "correlation": 0.888741,
+            "score": 1.000243,
+            "overlap_ratio": 0.995855
+          },
+          {
+            "offset_seconds": 0.833333,
+            "offset_frames": 25,
+            "correlation": 0.886929,
+            "score": 0.998077,
+            "overlap_ratio": 0.995675
+          },
+          {
+            "offset_seconds": 0.766667,
+            "offset_frames": 23,
+            "correlation": 0.87517,
+            "score": 0.987027,
+            "overlap_ratio": 0.996035
+          },
+          {
+            "offset_seconds": 0.866667,
+            "offset_frames": 26,
+            "correlation": 0.869417,
+            "score": 0.980209,
+            "overlap_ratio": 0.995495
+          },
+          {
+            "offset_seconds": 0.733333,
+            "offset_frames": 22,
+            "correlation": 0.847653,
+            "score": 0.959865,
+            "overlap_ratio": 0.996216
+          },
+          {
+            "offset_seconds": 0.9,
+            "offset_frames": 27,
+            "correlation": 0.838571,
+            "score": 0.949009,
+            "overlap_ratio": 0.995314
+          },
+          {
+            "offset_seconds": 0.7,
+            "offset_frames": 21,
+            "correlation": 0.808872,
+            "score": 0.921439,
+            "overlap_ratio": 0.996396
+          },
+          {
+            "offset_seconds": 0.933333,
+            "offset_frames": 28,
+            "correlation": 0.797124,
+            "score": 0.907207,
+            "overlap_ratio": 0.995134
+          }
+        ],
+        "selected_by": "best_correlation",
+        "warnings": [],
+        "raw_best_offset_seconds": 0.8,
+        "raw_best_correlation": 0.8887405395507812,
+        "peak_margin": 0.0018110871315002441,
+        "lag_fps": 30.0
       },
       "ir": {
         "modality": "ir",
@@ -101,7 +355,7 @@
         "duration_seconds": 185.0,
         "offset_seconds": -0.13333333333333333,
         "offset_frames": -4,
-        "peak_correlation": 0.8762723207473755,
+        "peak_correlation": 0.9625632166862488,
         "confidence_label": "high",
         "overlap_reference_seconds": {
           "start": 0.133333,
@@ -112,26 +366,152 @@
           "end": 184.866667
         },
         "activity_plot_file": "temporal_alignment_plots/cut_carrot_day_rgb_ir_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.962563,
+            "score": 1.053143,
+            "overlap_ratio": 0.999279
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.963168,
+            "score": 1.046393,
+            "overlap_ratio": 0.999099
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.939872,
+            "score": 1.037807,
+            "overlap_ratio": 0.999459
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.942057,
+            "score": 1.017927,
+            "overlap_ratio": 0.998919
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.903586,
+            "score": 1.008876,
+            "overlap_ratio": 0.99964
+          },
+          {
+            "offset_seconds": -0.233333,
+            "offset_frames": -7,
+            "correlation": 0.907018,
+            "score": 0.975533,
+            "overlap_ratio": 0.998739
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.856235,
+            "score": 0.96888,
+            "overlap_ratio": 0.99982
+          },
+          {
+            "offset_seconds": -0.266667,
+            "offset_frames": -8,
+            "correlation": 0.860995,
+            "score": 0.922155,
+            "overlap_ratio": 0.998558
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.166667,
+        "raw_best_correlation": 0.9631675481796265,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "depth": {
         "modality": "depth",
         "file": "dataset/cut_carrot_split/cut_carrot_day_depth.mp4",
         "duration_seconds": 185.0,
-        "offset_seconds": -0.13333333333333333,
-        "offset_frames": -4,
-        "peak_correlation": 0.49908456206321716,
+        "offset_seconds": -0.1,
+        "offset_frames": -3,
+        "peak_correlation": 0.5510010123252869,
         "confidence_label": "medium",
         "overlap_reference_seconds": {
-          "start": 0.133333,
+          "start": 0.1,
           "end": 185.0
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 184.866667
+          "end": 184.9
         },
         "activity_plot_file": "temporal_alignment_plots/cut_carrot_day_rgb_depth_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.551001,
+            "score": 0.650936,
+            "overlap_ratio": 0.999459
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.543729,
+            "score": 0.650352,
+            "overlap_ratio": 0.99964
+          },
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.553832,
+            "score": 0.647079,
+            "overlap_ratio": 0.999279
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.533025,
+            "score": 0.646337,
+            "overlap_ratio": 0.99982
+          },
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.519561,
+            "score": 0.639561,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.550613,
+            "score": 0.637172,
+            "overlap_ratio": 0.999099
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.541503,
+            "score": 0.621373,
+            "overlap_ratio": 0.998919
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.504294,
+            "score": 0.617605,
+            "overlap_ratio": 0.99982
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.133333,
+        "raw_best_correlation": 0.5538322925567627,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       }
     }
   },
@@ -148,58 +528,249 @@
         "modality": "event",
         "file": "dataset/ride_a_bike_split/ride_a_bike_day_event.mp4",
         "duration_seconds": 78.06588599999999,
-        "offset_seconds": -8.066666666666666,
-        "offset_frames": -242,
-        "peak_correlation": 0.21463629603385925,
+        "offset_seconds": 1.2666666666666666,
+        "offset_frames": 38,
+        "peak_correlation": 0.23855380713939667,
         "confidence_label": "low",
         "overlap_reference_seconds": {
-          "start": 8.066667,
-          "end": 86.132553
+          "start": 0.0,
+          "end": 76.799219
         },
         "overlap_target_seconds": {
-          "start": 0.0,
+          "start": 1.266667,
           "end": 78.065886
         },
         "activity_plot_file": "temporal_alignment_plots/ride_a_bike_day_rgb_event_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": 1.266667,
+            "offset_frames": 38,
+            "correlation": 0.238554,
+            "score": 0.343939,
+            "overlap_ratio": 0.983768
+          },
+          {
+            "offset_seconds": 1.233333,
+            "offset_frames": 37,
+            "correlation": 0.237951,
+            "score": 0.343721,
+            "overlap_ratio": 0.984195
+          },
+          {
+            "offset_seconds": 1.3,
+            "offset_frames": 39,
+            "correlation": 0.238554,
+            "score": 0.343555,
+            "overlap_ratio": 0.98334
+          },
+          {
+            "offset_seconds": 1.2,
+            "offset_frames": 36,
+            "correlation": 0.236845,
+            "score": 0.343,
+            "overlap_ratio": 0.984622
+          },
+          {
+            "offset_seconds": 1.333333,
+            "offset_frames": 40,
+            "correlation": 0.237871,
+            "score": 0.342487,
+            "overlap_ratio": 0.982913
+          },
+          {
+            "offset_seconds": 1.166667,
+            "offset_frames": 35,
+            "correlation": 0.235329,
+            "score": 0.341868,
+            "overlap_ratio": 0.985049
+          },
+          {
+            "offset_seconds": 1.366667,
+            "offset_frames": 41,
+            "correlation": 0.236534,
+            "score": 0.340765,
+            "overlap_ratio": 0.982486
+          },
+          {
+            "offset_seconds": 1.133333,
+            "offset_frames": 34,
+            "correlation": 0.233524,
+            "score": 0.340448,
+            "overlap_ratio": 0.985476
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [
+          "Selected offset uses modality prior because the raw highest-correlation lag was less plausible."
+        ],
+        "raw_best_offset_seconds": -8.133333,
+        "raw_best_correlation": 0.2817261219024658,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "ir": {
         "modality": "ir",
         "file": "dataset/ride_a_bike_split/ride_a_bike_day_ir.mp4",
         "duration_seconds": 98.46666666666667,
-        "offset_seconds": -0.16666666666666666,
-        "offset_frames": -5,
-        "peak_correlation": 0.8799594640731812,
+        "offset_seconds": -0.1,
+        "offset_frames": -3,
+        "peak_correlation": 0.897020161151886,
         "confidence_label": "high",
         "overlap_reference_seconds": {
-          "start": 0.166667,
+          "start": 0.1,
           "end": 98.5
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 98.333333
+          "end": 98.4
         },
         "activity_plot_file": "temporal_alignment_plots/ride_a_bike_day_rgb_ir_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.89702,
+            "score": 0.994939,
+            "overlap_ratio": 0.999323
+          },
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.902713,
+            "score": 0.993258,
+            "overlap_ratio": 0.998984
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.886682,
+            "score": 0.991974,
+            "overlap_ratio": 0.999661
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.872637,
+            "score": 0.985304,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.901585,
+            "score": 0.984756,
+            "overlap_ratio": 0.998645
+          },
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.855654,
+            "score": 0.975654,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.892311,
+            "score": 0.968108,
+            "overlap_ratio": 0.998307
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.836201,
+            "score": 0.948828,
+            "overlap_ratio": 0.999661
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.133333,
+        "raw_best_correlation": 0.9027127623558044,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "depth": {
         "modality": "depth",
         "file": "dataset/ride_a_bike_split/ride_a_bike_day_depth.mp4",
         "duration_seconds": 98.46666666666667,
-        "offset_seconds": -0.16666666666666666,
-        "offset_frames": -5,
-        "peak_correlation": 0.464468777179718,
+        "offset_seconds": -0.03333333333333333,
+        "offset_frames": -1,
+        "peak_correlation": 0.4549601078033447,
         "confidence_label": "medium",
         "overlap_reference_seconds": {
-          "start": 0.166667,
+          "start": 0.033333,
           "end": 98.5
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 98.333333
+          "end": 98.466667
         },
         "activity_plot_file": "temporal_alignment_plots/ride_a_bike_day_rgb_depth_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.45496,
+            "score": 0.568293,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.461138,
+            "score": 0.567764,
+            "overlap_ratio": 0.999661
+          },
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.447558,
+            "score": 0.567558,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.465743,
+            "score": 0.565662,
+            "overlap_ratio": 0.999323
+          },
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.468354,
+            "score": 0.561566,
+            "overlap_ratio": 0.998984
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.467983,
+            "score": 0.554487,
+            "overlap_ratio": 0.998645
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.439041,
+            "score": 0.552334,
+            "overlap_ratio": 0.999661
+          },
+          {
+            "offset_seconds": -0.2,
+            "offset_frames": -6,
+            "correlation": 0.464067,
+            "score": 0.543863,
+            "overlap_ratio": 0.998307
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.133333,
+        "raw_best_correlation": 0.46835410594940186,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       }
     }
   },
@@ -218,7 +789,7 @@
         "duration_seconds": 121.99878,
         "offset_seconds": -2.7666666666666666,
         "offset_frames": -83,
-        "peak_correlation": 0.7900564670562744,
+        "peak_correlation": 0.8506959080696106,
         "confidence_label": "high",
         "overlap_reference_seconds": {
           "start": 2.766667,
@@ -229,45 +800,234 @@
           "end": 121.933333
         },
         "activity_plot_file": "temporal_alignment_plots/wash_hands_day_rgb_event_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -2.766667,
+            "offset_frames": -83,
+            "correlation": 0.850696,
+            "score": 0.942964,
+            "overlap_ratio": 0.999453
+          },
+          {
+            "offset_seconds": -2.733333,
+            "offset_frames": -82,
+            "correlation": 0.849039,
+            "score": 0.941673,
+            "overlap_ratio": 0.999727
+          },
+          {
+            "offset_seconds": -2.8,
+            "offset_frames": -84,
+            "correlation": 0.848092,
+            "score": 0.939994,
+            "overlap_ratio": 0.99918
+          },
+          {
+            "offset_seconds": -2.7,
+            "offset_frames": -81,
+            "correlation": 0.84338,
+            "score": 0.93638,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -2.833333,
+            "offset_frames": -85,
+            "correlation": 0.841622,
+            "score": 0.933158,
+            "overlap_ratio": 0.998907
+          },
+          {
+            "offset_seconds": -2.666667,
+            "offset_frames": -80,
+            "correlation": 0.834307,
+            "score": 0.92764,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -2.866667,
+            "offset_frames": -86,
+            "correlation": 0.831817,
+            "score": 0.922987,
+            "overlap_ratio": 0.998634
+          },
+          {
+            "offset_seconds": -2.633333,
+            "offset_frames": -79,
+            "correlation": 0.822225,
+            "score": 0.915892,
+            "overlap_ratio": 1.0
+          }
+        ],
+        "selected_by": "best_correlation",
+        "warnings": [],
+        "raw_best_offset_seconds": -2.766667,
+        "raw_best_correlation": 0.8506959080696106,
+        "peak_margin": 0.0016571879386901855,
+        "lag_fps": 30.0
       },
       "ir": {
         "modality": "ir",
         "file": "dataset/wash_hand_split/wash_hands_day_ir.mp4",
         "duration_seconds": 124.7,
-        "offset_seconds": -0.1,
-        "offset_frames": -3,
-        "peak_correlation": 0.9255497455596924,
+        "offset_seconds": -0.03333333333333333,
+        "offset_frames": -1,
+        "peak_correlation": 0.9622421264648438,
         "confidence_label": "high",
         "overlap_reference_seconds": {
-          "start": 0.1,
+          "start": 0.033333,
           "end": 124.7
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 124.6
+          "end": 124.666667
         },
         "activity_plot_file": "temporal_alignment_plots/wash_hands_day_rgb_ir_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.962242,
+            "score": 1.074877,
+            "overlap_ratio": 0.999733
+          },
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.954762,
+            "score": 1.074762,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.966576,
+            "score": 1.071846,
+            "overlap_ratio": 0.999465
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.967185,
+            "score": 1.065089,
+            "overlap_ratio": 0.999198
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.944483,
+            "score": 1.057118,
+            "overlap_ratio": 0.999733
+          },
+          {
+            "offset_seconds": -0.133333,
+            "offset_frames": -4,
+            "correlation": 0.963826,
+            "score": 1.054364,
+            "overlap_ratio": 0.99893
+          },
+          {
+            "offset_seconds": -0.166667,
+            "offset_frames": -5,
+            "correlation": 0.957089,
+            "score": 1.040261,
+            "overlap_ratio": 0.998663
+          },
+          {
+            "offset_seconds": 0.066667,
+            "offset_frames": 2,
+            "correlation": 0.931713,
+            "score": 1.036982,
+            "overlap_ratio": 0.999465
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": -0.1,
+        "raw_best_correlation": 0.9671847820281982,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       },
       "depth": {
         "modality": "depth",
         "file": "dataset/wash_hand_split/wash_hands_day_depth.mp4",
         "duration_seconds": 124.7,
-        "offset_seconds": -0.06666666666666667,
-        "offset_frames": -2,
-        "peak_correlation": 0.7138791680335999,
-        "confidence_label": "high",
+        "offset_seconds": 0.0,
+        "offset_frames": 0,
+        "peak_correlation": 0.7613919377326965,
+        "confidence_label": "medium",
         "overlap_reference_seconds": {
-          "start": 0.066667,
+          "start": 0.0,
           "end": 124.7
         },
         "overlap_target_seconds": {
           "start": 0.0,
-          "end": 124.633333
+          "end": 124.7
         },
         "activity_plot_file": "temporal_alignment_plots/wash_hands_day_rgb_depth_activity_signal.png",
-        "warnings": []
+        "candidate_offsets": [
+          {
+            "offset_seconds": 0.0,
+            "offset_frames": 0,
+            "correlation": 0.761392,
+            "score": 0.881392,
+            "overlap_ratio": 1.0
+          },
+          {
+            "offset_seconds": 0.033333,
+            "offset_frames": 1,
+            "correlation": 0.761753,
+            "score": 0.875055,
+            "overlap_ratio": 0.999733
+          },
+          {
+            "offset_seconds": -0.033333,
+            "offset_frames": -1,
+            "correlation": 0.759782,
+            "score": 0.873083,
+            "overlap_ratio": 0.999733
+          },
+          {
+            "offset_seconds": 0.066667,
+            "offset_frames": 2,
+            "correlation": 0.76097,
+            "score": 0.867572,
+            "overlap_ratio": 0.999465
+          },
+          {
+            "offset_seconds": -0.066667,
+            "offset_frames": -2,
+            "correlation": 0.75682,
+            "score": 0.863423,
+            "overlap_ratio": 0.999465
+          },
+          {
+            "offset_seconds": 0.1,
+            "offset_frames": 3,
+            "correlation": 0.759171,
+            "score": 0.859074,
+            "overlap_ratio": 0.999198
+          },
+          {
+            "offset_seconds": -0.1,
+            "offset_frames": -3,
+            "correlation": 0.752378,
+            "score": 0.852282,
+            "overlap_ratio": 0.999198
+          },
+          {
+            "offset_seconds": 0.133333,
+            "offset_frames": 4,
+            "correlation": 0.756491,
+            "score": 0.849696,
+            "overlap_ratio": 0.99893
+          }
+        ],
+        "selected_by": "modality_prior",
+        "warnings": [],
+        "raw_best_offset_seconds": 0.033333,
+        "raw_best_correlation": 0.7617533802986145,
+        "peak_margin": 0.0,
+        "lag_fps": 30.0
       }
     }
   }
