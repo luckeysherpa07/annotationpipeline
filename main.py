@@ -35,6 +35,7 @@ from annotation_feature.pipeline.modalities.marigold import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
 )
+from annotation_feature.temporal_alignment import run_day_night_temporal_alignment
 
 
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
@@ -311,42 +312,44 @@ def main():
         print("10. Test DEPTH preprocessing + batch pipeline (no API calls, demo Q&A)")
         print("11. Test DEPTH batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
         print("12. Run DEPTH batch pipeline on all videos with Q&A (production)")
+        print("\n--- TEMPORAL ALIGNMENT ---")
+        print("13. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
         print("\n--- IR PIPELINE ---")
-        print("13. Test IR preprocessing + batch pipeline (no API calls, demo Q&A)")
-        print("14. Test IR batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
-        print("15. Run IR batch pipeline on all videos with Q&A (production)")
+        print("14. Test IR preprocessing + batch pipeline (no API calls, demo Q&A)")
+        print("15. Test IR batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
+        print("16. Run IR batch pipeline on all videos with Q&A (production)")
         print("\n--- AUDIO PIPELINE ---")
-        print("16. Test AUDIO pipeline on 1 file (no API calls, demo Q&A)")
-        print("17. Test AUDIO pipeline on 1 file with real Gemini API calls")
-        print("18. Run AUDIO pipeline on all files (production)")
+        print("17. Test AUDIO pipeline on 1 file (no API calls, demo Q&A)")
+        print("18. Test AUDIO pipeline on 1 file with real Gemini API calls")
+        print("19. Run AUDIO pipeline on all files (production)")
         print("\n--- MARIGOLD DEPTH ---")
-        print("19. Estimate Marigold depth maps from cached RGB frames")
-        print("20. Estimate Marigold depth maps from one selected night IR frame folder")
-        print("21. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
-        print("22. Test Marigold depth estimation on one .frames_cache folder")
-        print("23. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
-        print("24. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
-        print("25. Run Marigold depth QA on all cached pairs (production)")
+        print("20. Estimate Marigold depth maps from cached RGB frames")
+        print("21. Estimate Marigold depth maps from one selected night IR frame folder")
+        print("22. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
+        print("23. Test Marigold depth estimation on one .frames_cache folder")
+        print("24. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
+        print("25. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
+        print("26. Run Marigold depth QA on all cached pairs (production)")
         print("\n--- LATE FUSION ---")
-        print("26. Run late fusion on existing modality JSON results")
+        print("27. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
-        print("27. Generate semantic task segment suggestions")
-        print("28. Run RGB QA after task segment")
-        print("29. Run EVENT QA after task segment")
-        print("30. Run MARIGOLD DEPTH QA after task segment")
-        print("31. Run IR QA after task segment")
-        print("32. Run AUDIO QA after task segment")
-        print("33. Run ALL QA pipelines on task segments")
-        print("34. Export grouped Q/A pairs from segmented modality results")
+        print("28. Generate semantic task segment suggestions")
+        print("29. Run RGB QA after task segment")
+        print("30. Run EVENT QA after task segment")
+        print("31. Run MARIGOLD DEPTH QA after task segment")
+        print("32. Run IR QA after task segment")
+        print("33. Run AUDIO QA after task segment")
+        print("34. Run ALL QA pipelines on task segments")
+        print("35. Export grouped Q/A pairs from segmented modality results")
         print("\n--- HOLISTIC QA ---")
-        print("35. Normalize evidence units from existing modality JSON results")
-        print("36. Group normalized evidence units by reasoning category")
-        print("37. Export Q/A pairs from grouped QA into JSON")
+        print("36. Normalize evidence units from existing modality JSON results")
+        print("37. Group normalized evidence units by reasoning category")
+        print("38. Export Q/A pairs from grouped QA into JSON")
         print("\n--- CSV EXPORT ---")
-        print("38. Export segmented normalized evidence units to CSV")
-        print("\n39. Exit")
+        print("39. Export segmented normalized evidence units to CSV")
+        print("\n40. Exit")
 
-        choice = input("\nEnter choice (1-39): ").strip()
+        choice = input("\nEnter choice (1-40): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -467,13 +470,32 @@ def main():
 
         elif choice == "13":
             print("\n" + "-" * 60)
+            print("Running: temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
+            print("-" * 60)
+            print("Uses local OpenCV processing only; no Gemini/API calls.")
+            print("Uses RGB as the reference and aligns event, IR, and depth to it.")
+            print("Writes temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
+            print("Writes side-labeled combined and per-modality activity-signal PNG plots under temporal_alignment_plots/.\n")
+            alignment_results = run_day_night_temporal_alignment(
+                dataset_folder="dataset",
+                day_output_path="temporal_alignment_day_results.json",
+                night_output_path="temporal_alignment_night_results.json",
+                plot_output_folder="temporal_alignment_plots",
+            )
+            print(f"Aligned {len(alignment_results['day'])} day multimodal sample(s).")
+            print(f"Aligned {len(alignment_results['night'])} night multimodal sample(s).")
+            print("Results saved to temporal_alignment_day_results.json and temporal_alignment_night_results.json")
+            print("Plots saved under temporal_alignment_plots/")
+
+        elif choice == "14":
+            print("\n" + "-" * 60)
             print("Running: IR batch pipeline test (demo Q&A)")
             print("-" * 60)
             print("1 Gemini call per IR pair (caption, question, and answer generation)")
             print("skip_api=True -> demo Q&A\n")
             run_ir(test_mode=True, skip_api=True)
 
-        elif choice == "14":
+        elif choice == "15":
             print("\n" + "-" * 60)
             print("Running: IR batch pipeline on 1 pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -484,7 +506,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "15":
+        elif choice == "16":
             print("\n" + "-" * 60)
             print("Running: IR batch pipeline on all videos (production)")
             print("WARNING: This will use Gemini API quota for each video!")
@@ -495,7 +517,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "16":
+        elif choice == "17":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade test on 1 pair (using demo data)")
             print("-" * 60)
@@ -503,7 +525,7 @@ def main():
             print("skip_api=True -> no Gemini API calls\n")
             run_audio(test_mode=True, skip_api=True)
 
-        elif choice == "17":
+        elif choice == "18":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade on 1 pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -514,7 +536,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "18":
+        elif choice == "19":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade on all pairs (production)")
             print("WARNING: This will use Gemini API quota for each pair!")
@@ -526,7 +548,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "19":
+        elif choice == "20":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation from cached RGB frames")
             print("Uses cached RGB frames from dataset/.frames_cache")
@@ -534,7 +556,7 @@ def main():
             print("-" * 60)
             run_marigold_depth_estimation(test_mode=False)
 
-        elif choice == "20":
+        elif choice == "21":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected night IR frame folder")
             print("Uses cached IR frames from dataset/.frames_cache_ir")
@@ -548,7 +570,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "21":
+        elif choice == "22":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected frame from one .frames_cache folder")
             print("The selected frame will be processed on its inferred day/night side only")
@@ -567,7 +589,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "22":
+        elif choice == "23":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected .frames_cache folder")
             print("The selected folder will be resolved to its full day/night pair when possible")
@@ -581,7 +603,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "23":
+        elif choice == "24":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA test on 1 cached pair (demo Q&A)")
             print("Requires existing Marigold depth maps in dataset/.frames_cache_marigold")
@@ -589,7 +611,7 @@ def main():
             print("skip_api=True -> demo Q&A\n")
             run_marigold_depth_qa(test_mode=True, skip_api=True)
 
-        elif choice == "24":
+        elif choice == "25":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on 1 cached pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -600,7 +622,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "25":
+        elif choice == "26":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on all cached pairs (production)")
             print("WARNING: This will use Gemini API quota for each cached Marigold pair!")
@@ -611,7 +633,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "26":
+        elif choice == "27":
             print("\n" + "-" * 60)
             print("Running: late fusion on existing modality JSON results")
             print("-" * 60)
@@ -621,7 +643,7 @@ def main():
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
             print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
 
-        elif choice == "27":
+        elif choice == "28":
             print("\n" + "-" * 60)
             print("Running: generate semantic task segment suggestions")
             print("-" * 60)
@@ -635,25 +657,25 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "28":
+        elif choice == "29":
             _run_segmented_qa_menu_option(["rgb"], "RGB QA after task segment")
 
-        elif choice == "29":
+        elif choice == "30":
             _run_segmented_qa_menu_option(["event"], "EVENT QA after task segment")
 
-        elif choice == "30":
+        elif choice == "31":
             _run_segmented_qa_menu_option(["depth"], "MARIGOLD DEPTH QA after task segment")
 
-        elif choice == "31":
+        elif choice == "32":
             _run_segmented_qa_menu_option(["ir"], "IR QA after task segment")
 
-        elif choice == "32":
+        elif choice == "33":
             _run_segmented_qa_menu_option(["audio"], "AUDIO QA after task segment")
 
-        elif choice == "33":
+        elif choice == "34":
             _run_all_segmented_qa_menu_option()
 
-        elif choice == "34":
+        elif choice == "35":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs from segmented modality results")
             print("-" * 60)
@@ -665,7 +687,7 @@ def main():
                 "into segmented_grouped_qa_pairs.json"
             )
 
-        elif choice == "35":
+        elif choice == "36":
             print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
@@ -674,7 +696,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "36":
+        elif choice == "37":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -683,7 +705,7 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "37":
+        elif choice == "38":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs to separate JSON")
             print("-" * 60)
@@ -692,7 +714,7 @@ def main():
             grouped_qa_results = run_export_grouped_qa()
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
-        elif choice == "38":
+        elif choice == "39":
             print("\n" + "-" * 60)
             print("Running: export segmented normalized evidence units to CSV")
             print("-" * 60)
@@ -701,7 +723,7 @@ def main():
             row_count = run_export_segmented_normalized_evidence_csv()
             print(f"Exported {row_count} row(s) into segmented_normalized_evidence_units.csv")
 
-        elif choice == "39":
+        elif choice == "40":
             print("\nExiting.")
             break
 
