@@ -312,24 +312,24 @@ def main():
         print("10. Test DEPTH preprocessing + batch pipeline (no API calls, demo Q&A)")
         print("11. Test DEPTH batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
         print("12. Run DEPTH batch pipeline on all videos with Q&A (production)")
-        print("\n--- TEMPORAL ALIGNMENT ---")
-        print("13. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
         print("\n--- IR PIPELINE ---")
-        print("14. Test IR preprocessing + batch pipeline (no API calls, demo Q&A)")
-        print("15. Test IR batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
-        print("16. Run IR batch pipeline on all videos with Q&A (production)")
+        print("13. Test IR preprocessing + batch pipeline (no API calls, demo Q&A)")
+        print("14. Test IR batch pipeline on 1 pair with Q&A (with real Gemini API calls)")
+        print("15. Run IR batch pipeline on all videos with Q&A (production)")
         print("\n--- AUDIO PIPELINE ---")
-        print("17. Test AUDIO pipeline on 1 file (no API calls, demo Q&A)")
-        print("18. Test AUDIO pipeline on 1 file with real Gemini API calls")
-        print("19. Run AUDIO pipeline on all files (production)")
+        print("16. Test AUDIO pipeline on 1 file (no API calls, demo Q&A)")
+        print("17. Test AUDIO pipeline on 1 file with real Gemini API calls")
+        print("18. Run AUDIO pipeline on all files (production)")
         print("\n--- MARIGOLD DEPTH ---")
-        print("20. Estimate Marigold depth maps from cached RGB frames")
-        print("21. Estimate Marigold depth maps from one selected night IR frame folder")
-        print("22. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
-        print("23. Test Marigold depth estimation on one .frames_cache folder")
-        print("24. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
-        print("25. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
-        print("26. Run Marigold depth QA on all cached pairs (production)")
+        print("19. Estimate Marigold depth maps from cached RGB frames")
+        print("20. Estimate Marigold depth maps from one selected night IR frame folder")
+        print("21. Test Marigold depth estimation on one selected frame from one .frames_cache folder")
+        print("22. Test Marigold depth estimation on one .frames_cache folder")
+        print("23. Test Marigold depth QA on 1 cached pair (no API calls, demo Q&A)")
+        print("24. Test Marigold depth QA on 1 cached pair with real Gemini API calls")
+        print("25. Run Marigold depth QA on all cached pairs (production)")
+        print("\n--- TEMPORAL ALIGNMENT ---")
+        print("26. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
         print("\n--- LATE FUSION ---")
         print("27. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
@@ -470,32 +470,13 @@ def main():
 
         elif choice == "13":
             print("\n" + "-" * 60)
-            print("Running: temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
-            print("-" * 60)
-            print("Uses local OpenCV processing only; no Gemini/API calls.")
-            print("Uses RGB as the reference and aligns event, IR, and depth to it.")
-            print("Writes temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
-            print("Writes side-labeled combined and per-modality activity-signal PNG plots under temporal_alignment_plots/.\n")
-            alignment_results = run_day_night_temporal_alignment(
-                dataset_folder="dataset",
-                day_output_path="temporal_alignment_day_results.json",
-                night_output_path="temporal_alignment_night_results.json",
-                plot_output_folder="temporal_alignment_plots",
-            )
-            print(f"Aligned {len(alignment_results['day'])} day multimodal sample(s).")
-            print(f"Aligned {len(alignment_results['night'])} night multimodal sample(s).")
-            print("Results saved to temporal_alignment_day_results.json and temporal_alignment_night_results.json")
-            print("Plots saved under temporal_alignment_plots/")
-
-        elif choice == "14":
-            print("\n" + "-" * 60)
             print("Running: IR batch pipeline test (demo Q&A)")
             print("-" * 60)
             print("1 Gemini call per IR pair (caption, question, and answer generation)")
             print("skip_api=True -> demo Q&A\n")
             run_ir(test_mode=True, skip_api=True)
 
-        elif choice == "15":
+        elif choice == "14":
             print("\n" + "-" * 60)
             print("Running: IR batch pipeline on 1 pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -506,7 +487,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "16":
+        elif choice == "15":
             print("\n" + "-" * 60)
             print("Running: IR batch pipeline on all videos (production)")
             print("WARNING: This will use Gemini API quota for each video!")
@@ -517,7 +498,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "17":
+        elif choice == "16":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade test on 1 pair (using demo data)")
             print("-" * 60)
@@ -525,7 +506,7 @@ def main():
             print("skip_api=True -> no Gemini API calls\n")
             run_audio(test_mode=True, skip_api=True)
 
-        elif choice == "18":
+        elif choice == "17":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade on 1 pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -536,7 +517,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "19":
+        elif choice == "18":
             print("\n" + "-" * 60)
             print("Running: AUDIO cascade on all pairs (production)")
             print("WARNING: This will use Gemini API quota for each pair!")
@@ -548,7 +529,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "20":
+        elif choice == "19":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation from cached RGB frames")
             print("Uses cached RGB frames from dataset/.frames_cache")
@@ -556,7 +537,7 @@ def main():
             print("-" * 60)
             run_marigold_depth_estimation(test_mode=False)
 
-        elif choice == "21":
+        elif choice == "20":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected night IR frame folder")
             print("Uses cached IR frames from dataset/.frames_cache_ir")
@@ -570,7 +551,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "22":
+        elif choice == "21":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected frame from one .frames_cache folder")
             print("The selected frame will be processed on its inferred day/night side only")
@@ -589,7 +570,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "23":
+        elif choice == "22":
             print("\n" + "-" * 60)
             print("Running: Marigold depth estimation on one selected .frames_cache folder")
             print("The selected folder will be resolved to its full day/night pair when possible")
@@ -603,7 +584,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "24":
+        elif choice == "23":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA test on 1 cached pair (demo Q&A)")
             print("Requires existing Marigold depth maps in dataset/.frames_cache_marigold")
@@ -611,7 +592,7 @@ def main():
             print("skip_api=True -> demo Q&A\n")
             run_marigold_depth_qa(test_mode=True, skip_api=True)
 
-        elif choice == "25":
+        elif choice == "24":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on 1 cached pair (real Gemini API calls)")
             print("WARNING: This will use Gemini API quota!")
@@ -622,7 +603,7 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "26":
+        elif choice == "25":
             print("\n" + "-" * 60)
             print("Running: Marigold depth QA on all cached pairs (production)")
             print("WARNING: This will use Gemini API quota for each cached Marigold pair!")
@@ -632,6 +613,25 @@ def main():
                 run_marigold_depth_qa(test_mode=False, skip_api=False)
             else:
                 print("Cancelled.")
+
+        elif choice == "26":
+            print("\n" + "-" * 60)
+            print("Running: temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
+            print("-" * 60)
+            print("Uses local OpenCV processing only; no Gemini/API calls.")
+            print("Uses RGB as the reference and aligns event, IR, and depth to it.")
+            print("Writes temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
+            print("Writes side-labeled combined and per-modality activity-signal PNG plots under temporal_alignment_plots/.\n")
+            alignment_results = run_day_night_temporal_alignment(
+                dataset_folder="dataset",
+                day_output_path="temporal_alignment_day_results.json",
+                night_output_path="temporal_alignment_night_results.json",
+                plot_output_folder="temporal_alignment_plots",
+            )
+            print(f"Aligned {len(alignment_results['day'])} day multimodal sample(s).")
+            print(f"Aligned {len(alignment_results['night'])} night multimodal sample(s).")
+            print("Results saved to temporal_alignment_day_results.json and temporal_alignment_night_results.json")
+            print("Plots saved under temporal_alignment_plots/")
 
         elif choice == "27":
             print("\n" + "-" * 60)
