@@ -19,7 +19,7 @@ from annotation_feature.pipeline import (
     run_marigold_depth_estimation,
     run_marigold_ir_depth_estimation,
     run_marigold_depth_qa,
-    run_late_fusion,
+    run_multimodal_qa_pipeline,
     run_task_slicing,
     run_segmented_pipeline,
 )
@@ -151,10 +151,21 @@ def _run_all_pipelines(test_mode: bool, skip_api: bool) -> None:
     print("[5/6] AUDIO pipeline...")
     run_audio(test_mode=test_mode, skip_api=skip_api)
 
-    print("[6/6] Late fusion...")
-    fused_results = run_late_fusion(collect_diagnostics=True)
-    print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
-    print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
+    print("[6/6] Implicit cross-modal QA benchmark...")
+    input_path = Path("segmented_normalized_evidence_units.json")
+    if not input_path.exists():
+        print(
+            "Skipped implicit cross-modal QA because segmented_normalized_evidence_units.json "
+            "does not exist. Run segmented QA export first."
+        )
+        return
+    output_path = run_multimodal_qa_pipeline(
+        input_path=input_path,
+        output_path="outputs/implicit_multimodal_qa_candidates_template.json",
+        generation_mode="template",
+        test_mode=test_mode,
+    )
+    print(f"Wrote implicit cross-modal QA candidates to {output_path}")
 
 
 def _run_segmented_qa_menu_option(modalities: list[str], label: str) -> None:
@@ -284,6 +295,69 @@ def _run_all_segmented_qa_menu_option() -> None:
         print(f"  {modality}: {path}")
 
 
+def _select_multimodal_generation_mode() -> str | None:
+    print("\nGeneration mode:")
+    print("1. template (no API calls, deterministic baseline)")
+    print("2. gemini (uses Gemini to generate more natural QA)")
+    raw_choice = input("\nChoose generation mode (1-2): ").strip()
+    if raw_choice == "1":
+        return "template"
+    if raw_choice == "2":
+        return "gemini"
+    print("Invalid selection.")
+    return None
+
+
+def _run_multimodal_qa_menu_option() -> None:
+    input_path = Path("segmented_normalized_evidence_units.json")
+    print("\n" + "-" * 60)
+    print("Running: implicit cross-modal QA benchmark generation")
+    print("-" * 60)
+    print("This step reads segmented_normalized_evidence_units.json.")
+    print("It writes role-aware implicit multimodal QA candidates under outputs/.")
+    print("Questions avoid explicit wording like 'what RGB and audio clues together...'.")
+    print("Each QA records context_modality, decisive_modality, challenge_type, and why_multimodal.")
+    if not input_path.exists():
+        print("\nMissing input: segmented_normalized_evidence_units.json")
+        print("Run the segmented grouped Q/A export first.")
+        return
+
+    generation_mode = _select_multimodal_generation_mode()
+    if generation_mode is None:
+        print("Cancelled.")
+        return
+
+    output_path = Path("outputs") / f"implicit_multimodal_qa_candidates_{generation_mode}.json"
+    print(f"\nInput: {input_path}")
+    print(f"Output: {output_path}")
+    print(f"Generation mode: {generation_mode}")
+    print("Candidate generation: one QA per available context->decisive direction and supported challenge type.")
+    if generation_mode == "gemini":
+        print("WARNING: This will use Gemini API quota.")
+        print("Gemini batching: segment-level chunks, up to 20 bundles per call.")
+        print("Resume/checkpoint is enabled; reruns skip QA items already present in the output file.")
+    print("-" * 60)
+
+    if not _confirm():
+        print("Cancelled.")
+        return
+
+    output_path = run_multimodal_qa_pipeline(
+        input_path=input_path,
+        output_path=output_path,
+        generation_mode=generation_mode,
+        test_mode=False,
+        delay_between_calls=8 if generation_mode == "gemini" else 0,
+        max_concurrent_calls=1,
+        resume=True,
+        checkpoint_every=1,
+        gemini_batch_scope="segment",
+        max_bundles_per_gemini_call=20,
+        model_name="gemini-2.0-flash",
+    )
+    print(f"Wrote implicit cross-modal QA candidates to {output_path}")
+
+
 def main():
     print("\n" + "=" * 60)
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
@@ -294,15 +368,15 @@ def main():
     print("IR: Single mega-prompt per pair with caption, question, and answer generation")
     print("AUDIO: Cascaded HIA -> timestamped audio-visual caption -> QA generation")
     print("MARIGOLD: Estimate depth from cached RGB frames, then reuse depth QA prompts on Marigold maps")
-    print("LATE FUSION: Post-process modality captions into fused scene summaries")
+    print("MULTIMODAL QA: Generate implicit cross-modal QA from segmented evidence")
     print("=" * 60)
 
     while True:
         print("\nChoose a test to run:\n")
         print("--- ALL PIPELINES ---")
-        print("1. Test ALL pipelines (no API calls, using DEMO data) + late fusion")
-        print("2. Test ALL pipelines on 1 pair/file (with real Gemini API calls) + late fusion")
-        print("3. Run ALL pipelines on all videos/files (production) + late fusion")
+        print("1. Test ALL pipelines (no API calls, using DEMO data) + implicit multimodal QA benchmark")
+        print("2. Test ALL pipelines on 1 pair/file (with real Gemini API calls) + implicit multimodal QA benchmark")
+        print("3. Run ALL pipelines on all videos/files (production) + implicit multimodal QA benchmark")
         print("\n--- RGB PIPELINE ---")
         print("4. Test RGB preprocessing + batch pipeline (no API calls, using DEMO data)")
         print("5. Test RGB batch pipeline on 1 pair (with real Gemini API calls)")
@@ -334,8 +408,8 @@ def main():
         print("\n--- TEMPORAL ALIGNMENT ---")
         print("26. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
         print("27. Export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
-        print("\n--- LATE FUSION ---")
-        print("28. Run late fusion on existing modality JSON results")
+        print("\n--- MULTIMODAL QA BENCHMARK ---")
+        print("28. Generate implicit cross-modal QA from segmented normalized evidence")
         print("\n--- TASK SLICING ---")
         print("29. Generate semantic task segment suggestions")
         print("30. Run RGB QA after task segment")
@@ -357,14 +431,14 @@ def main():
 
         if choice == "1":
             print("\n" + "-" * 60)
-            print("Running: ALL pipelines test (using DEMO data) + late fusion")
+            print("Running: ALL pipelines test (using DEMO data) + implicit multimodal QA benchmark")
             print("-" * 60)
             print("skip_api=True -> demo outputs for all modality pipelines\n")
             _run_all_pipelines(test_mode=True, skip_api=True)
 
         elif choice == "2":
             print("\n" + "-" * 60)
-            print("Running: ALL pipelines on 1 pair/file (real Gemini API calls) + late fusion")
+            print("Running: ALL pipelines on 1 pair/file (real Gemini API calls) + implicit multimodal QA benchmark")
             print("WARNING: This will use Gemini API quota across all modalities!")
             print("-" * 60)
             if _confirm():
@@ -374,7 +448,7 @@ def main():
 
         elif choice == "3":
             print("\n" + "-" * 60)
-            print("Running: ALL pipelines on all videos/files (production) + late fusion")
+            print("Running: ALL pipelines on all videos/files (production) + implicit multimodal QA benchmark")
             print("WARNING: This will use Gemini API quota across all modalities!")
             print("-" * 60)
             if _confirm():
@@ -663,14 +737,7 @@ def main():
                 print(f"- skipped {item['sample']} {item['side']}: {item['reason']}")
 
         elif choice == "28":
-            print("\n" + "-" * 60)
-            print("Running: late fusion on existing modality JSON results")
-            print("-" * 60)
-            print("This step reads the current RGB, IR, event, audio, and depth result files.")
-            print("It writes fused QA results, diagnostics, and analysis files.\n")
-            fused_results = run_late_fusion(collect_diagnostics=True)
-            print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
-            print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
+            _run_multimodal_qa_menu_option()
 
         elif choice == "29":
             print("\n" + "-" * 60)
