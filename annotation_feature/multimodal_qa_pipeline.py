@@ -942,7 +942,17 @@ async def _generate_gemini_batch_qa(
 
 def _question_mentions_modalities(question: str) -> bool:
     text = question.lower()
-    return any(token in text for token in ("rgb", "audio", "event stream", "depth", "ir", "infrared", "modality"))
+    patterns = (
+        r"\brgb\b",
+        r"\baudio\b",
+        r"\bevent\s+stream\b",
+        r"\bdepth\b",
+        r"\bir\b",
+        r"\binfrared\b",
+        r"\bmodality\b",
+        r"\bmodalities\b",
+    )
+    return any(re.search(pattern, text) for pattern in patterns)
 
 
 def _validate_qa_item(item: dict[str, Any]) -> list[str]:
