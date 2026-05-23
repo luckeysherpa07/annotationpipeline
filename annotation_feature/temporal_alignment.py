@@ -20,6 +20,7 @@ DEFAULT_DAY_OUTPUT_PATH = Path("temporal_alignment_day_results.json")
 DEFAULT_NIGHT_OUTPUT_PATH = Path("temporal_alignment_night_results.json")
 DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_optical_flow_check_mailbox_day_event.json")
 DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_dtw_check_mailbox_day_event.json")
+DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_feature_check_mailbox_day_event.json")
 DEFAULT_PLOT_OUTPUT_FOLDER = Path("temporal_alignment_plots")
 DEFAULT_EXPORT_OUTPUT_FOLDER = Path("temporal_alignment_exports")
 EXPORT_PANEL_WIDTH = 320
@@ -27,6 +28,11 @@ EXPORT_PANEL_HEIGHT = 180
 EXPORT_PREVIEW_FPS = 10
 DTW_EXPORT_PREVIEW_FPS = 30
 DTW_EXPORT_SMOOTHING_SECONDS = 1.5
+FEATURE_ALIGNMENT_SAMPLE_STRIDE_SECONDS = 4.0
+FEATURE_ALIGNMENT_OFFSET_STEP_SECONDS = 0.5
+FEATURE_ALIGNMENT_MAX_OFFSET_SECONDS = 20.0
+FEATURE_ALIGNMENT_MIN_OFFSET_SECONDS = -20.0
+FEATURE_ALIGNMENT_RESIZE_WIDTH = 320
 EXPORT_LABEL_FONT_SIZE = 18
 
 MODALITY_COLORS = {
@@ -320,6 +326,148 @@ def _smooth_dtw_offset_curve_for_export(
     ]
 
 
+def _preprocess_feature_frame(frame: np.ndarray, modality: str, resize_width: int = FEATURE_ALIGNMENT_RESIZE_WIDTH) -> np.ndarray:
+    gray = _resize_gray_frame(frame, resize_width)
+    if modality == "event":
+        low = float(np.percentile(gray, 2))
+        high = float(np.percentile(gray, 98))
+        if high > low:
+            gray = np.clip((gray.astype(np.float32) - low) * 255.0 / (high - low), 0, 255).astype(np.uint8)
+        else:
+            gray = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        gray = cv2.GaussianBlur(gray, (3, 3), 0)
+        edges = cv2.Canny(gray, 35, 110)
+        return cv2.dilate(edges, np.ones((2, 2), dtype=np.uint8), iterations=1)
+
+    gray = cv2.equalizeHist(gray.astype(np.uint8))
+    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    return cv2.Canny(gray, 45, 135)
+
+
+def _read_video_frame_by_index(video_path: Path, frame_index: int) -> np.ndarray | None:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        return None
+    cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, int(frame_index)))
+    ok, frame = cap.read()
+    cap.release()
+    return frame if ok else None
+
+
+def _read_video_frame_by_time(video_path: Path, time_seconds: float, fps: float) -> np.ndarray | None:
+    return _read_video_frame_by_index(video_path, int(round(max(0.0, time_seconds) * fps)))
+
+
+def _detect_orb_features(
+    frame: np.ndarray | None,
+    modality: str,
+    orb: cv2.ORB,
+    resize_width: int = FEATURE_ALIGNMENT_RESIZE_WIDTH,
+) -> tuple[list[cv2.KeyPoint], np.ndarray | None]:
+    if frame is None:
+        return [], None
+    prepared = _preprocess_feature_frame(frame, modality=modality, resize_width=resize_width)
+    keypoints, descriptors = orb.detectAndCompute(prepared, None)
+    return list(keypoints or []), descriptors
+
+
+def _score_feature_match(
+    reference_features: tuple[list[cv2.KeyPoint], np.ndarray | None],
+    event_features: tuple[list[cv2.KeyPoint], np.ndarray | None],
+    matcher: cv2.BFMatcher,
+) -> dict[str, Any]:
+    reference_keypoints, reference_descriptors = reference_features
+    event_keypoints, event_descriptors = event_features
+    if reference_descriptors is None or event_descriptors is None:
+        return {"score": 0.0, "match_count": 0, "inlier_count": 0, "mean_distance": None}
+    if len(reference_descriptors) < 2 or len(event_descriptors) < 2:
+        return {"score": 0.0, "match_count": 0, "inlier_count": 0, "mean_distance": None}
+
+    raw_matches = matcher.knnMatch(reference_descriptors, event_descriptors, k=2)
+    good_matches = []
+    for pair in raw_matches:
+        if len(pair) < 2:
+            continue
+        first, second = pair
+        if first.distance < 0.78 * second.distance:
+            good_matches.append(first)
+
+    match_count = len(good_matches)
+    if match_count == 0:
+        return {"score": 0.0, "match_count": 0, "inlier_count": 0, "mean_distance": None}
+
+    mean_distance = float(np.mean([match.distance for match in good_matches]))
+    inlier_count = 0
+    if match_count >= 8:
+        reference_points = np.float32([reference_keypoints[match.queryIdx].pt for match in good_matches]).reshape(-1, 1, 2)
+        event_points = np.float32([event_keypoints[match.trainIdx].pt for match in good_matches]).reshape(-1, 1, 2)
+        _, mask = cv2.findHomography(reference_points, event_points, cv2.RANSAC, 5.0)
+        if mask is not None:
+            inlier_count = int(mask.ravel().sum())
+
+    score = float(inlier_count * 2.0 + match_count * 0.35 - mean_distance * 0.015)
+    return {
+        "score": max(0.0, score),
+        "match_count": int(match_count),
+        "inlier_count": int(inlier_count),
+        "mean_distance": round(mean_distance, 6),
+    }
+
+
+def _confidence_from_feature_window(match_count: int, inlier_count: int, score: float) -> str:
+    if inlier_count >= 12 and score >= 20:
+        return "high"
+    if inlier_count >= 6 or match_count >= 18 or score >= 8:
+        return "medium"
+    return "low"
+
+
+def _load_dtw_offset_curve(path: Path = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH) -> list[dict[str, float]]:
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+        alignment = data.get("alignment", {}) if isinstance(data, dict) else {}
+        curve = alignment.get("smoothed_offset_curve") or alignment.get("offset_curve") or []
+        return [item for item in curve if isinstance(item, dict)]
+    except Exception:
+        return []
+
+
+def _interpolated_offset_curve_from_windows(
+    windows: list[dict[str, Any]],
+    reference_duration: float,
+    target_duration: float,
+    fps: float,
+) -> list[dict[str, float]]:
+    anchors = [
+        window
+        for window in windows
+        if isinstance(window.get("selected_offset_seconds"), (int, float)) and window.get("confidence_label") != "low"
+    ]
+    if len(anchors) < 2:
+        anchors = [window for window in windows if isinstance(window.get("selected_offset_seconds"), (int, float))]
+    if not anchors:
+        return []
+
+    anchor_times = np.asarray([float(window["reference_time_seconds"]) for window in anchors], dtype=np.float32)
+    anchor_offsets = np.asarray([float(window["selected_offset_seconds"]) for window in anchors], dtype=np.float32)
+    order = np.argsort(anchor_times)
+    anchor_times = anchor_times[order]
+    anchor_offsets = anchor_offsets[order]
+    times = np.arange(0.0, max(0.0, reference_duration), 1.0 / max(fps, 1e-6), dtype=np.float32)
+    offsets = np.interp(times, anchor_times, anchor_offsets).astype(np.float32)
+
+    curve = [
+        {
+            "reference_time_seconds": round(float(reference_time), 6),
+            "event_time_seconds": round(float(np.clip(reference_time + offset, 0.0, target_duration)), 6),
+            "offset_seconds": round(float(np.clip(reference_time + offset, 0.0, target_duration) - reference_time), 6),
+        }
+        for reference_time, offset in zip(times, offsets)
+    ]
+    return _smooth_dtw_offset_curve_for_export(curve, smoothing_seconds=DTW_EXPORT_SMOOTHING_SECONDS)
+
+
 def _draw_label(
     frame: np.ndarray,
     lines: list[str],
@@ -361,10 +509,9 @@ def _read_video_frame_forward(
 ) -> np.ndarray | None:
     frame_index = max(0, int(frame_index))
     current_index = int(state.get("next_index", 0))
-    cached_index = state.get("cached_index")
-    cached_frame = state.get("cached_frame")
-    if cached_index == frame_index and cached_frame is not None:
-        return cached_frame.copy()
+    frame_cache = state.setdefault("frame_cache", {})
+    if frame_index in frame_cache:
+        return frame_cache[frame_index].copy()
 
     if frame_index < current_index:
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
@@ -380,8 +527,9 @@ def _read_video_frame_forward(
 
     state["next_index"] = current_index
     if frame is not None:
-        state["cached_index"] = frame_index
-        state["cached_frame"] = frame.copy()
+        frame_cache[frame_index] = frame.copy()
+        for cached_index in sorted(frame_cache)[:-8]:
+            frame_cache.pop(cached_index, None)
     return frame
 
 
@@ -637,6 +785,74 @@ def _write_dtw_activity_signal_plot(
     _draw_panel(canvas, "Raw optical-flow traces", raw_bounds, raw_min_time, raw_max_time, raw_items)
     _draw_panel(canvas, "DTW-warped EVENT trace on RGB timeline", aligned_bounds, aligned_min_time, aligned_max_time, aligned_items)
 
+    cv2.imwrite(str(output_path), canvas)
+
+
+def _write_feature_offset_plot(
+    output_path: Path,
+    title: str,
+    windows: list[dict[str, Any]],
+    offset_curve: list[dict[str, float]],
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    width, height = 1500, 640
+    canvas = np.full((height, width, 3), 255, dtype=np.uint8)
+    left, right = 90, width - 50
+    top, bottom = 110, height - 90
+
+    all_times = [float(item["reference_time_seconds"]) for item in offset_curve]
+    all_offsets = [float(item["offset_seconds"]) for item in offset_curve]
+    for window in windows:
+        if isinstance(window.get("selected_offset_seconds"), (int, float)):
+            all_times.append(float(window["reference_time_seconds"]))
+            all_offsets.append(float(window["selected_offset_seconds"]))
+    if not all_times or not all_offsets:
+        cv2.putText(canvas, "No feature offsets available", (left, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, TEXT_COLOR, 2)
+        cv2.imwrite(str(output_path), canvas)
+        return
+
+    min_time = min(all_times)
+    max_time = max(all_times)
+    min_offset = min(all_offsets)
+    max_offset = max(all_offsets)
+    if max_time <= min_time:
+        max_time = min_time + 1.0
+    if max_offset <= min_offset:
+        max_offset = min_offset + 1.0
+    padding = max(0.5, (max_offset - min_offset) * 0.08)
+    min_offset -= padding
+    max_offset += padding
+
+    cv2.putText(canvas, title, (left, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.86, TEXT_COLOR, 2, cv2.LINE_AA)
+    cv2.rectangle(canvas, (left, top), (right, bottom), AXIS_COLOR, 1)
+    for tick in np.linspace(min_time, max_time, 6):
+        x = int(round(left + (tick - min_time) / (max_time - min_time) * (right - left)))
+        cv2.line(canvas, (x, top), (x, bottom), GRID_COLOR, 1)
+        cv2.putText(canvas, f"{tick:.0f}s", (x - 18, bottom + 28), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_COLOR, 1)
+    for tick in np.linspace(min_offset, max_offset, 5):
+        y = int(round(bottom - (tick - min_offset) / (max_offset - min_offset) * (bottom - top)))
+        cv2.line(canvas, (left, y), (right, y), GRID_COLOR, 1)
+        cv2.putText(canvas, f"{tick:.1f}s", (20, y + 5), cv2.FONT_HERSHEY_SIMPLEX, 0.45, TEXT_COLOR, 1)
+
+    if offset_curve:
+        curve_points = []
+        for item in offset_curve:
+            x = int(round(left + (float(item["reference_time_seconds"]) - min_time) / (max_time - min_time) * (right - left)))
+            y = int(round(bottom - (float(item["offset_seconds"]) - min_offset) / (max_offset - min_offset) * (bottom - top)))
+            curve_points.append((x, y))
+        if len(curve_points) > 1:
+            cv2.polylines(canvas, [np.asarray(curve_points, dtype=np.int32).reshape((-1, 1, 2))], False, MODALITY_COLORS["event"], 2, cv2.LINE_AA)
+
+    confidence_colors = {"high": (30, 130, 30), "medium": (30, 140, 210), "low": (150, 150, 150)}
+    for window in windows:
+        if not isinstance(window.get("selected_offset_seconds"), (int, float)):
+            continue
+        x = int(round(left + (float(window["reference_time_seconds"]) - min_time) / (max_time - min_time) * (right - left)))
+        y = int(round(bottom - (float(window["selected_offset_seconds"]) - min_offset) / (max_offset - min_offset) * (bottom - top)))
+        color = confidence_colors.get(str(window.get("confidence_label")), (120, 120, 120))
+        cv2.circle(canvas, (x, y), 4, color, -1, cv2.LINE_AA)
+
+    cv2.putText(canvas, "line=smoothed offset curve, dots=local feature estimates", (left, height - 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, TEXT_COLOR, 1, cv2.LINE_AA)
     cv2.imwrite(str(output_path), canvas)
 
 
@@ -1424,6 +1640,228 @@ def run_check_mailbox_day_rgb_event_dtw_alignment(
     return result
 
 
+def run_check_mailbox_day_rgb_event_feature_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    resize_width: int = FEATURE_ALIGNMENT_RESIZE_WIDTH,
+    sample_stride_seconds: float = FEATURE_ALIGNMENT_SAMPLE_STRIDE_SECONDS,
+    offset_step_seconds: float = FEATURE_ALIGNMENT_OFFSET_STEP_SECONDS,
+    min_offset_seconds: float = FEATURE_ALIGNMENT_MIN_OFFSET_SECONDS,
+    max_offset_seconds: float = FEATURE_ALIGNMENT_MAX_OFFSET_SECONDS,
+) -> dict[str, Any]:
+    dataset_folder = Path(dataset_folder)
+    output_path = Path(output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
+    event_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_event.mp4"
+
+    reference_meta = _video_metadata(reference_file)
+    event_meta = _video_metadata(event_file)
+    warnings: list[str] = []
+    result: dict[str, Any] = {
+        "pair_key": "dataset/check_mailbox_split/check_mailbox",
+        "side": "day",
+        "method": "feature_based_local_offsets",
+        "reference_modality": REFERENCE_MODALITY,
+        "reference_file": str(reference_file),
+        "reference_duration_seconds": float(reference_meta["duration_seconds"]),
+        "target_modality": "event",
+        "target_file": str(event_file),
+        "target_duration_seconds": float(event_meta["duration_seconds"]),
+        "plot_file": None,
+        "alignment": None,
+        "comparison": {},
+        "export": None,
+        "warnings": warnings,
+    }
+
+    if not reference_meta["opened"]:
+        warnings.append(f"Could not open RGB reference video: {reference_file}")
+    if not event_meta["opened"]:
+        warnings.append(f"Could not open EVENT video: {event_file}")
+    reference_fps = float(reference_meta["fps"])
+    event_fps = float(event_meta["fps"])
+    if reference_fps <= 0 or event_fps <= 0:
+        warnings.append("Could not determine FPS for one or both videos.")
+    if warnings:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, ensure_ascii=False)
+        return result
+
+    dtw_curve = _load_dtw_offset_curve()
+    if dtw_curve:
+        result["comparison"]["dtw_curve_available"] = True
+    else:
+        result["comparison"]["dtw_curve_available"] = False
+        warnings.append("DTW curve unavailable; feature search uses the full configured offset range.")
+
+    orb = cv2.ORB_create(nfeatures=1200, fastThreshold=8)
+    matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
+    reference_feature_cache: dict[int, tuple[list[cv2.KeyPoint], np.ndarray | None]] = {}
+    event_feature_cache: dict[int, tuple[list[cv2.KeyPoint], np.ndarray | None]] = {}
+
+    def reference_features_at(time_seconds: float) -> tuple[list[cv2.KeyPoint], np.ndarray | None]:
+        frame_index = int(round(np.clip(time_seconds, 0.0, float(reference_meta["duration_seconds"])) * reference_fps))
+        if frame_index not in reference_feature_cache:
+            frame = _read_video_frame_by_index(reference_file, frame_index)
+            reference_feature_cache[frame_index] = _detect_orb_features(frame, REFERENCE_MODALITY, orb, resize_width=resize_width)
+        return reference_feature_cache[frame_index]
+
+    def event_features_at(time_seconds: float) -> tuple[list[cv2.KeyPoint], np.ndarray | None]:
+        frame_index = int(round(np.clip(time_seconds, 0.0, float(event_meta["duration_seconds"])) * event_fps))
+        if frame_index not in event_feature_cache:
+            frame = _read_video_frame_by_index(event_file, frame_index)
+            event_feature_cache[frame_index] = _detect_orb_features(frame, "event", orb, resize_width=resize_width)
+        return event_feature_cache[frame_index]
+
+    window_times = np.arange(
+        0.0,
+        max(0.0, float(reference_meta["duration_seconds"])),
+        max(0.5, sample_stride_seconds),
+        dtype=np.float32,
+    )
+    windows: list[dict[str, Any]] = []
+    for reference_time in window_times:
+        reference_time = float(reference_time)
+        reference_features = reference_features_at(reference_time)
+        if dtw_curve:
+            prior_event_time = _event_time_from_offset_curve(dtw_curve, reference_time)
+            prior_offset = float(prior_event_time - reference_time)
+            candidate_min = max(min_offset_seconds, prior_offset - 4.0)
+            candidate_max = min(max_offset_seconds, prior_offset + 4.0)
+        else:
+            prior_offset = None
+            candidate_min = min_offset_seconds
+            candidate_max = max_offset_seconds
+
+        candidates: list[dict[str, Any]] = []
+        for offset in np.arange(candidate_min, candidate_max + offset_step_seconds * 0.5, offset_step_seconds):
+            event_time = reference_time + float(offset)
+            if event_time < 0.0 or event_time > float(event_meta["duration_seconds"]):
+                continue
+            score = _score_feature_match(reference_features, event_features_at(event_time), matcher)
+            score.update(
+                {
+                    "offset_seconds": round(float(offset), 6),
+                    "event_time_seconds": round(float(event_time), 6),
+                }
+            )
+            candidates.append(score)
+
+        candidates.sort(
+            key=lambda item: (
+                float(item.get("score", 0.0)),
+                int(item.get("inlier_count", 0)),
+                int(item.get("match_count", 0)),
+            ),
+            reverse=True,
+        )
+        best = candidates[0] if candidates else {}
+        match_count = int(best.get("match_count", 0) or 0)
+        inlier_count = int(best.get("inlier_count", 0) or 0)
+        score = float(best.get("score", 0.0) or 0.0)
+        confidence = _confidence_from_feature_window(match_count, inlier_count, score)
+        selected_offset = best.get("offset_seconds")
+        if selected_offset is None and prior_offset is not None:
+            selected_offset = round(prior_offset, 6)
+        windows.append(
+            {
+                "reference_time_seconds": round(reference_time, 6),
+                "selected_offset_seconds": selected_offset,
+                "selected_event_time_seconds": best.get("event_time_seconds"),
+                "score": round(score, 6),
+                "match_count": match_count,
+                "inlier_count": inlier_count,
+                "mean_distance": best.get("mean_distance"),
+                "confidence_label": confidence,
+                "prior_offset_seconds": round(prior_offset, 6) if prior_offset is not None else None,
+                "candidate_offsets": candidates[:5],
+            }
+        )
+
+    smoothed_curve = _interpolated_offset_curve_from_windows(
+        windows,
+        reference_duration=float(reference_meta["duration_seconds"]),
+        target_duration=float(event_meta["duration_seconds"]),
+        fps=reference_fps,
+    )
+    offset_curve = _sample_offset_curve(smoothed_curve)
+    offsets = np.asarray([item["offset_seconds"] for item in smoothed_curve], dtype=np.float32)
+    median_offset = float(np.median(offsets)) if offsets.size else None
+    start_offset = float(offsets[0]) if offsets.size else None
+    end_offset = float(offsets[-1]) if offsets.size else None
+    drift = float(end_offset - start_offset) if start_offset is not None and end_offset is not None else None
+    reference_overlap, target_overlap = _overlap_windows(
+        float(reference_meta["duration_seconds"]),
+        float(event_meta["duration_seconds"]),
+        median_offset,
+    )
+
+    alignment = {
+        "modality": "event",
+        "file": str(event_file),
+        "duration_seconds": float(event_meta["duration_seconds"]),
+        "offset_seconds": median_offset,
+        "offset_frames": int(round(median_offset * min(reference_fps, event_fps))) if median_offset is not None else None,
+        "start_offset_seconds": start_offset,
+        "end_offset_seconds": end_offset,
+        "offset_drift_seconds": drift,
+        "offset_curve": offset_curve,
+        "smoothed_offset_curve": offset_curve,
+        "offset_curve_full_count": len(smoothed_curve),
+        "local_windows": windows,
+        "feature_settings": {
+            "resize_width": resize_width,
+            "sample_stride_seconds": sample_stride_seconds,
+            "offset_step_seconds": offset_step_seconds,
+            "min_offset_seconds": min_offset_seconds,
+            "max_offset_seconds": max_offset_seconds,
+            "uses_dtw_prior_when_available": True,
+        },
+        "confidence_label": "diagnostic",
+        "selected_by": "feature_based_local_offsets",
+        "overlap_reference_seconds": reference_overlap,
+        "overlap_target_seconds": target_overlap,
+        "activity_plot_file": None,
+        "warnings": warnings,
+    }
+
+    if dtw_curve:
+        try:
+            dtw_offsets = np.asarray([float(item["offset_seconds"]) for item in dtw_curve], dtype=np.float32)
+            result["comparison"].update(
+                {
+                    "dtw_median_offset_seconds": float(np.median(dtw_offsets)),
+                    "dtw_start_offset_seconds": float(dtw_offsets[0]),
+                    "dtw_end_offset_seconds": float(dtw_offsets[-1]),
+                    "feature_median_offset_seconds": median_offset,
+                    "feature_start_offset_seconds": start_offset,
+                    "feature_end_offset_seconds": end_offset,
+                }
+            )
+        except Exception as exc:
+            result["comparison"]["dtw_comparison_warning"] = str(exc)
+
+    if plot_output_folder is not None:
+        plot_path = plot_output_folder / "check_mailbox_day_rgb_event_feature_offsets.png"
+        _write_feature_offset_plot(
+            plot_path,
+            "Feature-based local offsets: check_mailbox day RGB vs EVENT",
+            windows=windows,
+            offset_curve=smoothed_curve,
+        )
+        alignment["activity_plot_file"] = str(plot_path)
+        result["plot_file"] = str(plot_path)
+
+    result["alignment"] = alignment
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
+
+
 def _load_alignment_results(path: Path) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as handle:
         data = json.load(handle)
@@ -1977,6 +2415,186 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
         resize_width=resize_width,
     )
     export_summary = export_check_mailbox_day_rgb_event_dtw_alignment(
+        alignment_input_path=output_path,
+        output_folder=output_folder,
+    )
+    result["export"] = export_summary
+    with open(Path(output_path), "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
+
+
+def _export_rgb_event_feature_for_result(
+    result: dict[str, Any],
+    output_folder: Path,
+) -> dict[str, Any]:
+    output_path = output_folder / "check_mailbox_day_rgb_event_feature_aligned.mp4"
+
+    reference_file = Path(str(result.get("reference_file", "")))
+    reference_duration = float(result.get("reference_duration_seconds") or 0.0)
+    alignment = result.get("alignment")
+    if not isinstance(alignment, dict):
+        raise ValueError("Feature result must include an alignment object.")
+
+    event_file = Path(str(alignment.get("file") or result.get("target_file") or ""))
+    event_duration = float(alignment.get("duration_seconds") or result.get("target_duration_seconds") or 0.0)
+    offset_curve = alignment.get("smoothed_offset_curve") or alignment.get("offset_curve")
+    if not isinstance(offset_curve, list) or not offset_curve:
+        raise ValueError("Feature alignment must include a non-empty offset_curve.")
+
+    if not reference_file.exists():
+        raise FileNotFoundError(f"RGB reference file does not exist: {reference_file}")
+    if not event_file.exists():
+        raise FileNotFoundError(f"EVENT file does not exist: {event_file}")
+    if reference_duration <= 0 or event_duration <= 0:
+        raise ValueError("Feature export requires positive RGB and EVENT durations.")
+
+    render_offset_curve = _smooth_dtw_offset_curve_for_export(offset_curve)
+    reference_start = max(0.0, float(render_offset_curve[0]["reference_time_seconds"]))
+    reference_end = min(reference_duration, float(render_offset_curve[-1]["reference_time_seconds"]))
+    duration = max(0.0, reference_end - reference_start)
+    if duration <= 0:
+        raise ValueError("No positive RGB/EVENT feature-alignment overlap window is available.")
+
+    rgb_cap = cv2.VideoCapture(str(reference_file))
+    event_cap = cv2.VideoCapture(str(event_file))
+    if not rgb_cap.isOpened():
+        raise ValueError(f"Could not open RGB reference video: {reference_file}")
+    if not event_cap.isOpened():
+        rgb_cap.release()
+        raise ValueError(f"Could not open EVENT video: {event_file}")
+    reference_fps = float(rgb_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    event_fps = float(event_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    if reference_fps <= 0 or event_fps <= 0:
+        rgb_cap.release()
+        event_cap.release()
+        raise ValueError("Could not determine FPS for one or both videos.")
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+    writer = cv2.VideoWriter(
+        str(tmp_output_path),
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        float(DTW_EXPORT_PREVIEW_FPS),
+        (EXPORT_PANEL_WIDTH * 2, EXPORT_PANEL_HEIGHT),
+    )
+    if not writer.isOpened():
+        rgb_cap.release()
+        event_cap.release()
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError("Could not create OpenCV VideoWriter for feature preview.")
+
+    frame_count = max(1, int(np.floor(duration * DTW_EXPORT_PREVIEW_FPS)))
+    written_count = 0
+    rgb_state: dict[str, Any] = {}
+    event_state: dict[str, Any] = {}
+    try:
+        for frame_index in range(frame_count):
+            rgb_time = reference_start + frame_index / float(DTW_EXPORT_PREVIEW_FPS)
+            event_time = min(event_duration, max(0.0, _event_time_from_offset_curve(render_offset_curve, rgb_time)))
+            offset = event_time - rgb_time
+            rgb_frame_index = int(round(rgb_time * reference_fps))
+            event_position = event_time * event_fps
+            event_frame_index = int(np.floor(event_position))
+            event_blend_weight = float(event_position - event_frame_index)
+
+            rgb_panel = _prepare_preview_panel(_read_video_frame_forward(rgb_cap, rgb_frame_index, rgb_state))
+            event_frame_a, event_frame_b = _read_video_frame_pair_forward(event_cap, event_frame_index, event_state)
+            event_panel = _prepare_preview_panel(_blend_frames(event_frame_a, event_frame_b, event_blend_weight))
+            _draw_label(rgb_panel, ["RGB", f"t={rgb_time:.2f}s"])
+            _draw_label(event_panel, ["EVENT feature", f"t={event_time:.2f}s", f"offset={offset:+.3f}s"])
+            writer.write(np.hstack([rgb_panel, event_panel]))
+            written_count += 1
+    finally:
+        writer.release()
+        rgb_cap.release()
+        event_cap.release()
+
+    if written_count == 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError("Feature preview export wrote zero frames.")
+
+    tmp_output_path.replace(output_path)
+    return {
+        "sample": "check_mailbox",
+        "side": "day",
+        "output_file": str(output_path),
+        "reference_file": str(reference_file),
+        "event_file": str(event_file),
+        "rgb_start_seconds": round(reference_start, 6),
+        "rgb_end_seconds": round(reference_end, 6),
+        "duration_seconds": round(duration, 6),
+        "preview_fps": DTW_EXPORT_PREVIEW_FPS,
+        "frames_written": written_count,
+        "encoder": "opencv-mp4v",
+        "render_curve": {
+            "source": "smoothed_offset_curve",
+            "smoothing_seconds": DTW_EXPORT_SMOOTHING_SECONDS,
+            "points": _sample_offset_curve(render_offset_curve),
+            "full_count": len(render_offset_curve),
+            "monotonic_event_time": True,
+            "event_frame_interpolation": "linear_blend",
+        },
+    }
+
+
+def export_check_mailbox_day_rgb_event_feature_alignment(
+    alignment_input_path: Path | str = DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+) -> dict[str, Any]:
+    """Export the check_mailbox day RGB/EVENT feature-alignment preview."""
+    alignment_input_path = Path(alignment_input_path)
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    result: dict[str, Any] | None = None
+
+    try:
+        result = _load_optical_flow_alignment(alignment_input_path)
+        exported.append(_export_rgb_event_feature_for_result(result=result, output_folder=output_folder))
+    except Exception as exc:
+        skipped.append(
+            {
+                "sample": "check_mailbox",
+                "side": "day",
+                "reason": str(exc),
+            }
+        )
+
+    summary = {
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_event_feature_export_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    summary["summary_file"] = str(summary_path)
+    if result is not None:
+        result["export"] = summary
+        with open(alignment_input_path, "w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, ensure_ascii=False)
+    return summary
+
+
+def run_and_export_check_mailbox_day_rgb_event_feature_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    resize_width: int = FEATURE_ALIGNMENT_RESIZE_WIDTH,
+) -> dict[str, Any]:
+    """Run feature-based alignment and export its drift-corrected preview."""
+    result = run_check_mailbox_day_rgb_event_feature_alignment(
+        dataset_folder=dataset_folder,
+        output_path=output_path,
+        plot_output_folder=plot_output_folder,
+        resize_width=resize_width,
+    )
+    export_summary = export_check_mailbox_day_rgb_event_feature_alignment(
         alignment_input_path=output_path,
         output_folder=output_folder,
     )
