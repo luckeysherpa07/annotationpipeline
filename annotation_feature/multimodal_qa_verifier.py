@@ -16,11 +16,16 @@ from annotation_feature.pipeline.client import create_gemini_client
 
 VERIFIER_MODEL_NAME = "gemini-2.0-flash"
 DEFAULT_DELAY_SECONDS = 8
+DEFAULT_BATCH_SIZE = 5
+DEFAULT_MAX_CONCURRENT_CALLS = 1
 
 ANSWERABILITY_LABELS = {"unanswerable", "partial", "answerable"}
+ANSWER_CUE_LABELS = {"absent", "partial", "present"}
+GROUNDING_LABELS = {"ungrounded", "partial", "grounded"}
 DEPENDENCY_LABELS = {"none", "weak", "strong"}
 HALLUCINATION_LABELS = {"pass", "fail"}
 QUALITY_STATUS = {"accepted", "rejected", "needs_revision"}
+VERIFICATION_SCHEMA_VERSION = "context_decisive_v2"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -154,20 +159,26 @@ def _build_verifier_prompt(item: dict[str, Any], model_name: str) -> str:
             "You are verifying whether an implicit cross-modal QA is valid.",
             "Use ONLY the provided evidence. Do not use external knowledge or unstated commonsense guesses.",
             "A condition is answerable only if the evidence explicitly supports the answer.",
-            "Evaluate whether the context modality grounds the queried object/event/scene and whether the decisive modality supports the answer.",
+            "The benchmark uses a context/decisive design:",
+            "- context evidence should ground which object, action, event, time, or scene the question asks about.",
+            "- decisive evidence should provide the answer-critical cue.",
+            "- Decisive evidence may contain the answer cue while still being unable to fully answer the grounded question by itself.",
             "",
             "Definitions:",
             "- context_only: answerability using only context_evidence.",
-            "- decisive_only: answerability using only decisive_evidence.",
-            "- combined: answerability using both evidence sources together.",
+            "- decisive_only_answer_cue: whether decisive_evidence contains the answer-critical cue, ignoring whether it is grounded to the question target.",
+            "- decisive_only_grounding: whether decisive_evidence alone grounds that cue to the specific object/action/event/scene asked about.",
+            "- combined: answerability using both evidence sources together as a grounded answer.",
             "- cross_modal_dependency: whether the QA truly requires binding context evidence to decisive evidence.",
             "",
             "Return ONLY valid JSON with this exact structure:",
             "{",
             '  "answerability_verification": {',
             '    "status": "verified",',
+            f'    "schema_version": "{VERIFICATION_SCHEMA_VERSION}",',
             '    "context_only": {"label": "unanswerable|partial|answerable", "rationale": "..."},',
-            '    "decisive_only": {"label": "unanswerable|partial|answerable", "rationale": "..."},',
+            '    "decisive_only_answer_cue": {"label": "absent|partial|present", "rationale": "..."},',
+            '    "decisive_only_grounding": {"label": "ungrounded|partial|grounded", "rationale": "..."},',
             '    "combined": {"label": "unanswerable|partial|answerable", "rationale": "..."},',
             '    "cross_modal_dependency": {"label": "none|weak|strong", "rationale": "..."},',
             '    "hallucination_check": {"label": "pass|fail", "rationale": "..."},',
@@ -182,6 +193,59 @@ def _build_verifier_prompt(item: dict[str, Any], model_name: str) -> str:
             "}",
             "",
             "QA candidate:",
+            json.dumps(payload, indent=2, ensure_ascii=False),
+        ]
+    )
+
+
+def _build_batch_verifier_prompt(items: list[dict[str, Any]], model_name: str) -> str:
+    payload = [_build_verifier_payload(item) for item in items]
+    return "\n".join(
+        [
+            "You are verifying multiple implicit cross-modal QA candidates.",
+            "Use ONLY the provided evidence. Do not use external knowledge or unstated commonsense guesses.",
+            "A condition is answerable only if the evidence explicitly supports the answer.",
+            "The benchmark uses a context/decisive design:",
+            "- context evidence should ground which object, action, event, time, or scene the question asks about.",
+            "- decisive evidence should provide the answer-critical cue.",
+            "- Decisive evidence may contain the answer cue while still being unable to fully answer the grounded question by itself.",
+            "For each QA candidate, evaluate whether context evidence grounds the queried target and whether decisive evidence supplies the answer cue.",
+            "Return exactly one verification result for each qa_id.",
+            "",
+            "Definitions:",
+            "- context_only: answerability using only context_evidence.",
+            "- decisive_only_answer_cue: whether decisive_evidence contains the answer-critical cue, ignoring whether it is grounded to the question target.",
+            "- decisive_only_grounding: whether decisive_evidence alone grounds that cue to the specific object/action/event/scene asked about.",
+            "- combined: answerability using both evidence sources together as a grounded answer.",
+            "- cross_modal_dependency: whether the QA truly requires binding context evidence to decisive evidence.",
+            "",
+            "Return ONLY valid JSON with this exact structure:",
+            "{",
+            '  "verification_results": [',
+            "    {",
+            '      "qa_id": "...",',
+            '      "answerability_verification": {',
+            '        "status": "verified",',
+            f'        "schema_version": "{VERIFICATION_SCHEMA_VERSION}",',
+            '        "context_only": {"label": "unanswerable|partial|answerable", "rationale": "..."},',
+            '        "decisive_only_answer_cue": {"label": "absent|partial|present", "rationale": "..."},',
+            '        "decisive_only_grounding": {"label": "ungrounded|partial|grounded", "rationale": "..."},',
+            '        "combined": {"label": "unanswerable|partial|answerable", "rationale": "..."},',
+            '        "cross_modal_dependency": {"label": "none|weak|strong", "rationale": "..."},',
+            '        "hallucination_check": {"label": "pass|fail", "rationale": "..."},',
+            f'        "verifier": "{model_name}"',
+            "      },",
+            '      "selection": {',
+            '        "candidate_status": "reviewed",',
+            '        "quality_status": "accepted|rejected|needs_revision",',
+            '        "keep": true,',
+            '        "review_notes": "..."',
+            "      }",
+            "    }",
+            "  ]",
+            "}",
+            "",
+            "QA candidates:",
             json.dumps(payload, indent=2, ensure_ascii=False),
         ]
     )
@@ -203,15 +267,17 @@ def _normalize_label_record(value: Any, allowed: set[str], default: str) -> dict
 
 def _rule_keep(verification: dict[str, Any]) -> bool:
     context_only = verification.get("context_only", {}).get("label")
-    decisive_only = verification.get("decisive_only", {}).get("label")
+    decisive_cue = verification.get("decisive_only_answer_cue", {}).get("label")
+    decisive_grounding = verification.get("decisive_only_grounding", {}).get("label")
     combined = verification.get("combined", {}).get("label")
     dependency = verification.get("cross_modal_dependency", {}).get("label")
     hallucination = verification.get("hallucination_check", {}).get("label")
     return (
         context_only != "answerable"
-        and decisive_only != "answerable"
+        and decisive_cue in {"partial", "present"}
+        and decisive_grounding != "grounded"
         and combined == "answerable"
-        and dependency == "strong"
+        and dependency in {"weak", "strong"}
         and hallucination == "pass"
     )
 
@@ -222,8 +288,18 @@ def _normalize_verifier_response(parsed: dict[str, Any], model_name: str) -> dic
         raw_verification = {}
     verification = {
         "status": "verified",
+        "schema_version": str(raw_verification.get("schema_version") or VERIFICATION_SCHEMA_VERSION),
         "context_only": _normalize_label_record(raw_verification.get("context_only"), ANSWERABILITY_LABELS, "unanswerable"),
-        "decisive_only": _normalize_label_record(raw_verification.get("decisive_only"), ANSWERABILITY_LABELS, "unanswerable"),
+        "decisive_only_answer_cue": _normalize_label_record(
+            raw_verification.get("decisive_only_answer_cue"),
+            ANSWER_CUE_LABELS,
+            "absent",
+        ),
+        "decisive_only_grounding": _normalize_label_record(
+            raw_verification.get("decisive_only_grounding"),
+            GROUNDING_LABELS,
+            "ungrounded",
+        ),
         "combined": _normalize_label_record(raw_verification.get("combined"), ANSWERABILITY_LABELS, "unanswerable"),
         "cross_modal_dependency": _normalize_label_record(
             raw_verification.get("cross_modal_dependency"),
@@ -272,9 +348,32 @@ async def _verify_item(client, item: dict[str, Any], model_name: str) -> dict[st
     return _normalize_verifier_response(parsed, model_name)
 
 
+async def _verify_batch(client, items: list[dict[str, Any]], model_name: str) -> dict[str, dict[str, Any]]:
+    response_text = await _call_verifier_gemini_with_retry(
+        client,
+        [_build_batch_verifier_prompt(items, model_name)],
+        model_name=model_name,
+    )
+    parsed = _parse_json_object_response(response_text)
+    raw_results = parsed.get("verification_results", [])
+    if not isinstance(raw_results, list):
+        raise ValueError("Gemini batch verifier response must contain verification_results list")
+
+    results: dict[str, dict[str, Any]] = {}
+    for raw_result in raw_results:
+        if not isinstance(raw_result, dict):
+            continue
+        qa_id = str(raw_result.get("qa_id") or "").strip()
+        if not qa_id or qa_id in results:
+            continue
+        results[qa_id] = _normalize_verifier_response(raw_result, model_name)
+    return results
+
+
 def _mark_verification_failed(item: dict[str, Any], error: Exception, model_name: str) -> None:
     item["answerability_verification"] = {
         "status": "verification_failed",
+        "schema_version": VERIFICATION_SCHEMA_VERSION,
         "error": str(error),
         "verifier": model_name,
     }
@@ -331,6 +430,10 @@ def _verification_summary(qa_items: list[dict[str, Any]], eligible_count: int, v
     }
 
 
+def _chunked_indices(indices: list[int], batch_size: int) -> list[list[int]]:
+    return [indices[index : index + batch_size] for index in range(0, len(indices), batch_size)]
+
+
 async def _run_verifier_async(
     input_path: Path,
     output_path: Path,
@@ -341,6 +444,9 @@ async def _run_verifier_async(
     challenge_type: str | None,
     delay_between_calls: int,
     model_name: str,
+    batch_size: int,
+    max_concurrent_calls: int,
+    checkpoint_every: int,
 ) -> Path:
     data = _load_json(input_path)
     qa_items = data.get("qa_items", [])
@@ -367,36 +473,130 @@ async def _run_verifier_async(
     client = create_gemini_client()
     verified_count = 0
     failed_count = 0
-    for run_index, item_index in enumerate(eligible_indices, start=1):
+    completed_batches = 0
+    save_lock = asyncio.Lock()
+    item_lock = asyncio.Lock()
+    batches = _chunked_indices(eligible_indices, batch_size)
+
+    async def save_checkpoint() -> None:
+        output_data.setdefault("metadata", {})["verification"] = {
+            "verifier": model_name,
+            "schema_version": VERIFICATION_SCHEMA_VERSION,
+            "source_file": str(input_path),
+            "resume": resume,
+            "batch_size": batch_size,
+            "max_concurrent_calls": max_concurrent_calls,
+            "filters": {
+                "limit": limit,
+                "side": side,
+                "pair": pair,
+                "challenge_type": challenge_type,
+            },
+            "summary": _verification_summary(output_items, len(eligible_indices), verified_count, failed_count),
+            "distribution_all_items": _build_distribution(output_items, accepted_only=False),
+            "distribution_accepted_items": _build_distribution(output_items, accepted_only=True),
+        }
+        _save_json(output_data, output_path)
+
+    async def verify_single(item_index: int) -> tuple[int, bool]:
         item = output_items[item_index]
-        print(f"Verifying [{run_index}/{len(eligible_indices)}]: {item.get('qa_id')}")
         try:
             result = await _verify_item(client, item, model_name)
-            item["answerability_verification"] = result["answerability_verification"]
-            item["selection"] = result["selection"]
-            verified_count += 1
+            async with item_lock:
+                item["answerability_verification"] = result["answerability_verification"]
+                item["selection"] = result["selection"]
+            return item_index, True
         except Exception as exc:
             print(f"WARNING: Verification failed for {item.get('qa_id')}: {exc}")
-            _mark_verification_failed(item, exc, model_name)
-            failed_count += 1
-        if run_index < len(eligible_indices) and delay_between_calls > 0:
+            async with item_lock:
+                _mark_verification_failed(item, exc, model_name)
+            return item_index, False
+
+    async def verify_batch(batch_index: int, batch_indices: list[int]) -> tuple[int, int]:
+        batch_items = [output_items[index] for index in batch_indices]
+        first_id = batch_items[0].get("qa_id") if batch_items else ""
+        print(
+            f"Verifying batch [{batch_index}/{len(batches)}]: "
+            f"{len(batch_indices)} item(s), first={first_id}"
+        )
+        try:
+            results_by_qa_id = await _verify_batch(client, batch_items, model_name)
+            verified = 0
+            failed = 0
+            missing_indices = []
+            async with item_lock:
+                for item_index in batch_indices:
+                    item = output_items[item_index]
+                    qa_id = str(item.get("qa_id") or "")
+                    result = results_by_qa_id.get(qa_id)
+                    if result is None:
+                        missing_indices.append(item_index)
+                        continue
+                    item["answerability_verification"] = result["answerability_verification"]
+                    item["selection"] = result["selection"]
+                    verified += 1
+
+            if missing_indices:
+                print(
+                    f"WARNING: Batch [{batch_index}/{len(batches)}] omitted "
+                    f"{len(missing_indices)} item(s); falling back to single-item verification."
+                )
+                for missing_index in missing_indices:
+                    _, success = await verify_single(missing_index)
+                    if success:
+                        verified += 1
+                    else:
+                        failed += 1
+            return verified, failed
+        except Exception as exc:
+            print(
+                f"WARNING: Batch verification failed for batch [{batch_index}/{len(batches)}]: {exc}. "
+                "Falling back to single-item verification."
+            )
+            verified = 0
+            failed = 0
+            for item_index in batch_indices:
+                _, success = await verify_single(item_index)
+                if success:
+                    verified += 1
+                else:
+                    failed += 1
+            return verified, failed
+
+    print(
+        f"Verifying {len(eligible_indices)} eligible QA item(s) in {len(batches)} batch(es), "
+        f"batch_size={batch_size}, model={model_name}, max_concurrent_calls={max_concurrent_calls}."
+    )
+
+    async def run_batch(batch_index: int, batch_indices: list[int]) -> None:
+        nonlocal verified_count, failed_count, completed_batches
+        verified, failed = await verify_batch(batch_index, batch_indices)
+        async with item_lock:
+            verified_count += verified
+            failed_count += failed
+            completed_batches += 1
+            should_save = checkpoint_every > 0 and completed_batches % checkpoint_every == 0
+        if should_save:
+            async with save_lock:
+                await save_checkpoint()
+        if delay_between_calls > 0:
             await asyncio.sleep(delay_between_calls)
 
-    output_data.setdefault("metadata", {})["verification"] = {
-        "verifier": model_name,
-        "source_file": str(input_path),
-        "resume": resume,
-        "filters": {
-            "limit": limit,
-            "side": side,
-            "pair": pair,
-            "challenge_type": challenge_type,
-        },
-        "summary": _verification_summary(output_items, len(eligible_indices), verified_count, failed_count),
-        "distribution_all_items": _build_distribution(output_items, accepted_only=False),
-        "distribution_accepted_items": _build_distribution(output_items, accepted_only=True),
-    }
-    _save_json(output_data, output_path)
+    if max_concurrent_calls > 1:
+        semaphore = asyncio.Semaphore(max_concurrent_calls)
+
+        async def bounded_run(batch_index: int, batch_indices: list[int]) -> None:
+            async with semaphore:
+                await run_batch(batch_index, batch_indices)
+
+        await asyncio.gather(
+            *(bounded_run(batch_index, batch_indices) for batch_index, batch_indices in enumerate(batches, start=1))
+        )
+    else:
+        for batch_index, batch_indices in enumerate(batches, start=1):
+            await run_batch(batch_index, batch_indices)
+
+    await save_checkpoint()
     return output_path
 
 
@@ -410,11 +610,17 @@ def run_multimodal_qa_verifier(
     challenge_type: str | None = None,
     delay_between_calls: int = DEFAULT_DELAY_SECONDS,
     model_name: str = VERIFIER_MODEL_NAME,
+    batch_size: int = DEFAULT_BATCH_SIZE,
+    max_concurrent_calls: int = DEFAULT_MAX_CONCURRENT_CALLS,
+    checkpoint_every: int = 1,
 ) -> Path:
     """Verify implicit cross-modal QA candidates using Gemini."""
     resolved_model_name = model_name.strip()
     if not resolved_model_name:
         raise ValueError("model_name must not be empty")
+    resolved_batch_size = max(1, int(batch_size))
+    resolved_concurrency = max(1, int(max_concurrent_calls))
+    resolved_checkpoint_every = max(1, int(checkpoint_every))
     return asyncio.run(
         _run_verifier_async(
             input_path=Path(input_path),
@@ -426,6 +632,9 @@ def run_multimodal_qa_verifier(
             challenge_type=challenge_type,
             delay_between_calls=delay_between_calls,
             model_name=resolved_model_name,
+            batch_size=resolved_batch_size,
+            max_concurrent_calls=resolved_concurrency,
+            checkpoint_every=resolved_checkpoint_every,
         )
     )
 
@@ -441,6 +650,9 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--challenge-type", default=None)
     parser.add_argument("--delay-between-calls", type=int, default=DEFAULT_DELAY_SECONDS)
     parser.add_argument("--model-name", default=VERIFIER_MODEL_NAME, help="Gemini model name used for verification.")
+    parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Number of QA items per verifier call.")
+    parser.add_argument("--max-concurrent-calls", type=int, default=DEFAULT_MAX_CONCURRENT_CALLS)
+    parser.add_argument("--checkpoint-every", type=int, default=1, help="Save progress after this many verifier batches.")
     return parser
 
 
@@ -456,6 +668,9 @@ def main() -> None:
         challenge_type=args.challenge_type,
         delay_between_calls=args.delay_between_calls,
         model_name=args.model_name,
+        batch_size=args.batch_size,
+        max_concurrent_calls=args.max_concurrent_calls,
+        checkpoint_every=args.checkpoint_every,
     )
     print(f"Wrote verified implicit multimodal QA to {output_path}")
 

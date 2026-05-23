@@ -643,8 +643,10 @@ def _normalize_raw_qa(raw_item: dict[str, Any], bundle: dict[str, Any], index: i
         else _single_modality_limits(bundle),
         "answerability_verification": {
             "status": "unverified",
+            "schema_version": "context_decisive_v2",
             "context_only": None,
-            "decisive_only": None,
+            "decisive_only_answer_cue": None,
+            "decisive_only_grounding": None,
             "combined": None,
             "cross_modal_dependency": None,
             "verifier": None,
