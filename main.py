@@ -36,7 +36,10 @@ from annotation_feature.pipeline.modalities.marigold import (
     list_cached_rgb_folders,
 )
 from annotation_feature.temporal_alignment import (
+    export_check_mailbox_day_rgb_event_optical_flow_alignment,
     export_day_night_rgb_event_depth_ir_alignment_grids,
+    run_and_export_check_mailbox_day_rgb_event_dtw_alignment,
+    run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_day_night_temporal_alignment,
 )
 
@@ -334,26 +337,29 @@ def main():
         print("\n--- TEMPORAL ALIGNMENT ---")
         print("26. Run temporal alignment for day/night RGB/EVENT/IR/DEPTH videos")
         print("27. Export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
+        print("28. Test optical-flow temporal alignment for check_mailbox day RGB/EVENT")
+        print("29. Export optical-flow RGB/EVENT aligned video for check_mailbox day")
+        print("30. Run DTW temporal alignment + export drift-corrected video for check_mailbox day RGB/EVENT")
         print("\n--- LATE FUSION ---")
-        print("28. Run late fusion on existing modality JSON results")
+        print("31. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
-        print("29. Generate semantic task segment suggestions")
-        print("30. Run RGB QA after task segment")
-        print("31. Run EVENT QA after task segment")
-        print("32. Run MARIGOLD DEPTH QA after task segment")
-        print("33. Run IR QA after task segment")
-        print("34. Run AUDIO QA after task segment")
-        print("35. Run ALL QA pipelines on task segments")
-        print("36. Export grouped Q/A pairs from segmented modality results")
+        print("32. Generate semantic task segment suggestions")
+        print("33. Run RGB QA after task segment")
+        print("34. Run EVENT QA after task segment")
+        print("35. Run MARIGOLD DEPTH QA after task segment")
+        print("36. Run IR QA after task segment")
+        print("37. Run AUDIO QA after task segment")
+        print("38. Run ALL QA pipelines on task segments")
+        print("39. Export grouped Q/A pairs from segmented modality results")
         print("\n--- HOLISTIC QA ---")
-        print("37. Normalize evidence units from existing modality JSON results")
-        print("38. Group normalized evidence units by reasoning category")
-        print("39. Export Q/A pairs from grouped QA into JSON")
+        print("40. Normalize evidence units from existing modality JSON results")
+        print("41. Group normalized evidence units by reasoning category")
+        print("42. Export Q/A pairs from grouped QA into JSON")
         print("\n--- CSV EXPORT ---")
-        print("40. Export segmented normalized evidence units to CSV")
-        print("\n41. Exit")
+        print("43. Export segmented normalized evidence units to CSV")
+        print("\n44. Exit")
 
-        choice = input("\nEnter choice (1-41): ").strip()
+        choice = input("\nEnter choice (1-44): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -664,6 +670,102 @@ def main():
 
         elif choice == "28":
             print("\n" + "-" * 60)
+            print("Running: optical-flow temporal alignment for check_mailbox day RGB/EVENT")
+            print("-" * 60)
+            print("This is diagnostic only and does not overwrite temporal_alignment_day_results.json.")
+            print("Writes temporal_alignment_optical_flow_check_mailbox_day_event.json.")
+            print("Writes temporal_alignment_plots/check_mailbox_day_rgb_event_optical_flow_activity_signal.png.\n")
+            optical_flow_result = run_check_mailbox_day_rgb_event_optical_flow_alignment(
+                dataset_folder="dataset",
+                output_path="temporal_alignment_optical_flow_check_mailbox_day_event.json",
+                plot_output_folder="temporal_alignment_plots",
+            )
+            alignment = optical_flow_result.get("alignment") or {}
+            comparison = optical_flow_result.get("comparison") or {}
+            print(f"Optical-flow selected offset: {alignment.get('offset_seconds')}s")
+            print(f"Optical-flow peak correlation: {alignment.get('peak_correlation')}")
+            print(f"Optical-flow confidence: {alignment.get('confidence_label')}")
+            print(
+                "Motion-energy comparison: "
+                f"selected={comparison.get('motion_energy_selected_offset_seconds')}s, "
+                f"raw_best={comparison.get('motion_energy_raw_best_offset_seconds')}s"
+            )
+            print("Top optical-flow candidates:")
+            for candidate in alignment.get("candidate_offsets", [])[:5]:
+                print(
+                    f"- offset={candidate.get('offset_seconds')}s, "
+                    f"corr={candidate.get('correlation')}, score={candidate.get('score')}"
+                )
+            if optical_flow_result.get("warnings"):
+                print("Warnings:")
+                for warning in optical_flow_result["warnings"]:
+                    print(f"- {warning}")
+
+        elif choice == "29":
+            print("\n" + "-" * 60)
+            print("Running: export optical-flow RGB/EVENT aligned video for check_mailbox day")
+            print("-" * 60)
+            print("Reads temporal_alignment_optical_flow_check_mailbox_day_event.json.")
+            print("Uses the stored optical-flow EVENT offset_seconds.")
+            print("Writes a low-resolution RGB/EVENT preview under temporal_alignment_exports/.")
+            print("Tries GPU h264_nvenc first, then falls back to CPU libx264 if needed.\n")
+            export_summary = export_check_mailbox_day_rgb_event_optical_flow_alignment(
+                alignment_input_path="temporal_alignment_optical_flow_check_mailbox_day_event.json",
+                output_folder="temporal_alignment_exports",
+                prefer_gpu=True,
+            )
+            print(f"Exported {export_summary['exported_count']} aligned preview video(s).")
+            print(f"Skipped {export_summary['skipped_count']} sample(s).")
+            print(f"Summary saved to {export_summary['summary_file']}")
+            for item in export_summary["exported"]:
+                print(
+                    f"- {item['sample']} {item['side']}: {item['output_file']} "
+                    f"({item['duration_seconds']}s, {item['encoder']})"
+                )
+            for item in export_summary["skipped"]:
+                print(f"- skipped {item['sample']} {item['side']}: {item['reason']}")
+
+        elif choice == "30":
+            print("\n" + "-" * 60)
+            print("Running: DTW temporal alignment + drift-corrected export for check_mailbox day RGB/EVENT")
+            print("-" * 60)
+            print("This is diagnostic only and does not overwrite temporal_alignment_day_results.json.")
+            print("Uses optical-flow activity traces and Dynamic Time Warping to estimate a time-varying EVENT offset.")
+            print("Writes temporal_alignment_dtw_check_mailbox_day_event.json.")
+            print("Writes temporal_alignment_plots/check_mailbox_day_rgb_event_dtw_activity_signal.png.")
+            print("Writes temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_aligned.mp4.\n")
+            dtw_result = run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
+                dataset_folder="dataset",
+                output_path="temporal_alignment_dtw_check_mailbox_day_event.json",
+                plot_output_folder="temporal_alignment_plots",
+                output_folder="temporal_alignment_exports",
+                window_seconds=10.0,
+            )
+            alignment = dtw_result.get("alignment") or {}
+            export_summary = dtw_result.get("export") or {}
+            print(f"DTW median offset: {alignment.get('offset_seconds')}s")
+            print(f"DTW start offset: {alignment.get('start_offset_seconds')}s")
+            print(f"DTW end offset: {alignment.get('end_offset_seconds')}s")
+            print(f"DTW drift: {alignment.get('offset_drift_seconds')}s")
+            print(f"DTW path length: {alignment.get('dtw_path_length')}")
+            print(f"Exported {export_summary.get('exported_count', 0)} drift-corrected preview video(s).")
+            print(f"Skipped {export_summary.get('skipped_count', 0)} sample(s).")
+            if export_summary.get("summary_file"):
+                print(f"Summary saved to {export_summary['summary_file']}")
+            for item in export_summary.get("exported", []):
+                print(
+                    f"- {item['sample']} {item['side']}: {item['output_file']} "
+                    f"({item['duration_seconds']}s, {item['encoder']})"
+                )
+            for item in export_summary.get("skipped", []):
+                print(f"- skipped {item['sample']} {item['side']}: {item['reason']}")
+            if dtw_result.get("warnings"):
+                print("Warnings:")
+                for warning in dtw_result["warnings"]:
+                    print(f"- {warning}")
+
+        elif choice == "31":
+            print("\n" + "-" * 60)
             print("Running: late fusion on existing modality JSON results")
             print("-" * 60)
             print("This step reads the current RGB, IR, event, audio, and depth result files.")
@@ -672,7 +774,7 @@ def main():
             print(f"Fused {len(fused_results)} samples into fused_qa_results.json")
             print("Wrote fusion_diagnostics.json, fusion_qa_stats.json, and fusion_qa_rows.csv")
 
-        elif choice == "29":
+        elif choice == "32":
             print("\n" + "-" * 60)
             print("Running: generate semantic task segment suggestions")
             print("-" * 60)
@@ -686,25 +788,25 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "30":
+        elif choice == "33":
             _run_segmented_qa_menu_option(["rgb"], "RGB QA after task segment")
 
-        elif choice == "31":
+        elif choice == "34":
             _run_segmented_qa_menu_option(["event"], "EVENT QA after task segment")
 
-        elif choice == "32":
+        elif choice == "35":
             _run_segmented_qa_menu_option(["depth"], "MARIGOLD DEPTH QA after task segment")
 
-        elif choice == "33":
+        elif choice == "36":
             _run_segmented_qa_menu_option(["ir"], "IR QA after task segment")
 
-        elif choice == "34":
+        elif choice == "37":
             _run_segmented_qa_menu_option(["audio"], "AUDIO QA after task segment")
 
-        elif choice == "35":
+        elif choice == "38":
             _run_all_segmented_qa_menu_option()
 
-        elif choice == "36":
+        elif choice == "39":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs from segmented modality results")
             print("-" * 60)
@@ -716,7 +818,7 @@ def main():
                 "into segmented_grouped_qa_pairs.json"
             )
 
-        elif choice == "37":
+        elif choice == "40":
             print("\n" + "-" * 60)
             print("Running: normalize evidence units from existing modality JSON results")
             print("-" * 60)
@@ -725,7 +827,7 @@ def main():
             normalized_results = normalize_all_modalities()
             print(f"Normalized {len(normalized_results)} samples into normalized_evidence_units.json")
 
-        elif choice == "38":
+        elif choice == "41":
             print("\n" + "-" * 60)
             print("Running: group normalized evidence units by reasoning category")
             print("-" * 60)
@@ -734,7 +836,7 @@ def main():
             grouped_results = run_group_evidence()
             print(f"Grouped {len(grouped_results)} samples into grouped_evidence.json")
 
-        elif choice == "39":
+        elif choice == "42":
             print("\n" + "-" * 60)
             print("Running: export grouped Q/A pairs to separate JSON")
             print("-" * 60)
@@ -743,7 +845,7 @@ def main():
             grouped_qa_results = run_export_grouped_qa()
             print(f"Exported {len(grouped_qa_results)} samples into grouped_qa_pairs.json")
 
-        elif choice == "40":
+        elif choice == "43":
             print("\n" + "-" * 60)
             print("Running: export segmented normalized evidence units to CSV")
             print("-" * 60)
@@ -752,7 +854,7 @@ def main():
             row_count = run_export_segmented_normalized_evidence_csv()
             print(f"Exported {row_count} row(s) into segmented_normalized_evidence_units.csv")
 
-        elif choice == "41":
+        elif choice == "44":
             print("\nExiting.")
             break
 

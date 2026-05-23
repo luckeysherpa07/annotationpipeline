@@ -1,0 +1,102 @@
+{
+  "pair_key": "dataset/check_mailbox_split/check_mailbox",
+  "side": "day",
+  "method": "optical_flow",
+  "reference_modality": "rgb",
+  "reference_file": "dataset/check_mailbox_split/check_mailbox_day_rgb.mp4",
+  "reference_duration_seconds": 194.9,
+  "target_modality": "event",
+  "target_file": "dataset/check_mailbox_split/check_mailbox_day_event.mp4",
+  "target_duration_seconds": 180.231531,
+  "plot_file": "temporal_alignment_plots/check_mailbox_day_rgb_event_optical_flow_activity_signal.png",
+  "alignment": {
+    "modality": "event",
+    "file": "dataset/check_mailbox_split/check_mailbox_day_event.mp4",
+    "duration_seconds": 180.231531,
+    "offset_seconds": 0.23333333333333334,
+    "offset_frames": 7,
+    "peak_correlation": 0.2821650505065918,
+    "confidence_label": "low",
+    "candidate_offsets": [
+      {
+        "offset_seconds": 0.233333,
+        "offset_frames": 7,
+        "correlation": 0.282165,
+        "score": 0.399676,
+        "overlap_ratio": 0.998705
+      },
+      {
+        "offset_seconds": 0.266667,
+        "offset_frames": 8,
+        "correlation": 0.282183,
+        "score": 0.399338,
+        "overlap_ratio": 0.99852
+      },
+      {
+        "offset_seconds": 0.2,
+        "offset_frames": 6,
+        "correlation": 0.281355,
+        "score": 0.399222,
+        "overlap_ratio": 0.99889
+      },
+      {
+        "offset_seconds": 0.3,
+        "offset_frames": 9,
+        "correlation": 0.281495,
+        "score": 0.398295,
+        "overlap_ratio": 0.998335
+      },
+      {
+        "offset_seconds": 0.166667,
+        "offset_frames": 5,
+        "correlation": 0.27983,
+        "score": 0.398052,
+        "overlap_ratio": 0.999075
+      },
+      {
+        "offset_seconds": 0.333333,
+        "offset_frames": 10,
+        "correlation": 0.280255,
+        "score": 0.396699,
+        "overlap_ratio": 0.99815
+      },
+      {
+        "offset_seconds": 0.133333,
+        "offset_frames": 4,
+        "correlation": 0.277745,
+        "score": 0.396323,
+        "overlap_ratio": 0.99926
+      },
+      {
+        "offset_seconds": 0.366667,
+        "offset_frames": 11,
+        "correlation": 0.278638,
+        "score": 0.394727,
+        "overlap_ratio": 0.997965
+      }
+    ],
+    "selected_by": "modality_prior",
+    "raw_best_offset_seconds": 0.266667,
+    "raw_best_correlation": 0.2821826934814453,
+    "peak_margin": 0.0,
+    "lag_fps": 30.0,
+    "overlap_reference_seconds": {
+      "start": 0.0,
+      "end": 179.998198
+    },
+    "overlap_target_seconds": {
+      "start": 0.233333,
+      "end": 180.231531
+    },
+    "activity_plot_file": "temporal_alignment_plots/check_mailbox_day_rgb_event_optical_flow_activity_signal.png",
+    "warnings": []
+  },
+  "comparison": {
+    "motion_energy_selected_offset_seconds": -0.9,
+    "motion_energy_raw_best_offset_seconds": -14.2,
+    "motion_energy_peak_correlation": 0.319881796836853,
+    "optical_flow_selected_offset_seconds": 0.23333333333333334,
+    "optical_flow_peak_correlation": 0.2821650505065918
+  },
+  "warnings": []
+}

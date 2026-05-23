@@ -18,11 +18,15 @@ ALL_MODALITIES = (REFERENCE_MODALITY, *TARGET_MODALITIES)
 DEFAULT_OUTPUT_PATH = Path("temporal_alignment_results.json")
 DEFAULT_DAY_OUTPUT_PATH = Path("temporal_alignment_day_results.json")
 DEFAULT_NIGHT_OUTPUT_PATH = Path("temporal_alignment_night_results.json")
+DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_optical_flow_check_mailbox_day_event.json")
+DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_dtw_check_mailbox_day_event.json")
 DEFAULT_PLOT_OUTPUT_FOLDER = Path("temporal_alignment_plots")
 DEFAULT_EXPORT_OUTPUT_FOLDER = Path("temporal_alignment_exports")
 EXPORT_PANEL_WIDTH = 320
 EXPORT_PANEL_HEIGHT = 180
 EXPORT_PREVIEW_FPS = 10
+DTW_EXPORT_PREVIEW_FPS = 30
+DTW_EXPORT_SMOOTHING_SECONDS = 1.5
 EXPORT_LABEL_FONT_SIZE = 18
 
 MODALITY_COLORS = {
@@ -127,6 +131,298 @@ def _motion_energy_trace(video_path: Path, resize_width: int = 160) -> np.ndarra
 
     cap.release()
     return np.asarray(energies, dtype=np.float32)
+
+
+def _resize_gray_frame(frame: np.ndarray, resize_width: int) -> np.ndarray:
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    if resize_width > 0 and gray.shape[1] > resize_width:
+        scale = resize_width / float(gray.shape[1])
+        resize_height = max(1, int(round(gray.shape[0] * scale)))
+        gray = cv2.resize(gray, (resize_width, resize_height), interpolation=cv2.INTER_AREA)
+    return gray
+
+
+def _optical_flow_magnitude_trace(video_path: Path, resize_width: int = 160) -> np.ndarray:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Cannot open video file: {video_path}")
+
+    previous_gray: np.ndarray | None = None
+    magnitudes: list[float] = []
+
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+
+        gray = _resize_gray_frame(frame, resize_width).astype(np.uint8)
+        if previous_gray is not None:
+            flow = cv2.calcOpticalFlowFarneback(
+                previous_gray,
+                gray,
+                None,
+                pyr_scale=0.5,
+                levels=3,
+                winsize=15,
+                iterations=3,
+                poly_n=5,
+                poly_sigma=1.2,
+                flags=0,
+            )
+            magnitude, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+            magnitudes.append(float(np.mean(magnitude)))
+        previous_gray = gray
+
+    cap.release()
+    return np.asarray(magnitudes, dtype=np.float32)
+
+
+def _dynamic_time_warping_path(
+    reference_trace: np.ndarray,
+    target_trace: np.ndarray,
+    reference_fps: float,
+    target_fps: float,
+    window_seconds: float,
+) -> tuple[list[tuple[int, int]], float]:
+    if reference_trace.size < 3 or target_trace.size < 3:
+        raise ValueError("DTW requires at least three samples in both traces.")
+    if reference_fps <= 0 or target_fps <= 0:
+        raise ValueError("DTW requires positive FPS values for both traces.")
+
+    reference = _prepare_alignment_trace(reference_trace, reference_fps)
+    target = _prepare_alignment_trace(target_trace, target_fps)
+    ref_count = int(reference.size)
+    target_count = int(target.size)
+    window_frames = max(1, int(round(window_seconds * max(reference_fps, target_fps))))
+
+    costs = np.full((ref_count + 1, target_count + 1), np.inf, dtype=np.float32)
+    backtrack = np.zeros((ref_count, target_count), dtype=np.uint8)
+    costs[0, 0] = 0.0
+
+    for ref_index in range(ref_count):
+        expected_target = int(round(ref_index * (target_count - 1) / max(1, ref_count - 1)))
+        target_start = max(0, expected_target - window_frames)
+        target_end = min(target_count, expected_target + window_frames + 1)
+        for target_index in range(target_start, target_end):
+            previous_costs = (
+                costs[ref_index, target_index],
+                costs[ref_index, target_index + 1],
+                costs[ref_index + 1, target_index],
+            )
+            direction = int(np.argmin(previous_costs))
+            best_previous = previous_costs[direction]
+            if not np.isfinite(best_previous):
+                continue
+            distance = float(reference[ref_index] - target[target_index])
+            costs[ref_index + 1, target_index + 1] = best_previous + distance * distance
+            backtrack[ref_index, target_index] = direction
+
+    if not np.isfinite(costs[ref_count, target_count]):
+        raise ValueError(
+            f"No DTW path found. Increase window_seconds above {window_seconds:.3f}s for these durations."
+        )
+
+    path: list[tuple[int, int]] = []
+    ref_index = ref_count - 1
+    target_index = target_count - 1
+    while ref_index >= 0 and target_index >= 0:
+        path.append((ref_index, target_index))
+        direction = int(backtrack[ref_index, target_index])
+        if direction == 0:
+            ref_index -= 1
+            target_index -= 1
+        elif direction == 1:
+            ref_index -= 1
+        else:
+            target_index -= 1
+    path.reverse()
+    normalized_cost = float(costs[ref_count, target_count] / max(1, len(path)))
+    return path, normalized_cost
+
+
+def _offset_curve_from_dtw_path(
+    path: list[tuple[int, int]],
+    reference_fps: float,
+    target_fps: float,
+) -> list[dict[str, float]]:
+    by_reference: dict[int, list[int]] = {}
+    for reference_index, target_index in path:
+        by_reference.setdefault(reference_index, []).append(target_index)
+
+    offset_curve: list[dict[str, float]] = []
+    for reference_index in sorted(by_reference):
+        target_index = float(np.median(np.asarray(by_reference[reference_index], dtype=np.float32)))
+        reference_time = float(reference_index / reference_fps)
+        target_time = float(target_index / target_fps)
+        offset_curve.append(
+            {
+                "reference_time_seconds": round(reference_time, 6),
+                "event_time_seconds": round(target_time, 6),
+                "offset_seconds": round(target_time - reference_time, 6),
+            }
+        )
+    return offset_curve
+
+
+def _sample_offset_curve(
+    offset_curve: list[dict[str, float]],
+    max_points: int = 900,
+) -> list[dict[str, float]]:
+    if len(offset_curve) <= max_points:
+        return offset_curve
+    indices = np.linspace(0, len(offset_curve) - 1, max_points).round().astype(np.int32)
+    return [offset_curve[int(index)] for index in np.unique(indices)]
+
+
+def _event_time_from_offset_curve(offset_curve: list[dict[str, float]], reference_time: float) -> float:
+    if not offset_curve:
+        raise ValueError("DTW offset curve is empty.")
+    reference_times = np.asarray([item["reference_time_seconds"] for item in offset_curve], dtype=np.float32)
+    event_times = np.asarray([item["event_time_seconds"] for item in offset_curve], dtype=np.float32)
+    return float(np.interp(reference_time, reference_times, event_times))
+
+
+def _smooth_dtw_offset_curve_for_export(
+    offset_curve: list[dict[str, float]],
+    smoothing_seconds: float = DTW_EXPORT_SMOOTHING_SECONDS,
+) -> list[dict[str, float]]:
+    if len(offset_curve) < 3:
+        return offset_curve
+
+    reference_times = np.asarray([item["reference_time_seconds"] for item in offset_curve], dtype=np.float32)
+    offsets = np.asarray([item["offset_seconds"] for item in offset_curve], dtype=np.float32)
+    median_step = float(np.median(np.diff(reference_times))) if reference_times.size > 1 else 0.0
+    if median_step <= 0:
+        return offset_curve
+
+    window = max(3, int(round(smoothing_seconds / median_step)))
+    if window % 2 == 0:
+        window += 1
+    window = min(window, offsets.size if offsets.size % 2 == 1 else offsets.size - 1)
+    if window < 3:
+        smoothed_offsets = offsets
+    else:
+        pad = window // 2
+        padded = np.pad(offsets, (pad, pad), mode="edge")
+        kernel = np.ones(window, dtype=np.float32) / float(window)
+        smoothed_offsets = np.convolve(padded, kernel, mode="valid").astype(np.float32)
+
+    event_times = reference_times + smoothed_offsets
+    event_times = np.maximum.accumulate(event_times)
+    smoothed_offsets = event_times - reference_times
+    return [
+        {
+            "reference_time_seconds": round(float(reference_time), 6),
+            "event_time_seconds": round(float(event_time), 6),
+            "offset_seconds": round(float(offset), 6),
+        }
+        for reference_time, event_time, offset in zip(reference_times, event_times, smoothed_offsets)
+    ]
+
+
+def _draw_label(
+    frame: np.ndarray,
+    lines: list[str],
+    x: int = 12,
+    y: int = 12,
+) -> None:
+    if not lines:
+        return
+    line_height = 22
+    width = max(1, max(cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, 0.52, 1)[0][0] for line in lines))
+    height = line_height * len(lines) + 12
+    cv2.rectangle(frame, (x - 4, y - 4), (x + width + 12, y + height), (0, 0, 0), -1)
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (x - 4, y - 4), (x + width + 12, y + height), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
+    for index, line in enumerate(lines):
+        cv2.putText(
+            frame,
+            line,
+            (x, y + 18 + index * line_height),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.52,
+            (255, 255, 255),
+            1,
+            cv2.LINE_AA,
+        )
+
+
+def _read_video_frame_at(cap: cv2.VideoCapture, time_seconds: float) -> np.ndarray | None:
+    cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, time_seconds) * 1000.0)
+    ok, frame = cap.read()
+    return frame if ok else None
+
+
+def _read_video_frame_forward(
+    cap: cv2.VideoCapture,
+    frame_index: int,
+    state: dict[str, Any],
+) -> np.ndarray | None:
+    frame_index = max(0, int(frame_index))
+    current_index = int(state.get("next_index", 0))
+    cached_index = state.get("cached_index")
+    cached_frame = state.get("cached_frame")
+    if cached_index == frame_index and cached_frame is not None:
+        return cached_frame.copy()
+
+    if frame_index < current_index:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+        current_index = frame_index
+
+    frame: np.ndarray | None = None
+    while current_index <= frame_index:
+        ok, candidate = cap.read()
+        if not ok:
+            break
+        frame = candidate
+        current_index += 1
+
+    state["next_index"] = current_index
+    if frame is not None:
+        state["cached_index"] = frame_index
+        state["cached_frame"] = frame.copy()
+    return frame
+
+
+def _read_video_frame_pair_forward(
+    cap: cv2.VideoCapture,
+    first_frame_index: int,
+    state: dict[str, Any],
+) -> tuple[np.ndarray | None, np.ndarray | None]:
+    first_frame = _read_video_frame_forward(cap, first_frame_index, state)
+    second_frame = _read_video_frame_forward(cap, first_frame_index + 1, state)
+    return first_frame, second_frame
+
+
+def _blend_frames(first_frame: np.ndarray | None, second_frame: np.ndarray | None, weight: float) -> np.ndarray | None:
+    if first_frame is None:
+        return second_frame
+    if second_frame is None:
+        return first_frame
+    weight = float(np.clip(weight, 0.0, 1.0))
+    if weight <= 1e-6:
+        return first_frame
+    if weight >= 1.0 - 1e-6:
+        return second_frame
+    return cv2.addWeighted(first_frame, 1.0 - weight, second_frame, weight, 0.0)
+
+
+def _prepare_preview_panel(frame: np.ndarray | None) -> np.ndarray:
+    panel = np.zeros((EXPORT_PANEL_HEIGHT, EXPORT_PANEL_WIDTH, 3), dtype=np.uint8)
+    if frame is None:
+        cv2.putText(panel, "missing frame", (76, 95), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (230, 230, 230), 1, cv2.LINE_AA)
+        return panel
+
+    height, width = frame.shape[:2]
+    scale = min(EXPORT_PANEL_WIDTH / max(1, width), EXPORT_PANEL_HEIGHT / max(1, height))
+    resized_width = max(1, int(round(width * scale)))
+    resized_height = max(1, int(round(height * scale)))
+    resized = cv2.resize(frame, (resized_width, resized_height), interpolation=cv2.INTER_AREA)
+    x = (EXPORT_PANEL_WIDTH - resized_width) // 2
+    y = (EXPORT_PANEL_HEIGHT - resized_height) // 2
+    panel[y : y + resized_height, x : x + resized_width] = resized
+    return panel
 
 
 def _normalize_for_plot(trace: np.ndarray) -> np.ndarray:
@@ -284,6 +580,62 @@ def _write_activity_signal_plot(
 
     _draw_panel(canvas, "Raw motion-energy traces", raw_bounds, raw_min_time, raw_max_time, raw_items)
     _draw_panel(canvas, "Aligned traces on RGB timeline", aligned_bounds, aligned_min_time, aligned_max_time, aligned_items)
+
+    cv2.imwrite(str(output_path), canvas)
+
+
+def _write_dtw_activity_signal_plot(
+    output_path: Path,
+    title: str,
+    reference_trace: np.ndarray,
+    reference_fps: float,
+    event_trace: np.ndarray,
+    event_fps: float,
+    offset_curve: list[dict[str, float]],
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    width, height = 1500, 820
+    canvas = np.full((height, width, 3), 255, dtype=np.uint8)
+    left, right = 90, width - 50
+    raw_bounds = (left, 145, right, 335)
+    aligned_bounds = (left, 505, right, 695)
+
+    reference_times = _times_for_trace(reference_trace, reference_fps)
+    event_times = _times_for_trace(event_trace, event_fps)
+    reference_values = _normalize_for_plot(reference_trace)
+    event_values = _normalize_for_plot(event_trace)
+
+    curve_reference_times = np.asarray([item["reference_time_seconds"] for item in offset_curve], dtype=np.float32)
+    curve_event_times = np.asarray([item["event_time_seconds"] for item in offset_curve], dtype=np.float32)
+    event_by_reference = np.interp(curve_event_times, event_times, event_values).astype(np.float32)
+    reference_by_curve = np.interp(curve_reference_times, reference_times, reference_values).astype(np.float32)
+
+    offsets = np.asarray([item["offset_seconds"] for item in offset_curve], dtype=np.float32)
+    if offsets.size:
+        summary = (
+            f"DTW median offset {float(np.median(offsets)):.3f}s  "
+            f"start {float(offsets[0]):.3f}s  end {float(offsets[-1]):.3f}s  "
+            f"drift {float(offsets[-1] - offsets[0]):.3f}s"
+        )
+    else:
+        summary = "DTW offset curve unavailable"
+
+    cv2.putText(canvas, title, (left, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.86, TEXT_COLOR, 2, cv2.LINE_AA)
+    cv2.putText(canvas, summary, (left, 88), cv2.FONT_HERSHEY_SIMPLEX, 0.52, TEXT_COLOR, 1, cv2.LINE_AA)
+
+    raw_items = [
+        (reference_times, reference_values, MODALITY_COLORS["rgb"], "rgb"),
+        (event_times, event_values, MODALITY_COLORS["event"], "event"),
+    ]
+    aligned_items = [
+        (curve_reference_times, reference_by_curve, MODALITY_COLORS["rgb"], "rgb"),
+        (curve_reference_times, event_by_reference, MODALITY_COLORS["event"], "event warped by DTW"),
+    ]
+    raw_min_time, raw_max_time = _time_range(raw_items)
+    aligned_min_time, aligned_max_time = _time_range(aligned_items)
+    _draw_panel(canvas, "Raw optical-flow traces", raw_bounds, raw_min_time, raw_max_time, raw_items)
+    _draw_panel(canvas, "DTW-warped EVENT trace on RGB timeline", aligned_bounds, aligned_min_time, aligned_max_time, aligned_items)
 
     cv2.imwrite(str(output_path), canvas)
 
@@ -847,6 +1199,231 @@ def run_day_night_temporal_alignment(
     }
 
 
+def run_check_mailbox_day_rgb_event_optical_flow_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    max_lag_seconds: float = 30.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    dataset_folder = Path(dataset_folder)
+    output_path = Path(output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
+    event_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_event.mp4"
+
+    reference_meta = _video_metadata(reference_file)
+    event_meta = _video_metadata(event_file)
+    warnings: list[str] = []
+    result: dict[str, Any] = {
+        "pair_key": "dataset/check_mailbox_split/check_mailbox",
+        "side": "day",
+        "method": "optical_flow",
+        "reference_modality": REFERENCE_MODALITY,
+        "reference_file": str(reference_file),
+        "reference_duration_seconds": float(reference_meta["duration_seconds"]),
+        "target_modality": "event",
+        "target_file": str(event_file),
+        "target_duration_seconds": float(event_meta["duration_seconds"]),
+        "plot_file": None,
+        "alignment": None,
+        "comparison": {},
+        "warnings": warnings,
+    }
+
+    if not reference_meta["opened"]:
+        warnings.append(f"Could not open RGB reference video: {reference_file}")
+    if not event_meta["opened"]:
+        warnings.append(f"Could not open EVENT video: {event_file}")
+    reference_fps = float(reference_meta["fps"])
+    event_fps = float(event_meta["fps"])
+    if reference_fps <= 0 or event_fps <= 0:
+        warnings.append("Could not determine FPS for one or both videos.")
+    if warnings:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, ensure_ascii=False)
+        return result
+
+    reference_trace = _optical_flow_magnitude_trace(reference_file, resize_width=resize_width)
+    event_trace = _optical_flow_magnitude_trace(event_file, resize_width=resize_width)
+    lag_fps = min(reference_fps, event_fps)
+    estimate = _estimate_offset(
+        reference_trace,
+        event_trace,
+        lag_fps,
+        max_lag_seconds=max_lag_seconds,
+        target_modality="event",
+    )
+    warnings.extend(estimate.pop("warnings", []))
+    reference_overlap, target_overlap = _overlap_windows(
+        float(reference_meta["duration_seconds"]),
+        float(event_meta["duration_seconds"]),
+        estimate["offset_seconds"],
+    )
+    alignment = {
+        "modality": "event",
+        "file": str(event_file),
+        "duration_seconds": float(event_meta["duration_seconds"]),
+        **estimate,
+        "overlap_reference_seconds": reference_overlap,
+        "overlap_target_seconds": target_overlap,
+        "activity_plot_file": None,
+        "warnings": warnings,
+    }
+
+    if plot_output_folder is not None:
+        plot_path = plot_output_folder / "check_mailbox_day_rgb_event_optical_flow_activity_signal.png"
+        _write_activity_signal_plot(
+            plot_path,
+            "Optical-flow activity signal: check_mailbox day RGB vs EVENT",
+            {
+                REFERENCE_MODALITY: (reference_trace, reference_fps),
+                "event": (event_trace, event_fps),
+            },
+            {REFERENCE_MODALITY: 0.0, "event": alignment["offset_seconds"]},
+            {"event": alignment},
+            (REFERENCE_MODALITY, "event"),
+        )
+        alignment["activity_plot_file"] = str(plot_path)
+        result["plot_file"] = str(plot_path)
+
+    result["alignment"] = alignment
+    try:
+        day_results = _load_alignment_results(DEFAULT_DAY_OUTPUT_PATH)
+        check_mailbox = next(
+            item for item in day_results if item.get("pair_key") == "dataset/check_mailbox_split/check_mailbox"
+        )
+        current_event = check_mailbox.get("alignments", {}).get("event", {})
+        result["comparison"] = {
+            "motion_energy_selected_offset_seconds": current_event.get("offset_seconds"),
+            "motion_energy_raw_best_offset_seconds": current_event.get("raw_best_offset_seconds"),
+            "motion_energy_peak_correlation": current_event.get("peak_correlation"),
+            "optical_flow_selected_offset_seconds": alignment.get("offset_seconds"),
+            "optical_flow_peak_correlation": alignment.get("peak_correlation"),
+        }
+    except Exception as exc:
+        result["comparison"] = {"warning": f"Could not load current motion-energy comparison: {exc}"}
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
+
+
+def run_check_mailbox_day_rgb_event_dtw_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    dataset_folder = Path(dataset_folder)
+    output_path = Path(output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
+    event_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_event.mp4"
+
+    reference_meta = _video_metadata(reference_file)
+    event_meta = _video_metadata(event_file)
+    warnings: list[str] = []
+    result: dict[str, Any] = {
+        "pair_key": "dataset/check_mailbox_split/check_mailbox",
+        "side": "day",
+        "method": "dynamic_time_warping_optical_flow",
+        "reference_modality": REFERENCE_MODALITY,
+        "reference_file": str(reference_file),
+        "reference_duration_seconds": float(reference_meta["duration_seconds"]),
+        "target_modality": "event",
+        "target_file": str(event_file),
+        "target_duration_seconds": float(event_meta["duration_seconds"]),
+        "plot_file": None,
+        "alignment": None,
+        "export": None,
+        "warnings": warnings,
+    }
+
+    if not reference_meta["opened"]:
+        warnings.append(f"Could not open RGB reference video: {reference_file}")
+    if not event_meta["opened"]:
+        warnings.append(f"Could not open EVENT video: {event_file}")
+    reference_fps = float(reference_meta["fps"])
+    event_fps = float(event_meta["fps"])
+    if reference_fps <= 0 or event_fps <= 0:
+        warnings.append("Could not determine FPS for one or both videos.")
+    if warnings:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, ensure_ascii=False)
+        return result
+
+    reference_trace = _optical_flow_magnitude_trace(reference_file, resize_width=resize_width)
+    event_trace = _optical_flow_magnitude_trace(event_file, resize_width=resize_width)
+    path, normalized_cost = _dynamic_time_warping_path(
+        reference_trace,
+        event_trace,
+        reference_fps=reference_fps,
+        target_fps=event_fps,
+        window_seconds=window_seconds,
+    )
+    full_offset_curve = _offset_curve_from_dtw_path(path, reference_fps=reference_fps, target_fps=event_fps)
+    offset_curve = _sample_offset_curve(full_offset_curve)
+    offsets = np.asarray([item["offset_seconds"] for item in full_offset_curve], dtype=np.float32)
+    start_offset = float(offsets[0]) if offsets.size else None
+    end_offset = float(offsets[-1]) if offsets.size else None
+    median_offset = float(np.median(offsets)) if offsets.size else None
+    drift = float(end_offset - start_offset) if start_offset is not None and end_offset is not None else None
+
+    reference_overlap, target_overlap = _overlap_windows(
+        float(reference_meta["duration_seconds"]),
+        float(event_meta["duration_seconds"]),
+        median_offset,
+    )
+    alignment = {
+        "modality": "event",
+        "file": str(event_file),
+        "duration_seconds": float(event_meta["duration_seconds"]),
+        "offset_seconds": median_offset,
+        "offset_frames": int(round(median_offset * min(reference_fps, event_fps))) if median_offset is not None else None,
+        "start_offset_seconds": start_offset,
+        "end_offset_seconds": end_offset,
+        "offset_drift_seconds": drift,
+        "dtw_normalized_cost": normalized_cost,
+        "dtw_path_length": len(path),
+        "dtw_window_seconds": float(window_seconds),
+        "offset_curve": offset_curve,
+        "offset_curve_full_count": len(full_offset_curve),
+        "confidence_label": "diagnostic",
+        "selected_by": "dynamic_time_warping",
+        "peak_correlation": None,
+        "candidate_offsets": [],
+        "overlap_reference_seconds": reference_overlap,
+        "overlap_target_seconds": target_overlap,
+        "activity_plot_file": None,
+        "warnings": warnings,
+    }
+
+    if plot_output_folder is not None:
+        plot_path = plot_output_folder / "check_mailbox_day_rgb_event_dtw_activity_signal.png"
+        _write_dtw_activity_signal_plot(
+            plot_path,
+            "DTW optical-flow activity signal: check_mailbox day RGB vs EVENT",
+            reference_trace=reference_trace,
+            reference_fps=reference_fps,
+            event_trace=event_trace,
+            event_fps=event_fps,
+            offset_curve=full_offset_curve,
+        )
+        alignment["activity_plot_file"] = str(plot_path)
+        result["plot_file"] = str(plot_path)
+
+    result["alignment"] = alignment
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
+
+
 def _load_alignment_results(path: Path) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as handle:
         data = json.load(handle)
@@ -1081,6 +1658,332 @@ def export_day_night_rgb_event_depth_ir_alignment_grids(
         json.dump(summary, handle, indent=2)
     summary["summary_file"] = str(summary_path)
     return summary
+
+
+def _load_optical_flow_alignment(path: Path) -> dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected a top-level JSON object in {path}")
+    return data
+
+
+def _export_rgb_event_optical_flow_for_result(
+    result: dict[str, Any],
+    output_folder: Path,
+    prefer_gpu: bool,
+) -> dict[str, Any]:
+    output_path = output_folder / "check_mailbox_day_rgb_event_optical_flow_aligned.mp4"
+
+    reference_file = Path(str(result.get("reference_file", "")))
+    reference_duration = float(result.get("reference_duration_seconds") or 0.0)
+    alignment = result.get("alignment")
+    if not isinstance(alignment, dict):
+        raise ValueError("Optical-flow result must include an alignment object.")
+
+    event_file = Path(str(alignment.get("file") or result.get("target_file") or ""))
+    event_offset = alignment.get("offset_seconds")
+    event_duration = alignment.get("duration_seconds") or result.get("target_duration_seconds")
+    if event_offset is None or event_duration is None:
+        raise ValueError("Optical-flow alignment must include offset_seconds and duration_seconds.")
+    event_offset = float(event_offset)
+    event_duration = float(event_duration)
+
+    if not reference_file.exists():
+        raise FileNotFoundError(f"RGB reference file does not exist: {reference_file}")
+    if not event_file.exists():
+        raise FileNotFoundError(f"EVENT file does not exist: {event_file}")
+    if reference_duration <= 0:
+        raise ValueError("reference_duration_seconds must be positive.")
+
+    reference_start = max(0.0, -event_offset)
+    reference_end = min(reference_duration, event_duration - event_offset)
+    duration = max(0.0, reference_end - reference_start)
+    if duration <= 0:
+        raise ValueError("No positive RGB/EVENT optical-flow overlap window is available.")
+
+    rgb_seek = reference_start
+    event_seek = max(0.0, reference_start + event_offset)
+    rgb_label = _ffmpeg_escape_text("RGB")
+    event_label = _ffmpeg_escape_text(f"EVENT optical-flow offset {event_offset:.3f}s")
+    filter_complex = (
+        f"[0:v]fps={EXPORT_PREVIEW_FPS},"
+        f"scale={EXPORT_PANEL_WIDTH}:{EXPORT_PANEL_HEIGHT}:force_original_aspect_ratio=decrease,"
+        f"pad={EXPORT_PANEL_WIDTH}:{EXPORT_PANEL_HEIGHT}:(ow-iw)/2:(oh-ih)/2,"
+        f"drawtext=text='{rgb_label}':x=12:y=12:fontsize={EXPORT_LABEL_FONT_SIZE}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.55:boxborderw=8,setsar=1,setpts=PTS-STARTPTS[rgb];"
+        f"[1:v]fps={EXPORT_PREVIEW_FPS},"
+        f"scale={EXPORT_PANEL_WIDTH}:{EXPORT_PANEL_HEIGHT}:force_original_aspect_ratio=decrease,"
+        f"pad={EXPORT_PANEL_WIDTH}:{EXPORT_PANEL_HEIGHT}:(ow-iw)/2:(oh-ih)/2,"
+        f"drawtext=text='{event_label}':x=12:y=12:fontsize={EXPORT_LABEL_FONT_SIZE}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.55:boxborderw=8,setsar=1,setpts=PTS-STARTPTS[event];"
+        "[rgb][event]hstack=inputs=2,format=yuv420p[outv]"
+    )
+    command_prefix = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-ss",
+        f"{rgb_seek:.6f}",
+        "-t",
+        f"{duration:.6f}",
+        "-i",
+        str(reference_file),
+        "-ss",
+        f"{event_seek:.6f}",
+        "-t",
+        f"{duration:.6f}",
+        "-i",
+        str(event_file),
+        "-filter_complex",
+        filter_complex,
+        "-map",
+        "[outv]",
+        "-an",
+    ]
+    encoder_used, error = _run_ffmpeg_with_optional_gpu(command_prefix, output_path, prefer_gpu=prefer_gpu)
+    if encoder_used is None:
+        raise RuntimeError(f"Failed to export aligned RGB/EVENT optical-flow video: {error}")
+
+    return {
+        "sample": "check_mailbox",
+        "side": "day",
+        "output_file": str(output_path),
+        "reference_file": str(reference_file),
+        "event_file": str(event_file),
+        "event_offset_seconds": event_offset,
+        "rgb_seek_seconds": round(rgb_seek, 6),
+        "event_seek_seconds": round(event_seek, 6),
+        "duration_seconds": round(duration, 6),
+        "encoder": encoder_used,
+        "gpu_fallback_warning": error if encoder_used == "libx264" and error else None,
+    }
+
+
+def export_check_mailbox_day_rgb_event_optical_flow_alignment(
+    alignment_input_path: Path | str = DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    prefer_gpu: bool = True,
+) -> dict[str, Any]:
+    """Export the check_mailbox day RGB/EVENT optical-flow alignment preview."""
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+
+    try:
+        result = _load_optical_flow_alignment(Path(alignment_input_path))
+        exported.append(
+            _export_rgb_event_optical_flow_for_result(
+                result=result,
+                output_folder=output_folder,
+                prefer_gpu=prefer_gpu,
+            )
+        )
+    except Exception as exc:
+        skipped.append(
+            {
+                "sample": "check_mailbox",
+                "side": "day",
+                "reason": str(exc),
+            }
+        )
+
+    summary = {
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_event_optical_flow_export_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    summary["summary_file"] = str(summary_path)
+    return summary
+
+
+def _export_rgb_event_dtw_for_result(
+    result: dict[str, Any],
+    output_folder: Path,
+) -> dict[str, Any]:
+    output_path = output_folder / "check_mailbox_day_rgb_event_dtw_aligned.mp4"
+
+    reference_file = Path(str(result.get("reference_file", "")))
+    reference_duration = float(result.get("reference_duration_seconds") or 0.0)
+    alignment = result.get("alignment")
+    if not isinstance(alignment, dict):
+        raise ValueError("DTW result must include an alignment object.")
+
+    event_file = Path(str(alignment.get("file") or result.get("target_file") or ""))
+    event_duration = float(alignment.get("duration_seconds") or result.get("target_duration_seconds") or 0.0)
+    offset_curve = alignment.get("offset_curve")
+    if not isinstance(offset_curve, list) or not offset_curve:
+        raise ValueError("DTW alignment must include a non-empty offset_curve.")
+    render_offset_curve = _smooth_dtw_offset_curve_for_export(offset_curve)
+
+    if not reference_file.exists():
+        raise FileNotFoundError(f"RGB reference file does not exist: {reference_file}")
+    if not event_file.exists():
+        raise FileNotFoundError(f"EVENT file does not exist: {event_file}")
+    if reference_duration <= 0 or event_duration <= 0:
+        raise ValueError("DTW export requires positive RGB and EVENT durations.")
+
+    reference_start = max(0.0, float(offset_curve[0]["reference_time_seconds"]))
+    reference_end = min(reference_duration, float(offset_curve[-1]["reference_time_seconds"]))
+    duration = max(0.0, reference_end - reference_start)
+    if duration <= 0:
+        raise ValueError("No positive RGB/EVENT DTW overlap window is available.")
+
+    rgb_cap = cv2.VideoCapture(str(reference_file))
+    event_cap = cv2.VideoCapture(str(event_file))
+    if not rgb_cap.isOpened():
+        raise ValueError(f"Could not open RGB reference video: {reference_file}")
+    if not event_cap.isOpened():
+        rgb_cap.release()
+        raise ValueError(f"Could not open EVENT video: {event_file}")
+    reference_fps = float(rgb_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    event_fps = float(event_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    if reference_fps <= 0 or event_fps <= 0:
+        rgb_cap.release()
+        event_cap.release()
+        raise ValueError("Could not determine FPS for one or both videos.")
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+    writer = cv2.VideoWriter(
+        str(tmp_output_path),
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        float(DTW_EXPORT_PREVIEW_FPS),
+        (EXPORT_PANEL_WIDTH * 2, EXPORT_PANEL_HEIGHT),
+    )
+    if not writer.isOpened():
+        rgb_cap.release()
+        event_cap.release()
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError("Could not create OpenCV VideoWriter for DTW preview.")
+
+    frame_count = max(1, int(np.floor(duration * DTW_EXPORT_PREVIEW_FPS)))
+    written_count = 0
+    rgb_state: dict[str, Any] = {}
+    event_state: dict[str, Any] = {}
+    try:
+        for frame_index in range(frame_count):
+            rgb_time = reference_start + frame_index / float(DTW_EXPORT_PREVIEW_FPS)
+            event_time = min(event_duration, max(0.0, _event_time_from_offset_curve(render_offset_curve, rgb_time)))
+            offset = event_time - rgb_time
+            rgb_frame_index = int(round(rgb_time * reference_fps))
+            event_position = event_time * event_fps
+            event_frame_index = int(np.floor(event_position))
+            event_blend_weight = float(event_position - event_frame_index)
+
+            rgb_panel = _prepare_preview_panel(_read_video_frame_forward(rgb_cap, rgb_frame_index, rgb_state))
+            event_frame_a, event_frame_b = _read_video_frame_pair_forward(event_cap, event_frame_index, event_state)
+            event_panel = _prepare_preview_panel(_blend_frames(event_frame_a, event_frame_b, event_blend_weight))
+            _draw_label(rgb_panel, ["RGB", f"t={rgb_time:.2f}s"])
+            _draw_label(event_panel, ["EVENT DTW", f"t={event_time:.2f}s", f"offset={offset:+.3f}s"])
+            writer.write(np.hstack([rgb_panel, event_panel]))
+            written_count += 1
+    finally:
+        writer.release()
+        rgb_cap.release()
+        event_cap.release()
+
+    if written_count == 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError("DTW preview export wrote zero frames.")
+
+    tmp_output_path.replace(output_path)
+    return {
+        "sample": "check_mailbox",
+        "side": "day",
+        "output_file": str(output_path),
+        "reference_file": str(reference_file),
+        "event_file": str(event_file),
+        "rgb_start_seconds": round(reference_start, 6),
+        "rgb_end_seconds": round(reference_end, 6),
+        "duration_seconds": round(duration, 6),
+        "preview_fps": DTW_EXPORT_PREVIEW_FPS,
+        "frames_written": written_count,
+        "encoder": "opencv-mp4v",
+        "render_curve": {
+            "source": "smoothed_offset_curve",
+            "smoothing_seconds": DTW_EXPORT_SMOOTHING_SECONDS,
+            "points": _sample_offset_curve(render_offset_curve),
+            "full_count": len(render_offset_curve),
+            "monotonic_event_time": True,
+            "event_frame_interpolation": "linear_blend",
+        },
+    }
+
+
+def export_check_mailbox_day_rgb_event_dtw_alignment(
+    alignment_input_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+) -> dict[str, Any]:
+    """Export the check_mailbox day RGB/EVENT DTW drift-corrected preview."""
+    alignment_input_path = Path(alignment_input_path)
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    result: dict[str, Any] | None = None
+
+    try:
+        result = _load_optical_flow_alignment(alignment_input_path)
+        exported.append(_export_rgb_event_dtw_for_result(result=result, output_folder=output_folder))
+    except Exception as exc:
+        skipped.append(
+            {
+                "sample": "check_mailbox",
+                "side": "day",
+                "reason": str(exc),
+            }
+        )
+
+    summary = {
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_event_dtw_export_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    summary["summary_file"] = str(summary_path)
+    if result is not None:
+        result["export"] = summary
+        with open(alignment_input_path, "w", encoding="utf-8") as handle:
+            json.dump(result, handle, indent=2, ensure_ascii=False)
+    return summary
+
+
+def run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    """Run DTW alignment and export its drift-corrected preview."""
+    result = run_check_mailbox_day_rgb_event_dtw_alignment(
+        dataset_folder=dataset_folder,
+        output_path=output_path,
+        plot_output_folder=plot_output_folder,
+        window_seconds=window_seconds,
+        resize_width=resize_width,
+    )
+    export_summary = export_check_mailbox_day_rgb_event_dtw_alignment(
+        alignment_input_path=output_path,
+        output_folder=output_folder,
+    )
+    result["export"] = export_summary
+    with open(Path(output_path), "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
 
 
 def export_check_mailbox_day_rgb_ir_event_alignment(
