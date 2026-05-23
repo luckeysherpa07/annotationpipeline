@@ -149,6 +149,13 @@ def _build_verifier_payload(item: dict[str, Any]) -> dict[str, Any]:
         "context_evidence": evidence_by_modality.get(context, {}) if isinstance(evidence_by_modality, dict) else {},
         "decisive_evidence": evidence_by_modality.get(decisive, {}) if isinstance(evidence_by_modality, dict) else {},
         "why_multimodal_claim": item.get("why_multimodal"),
+        "generation_self_check": {
+            "context_constraint": item.get("context_constraint"),
+            "decisive_answer_cue": item.get("decisive_answer_cue"),
+            "why_context_is_needed": item.get("why_context_is_needed"),
+            "why_decisive_is_needed": item.get("why_decisive_is_needed"),
+            "why_decisive_alone_is_not_grounded": item.get("why_decisive_alone_is_not_grounded"),
+        },
     }
 
 
@@ -187,6 +194,8 @@ def _build_verifier_prompt(item: dict[str, Any], model_name: str) -> str:
             '  "selection": {',
             '    "candidate_status": "reviewed",',
             '    "quality_status": "accepted|rejected|needs_revision",',
+            '    "benchmark_keep": true,',
+            '    "strict_keep": false,',
             '    "keep": true,',
             '    "review_notes": "..."',
             "  }",
@@ -238,6 +247,8 @@ def _build_batch_verifier_prompt(items: list[dict[str, Any]], model_name: str) -
             '      "selection": {',
             '        "candidate_status": "reviewed",',
             '        "quality_status": "accepted|rejected|needs_revision",',
+            '        "benchmark_keep": true,',
+            '        "strict_keep": false,',
             '        "keep": true,',
             '        "review_notes": "..."',
             "      }",
@@ -265,7 +276,7 @@ def _normalize_label_record(value: Any, allowed: set[str], default: str) -> dict
     return {"label": default, "rationale": ""}
 
 
-def _rule_keep(verification: dict[str, Any]) -> bool:
+def _strict_keep(verification: dict[str, Any]) -> bool:
     context_only = verification.get("context_only", {}).get("label")
     decisive_cue = verification.get("decisive_only_answer_cue", {}).get("label")
     decisive_grounding = verification.get("decisive_only_grounding", {}).get("label")
@@ -276,6 +287,21 @@ def _rule_keep(verification: dict[str, Any]) -> bool:
         context_only != "answerable"
         and decisive_cue in {"partial", "present"}
         and decisive_grounding != "grounded"
+        and combined == "answerable"
+        and dependency in {"weak", "strong"}
+        and hallucination == "pass"
+    )
+
+
+def _benchmark_keep(verification: dict[str, Any]) -> bool:
+    context_only = verification.get("context_only", {}).get("label")
+    decisive_cue = verification.get("decisive_only_answer_cue", {}).get("label")
+    combined = verification.get("combined", {}).get("label")
+    dependency = verification.get("cross_modal_dependency", {}).get("label")
+    hallucination = verification.get("hallucination_check", {}).get("label")
+    return (
+        context_only != "answerable"
+        and decisive_cue in {"partial", "present"}
         and combined == "answerable"
         and dependency in {"weak", "strong"}
         and hallucination == "pass"
@@ -318,19 +344,22 @@ def _normalize_verifier_response(parsed: dict[str, Any], model_name: str) -> dic
     if not isinstance(raw_selection, dict):
         raw_selection = {}
     raw_keep = raw_selection.get("keep")
-    rule_keep = _rule_keep(verification)
+    strict_keep = _strict_keep(verification)
+    benchmark_keep = _benchmark_keep(verification)
     selection = {
         "candidate_status": "reviewed",
         "quality_status": _label(
             raw_selection.get("quality_status"),
             QUALITY_STATUS,
-            "accepted" if rule_keep else "rejected",
+            "accepted" if benchmark_keep else "rejected",
         ),
-        "keep": rule_keep,
+        "benchmark_keep": benchmark_keep,
+        "strict_keep": strict_keep,
+        "keep": benchmark_keep,
         "verifier_keep_raw": raw_keep if isinstance(raw_keep, bool) else None,
         "review_notes": str(raw_selection.get("review_notes") or "").strip(),
     }
-    if not rule_keep and selection["quality_status"] == "accepted":
+    if not benchmark_keep and selection["quality_status"] == "accepted":
         selection["quality_status"] = "rejected"
     return {
         "answerability_verification": verification,
@@ -380,6 +409,8 @@ def _mark_verification_failed(item: dict[str, Any], error: Exception, model_name
     item["selection"] = {
         "candidate_status": "candidate",
         "quality_status": "unreviewed",
+        "benchmark_keep": None,
+        "strict_keep": None,
         "keep": None,
         "review_notes": f"Verification failed: {error}",
     }
@@ -396,6 +427,8 @@ def _build_distribution(qa_items: list[dict[str, Any]], accepted_only: bool = Fa
     by_side: Counter = Counter()
     by_status: Counter = Counter()
     by_keep: Counter = Counter()
+    by_benchmark_keep: Counter = Counter()
+    by_strict_keep: Counter = Counter()
     for item in qa_items:
         if accepted_only and item.get("selection", {}).get("keep") is not True:
             continue
@@ -405,6 +438,8 @@ def _build_distribution(qa_items: list[dict[str, Any]], accepted_only: bool = Fa
         by_side[str(item.get("side") or "unknown")] += 1
         by_status[str(item.get("selection", {}).get("quality_status") or "unknown")] += 1
         by_keep[str(item.get("selection", {}).get("keep"))] += 1
+        by_benchmark_keep[str(item.get("selection", {}).get("benchmark_keep"))] += 1
+        by_strict_keep[str(item.get("selection", {}).get("strict_keep"))] += 1
     return {
         "by_pair": _counter_to_dict(by_pair),
         "by_direction": _counter_to_dict(by_direction),
@@ -412,6 +447,8 @@ def _build_distribution(qa_items: list[dict[str, Any]], accepted_only: bool = Fa
         "by_side": _counter_to_dict(by_side),
         "by_quality_status": _counter_to_dict(by_status),
         "by_keep": _counter_to_dict(by_keep),
+        "by_benchmark_keep": _counter_to_dict(by_benchmark_keep),
+        "by_strict_keep": _counter_to_dict(by_strict_keep),
     }
 
 

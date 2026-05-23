@@ -636,6 +636,13 @@ def _normalize_raw_qa(raw_item: dict[str, Any], bundle: dict[str, Any], index: i
         },
         "evidence_by_modality": evidence_by_modality,
         "shared_object_or_event": str(raw_item.get("shared_object_or_event") or "").strip() or None,
+        "context_constraint": str(raw_item.get("context_constraint") or "").strip() or None,
+        "decisive_answer_cue": str(raw_item.get("decisive_answer_cue") or "").strip() or None,
+        "why_context_is_needed": str(raw_item.get("why_context_is_needed") or "").strip() or None,
+        "why_decisive_is_needed": str(raw_item.get("why_decisive_is_needed") or "").strip() or None,
+        "why_decisive_alone_is_not_grounded": (
+            str(raw_item.get("why_decisive_alone_is_not_grounded") or "").strip() or None
+        ),
         "evidence_selection_rationale": str(raw_item.get("evidence_selection_rationale") or "").strip() or None,
         "why_multimodal": str(raw_item.get("why_multimodal") or _why_multimodal(bundle)).strip(),
         "single_modality_limits": raw_item.get("single_modality_limits")
@@ -663,6 +670,8 @@ def _normalize_raw_qa(raw_item: dict[str, Any], bundle: dict[str, Any], index: i
         "selection": {
             "candidate_status": "candidate",
             "quality_status": "unreviewed",
+            "benchmark_keep": None,
+            "strict_keep": None,
             "keep": None,
             "review_notes": None,
         },
@@ -760,6 +769,10 @@ def _build_gemini_prompt(bundle: dict[str, Any]) -> str:
             "Return selected evidence_ids exactly as provided.",
             "Use the context modality to ground the queried object, event, or scene.",
             "Use the decisive modality to determine the answer.",
+            "The question must include a target constraint that is grounded by the context evidence.",
+            "The answer must rely on an answer cue supplied by the decisive evidence.",
+            "Do not ask a question whose target and answer are both fully specified by decisive evidence alone.",
+            "Prefer questions where decisive evidence gives the cue, but context evidence is needed to bind the cue to the asked target.",
             "Do not write questions like 'what RGB and audio evidence together...'.",
             "Do not explicitly mention modality names in the question unless there is no natural alternative.",
             "The question should sound like a natural question about the scene.",
@@ -780,6 +793,11 @@ def _build_gemini_prompt(bundle: dict[str, Any]) -> str:
             f'        "{decisive}": {{"source_sections": ["..."], "evidence_ids": ["..."], "evidence": "..."}}',
             "      },",
             '      "shared_object_or_event": "...",',
+            '      "context_constraint": "The target constraint in the question that comes from context evidence.",',
+            '      "decisive_answer_cue": "The answer-critical cue that comes from decisive evidence.",',
+            '      "why_context_is_needed": "...",',
+            '      "why_decisive_is_needed": "...",',
+            '      "why_decisive_alone_is_not_grounded": "...",',
             '      "evidence_selection_rationale": "...",',
             '      "why_multimodal": "...",',
             '      "single_modality_limits": {',
@@ -842,6 +860,10 @@ def _build_gemini_batch_prompt(tasks: list[dict[str, Any]]) -> str:
             "Return selected evidence_ids exactly as provided.",
             "Use the context modality to ground the queried object, event, or scene.",
             "Use the decisive modality to determine the answer.",
+            "Each question must include a target constraint that is grounded by the context evidence.",
+            "Each answer must rely on an answer cue supplied by the decisive evidence.",
+            "Do not ask questions whose target and answer are both fully specified by decisive evidence alone.",
+            "Prefer questions where decisive evidence gives the cue, but context evidence is needed to bind the cue to the asked target.",
             "Do not write questions like 'what RGB and audio evidence together...'.",
             "Do not explicitly mention modality names in the question unless there is no natural alternative.",
             "The question should sound like a natural question about the scene.",
@@ -862,6 +884,11 @@ def _build_gemini_batch_prompt(tasks: list[dict[str, Any]]) -> str:
             '        "modality_name": {"source_sections": ["..."], "evidence_ids": ["..."], "evidence": "..."}',
             "      },",
             '      "shared_object_or_event": "...",',
+            '      "context_constraint": "The target constraint in the question that comes from context evidence.",',
+            '      "decisive_answer_cue": "The answer-critical cue that comes from decisive evidence.",',
+            '      "why_context_is_needed": "...",',
+            '      "why_decisive_is_needed": "...",',
+            '      "why_decisive_alone_is_not_grounded": "...",',
             '      "evidence_selection_rationale": "...",',
             '      "why_multimodal": "...",',
             '      "single_modality_limits": {',
@@ -1422,23 +1449,29 @@ async def _run_multimodal_qa_pipeline_async(
             )
             async with qa_lock:
                 gemini_calls += 1
-                completed_bundles += len(batch)
+                completed_bundles += len(generated)
                 current_calls = gemini_calls
             print(
                 f"    Gemini batch complete [{current_calls}/{batch_count}], "
                 f"generated {len(generated)}/{len(batch)} QA item(s)."
             )
             await record_generated(generated)
-            for missing_task in missing_tasks:
-                await record_skip(missing_task, RuntimeError("Gemini batch response omitted this bundle_id"))
+            if missing_tasks:
+                print(
+                    f"    Gemini batch omitted {len(missing_tasks)} bundle(s); "
+                    "falling back to single-bundle generation for those items."
+                )
+                for missing_task in missing_tasks:
+                    await run_task(missing_task)
             if delay_between_calls > 0:
                 await asyncio.sleep(delay_between_calls)
         except Exception as exc:
-            async with qa_lock:
-                completed_bundles += len(batch)
-            print(f"WARNING: Failed Gemini batch for segment {segment_id}: {exc}")
+            print(
+                f"WARNING: Failed Gemini batch for segment {segment_id}: {exc}. "
+                "Falling back to single-bundle generation for this batch."
+            )
             for task in batch:
-                await record_skip(task, exc)
+                await run_task(task)
 
     if generation_mode == "gemini" and gemini_batch_scope == "segment":
         if max_concurrent_calls > 1:
