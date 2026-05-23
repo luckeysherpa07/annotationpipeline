@@ -452,18 +452,39 @@ def _build_distribution(qa_items: list[dict[str, Any]], accepted_only: bool = Fa
     }
 
 
-def _verification_summary(qa_items: list[dict[str, Any]], eligible_count: int, verified_count: int, failed_count: int) -> dict[str, int]:
+def _verification_summary(
+    qa_items: list[dict[str, Any]],
+    eligible_count: int,
+    pending_count: int,
+    verified_count: int,
+    failed_count: int,
+) -> dict[str, int]:
     accepted = sum(1 for item in qa_items if item.get("selection", {}).get("keep") is True)
     rejected = sum(1 for item in qa_items if item.get("selection", {}).get("quality_status") == "rejected")
     needs_revision = sum(1 for item in qa_items if item.get("selection", {}).get("quality_status") == "needs_revision")
+    total_verified = sum(
+        1
+        for item in qa_items
+        if isinstance(item.get("answerability_verification"), dict)
+        and item["answerability_verification"].get("status") == "verified"
+    )
+    total_failed = sum(
+        1
+        for item in qa_items
+        if isinstance(item.get("answerability_verification"), dict)
+        and item["answerability_verification"].get("status") == "verification_failed"
+    )
     return {
         "total_items": len(qa_items),
         "eligible_items": eligible_count,
-        "verified_items": verified_count,
+        "pending_items_this_run": pending_count,
+        "verified_items": total_verified,
+        "verified_items_this_run": verified_count,
         "accepted_items": accepted,
         "rejected_items": rejected,
         "needs_revision_items": needs_revision,
-        "verification_failed_items": failed_count,
+        "verification_failed_items": total_failed,
+        "verification_failed_items_this_run": failed_count,
     }
 
 
@@ -492,6 +513,49 @@ async def _run_verifier_async(
 
     output_data = copy.deepcopy(data)
     output_items = output_data["qa_items"]
+
+    restored_verified = 0
+    if resume and output_path.exists():
+        try:
+            existing_output = _load_json(output_path)
+            existing_items = existing_output.get("qa_items", [])
+            if isinstance(existing_items, list):
+                existing_by_id = {
+                    str(item.get("qa_id") or ""): item
+                    for item in existing_items
+                    if isinstance(item, dict) and item.get("qa_id")
+                }
+                for item in output_items:
+                    if not isinstance(item, dict):
+                        continue
+                    existing_item = existing_by_id.get(str(item.get("qa_id") or ""))
+                    if not isinstance(existing_item, dict):
+                        continue
+                    existing_verification = existing_item.get("answerability_verification", {})
+                    if not (
+                        isinstance(existing_verification, dict)
+                        and existing_verification.get("status") == "verified"
+                    ):
+                        continue
+                    item["answerability_verification"] = copy.deepcopy(existing_verification)
+                    if isinstance(existing_item.get("selection"), dict):
+                        item["selection"] = copy.deepcopy(existing_item["selection"])
+                    restored_verified += 1
+        except Exception as exc:
+            print(f"WARNING: Could not load existing verifier output for resume: {exc}")
+
+    all_eligible_indices = [
+        index
+        for index, item in enumerate(output_items)
+        if isinstance(item, dict)
+        and _is_eligible_for_verification(
+            item,
+            resume=False,
+            side=side,
+            pair=pair,
+            challenge_type=challenge_type,
+        )
+    ]
     eligible_indices = [
         index
         for index, item in enumerate(output_items)
@@ -507,7 +571,6 @@ async def _run_verifier_async(
     if limit is not None:
         eligible_indices = eligible_indices[:limit]
 
-    client = create_gemini_client()
     verified_count = 0
     failed_count = 0
     completed_batches = 0
@@ -529,11 +592,27 @@ async def _run_verifier_async(
                 "pair": pair,
                 "challenge_type": challenge_type,
             },
-            "summary": _verification_summary(output_items, len(eligible_indices), verified_count, failed_count),
+            "summary": _verification_summary(
+                output_items,
+                len(all_eligible_indices),
+                len(eligible_indices),
+                verified_count,
+                failed_count,
+            ),
             "distribution_all_items": _build_distribution(output_items, accepted_only=False),
             "distribution_accepted_items": _build_distribution(output_items, accepted_only=True),
         }
         _save_json(output_data, output_path)
+
+    if resume and restored_verified:
+        print(f"Resume enabled: restored {restored_verified} verified QA item(s) from {output_path}.")
+
+    if not eligible_indices:
+        print("No eligible QA item needs verification.")
+        await save_checkpoint()
+        return output_path
+
+    client = create_gemini_client()
 
     async def verify_single(item_index: int) -> tuple[int, bool]:
         item = output_items[item_index]

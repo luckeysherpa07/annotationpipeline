@@ -20,6 +20,8 @@ from annotation_feature.pipeline import (
     run_marigold_ir_depth_estimation,
     run_marigold_depth_qa,
     run_late_fusion,
+    run_multimodal_qa_pipeline,
+    run_multimodal_qa_verifier,
     run_task_slicing,
     run_segmented_pipeline,
 )
@@ -43,6 +45,11 @@ from annotation_feature.temporal_alignment import (
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_day_night_temporal_alignment,
 )
+
+
+MULTIMODAL_QA_MODEL_NAME = "gemini-3.1-flash-lite"
+MULTIMODAL_QA_CANDIDATES_PATH = Path("outputs/implicit_multimodal_qa_candidates_gemini_v2.json")
+MULTIMODAL_QA_VERIFIED_PATH = Path("outputs/implicit_multimodal_qa_verified_gemini_v2.json")
 
 
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
@@ -288,6 +295,84 @@ def _run_all_segmented_qa_menu_option() -> None:
         print(f"  {modality}: {path}")
 
 
+def _run_multimodal_qa_generation_menu_option() -> None:
+    input_path = Path("segmented_normalized_evidence_units.json")
+    output_path = MULTIMODAL_QA_CANDIDATES_PATH
+
+    print("\n" + "-" * 60)
+    print("Running: generate v2 implicit multimodal QA candidates")
+    print("-" * 60)
+    print(f"Input:  {input_path}")
+    print(f"Output: {output_path}")
+    print(f"Model:  {MULTIMODAL_QA_MODEL_NAME}")
+    print("Mode: Gemini, segment-batched, resume/checkpoint enabled.")
+    print("Batch controls: max_bundles_per_call=5, max_concurrent=1, delay_between_calls=5s.")
+    print("This will use Gemini API quota.")
+    print("-" * 60)
+
+    if not input_path.exists():
+        print(f"Missing input file: {input_path}")
+        return
+
+    if not _confirm():
+        print("Cancelled.")
+        return
+
+    result_path = run_multimodal_qa_pipeline(
+        input_path=input_path,
+        output_path=output_path,
+        generation_mode="gemini",
+        test_mode=False,
+        delay_between_calls=5,
+        max_concurrent_calls=1,
+        max_retries=3,
+        resume=True,
+        checkpoint_every=1,
+        gemini_batch_scope="segment",
+        max_bundles_per_gemini_call=5,
+        model_name=MULTIMODAL_QA_MODEL_NAME,
+    )
+    print(f"Wrote v2 implicit multimodal QA candidates to {result_path}")
+
+
+def _run_multimodal_qa_verifier_menu_option() -> None:
+    input_path = MULTIMODAL_QA_CANDIDATES_PATH
+    output_path = MULTIMODAL_QA_VERIFIED_PATH
+
+    print("\n" + "-" * 60)
+    print("Running: verify/filter v2 implicit multimodal QA candidates")
+    print("-" * 60)
+    print(f"Input:  {input_path}")
+    print(f"Output: {output_path}")
+    print(f"Model:  {MULTIMODAL_QA_MODEL_NAME}")
+    print("Mode: Gemini verifier, batch_size=5, resume/checkpoint enabled.")
+    print("This verifies validation-passed candidates and writes keep/benchmark_keep decisions.")
+    print("This will use Gemini API quota.")
+    print("-" * 60)
+
+    if not input_path.exists():
+        print(f"Missing input file: {input_path}")
+        print("Run option 45 first, or generate the candidates file from the command script.")
+        return
+
+    if not _confirm():
+        print("Cancelled.")
+        return
+
+    result_path = run_multimodal_qa_verifier(
+        input_path=input_path,
+        output_path=output_path,
+        limit=None,
+        resume=True,
+        delay_between_calls=5,
+        model_name=MULTIMODAL_QA_MODEL_NAME,
+        batch_size=5,
+        max_concurrent_calls=1,
+        checkpoint_every=1,
+    )
+    print(f"Wrote verified v2 implicit multimodal QA to {result_path}")
+
+
 def main():
     print("\n" + "=" * 60)
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
@@ -299,6 +384,7 @@ def main():
     print("AUDIO: Cascaded HIA -> timestamped audio-visual caption -> QA generation")
     print("MARIGOLD: Estimate depth from cached RGB frames, then reuse depth QA prompts on Marigold maps")
     print("LATE FUSION: Post-process modality captions into fused scene summaries")
+    print("MULTIMODAL QA: Generate and verify v2 implicit cross-modal QA benchmark items")
     print("=" * 60)
 
     while True:
@@ -360,9 +446,12 @@ def main():
         print("43. Export Q/A pairs from grouped QA into JSON")
         print("\n--- CSV EXPORT ---")
         print("44. Export segmented normalized evidence units to CSV")
-        print("\n45. Exit")
+        print("\n--- MULTIMODAL QA BENCHMARK ---")
+        print("45. Generate v2 implicit multimodal QA candidates")
+        print("46. Verify/filter v2 implicit multimodal QA candidates")
+        print("\n47. Exit")
 
-        choice = input("\nEnter choice (1-45): ").strip()
+        choice = input("\nEnter choice (1-47): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -900,6 +989,12 @@ def main():
             print(f"Exported {row_count} row(s) into segmented_normalized_evidence_units.csv")
 
         elif choice == "45":
+            _run_multimodal_qa_generation_menu_option()
+
+        elif choice == "46":
+            _run_multimodal_qa_verifier_menu_option()
+
+        elif choice == "47":
             print("\nExiting.")
             break
 

@@ -33,6 +33,12 @@ def run_multimodal_qa_pipeline(*args, **kwargs):
     return _run(*args, **kwargs)
 
 
+def run_multimodal_qa_verifier(*args, **kwargs):
+    from ..multimodal_qa_verifier import run_multimodal_qa_verifier as _run
+
+    return _run(*args, **kwargs)
+
+
 __all__ = [
     "run",
     "run_audio",
@@ -46,4 +52,5 @@ __all__ = [
     "run_task_slicing",
     "run_segmented_pipeline",
     "run_multimodal_qa_pipeline",
+    "run_multimodal_qa_verifier",
 ]
