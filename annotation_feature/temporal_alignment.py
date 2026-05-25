@@ -1534,18 +1534,75 @@ def run_check_mailbox_day_rgb_event_dtw_alignment(
     window_seconds: float = 10.0,
     resize_width: int = 160,
 ) -> dict[str, Any]:
+    return _run_rgb_event_dtw_alignment(
+        sample_name="check_mailbox",
+        split_folder_name="check_mailbox_split",
+        side="day",
+        dataset_folder=dataset_folder,
+        output_path=output_path,
+        plot_output_folder=plot_output_folder,
+        window_seconds=window_seconds,
+        resize_width=resize_width,
+    )
+
+
+def _dtw_alignment_output_path(output_folder: Path, sample_name: str, side: str) -> Path:
+    safe_sample_name = sample_name.replace(" ", "_")
+    return output_folder / f"temporal_alignment_dtw_{safe_sample_name}_{side}_event.json"
+
+
+def _discover_rgb_event_dtw_pairs(dataset_folder: Path) -> list[dict[str, Any]]:
+    pairs: list[dict[str, Any]] = []
+    for side in ("day", "night"):
+        for reference_file in sorted(dataset_folder.rglob(f"*_{side}_rgb.mp4")):
+            sample_name = reference_file.name[: -len(f"_{side}_rgb.mp4")]
+            event_file = reference_file.with_name(f"{sample_name}_{side}_event.mp4")
+            pairs.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "split_folder_name": reference_file.parent.name,
+                    "pair_key": str(reference_file.parent / sample_name),
+                    "reference_file": reference_file,
+                    "event_file": event_file,
+                    "complete": event_file.exists(),
+                }
+            )
+    return pairs
+
+
+def _run_rgb_event_dtw_alignment(
+    sample_name: str,
+    split_folder_name: str,
+    side: str,
+    dataset_folder: Path | str,
+    output_path: Path | str,
+    plot_output_folder: Path | str | None,
+    window_seconds: float,
+    resize_width: int,
+    reference_file: Path | str | None = None,
+    event_file: Path | str | None = None,
+) -> dict[str, Any]:
     dataset_folder = Path(dataset_folder)
     output_path = Path(output_path)
     plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
-    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
-    event_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_event.mp4"
+    side = side.lower()
+    if reference_file is None:
+        reference_file = dataset_folder / split_folder_name / f"{sample_name}_{side}_rgb.mp4"
+    else:
+        reference_file = Path(reference_file)
+    if event_file is None:
+        event_file = dataset_folder / split_folder_name / f"{sample_name}_{side}_event.mp4"
+    else:
+        event_file = Path(event_file)
 
     reference_meta = _video_metadata(reference_file)
     event_meta = _video_metadata(event_file)
     warnings: list[str] = []
     result: dict[str, Any] = {
-        "pair_key": "dataset/check_mailbox_split/check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "pair_key": str(reference_file.parent / sample_name),
+        "side": side,
         "method": "dynamic_time_warping_optical_flow",
         "reference_modality": REFERENCE_MODALITY,
         "reference_file": str(reference_file),
@@ -1620,10 +1677,10 @@ def run_check_mailbox_day_rgb_event_dtw_alignment(
     }
 
     if plot_output_folder is not None:
-        plot_path = plot_output_folder / "check_mailbox_day_rgb_event_dtw_activity_signal.png"
+        plot_path = plot_output_folder / f"{sample_name}_{side}_rgb_event_dtw_activity_signal.png"
         _write_dtw_activity_signal_plot(
             plot_path,
-            "DTW optical-flow activity signal: check_mailbox day RGB vs EVENT",
+            f"DTW optical-flow activity signal: {sample_name} {side} RGB vs EVENT",
             reference_trace=reference_trace,
             reference_fps=reference_fps,
             event_trace=event_trace,
@@ -2246,7 +2303,9 @@ def _export_rgb_event_dtw_for_result(
     result: dict[str, Any],
     output_folder: Path,
 ) -> dict[str, Any]:
-    output_path = output_folder / "check_mailbox_day_rgb_event_dtw_aligned.mp4"
+    sample_name = str(result.get("sample") or Path(str(result.get("pair_key") or "check_mailbox")).name)
+    side = str(result.get("side") or "day")
+    output_path = output_folder / f"{sample_name}_{side}_rgb_event_dtw_sliced_aligned.mp4"
 
     reference_file = Path(str(result.get("reference_file", "")))
     reference_duration = float(result.get("reference_duration_seconds") or 0.0)
@@ -2335,8 +2394,8 @@ def _export_rgb_event_dtw_for_result(
 
     tmp_output_path.replace(output_path)
     return {
-        "sample": "check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "side": side,
         "output_file": str(output_path),
         "reference_file": str(reference_file),
         "event_file": str(event_file),
@@ -2422,6 +2481,97 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
     with open(Path(output_path), "w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2, ensure_ascii=False)
     return result
+
+
+def run_and_export_all_rgb_event_dtw_alignments(
+    dataset_folder: Path | str = "dataset",
+    alignment_output_folder: Path | str = ".",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    """Run DTW alignment and export drift-corrected previews for every RGB/EVENT pair."""
+    dataset_folder = Path(dataset_folder)
+    alignment_output_folder = Path(alignment_output_folder)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder = Path(output_folder)
+    alignment_output_folder.mkdir(parents=True, exist_ok=True)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    discovered = _discover_rgb_event_dtw_pairs(dataset_folder)
+
+    for pair in discovered:
+        sample_name = str(pair["sample"])
+        side = str(pair["side"])
+        reference_file = Path(pair["reference_file"])
+        event_file = Path(pair["event_file"])
+        alignment_path = _dtw_alignment_output_path(alignment_output_folder, sample_name, side)
+
+        if not bool(pair.get("complete")):
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "reference_file": str(reference_file),
+                    "event_file": str(event_file),
+                    "alignment_file": str(alignment_path),
+                    "reason": f"Missing EVENT file: {event_file}",
+                }
+            )
+            continue
+
+        try:
+            result = _run_rgb_event_dtw_alignment(
+                sample_name=sample_name,
+                split_folder_name=str(pair["split_folder_name"]),
+                side=side,
+                dataset_folder=dataset_folder,
+                output_path=alignment_path,
+                plot_output_folder=plot_output_folder,
+                window_seconds=window_seconds,
+                resize_width=resize_width,
+                reference_file=reference_file,
+                event_file=event_file,
+            )
+            export_item = _export_rgb_event_dtw_for_result(result=result, output_folder=output_folder)
+            export_item["alignment_file"] = str(alignment_path)
+            exported.append(export_item)
+
+            result["export"] = {
+                "exported_count": 1,
+                "skipped_count": 0,
+                "exported": [export_item],
+                "skipped": [],
+            }
+            with open(alignment_path, "w", encoding="utf-8") as handle:
+                json.dump(result, handle, indent=2, ensure_ascii=False)
+        except Exception as exc:
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "reference_file": str(reference_file),
+                    "event_file": str(event_file),
+                    "alignment_file": str(alignment_path),
+                    "reason": str(exc),
+                }
+            )
+
+    summary = {
+        "discovered_count": len(discovered),
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_event_dtw_all_export_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2)
+    summary["summary_file"] = str(summary_path)
+    return summary
 
 
 def _export_rgb_event_feature_for_result(

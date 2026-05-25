@@ -1,4 +1,5 @@
 {
+  "sample": "check_mailbox",
   "pair_key": "dataset/check_mailbox_split/check_mailbox",
   "side": "day",
   "method": "dynamic_time_warping_optical_flow",
@@ -4546,7 +4547,7 @@
       {
         "sample": "check_mailbox",
         "side": "day",
-        "output_file": "temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_aligned.mp4",
+        "output_file": "temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_sliced_aligned.mp4",
         "reference_file": "dataset/check_mailbox_split/check_mailbox_day_rgb.mp4",
         "event_file": "dataset/check_mailbox_split/check_mailbox_day_event.mp4",
         "rgb_start_seconds": 0.0,
@@ -9063,11 +9064,11 @@
           "full_count": 900,
           "monotonic_event_time": true,
           "event_frame_interpolation": "linear_blend"
-        }
+        },
+        "alignment_file": "temporal_alignment_dtw_check_mailbox_day_event.json"
       }
     ],
-    "skipped": [],
-    "summary_file": "temporal_alignment_exports/rgb_event_dtw_export_summary.json"
+    "skipped": []
   },
   "warnings": []
 }
