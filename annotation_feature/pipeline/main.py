@@ -80,6 +80,7 @@ def run(
     test_pair_index: int = 0,
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
+    output_file: Path | str = "rgb_qa_results.json",
 ):
     """
     Run the RGB annotation pipeline.
@@ -89,6 +90,7 @@ def run(
         test_pair_index: Which video pair to process in test mode (0 = first)
         skip_api: If True, skip Gemini API calls and use DEMO_RESULT instead
         dataset_folder: Dataset directory containing the source videos
+        output_file: JSON path to write RGB QA results
     """
     if test_mode:
         print("=" * 50)
@@ -187,8 +189,9 @@ def run(
         }
         print(f"✓ Done: {pair_key}")
 
-    # Save results to JSON file at the project root
-    output_file = Path("rgb_qa_results.json")
+    # Save results to JSON file
+    output_file = Path(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
