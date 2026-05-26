@@ -8,6 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from annotation_feature.marigold_preprocessor import (
+    get_aligned_marigold_source_frames,
     get_cached_rgb_frames,
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
@@ -176,9 +177,64 @@ def run_marigold_ir_depth_estimation(
     return marigold_frames
 
 
+def run_aligned_marigold_depth_estimation(
+    dataset_folder: Path | str = "aligned_dataset",
+    model_name: str = "prs-eth/marigold-depth-v1-1",
+    device: str = "auto",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Estimate aligned Marigold depth maps from day RGB frames and night IR frames."""
+    print("=" * 60)
+    print("PRODUCTION: aligned Marigold depth estimation from day RGB + night IR frames")
+    print("=" * 60)
+
+    dataset_folder = Path(dataset_folder)
+    if not dataset_folder.exists():
+        print("ERROR: Aligned dataset folder not found!")
+        print(f"Expected to find aligned frame caches in: {dataset_folder}")
+        return {}
+
+    print(f"Dataset directory: {dataset_folder}")
+
+    source_frames = get_aligned_marigold_source_frames(dataset_folder)
+    if not source_frames:
+        print("No aligned RGB/IR source frames found for Marigold depth estimation.")
+        return {}
+
+    total_day = sum(len(frames.get("day", [])) for frames in source_frames.values())
+    total_night = sum(len(frames.get("night", [])) for frames in source_frames.values())
+    print(f"Resolved {len(source_frames)} aligned segment pair(s).")
+    print(f"  Day RGB source frames: {total_day}")
+    print(f"  Night IR source frames: {total_night}")
+
+    marigold_frames = preprocess_marigold_depth(
+        dataset_folder=dataset_folder,
+        output_subdir=".frames_cache_marigold",
+        model_name=model_name,
+        device=device,
+        cache_frames=source_frames,
+        cache_subdir=".frames_cache",
+        cache_modality="aligned RGB/IR",
+    )
+    if not marigold_frames:
+        print("No aligned Marigold depth maps were generated.")
+        return {}
+
+    total_day_depth = sum(len(frames.get("day", [])) for frames in marigold_frames.values())
+    total_night_depth = sum(len(frames.get("night", [])) for frames in marigold_frames.values())
+
+    print("\nSummary:")
+    print(f"  Segment pairs processed: {len(marigold_frames)}")
+    print(f"  Total day depth maps: {total_day_depth}")
+    print(f"  Total night depth maps: {total_night_depth}")
+    print(f"  Total depth maps: {total_day_depth + total_night_depth}")
+
+    return marigold_frames
+
+
 __all__ = [
     "list_cached_ir_night_folders",
     "list_cached_rgb_folders",
+    "run_aligned_marigold_depth_estimation",
     "run_marigold_depth_estimation",
     "run_marigold_ir_depth_estimation",
 ]

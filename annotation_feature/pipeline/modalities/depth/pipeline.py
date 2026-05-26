@@ -234,6 +234,7 @@ async def run_depth_parallel_pipeline(
     max_concurrent: int = 3,
     delay_between_pairs: int = 4,
     skip_api: bool = False,
+    on_pair_complete=None,
 ) -> Dict[str, dict]:
     """Run depth annotation pipeline in parallel.
     
@@ -269,5 +270,7 @@ async def run_depth_parallel_pipeline(
     for completed_task in asyncio.as_completed(tasks):
         pair_key, annotation_results = await completed_task
         results[pair_key] = annotation_results
+        if on_pair_complete is not None:
+            on_pair_complete(pair_key, annotation_results)
 
     return results

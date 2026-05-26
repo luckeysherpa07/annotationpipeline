@@ -29,6 +29,16 @@ def _get_flat_cache_side(folder_name: str, cache_modality: str = "rgb") -> str |
     return None
 
 
+def _build_segment_cache_pair_name(folder_name: str, cache_modality: str) -> str | None:
+    """Build the sample name from a nested aligned cache folder."""
+    stem = folder_name.lower()
+    modality_suffix = re.escape(cache_modality.lower())
+    match = re.match(rf"(?P<sample>.+)_(?:day|night\d*)_{modality_suffix}$", stem)
+    if not match:
+        return None
+    return re.sub(r"__+", "_", match.group("sample")).strip("_")
+
+
 def _is_night_ir_cache_folder(folder: Path) -> bool:
     """Return whether a folder is a flat night IR frame cache with frame PNGs."""
     return (
@@ -147,6 +157,82 @@ def get_cached_ir_frames(
         cache_subdir=cache_subdir,
         cache_modality="ir",
     )
+
+
+def get_aligned_marigold_source_frames(
+    dataset_folder: Path,
+    rgb_cache_subdir: str = ".frames_cache",
+    ir_cache_subdir: str = ".frames_cache_ir",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Retrieve aligned Marigold source frames: day from RGB, night from IR."""
+    sources: Dict[str, Dict[str, List[Path]]] = {}
+
+    def add_nested_side(cache_subdir: str, cache_modality: str, wanted_side: str) -> None:
+        cache_dir = dataset_folder / cache_subdir
+        if not cache_dir.exists():
+            print(f"WARNING: Cache directory not found: {cache_dir}")
+            return
+
+        for frame_dir in sorted(cache_dir.glob("*_split/Seg*/*"), key=lambda item: str(item).lower()):
+            if not frame_dir.is_dir():
+                continue
+
+            side = _get_flat_cache_side(frame_dir.name, cache_modality=cache_modality)
+            if side != wanted_side:
+                continue
+
+            sample_name = _build_segment_cache_pair_name(frame_dir.name, cache_modality)
+            if not sample_name:
+                continue
+
+            frames = sorted(frame_dir.glob("frame_*.png"))
+            if not frames:
+                continue
+
+            try:
+                relative_segment = frame_dir.parent.relative_to(cache_dir)
+            except ValueError:
+                continue
+
+            pair_key = str(relative_segment / sample_name)
+            sources.setdefault(pair_key, {"day": [], "night": []})
+            sources[pair_key][wanted_side] = frames
+
+    add_nested_side(rgb_cache_subdir, "rgb", "day")
+    add_nested_side(ir_cache_subdir, "ir", "night")
+
+    return sources
+
+
+def get_cached_marigold_depth_frames(
+    dataset_folder: Path,
+    cache_subdir: str = ".frames_cache_marigold",
+) -> Dict[str, Dict[str, List[Path]]]:
+    """Retrieve Marigold depth frames from flat or aligned nested cache layouts."""
+    cache_dir = dataset_folder / cache_subdir
+    if not cache_dir.exists():
+        print(f"ERROR: Marigold depth cache not found: {cache_dir}")
+        return {}
+
+    paired_frames: Dict[str, Dict[str, List[Path]]] = {}
+
+    for side_dir in sorted(cache_dir.glob("**"), key=lambda item: str(item).lower()):
+        if not side_dir.is_dir() or side_dir.name not in {"day", "night"}:
+            continue
+
+        frames = sorted(side_dir.glob("frame_*_depth.png"))
+        if not frames:
+            continue
+
+        try:
+            pair_key = str(side_dir.parent.relative_to(cache_dir))
+        except ValueError:
+            continue
+
+        paired_frames.setdefault(pair_key, {"day": [], "night": []})
+        paired_frames[pair_key][side_dir.name] = frames
+
+    return paired_frames
 
 
 def resolve_cached_pair_from_folder(

@@ -3,6 +3,7 @@
 from .pipeline import (
     list_cached_ir_night_folders,
     list_cached_rgb_folders,
+    run_aligned_marigold_depth_estimation,
     run_marigold_depth_estimation,
     run_marigold_ir_depth_estimation,
 )
@@ -10,6 +11,7 @@ from .pipeline import (
 __all__ = [
     "list_cached_ir_night_folders",
     "list_cached_rgb_folders",
+    "run_aligned_marigold_depth_estimation",
     "run_marigold_depth_estimation",
     "run_marigold_ir_depth_estimation",
 ]
