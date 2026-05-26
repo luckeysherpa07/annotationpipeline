@@ -39,6 +39,7 @@ from annotation_feature.temporal_alignment import (
     export_check_mailbox_day_rgb_event_optical_flow_alignment,
     export_day_night_rgb_event_depth_ir_alignment_grids,
     run_and_export_all_rgb_event_dtw_alignments,
+    run_and_export_all_rgb_event_dtw_with_audio_alignments,
     run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment,
     run_and_export_check_mailbox_day_rgb_event_dtw_alignment,
     run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment,
@@ -343,12 +344,12 @@ def main():
         print("27. Export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
         print("28. Test optical-flow temporal alignment for check_mailbox day RGB/EVENT")
         print("29. Export optical-flow RGB/EVENT aligned video for check_mailbox day")
-        print("\n--- TEMPORAL ALIGNMENT ---")
         print("30. Run DTW temporal alignment + export drift-corrected video for check_mailbox day RGB/EVENT")
         print("31. Run DTW temporal alignment + export all RGB/EVENT day/night videos")
         print("32. Run feature-based temporal alignment + export aligned video for check_mailbox day RGB/EVENT")
         print("33. Run cross-correlation temporal alignment + export video for check_mailbox day RGB/AUDIO")
-        print("34. Run combined RGB/EVENT DTW + RGB/AUDIO alignment for check_mailbox day")
+        print("\n--- TEMPORAL ALIGNMENT ---")
+        print("34. Run combined RGB/EVENT DTW + RGB/AUDIO alignment for all dataset day/night files")
         print("\n--- LATE FUSION ---")
         print("35. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
@@ -888,22 +889,24 @@ def main():
 
         elif choice == "34":
             print("\n" + "-" * 60)
-            print("Running: combined RGB/EVENT DTW + RGB/AUDIO alignment for check_mailbox day")
+            print("Running: combined RGB/EVENT DTW + RGB/AUDIO alignment for all dataset day/night files")
             print("-" * 60)
-            print("Creates one combined preview: RGB/EVENT DTW video with separate .m4a audio aligned to RGB.")
-            print("Ignores check_mailbox_day_rgb_with_audio.mp4 and embedded RGB audio.")
-            print("Writes temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_with_aligned_audio.mp4.")
-            print("Writes temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_with_aligned_audio_summary.json.\n")
-            combined_summary = run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
+            print("Discovers every complete RGB/EVENT/.m4a triplet under dataset/.")
+            print("Includes day and night files, and ignores *_rgb_with_audio.mp4 plus embedded RGB audio.")
+            print("Writes per-pair DTW and RGB/AUDIO JSON files.")
+            print("Writes temporal_alignment_exports/*_rgb_event_dtw_with_aligned_audio.mp4.")
+            print("Does not keep the intermediate no-audio RGB/EVENT DTW preview videos.")
+            print("Writes temporal_alignment_exports/rgb_event_dtw_with_audio_all_export_summary.json.\n")
+            combined_summary = run_and_export_all_rgb_event_dtw_with_audio_alignments(
                 dataset_folder="dataset",
-                dtw_output_path="temporal_alignment_dtw_check_mailbox_day_event.json",
-                audio_output_path="temporal_alignment_cross_correlation_check_mailbox_day_audio.json",
+                alignment_output_folder=".",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
                 window_seconds=10.0,
             )
+            print(f"Discovered {combined_summary.get('discovered_count', 0)} RGB/EVENT/AUDIO triplet(s).")
             print(f"Exported {combined_summary.get('exported_count', 0)} combined preview video(s).")
-            print(f"Skipped {combined_summary.get('skipped_count', 0)} combined export(s).")
+            print(f"Skipped {combined_summary.get('skipped_count', 0)} triplet(s).")
             if combined_summary.get("summary_file"):
                 print(f"Summary saved to {combined_summary['summary_file']}")
             for item in combined_summary.get("exported", []):

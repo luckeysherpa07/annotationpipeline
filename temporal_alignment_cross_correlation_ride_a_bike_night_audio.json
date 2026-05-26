@@ -1,0 +1,100 @@
+{
+  "sample": "ride_a_bike",
+  "side": "night",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/ride_a_bike_split/ride_a_bike_night_rgb.mp4",
+  "audio_file": "dataset/ride_a_bike_split/ride_a_bike_night.m4a",
+  "ignored_files": [
+    "dataset/ride_a_bike_split/ride_a_bike_night_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/ride_a_bike_night_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 3120,
+  "reference_duration_seconds": 104.0,
+  "audio_duration_seconds": 104.064,
+  "reference_trace_count": 3119,
+  "audio_trace_count": 3124,
+  "alignment": {
+    "offset_seconds": -28.633333333333333,
+    "offset_frames": -859,
+    "peak_correlation": 0.010376880876719952,
+    "confidence_label": "low",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -28.633333,
+        "offset_frames": -859,
+        "correlation": 0.010377,
+        "overlap_ratio": 0.724591
+      },
+      {
+        "offset_seconds": -28.666667,
+        "offset_frames": -860,
+        "correlation": 0.010329,
+        "overlap_ratio": 0.724271
+      },
+      {
+        "offset_seconds": -28.6,
+        "offset_frames": -858,
+        "correlation": 0.009973,
+        "overlap_ratio": 0.724912
+      },
+      {
+        "offset_seconds": -28.7,
+        "offset_frames": -861,
+        "correlation": 0.009799,
+        "overlap_ratio": 0.72395
+      },
+      {
+        "offset_seconds": -28.733333,
+        "offset_frames": -862,
+        "correlation": 0.009011,
+        "overlap_ratio": 0.723629
+      },
+      {
+        "offset_seconds": -28.566667,
+        "offset_frames": -857,
+        "correlation": 0.008943,
+        "overlap_ratio": 0.725232
+      },
+      {
+        "offset_seconds": -27.933333,
+        "offset_frames": -838,
+        "correlation": 0.008597,
+        "overlap_ratio": 0.731324
+      },
+      {
+        "offset_seconds": -27.9,
+        "offset_frames": -837,
+        "correlation": 0.008592,
+        "overlap_ratio": 0.731645
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 4.795752465724945e-05,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 28.633333,
+      "end": 104.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 75.366667
+    },
+    "overlap_ratio": 0.7245912151330555,
+    "overlap_samples": 2260,
+    "selected_correlation_recomputed": 0.010376880876719952,
+    "activity_plot_file": "temporal_alignment_plots/ride_a_bike_night_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "temporal_alignment_exports/ride_a_bike_night_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

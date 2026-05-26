@@ -1745,6 +1745,11 @@ def _dtw_alignment_output_path(output_folder: Path, sample_name: str, side: str)
     return output_folder / f"temporal_alignment_dtw_{safe_sample_name}_{side}_event.json"
 
 
+def _audio_alignment_output_path(output_folder: Path, sample_name: str, side: str) -> Path:
+    safe_sample_name = sample_name.replace(" ", "_")
+    return output_folder / f"temporal_alignment_cross_correlation_{safe_sample_name}_{side}_audio.json"
+
+
 def _discover_rgb_event_dtw_pairs(dataset_folder: Path) -> list[dict[str, Any]]:
     pairs: list[dict[str, Any]] = []
     for side in ("day", "night"):
@@ -1763,6 +1768,36 @@ def _discover_rgb_event_dtw_pairs(dataset_folder: Path) -> list[dict[str, Any]]:
                 }
             )
     return pairs
+
+
+def _discover_rgb_event_audio_triplets(dataset_folder: Path) -> list[dict[str, Any]]:
+    triplets: list[dict[str, Any]] = []
+    for side in ("day", "night"):
+        for reference_file in sorted(dataset_folder.rglob(f"*_{side}_rgb.mp4")):
+            if reference_file.name.endswith(f"_{side}_rgb_with_audio.mp4"):
+                continue
+            sample_name = reference_file.name[: -len(f"_{side}_rgb.mp4")]
+            event_file = reference_file.with_name(f"{sample_name}_{side}_event.mp4")
+            audio_file = reference_file.with_name(f"{sample_name}_{side}.m4a")
+            missing = []
+            if not event_file.exists():
+                missing.append(str(event_file))
+            if not audio_file.exists():
+                missing.append(str(audio_file))
+            triplets.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "split_folder_name": reference_file.parent.name,
+                    "pair_key": str(reference_file.parent / sample_name),
+                    "reference_file": reference_file,
+                    "event_file": event_file,
+                    "audio_file": audio_file,
+                    "complete": not missing,
+                    "missing": missing,
+                }
+            )
+    return triplets
 
 
 def _run_rgb_event_dtw_alignment(
@@ -2953,7 +2988,9 @@ def _export_rgb_audio_cross_correlation_for_result(
     output_folder: Path,
     prefer_gpu: bool = True,
 ) -> dict[str, Any]:
-    output_path = output_folder / "check_mailbox_day_rgb_audio_cross_correlation_aligned.mp4"
+    sample_name = str(result.get("sample") or "check_mailbox")
+    side = str(result.get("side") or "day")
+    output_path = output_folder / f"{sample_name}_{side}_rgb_audio_cross_correlation_aligned.mp4"
     reference_file = Path(str(result.get("reference_file", "")))
     audio_file = Path(str(result.get("audio_file", "")))
     reference_duration = float(result.get("reference_duration_seconds") or 0.0)
@@ -3038,8 +3075,8 @@ def _export_rgb_audio_cross_correlation_for_result(
 
     reference_overlap, audio_overlap = _overlap_windows(reference_duration, audio_duration, offset_seconds)
     return {
-        "sample": "check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "side": side,
         "output_file": str(output_path),
         "reference_file": str(reference_file),
         "audio_file": str(audio_file),
@@ -3061,7 +3098,10 @@ def _export_rgb_audio_cross_correlation_for_result(
     }
 
 
-def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
+def _run_rgb_audio_cross_correlation_alignment(
+    sample_name: str,
+    split_folder_name: str,
+    side: str,
     dataset_folder: Path | str = "dataset",
     output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
     plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
@@ -3069,26 +3109,37 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
     resize_width: int = 160,
     max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
     prefer_gpu: bool = True,
+    reference_file: Path | str | None = None,
+    audio_file: Path | str | None = None,
+    export_preview: bool = True,
+    summary_file_name: str = "rgb_audio_cross_correlation_export_summary.json",
 ) -> dict[str, Any]:
-    """Align check_mailbox day RGB with its separate .m4a audio using one fixed offset."""
+    """Align RGB with its separate .m4a audio using one fixed offset."""
     dataset_folder = Path(dataset_folder)
     output_path = Path(output_path)
     plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
     output_folder = Path(output_folder)
-    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
-    audio_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day.m4a"
+    side = side.lower()
+    if reference_file is None:
+        reference_file = dataset_folder / split_folder_name / f"{sample_name}_{side}_rgb.mp4"
+    else:
+        reference_file = Path(reference_file)
+    if audio_file is None:
+        audio_file = dataset_folder / split_folder_name / f"{sample_name}_{side}.m4a"
+    else:
+        audio_file = Path(audio_file)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_folder.mkdir(parents=True, exist_ok=True)
 
     result: dict[str, Any] = {
-        "sample": "check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "side": side,
         "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
         "reference_modality": "rgb",
         "target_modality": "audio",
         "reference_file": str(reference_file),
         "audio_file": str(audio_file),
-        "ignored_files": [str(dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb_with_audio.mp4")],
+        "ignored_files": [str(reference_file.with_name(f"{sample_name}_{side}_rgb_with_audio.mp4"))],
         "speed_warped": False,
         "plot_file": None,
         "warnings": [],
@@ -3147,11 +3198,11 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
         )
 
         if plot_output_folder is not None:
-            plot_path = plot_output_folder / "check_mailbox_day_rgb_audio_cross_correlation_activity_signal.png"
+            plot_path = plot_output_folder / f"{sample_name}_{side}_rgb_audio_cross_correlation_activity_signal.png"
             try:
                 _write_rgb_audio_activity_signal_plot(
                     plot_path,
-                    "RGB/audio cross-correlation: check_mailbox day",
+                    f"RGB/audio cross-correlation: {sample_name} {side}",
                     reference_trace=reference_trace,
                     reference_fps=reference_fps,
                     audio_trace=audio_trace,
@@ -3167,18 +3218,19 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
 
         if alignment.get("offset_seconds") is None:
             raise ValueError("No RGB/AUDIO offset could be estimated.")
-        exported.append(
-            _export_rgb_audio_cross_correlation_for_result(
-                result=result,
-                output_folder=output_folder,
-                prefer_gpu=prefer_gpu,
+        if export_preview:
+            exported.append(
+                _export_rgb_audio_cross_correlation_for_result(
+                    result=result,
+                    output_folder=output_folder,
+                    prefer_gpu=prefer_gpu,
+                )
             )
-        )
     except Exception as exc:
         skipped.append(
             {
-                "sample": "check_mailbox",
-                "side": "day",
+                "sample": sample_name,
+                "side": side,
                 "reference_file": str(reference_file),
                 "audio_file": str(audio_file),
                 "reason": str(exc),
@@ -3191,7 +3243,7 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
         "exported": exported,
         "skipped": skipped,
     }
-    summary_path = output_folder / "rgb_audio_cross_correlation_export_summary.json"
+    summary_path = output_folder / summary_file_name
     with open(summary_path, "w", encoding="utf-8") as handle:
         json.dump(export_summary, handle, indent=2)
     export_summary["summary_file"] = str(summary_path)
@@ -3201,13 +3253,41 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
     return result
 
 
+def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    resize_width: int = 160,
+    max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
+    prefer_gpu: bool = True,
+) -> dict[str, Any]:
+    """Align check_mailbox day RGB with its separate .m4a audio using one fixed offset."""
+    return _run_rgb_audio_cross_correlation_alignment(
+        sample_name="check_mailbox",
+        split_folder_name="check_mailbox_split",
+        side="day",
+        dataset_folder=dataset_folder,
+        output_path=output_path,
+        plot_output_folder=plot_output_folder,
+        output_folder=output_folder,
+        resize_width=resize_width,
+        max_lag_seconds=max_lag_seconds,
+        prefer_gpu=prefer_gpu,
+        export_preview=True,
+        summary_file_name="rgb_audio_cross_correlation_export_summary.json",
+    )
+
+
 def _mux_dtw_preview_with_aligned_audio(
     dtw_export: dict[str, Any],
     audio_result: dict[str, Any],
     output_folder: Path,
 ) -> dict[str, Any]:
     output_folder.mkdir(parents=True, exist_ok=True)
-    output_path = output_folder / "check_mailbox_day_rgb_event_dtw_with_aligned_audio.mp4"
+    sample_name = str(dtw_export.get("sample") or audio_result.get("sample") or "check_mailbox")
+    side = str(dtw_export.get("side") or audio_result.get("side") or "day")
+    output_path = output_folder / f"{sample_name}_{side}_rgb_event_dtw_with_aligned_audio.mp4"
     tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
     tmp_output_path.unlink(missing_ok=True)
 
@@ -3283,8 +3363,8 @@ def _mux_dtw_preview_with_aligned_audio(
 
     tmp_output_path.replace(output_path)
     return {
-        "sample": "check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "side": side,
         "output_file": str(output_path),
         "dtw_video_file": str(dtw_video_file),
         "audio_file": str(audio_file),
@@ -3302,50 +3382,77 @@ def _mux_dtw_preview_with_aligned_audio(
     }
 
 
-def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
-    dataset_folder: Path | str = "dataset",
-    dtw_output_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
-    audio_output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
-    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
-    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
-    window_seconds: float = 10.0,
-    resize_width: int = 160,
+def _run_and_export_rgb_event_dtw_with_audio_alignment(
+    sample_name: str,
+    split_folder_name: str,
+    side: str,
+    dataset_folder: Path | str,
+    dtw_output_path: Path | str,
+    audio_output_path: Path | str,
+    combined_summary_path: Path | str,
+    plot_output_folder: Path | str | None,
+    output_folder: Path | str,
+    window_seconds: float,
+    resize_width: int,
+    reference_file: Path | str | None = None,
+    event_file: Path | str | None = None,
+    audio_file: Path | str | None = None,
+    keep_intermediate_dtw_video: bool = True,
 ) -> dict[str, Any]:
-    """Export the check_mailbox day RGB/EVENT DTW preview with aligned separate audio."""
     dataset_folder = Path(dataset_folder)
     dtw_output_path = Path(dtw_output_path)
     audio_output_path = Path(audio_output_path)
+    combined_summary_path = Path(combined_summary_path)
     plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
+    side = side.lower()
+
+    reference_file = Path(reference_file) if reference_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_rgb.mp4"
+    event_file = Path(event_file) if event_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_event.mp4"
+    audio_file = Path(audio_file) if audio_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}.m4a"
 
     summary: dict[str, Any] = {
-        "sample": "check_mailbox",
-        "side": "day",
+        "sample": sample_name,
+        "side": side,
         "method": "rgb_event_dtw_visual_with_rgb_audio_cross_correlation_audio",
         "dtw_alignment_file": str(dtw_output_path),
         "audio_alignment_file": str(audio_output_path),
-        "ignored_files": [str(dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb_with_audio.mp4")],
+        "source_rgb_file": str(reference_file),
+        "source_event_file": str(event_file),
+        "source_audio_file": str(audio_file),
+        "ignored_files": [str(reference_file.with_name(f"{sample_name}_{side}_rgb_with_audio.mp4"))],
         "exported_count": 0,
         "skipped_count": 0,
         "exported": [],
         "skipped": [],
     }
-    dtw_result: dict[str, Any] | None = None
-    audio_result: dict[str, Any] | None = None
 
     try:
-        dtw_result = run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
+        dtw_result = _run_rgb_event_dtw_alignment(
+            sample_name=sample_name,
+            split_folder_name=split_folder_name,
+            side=side,
             dataset_folder=dataset_folder,
             output_path=dtw_output_path,
             plot_output_folder=plot_output_folder,
-            output_folder=output_folder,
             window_seconds=window_seconds,
             resize_width=resize_width,
+            reference_file=reference_file,
+            event_file=event_file,
         )
+        dtw_export = _export_rgb_event_dtw_for_result(result=dtw_result, output_folder=output_folder)
+        dtw_export["alignment_file"] = str(dtw_output_path)
+        dtw_result["export"] = {
+            "exported_count": 1,
+            "skipped_count": 0,
+            "exported": [dtw_export],
+            "skipped": [],
+        }
+        with open(dtw_output_path, "w", encoding="utf-8") as handle:
+            json.dump(dtw_result, handle, indent=2, ensure_ascii=False)
+
         dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
-        summary["source_rgb_file"] = str(dtw_result.get("reference_file") or "")
-        summary["source_event_file"] = str(dtw_alignment.get("file") or dtw_result.get("target_file") or "")
         summary["dtw"] = {
             "offset_seconds": dtw_alignment.get("offset_seconds"),
             "start_offset_seconds": dtw_alignment.get("start_offset_seconds"),
@@ -3356,21 +3463,22 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
             "export": dtw_result.get("export"),
         }
 
-        dtw_exported = (dtw_result.get("export") or {}).get("exported") or []
-        if not dtw_exported:
-            raise ValueError("RGB/EVENT DTW export did not produce a preview video.")
-        dtw_export = dtw_exported[0]
-
-        audio_result = run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
+        audio_result = _run_rgb_audio_cross_correlation_alignment(
+            sample_name=sample_name,
+            split_folder_name=split_folder_name,
+            side=side,
             dataset_folder=dataset_folder,
             output_path=audio_output_path,
             plot_output_folder=plot_output_folder,
             output_folder=output_folder,
             resize_width=resize_width,
             prefer_gpu=False,
+            reference_file=reference_file,
+            audio_file=audio_file,
+            export_preview=False,
+            summary_file_name=f"{sample_name}_{side}_rgb_audio_cross_correlation_export_summary.json",
         )
         audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
-        summary["source_audio_file"] = str(audio_result.get("audio_file") or "")
         summary["audio"] = {
             "offset_seconds": audio_alignment.get("offset_seconds"),
             "peak_correlation": audio_alignment.get("peak_correlation"),
@@ -3379,29 +3487,196 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
             "plot_file": audio_result.get("plot_file"),
             "export": audio_result.get("export"),
         }
-
-        audio_exported = (audio_result.get("export") or {}).get("exported") or []
-        if not audio_exported:
-            raise ValueError("RGB/AUDIO export did not produce an aligned audio preview.")
+        if audio_alignment.get("offset_seconds") is None:
+            raise ValueError("RGB/AUDIO alignment did not produce an offset.")
 
         combined_export = _mux_dtw_preview_with_aligned_audio(
             dtw_export=dtw_export,
             audio_result=audio_result,
             output_folder=output_folder,
         )
+        if not keep_intermediate_dtw_video:
+            intermediate_path = Path(str(dtw_export.get("output_file") or ""))
+            try:
+                if intermediate_path.exists():
+                    intermediate_path.unlink()
+                dtw_export["removed_after_audio_mux"] = True
+                combined_export["intermediate_dtw_video_removed"] = True
+            except Exception as exc:
+                warning = f"Could not remove intermediate no-audio DTW preview: {exc}"
+                dtw_export["removed_after_audio_mux"] = False
+                combined_export["intermediate_dtw_video_removed"] = False
+                combined_export.setdefault("warnings", []).append(warning)
+                summary.setdefault("warnings", []).append(warning)
+        combined_export["dtw_alignment_file"] = str(dtw_output_path)
+        combined_export["audio_alignment_file"] = str(audio_output_path)
         summary["exported"].append(combined_export)
     except Exception as exc:
         summary["skipped"].append(
             {
-                "sample": "check_mailbox",
-                "side": "day",
+                "sample": sample_name,
+                "side": side,
+                "reference_file": str(reference_file),
+                "event_file": str(event_file),
+                "audio_file": str(audio_file),
                 "reason": str(exc),
             }
         )
 
     summary["exported_count"] = len(summary["exported"])
     summary["skipped_count"] = len(summary["skipped"])
-    summary_path = output_folder / "check_mailbox_day_rgb_event_dtw_with_aligned_audio_summary.json"
+    combined_summary_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(combined_summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(combined_summary_path)
+    return summary
+
+
+def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
+    dataset_folder: Path | str = "dataset",
+    dtw_output_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
+    audio_output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    """Export the check_mailbox day RGB/EVENT DTW preview with aligned separate audio."""
+    return _run_and_export_rgb_event_dtw_with_audio_alignment(
+        sample_name="check_mailbox",
+        split_folder_name="check_mailbox_split",
+        side="day",
+        dataset_folder=dataset_folder,
+        dtw_output_path=dtw_output_path,
+        audio_output_path=audio_output_path,
+        combined_summary_path=Path(output_folder) / "check_mailbox_day_rgb_event_dtw_with_aligned_audio_summary.json",
+        plot_output_folder=plot_output_folder,
+        output_folder=output_folder,
+        window_seconds=window_seconds,
+        resize_width=resize_width,
+        keep_intermediate_dtw_video=False,
+    )
+
+
+def run_and_export_all_rgb_event_dtw_with_audio_alignments(
+    dataset_folder: Path | str = "dataset",
+    alignment_output_folder: Path | str = ".",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    """Run combined RGB/EVENT DTW + RGB/AUDIO fixed-offset exports for all complete triplets."""
+    dataset_folder = Path(dataset_folder)
+    alignment_output_folder = Path(alignment_output_folder)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder = Path(output_folder)
+    alignment_output_folder.mkdir(parents=True, exist_ok=True)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    discovered = _discover_rgb_event_audio_triplets(dataset_folder)
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+
+    for triplet in discovered:
+        sample_name = str(triplet["sample"])
+        side = str(triplet["side"])
+        reference_file = Path(triplet["reference_file"])
+        event_file = Path(triplet["event_file"])
+        audio_file = Path(triplet["audio_file"])
+        dtw_path = _dtw_alignment_output_path(alignment_output_folder, sample_name, side)
+        audio_path = _audio_alignment_output_path(alignment_output_folder, sample_name, side)
+        combined_summary_path = output_folder / f"{sample_name}_{side}_rgb_event_dtw_with_aligned_audio_summary.json"
+
+        if not bool(triplet.get("complete")):
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "reference_file": str(reference_file),
+                    "event_file": str(event_file),
+                    "audio_file": str(audio_file),
+                    "dtw_alignment_file": str(dtw_path),
+                    "audio_alignment_file": str(audio_path),
+                    "reason": "Missing required file(s): " + ", ".join(str(item) for item in triplet.get("missing", [])),
+                }
+            )
+            continue
+
+        try:
+            pair_summary = _run_and_export_rgb_event_dtw_with_audio_alignment(
+                sample_name=sample_name,
+                split_folder_name=str(triplet["split_folder_name"]),
+                side=side,
+                dataset_folder=dataset_folder,
+                dtw_output_path=dtw_path,
+                audio_output_path=audio_path,
+                combined_summary_path=combined_summary_path,
+                plot_output_folder=plot_output_folder,
+                output_folder=output_folder,
+                window_seconds=window_seconds,
+                resize_width=resize_width,
+                reference_file=reference_file,
+                event_file=event_file,
+                audio_file=audio_file,
+                keep_intermediate_dtw_video=False,
+            )
+            if pair_summary.get("exported"):
+                export_item = dict(pair_summary["exported"][0])
+                export_item.update(
+                    {
+                        "dtw_alignment_file": str(dtw_path),
+                        "audio_alignment_file": str(audio_path),
+                        "pair_summary_file": str(combined_summary_path),
+                        "source_rgb_file": str(reference_file),
+                        "source_event_file": str(event_file),
+                        "source_audio_file": str(audio_file),
+                        "dtw": pair_summary.get("dtw"),
+                        "audio": pair_summary.get("audio"),
+                    }
+                )
+                exported.append(export_item)
+            else:
+                reason = "Combined export did not produce an output video."
+                pair_skipped = pair_summary.get("skipped") or []
+                if pair_skipped and isinstance(pair_skipped[0], dict):
+                    reason = str(pair_skipped[0].get("reason") or reason)
+                skipped.append(
+                    {
+                        "sample": sample_name,
+                        "side": side,
+                        "reference_file": str(reference_file),
+                        "event_file": str(event_file),
+                        "audio_file": str(audio_file),
+                        "dtw_alignment_file": str(dtw_path),
+                        "audio_alignment_file": str(audio_path),
+                        "pair_summary_file": str(combined_summary_path),
+                        "reason": reason,
+                    }
+                )
+        except Exception as exc:
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "side": side,
+                    "reference_file": str(reference_file),
+                    "event_file": str(event_file),
+                    "audio_file": str(audio_file),
+                    "dtw_alignment_file": str(dtw_path),
+                    "audio_alignment_file": str(audio_path),
+                    "pair_summary_file": str(combined_summary_path),
+                    "reason": str(exc),
+                }
+            )
+
+    summary = {
+        "discovered_count": len(discovered),
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_event_dtw_with_audio_all_export_summary.json"
     with open(summary_path, "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, ensure_ascii=False)
     summary["summary_file"] = str(summary_path)
