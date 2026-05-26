@@ -3201,6 +3201,213 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
     return result
 
 
+def _mux_dtw_preview_with_aligned_audio(
+    dtw_export: dict[str, Any],
+    audio_result: dict[str, Any],
+    output_folder: Path,
+) -> dict[str, Any]:
+    output_folder.mkdir(parents=True, exist_ok=True)
+    output_path = output_folder / "check_mailbox_day_rgb_event_dtw_with_aligned_audio.mp4"
+    tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+
+    dtw_video_file = Path(str(dtw_export.get("output_file") or ""))
+    audio_file = Path(str(audio_result.get("audio_file") or ""))
+    audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
+    audio_offset_seconds = audio_alignment.get("offset_seconds")
+    if audio_offset_seconds is None:
+        raise ValueError("RGB/AUDIO alignment must include offset_seconds for combined export.")
+    audio_offset_seconds = float(audio_offset_seconds)
+    audio_duration = float(audio_result.get("audio_duration_seconds") or 0.0)
+    rgb_start_seconds = float(dtw_export.get("rgb_start_seconds") or 0.0)
+    duration_seconds = float(dtw_export.get("duration_seconds") or 0.0)
+
+    if not dtw_video_file.exists():
+        raise FileNotFoundError(f"DTW preview video does not exist: {dtw_video_file}")
+    if not audio_file.exists():
+        raise FileNotFoundError(f"Audio file does not exist: {audio_file}")
+    if duration_seconds <= 0:
+        raise ValueError("Combined export requires a positive DTW preview duration.")
+    if audio_duration <= 0:
+        raise ValueError("Combined export requires a positive audio duration.")
+
+    audio_time_at_preview_start = rgb_start_seconds + audio_offset_seconds
+    audio_seek_seconds = max(0.0, audio_time_at_preview_start)
+    audio_delay_seconds = max(0.0, -audio_time_at_preview_start)
+    if audio_seek_seconds >= audio_duration:
+        raise ValueError("Aligned audio seek starts beyond the end of the audio file.")
+
+    audio_filter = "[1:a]apad[a]"
+    if audio_delay_seconds > 0:
+        delay_ms = int(round(audio_delay_seconds * 1000.0))
+        audio_filter = f"[1:a]adelay={delay_ms}:all=1,apad[a]"
+
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        str(dtw_video_file),
+    ]
+    if audio_seek_seconds > 0:
+        command.extend(["-ss", f"{audio_seek_seconds:.6f}"])
+    command.extend(
+        [
+            "-i",
+            str(audio_file),
+            "-filter_complex",
+            audio_filter,
+            "-map",
+            "0:v:0",
+            "-map",
+            "[a]",
+            "-t",
+            f"{duration_seconds:.6f}",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            str(tmp_output_path),
+        ]
+    )
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Failed to mux DTW preview with aligned audio: {completed.stderr.strip()}")
+
+    tmp_output_path.replace(output_path)
+    return {
+        "sample": "check_mailbox",
+        "side": "day",
+        "output_file": str(output_path),
+        "dtw_video_file": str(dtw_video_file),
+        "audio_file": str(audio_file),
+        "duration_seconds": round(duration_seconds, 6),
+        "rgb_start_seconds": round(rgb_start_seconds, 6),
+        "audio_offset_seconds": round(audio_offset_seconds, 6),
+        "audio_correlation": round(float(audio_alignment.get("peak_correlation") or 0.0), 6),
+        "audio_shift": {
+            "source_seek_seconds": round(audio_seek_seconds, 6),
+            "output_delay_seconds": round(audio_delay_seconds, 6),
+            "speed_warped": False,
+        },
+        "video_stream": "rgb_event_dtw_preview_copy",
+        "audio_encoder": "aac",
+    }
+
+
+def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
+    dataset_folder: Path | str = "dataset",
+    dtw_output_path: Path | str = DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH,
+    audio_output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    window_seconds: float = 10.0,
+    resize_width: int = 160,
+) -> dict[str, Any]:
+    """Export the check_mailbox day RGB/EVENT DTW preview with aligned separate audio."""
+    dataset_folder = Path(dataset_folder)
+    dtw_output_path = Path(dtw_output_path)
+    audio_output_path = Path(audio_output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    summary: dict[str, Any] = {
+        "sample": "check_mailbox",
+        "side": "day",
+        "method": "rgb_event_dtw_visual_with_rgb_audio_cross_correlation_audio",
+        "dtw_alignment_file": str(dtw_output_path),
+        "audio_alignment_file": str(audio_output_path),
+        "ignored_files": [str(dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb_with_audio.mp4")],
+        "exported_count": 0,
+        "skipped_count": 0,
+        "exported": [],
+        "skipped": [],
+    }
+    dtw_result: dict[str, Any] | None = None
+    audio_result: dict[str, Any] | None = None
+
+    try:
+        dtw_result = run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
+            dataset_folder=dataset_folder,
+            output_path=dtw_output_path,
+            plot_output_folder=plot_output_folder,
+            output_folder=output_folder,
+            window_seconds=window_seconds,
+            resize_width=resize_width,
+        )
+        dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
+        summary["source_rgb_file"] = str(dtw_result.get("reference_file") or "")
+        summary["source_event_file"] = str(dtw_alignment.get("file") or dtw_result.get("target_file") or "")
+        summary["dtw"] = {
+            "offset_seconds": dtw_alignment.get("offset_seconds"),
+            "start_offset_seconds": dtw_alignment.get("start_offset_seconds"),
+            "end_offset_seconds": dtw_alignment.get("end_offset_seconds"),
+            "offset_drift_seconds": dtw_alignment.get("offset_drift_seconds"),
+            "dtw_path_length": dtw_alignment.get("dtw_path_length"),
+            "plot_file": dtw_result.get("plot_file"),
+            "export": dtw_result.get("export"),
+        }
+
+        dtw_exported = (dtw_result.get("export") or {}).get("exported") or []
+        if not dtw_exported:
+            raise ValueError("RGB/EVENT DTW export did not produce a preview video.")
+        dtw_export = dtw_exported[0]
+
+        audio_result = run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
+            dataset_folder=dataset_folder,
+            output_path=audio_output_path,
+            plot_output_folder=plot_output_folder,
+            output_folder=output_folder,
+            resize_width=resize_width,
+            prefer_gpu=False,
+        )
+        audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
+        summary["source_audio_file"] = str(audio_result.get("audio_file") or "")
+        summary["audio"] = {
+            "offset_seconds": audio_alignment.get("offset_seconds"),
+            "peak_correlation": audio_alignment.get("peak_correlation"),
+            "confidence_label": audio_alignment.get("confidence_label"),
+            "overlap_ratio": audio_alignment.get("overlap_ratio"),
+            "plot_file": audio_result.get("plot_file"),
+            "export": audio_result.get("export"),
+        }
+
+        audio_exported = (audio_result.get("export") or {}).get("exported") or []
+        if not audio_exported:
+            raise ValueError("RGB/AUDIO export did not produce an aligned audio preview.")
+
+        combined_export = _mux_dtw_preview_with_aligned_audio(
+            dtw_export=dtw_export,
+            audio_result=audio_result,
+            output_folder=output_folder,
+        )
+        summary["exported"].append(combined_export)
+    except Exception as exc:
+        summary["skipped"].append(
+            {
+                "sample": "check_mailbox",
+                "side": "day",
+                "reason": str(exc),
+            }
+        )
+
+    summary["exported_count"] = len(summary["exported"])
+    summary["skipped_count"] = len(summary["skipped"])
+    summary_path = output_folder / "check_mailbox_day_rgb_event_dtw_with_aligned_audio_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(summary_path)
+    return summary
+
+
 def export_check_mailbox_day_rgb_ir_event_alignment(
     alignment_input_path: Path | str = DEFAULT_DAY_OUTPUT_PATH,
     output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
