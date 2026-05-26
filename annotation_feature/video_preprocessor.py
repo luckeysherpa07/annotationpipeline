@@ -4,6 +4,18 @@ import cv2
 from typing import List, Tuple, Dict
 
 
+def _cache_output_dir(dataset_folder: Path, cache_dir: Path, video_path: Path) -> Path:
+    """Keep cache folders unique for nested datasets such as aligned Seg1/Seg2 exports."""
+    try:
+        relative_parent = video_path.relative_to(dataset_folder).parent
+    except ValueError:
+        relative_parent = Path()
+
+    if str(relative_parent) in ("", "."):
+        return cache_dir / video_path.stem
+    return cache_dir / relative_parent / video_path.stem
+
+
 def extract_frames(video_path: Path, fps: int = 1, output_dir: Path = None) -> List[Path]:
     """
     Extract frames from a video at the specified frames per second rate.
@@ -81,15 +93,16 @@ def preprocess_videos(dataset_folder: Path, fps: int = 1, video_type: str = "rgb
             continue
         
         name = file.name.lower()
-        if video_type not in name:
+        from annotation_feature.pipeline.utils import get_pair_key, is_modality_file
+        if not is_modality_file(file, video_type):
             continue
         
         # Build pair key (same logic as in pipeline.py)
-        from annotation_feature.pipeline.utils import get_pair_key
         pair_key = get_pair_key(file)
         
-        # Check if frames already cached
-        frame_output_dir = cache_dir / f"{file.stem}"
+        # Check if frames already cached. Include the relative parent path so
+        # aligned_dataset/<split>/SegN files do not overwrite each other.
+        frame_output_dir = _cache_output_dir(dataset_folder, cache_dir, file)
         cached_frames = sorted(frame_output_dir.glob("frame_*.png"))
         
         if cached_frames:

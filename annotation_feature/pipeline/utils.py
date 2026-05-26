@@ -22,6 +22,15 @@ def get_pair_key(file: Path) -> str:
     return str(file.parent / stem)
 
 
+def is_modality_file(file: Path, modality: str) -> bool:
+    """
+    Return True when a media filename has the modality as its own underscore token.
+    This avoids false IR matches in names like walk_upstairs_day_rgb.mp4.
+    """
+    tokens = file.stem.lower().split("_")
+    return modality.lower() in tokens
+
+
 def encode_frames_to_base64(frame_paths: list) -> list:
     """
     Encode image frames to base64 for API transmission.

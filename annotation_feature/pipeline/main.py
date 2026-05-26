@@ -14,7 +14,7 @@ from annotation_feature.demo_result import DEMO_RESULT
 from annotation_feature.video_preprocessor import extract_frames, preprocess_videos
 from annotation_feature.audio_preprocessor import preprocess_audio
 from .client import create_gemini_client
-from .utils import get_pair_key, video_extensions, audio_extensions
+from .utils import get_pair_key, is_modality_file, video_extensions, audio_extensions
 from .modalities.rgb import run_parallel_pipeline
 from .modalities.event import run_event_parallel_pipeline
 from .modalities.depth import run_depth_parallel_pipeline
@@ -23,6 +23,145 @@ from .modalities.audio import (
     format_audio_annotations,
     run_parallel_pipeline as run_audio_parallel_pipeline,
 )
+from prompts.event_prompts import EVENT_PROMPTS
+from prompts.ir_prompts import IR_PROMPTS
+from prompts.rgb_prompts import RGB_PROMPTS
+
+
+ANNOTATION_PROMPT_KEYS = {
+    "rgb": tuple(RGB_PROMPTS.keys()),
+    "event": tuple(EVENT_PROMPTS.keys()),
+    "ir": tuple(IR_PROMPTS.keys()),
+}
+
+
+def _load_existing_results(output_file: Path) -> Dict:
+    if not output_file.exists():
+        return {}
+
+    try:
+        with open(output_file, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"WARNING: Could not load existing results from {output_file}: {exc}")
+        return {}
+
+    if not isinstance(data, dict):
+        print(f"WARNING: Existing results file is not a JSON object: {output_file}")
+        return {}
+
+    return data
+
+
+def _annotation_item_has_content(item: Dict) -> bool:
+    if not isinstance(item, dict):
+        return False
+    return any(str(item.get(field, "")).strip() for field in ("caption", "question", "answer"))
+
+
+def _annotation_item_complete(item: Dict) -> bool:
+    if not isinstance(item, dict):
+        return False
+    return all(str(item.get(field, "")).strip() for field in ("caption", "question", "answer"))
+
+
+def _annotations_complete(annotations: Dict, expected_keys: tuple[str, ...]) -> bool:
+    if not isinstance(annotations, dict):
+        return False
+    return all(_annotation_item_complete(annotations.get(key, {})) for key in expected_keys)
+
+
+def _annotations_have_content(annotations: Dict) -> bool:
+    if not isinstance(annotations, dict):
+        return False
+    return any(_annotation_item_has_content(item) for item in annotations.values())
+
+
+def _entry_complete(entry: Dict, expected_keys: tuple[str, ...]) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    return _annotations_complete(entry.get("annotations", {}), expected_keys)
+
+
+def _merge_annotations(existing_annotations: Dict, new_annotations: Dict) -> Dict:
+    if not isinstance(existing_annotations, dict):
+        existing_annotations = {}
+    if not isinstance(new_annotations, dict):
+        return copy.deepcopy(existing_annotations)
+
+    if not _annotations_have_content(new_annotations) and _annotations_have_content(existing_annotations):
+        return copy.deepcopy(existing_annotations)
+
+    merged = copy.deepcopy(existing_annotations)
+    for annotation_type, new_item in new_annotations.items():
+        existing_item = merged.get(annotation_type, {})
+        if _annotation_item_has_content(new_item) or not _annotation_item_has_content(existing_item):
+            merged[annotation_type] = copy.deepcopy(new_item)
+    return merged
+
+
+def _write_results(output_file: Path, results: Dict) -> None:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_file, "w", encoding="utf-8") as handle:
+        json.dump(results, handle, indent=2, ensure_ascii=False)
+
+
+def _result_entry_for_pair(dataset_folder: Path, pair_key: str, modality: str, annotations: Dict) -> Dict:
+    night_file = None
+    day_file = None
+    for file in dataset_folder.rglob("*"):
+        if not file.is_file() or file.suffix.lower() not in video_extensions:
+            continue
+        name = file.name.lower()
+        if not is_modality_file(file, modality):
+            continue
+        if get_pair_key(file) == pair_key:
+            if "night" in name:
+                night_file = file
+            elif "day" in name:
+                day_file = file
+
+    return {
+        "night_file": str(night_file) if night_file else None,
+        "day_file": str(day_file) if day_file else None,
+        "annotations": annotations,
+    }
+
+
+def _resume_filter_pairs(
+    pairs_to_process: list[tuple[str, Dict[str, list]]],
+    existing_results: Dict,
+    expected_keys: tuple[str, ...],
+    label: str,
+) -> tuple[Dict[str, Dict[str, list]], int, int, int]:
+    available_pairs = {
+        pair_key: frames
+        for pair_key, frames in pairs_to_process
+        if frames.get("night") or frames.get("day")
+    }
+    complete_count = 0
+    partial_count = 0
+    empty_count = 0
+    pending_pairs: Dict[str, Dict[str, list]] = {}
+
+    for pair_key, frames in available_pairs.items():
+        existing_entry = existing_results.get(pair_key)
+        if _entry_complete(existing_entry, expected_keys):
+            complete_count += 1
+            continue
+
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        if _annotations_have_content(existing_annotations):
+            partial_count += 1
+        else:
+            empty_count += 1
+        pending_pairs[pair_key] = frames
+
+    print(
+        f"Resume scan for {label}: {complete_count} complete skipped, "
+        f"{partial_count} partial retry, {empty_count} empty/missing retry."
+    )
+    return pending_pairs, complete_count, partial_count, empty_count
 
 
 def _audio_source_pair_key(file: Path) -> str:
@@ -43,7 +182,7 @@ def _discover_audio_rgb_videos(dataset_folder: Path) -> Dict[str, Dict[str, Path
 
         name = file.name.lower()
         stem = file.stem.lower()
-        if "rgb" not in name or "with_audio" in name:
+        if not is_modality_file(file, "rgb") or "with_audio" in name:
             continue
         if not (stem.endswith("_day_rgb") or stem.endswith("_night_rgb")):
             continue
@@ -99,12 +238,9 @@ def run(
         if skip_api:
             print("Gemini API calls disabled - using DEMO_RESULT data\n")
 
-    client = None
-    if not skip_api:
-        client = create_gemini_client()
-
     dataset_folder = Path(dataset_folder)
-    results = {}
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
 
     if not dataset_folder.exists():
         print("ERROR: Dataset folder not found!")
@@ -131,19 +267,33 @@ def run(
     else:
         pairs_to_process = list(paired_frames.items())
 
-    available_pairs = {
-        pair_key: frames
-        for pair_key, frames in pairs_to_process
-        if frames.get("night") or frames.get("day")
-    }
+    expected_keys = ANNOTATION_PROMPT_KEYS["rgb"]
+    available_pairs, _, _, _ = _resume_filter_pairs(
+        pairs_to_process,
+        results,
+        expected_keys,
+        "RGB",
+    )
 
     if not available_pairs:
-        print("ERROR: No usable video frames found for selected pairs.")
+        print("No incomplete RGB pairs to process. Existing results are already complete for the selected pairs.")
         return results
 
     print(
         f"Processing {len(available_pairs)} batch pairs with up to 3 concurrent tasks and 4-second spacing..."
     )
+
+    client = None
+    if not skip_api:
+        client = create_gemini_client()
+
+    def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        existing_entry = results.get(pair_key, {})
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        merged_annotations = _merge_annotations(existing_annotations, annotation_results)
+        results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "rgb", merged_annotations)
+        _write_results(output_file, results)
+        print(f"Checkpoint saved for: {pair_key}")
 
     batch_results = asyncio.run(
         run_parallel_pipeline(
@@ -152,10 +302,11 @@ def run(
             max_concurrent=3,
             delay_between_pairs=4,
             skip_api=skip_api,
+            on_pair_complete=checkpoint_pair,
         )
     )
 
-    for pair_key, frames in pairs_to_process:
+    for pair_key, frames in available_pairs.items():
         night_frames = frames.get("night") or []
         day_frames = frames.get("day") or []
 
@@ -168,32 +319,11 @@ def run(
             print(f"WARNING: No batch output for pair {pair_key}. Falling back to DEMO_RESULT.")
             file_results = copy.deepcopy(DEMO_RESULT)
 
-        night_file = None
-        day_file = None
-        for file in dataset_folder.rglob("*"):
-            if not file.is_file() or file.suffix.lower() not in video_extensions:
-                continue
-            name = file.name.lower()
-            if "rgb" not in name:
-                continue
-            if get_pair_key(file) == pair_key:
-                if "night" in name:
-                    night_file = file
-                elif "day" in name:
-                    day_file = file
-
-        results[pair_key] = {
-            "night_file": str(night_file) if night_file else None,
-            "day_file": str(day_file) if day_file else None,
-            "annotations": file_results,
-        }
+        checkpoint_pair(pair_key, file_results)
         print(f"✓ Done: {pair_key}")
 
     # Save results to JSON file
-    output_file = Path(output_file)
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+    _write_results(output_file, results)
 
     print(f"\n" + "=" * 50)
     print(f"Results saved to: {output_file}")
@@ -227,12 +357,9 @@ def run_event(
         if skip_api:
             print("Gemini API calls disabled - using demo captions\n")
 
-    client = None
-    if not skip_api:
-        client = create_gemini_client()
-
     dataset_folder = Path(dataset_folder)
-    results = {}
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
 
     if not dataset_folder.exists():
         print("ERROR: Dataset folder not found!")
@@ -259,19 +386,33 @@ def run_event(
     else:
         pairs_to_process = list(paired_frames.items())
 
-    available_pairs = {
-        pair_key: frames
-        for pair_key, frames in pairs_to_process
-        if frames.get("night") or frames.get("day")
-    }
+    expected_keys = ANNOTATION_PROMPT_KEYS["event"]
+    available_pairs, _, _, _ = _resume_filter_pairs(
+        pairs_to_process,
+        results,
+        expected_keys,
+        "EVENT",
+    )
 
     if not available_pairs:
-        print("ERROR: No usable video frames found for selected pairs.")
+        print("No incomplete EVENT pairs to process. Existing results are already complete for the selected pairs.")
         return results
 
     print(
         f"Processing {len(available_pairs)} event pairs with up to 3 concurrent tasks and 4-second spacing..."
     )
+
+    client = None
+    if not skip_api:
+        client = create_gemini_client()
+
+    def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        existing_entry = results.get(pair_key, {})
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        merged_annotations = _merge_annotations(existing_annotations, annotation_results)
+        results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "event", merged_annotations)
+        _write_results(output_file, results)
+        print(f"Checkpoint saved for: {pair_key}")
 
     batch_results = asyncio.run(
         run_event_parallel_pipeline(
@@ -280,10 +421,11 @@ def run_event(
             max_concurrent=3,
             delay_between_pairs=4,
             skip_api=skip_api,
+            on_pair_complete=checkpoint_pair,
         )
     )
 
-    for pair_key, frames in pairs_to_process:
+    for pair_key, frames in available_pairs.items():
         night_frames = frames.get("night") or []
         day_frames = frames.get("day") or []
 
@@ -297,31 +439,10 @@ def run_event(
             from prompts.event_prompts import EVENT_PROMPTS
             file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in EVENT_PROMPTS.keys()}
 
-        night_file = None
-        day_file = None
-        for file in dataset_folder.rglob("*"):
-            if not file.is_file() or file.suffix.lower() not in video_extensions:
-                continue
-            name = file.name.lower()
-            if "event" not in name:
-                continue
-            if get_pair_key(file) == pair_key:
-                if "night" in name:
-                    night_file = file
-                elif "day" in name:
-                    day_file = file
-
-        results[pair_key] = {
-            "night_file": str(night_file) if night_file else None,
-            "day_file": str(day_file) if day_file else None,
-            "annotations": file_results,
-        }
+        checkpoint_pair(pair_key, file_results)
         print(f"✓ Done: {pair_key}")
 
-    output_file = Path(output_file)
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+    _write_results(output_file, results)
 
     print(f"\n" + "=" * 50)
     print(f"Event QA results saved to: {output_file}")
@@ -429,7 +550,7 @@ def run_depth(
             if not file.is_file() or file.suffix.lower() not in video_extensions:
                 continue
             name = file.name.lower()
-            if "depth" not in name:
+            if not is_modality_file(file, "depth"):
                 continue
             if get_pair_key(file) == pair_key:
                 if "night" in name:
@@ -614,12 +735,9 @@ def run_ir(
         if skip_api:
             print("Gemini API calls disabled - using demo results\n")
 
-    client = None
-    if not skip_api:
-        client = create_gemini_client()
-
     dataset_folder = Path(dataset_folder)
-    results = {}
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
 
     if not dataset_folder.exists():
         print("ERROR: Dataset folder not found!")
@@ -644,19 +762,33 @@ def run_ir(
     else:
         pairs_to_process = list(paired_frames.items())
 
-    available_pairs = {
-        pair_key: frames
-        for pair_key, frames in pairs_to_process
-        if frames.get("night") or frames.get("day")
-    }
+    expected_keys = ANNOTATION_PROMPT_KEYS["ir"]
+    available_pairs, _, _, _ = _resume_filter_pairs(
+        pairs_to_process,
+        results,
+        expected_keys,
+        "IR",
+    )
 
     if not available_pairs:
-        print("ERROR: No usable video frames found for selected pairs.")
+        print("No incomplete IR pairs to process. Existing results are already complete for the selected pairs.")
         return results
 
     print(
         f"Processing {len(available_pairs)} IR pairs with up to 3 concurrent tasks and 4-second spacing..."
     )
+
+    client = None
+    if not skip_api:
+        client = create_gemini_client()
+
+    def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        existing_entry = results.get(pair_key, {})
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        merged_annotations = _merge_annotations(existing_annotations, annotation_results)
+        results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "ir", merged_annotations)
+        _write_results(output_file, results)
+        print(f"Checkpoint saved for: {pair_key}")
 
     batch_results = asyncio.run(
         run_ir_parallel_pipeline(
@@ -665,10 +797,11 @@ def run_ir(
             max_concurrent=3,
             delay_between_pairs=4,
             skip_api=skip_api,
+            on_pair_complete=checkpoint_pair,
         )
     )
 
-    for pair_key, frames in pairs_to_process:
+    for pair_key, frames in available_pairs.items():
         night_frames = frames.get("night") or []
         day_frames = frames.get("day") or []
 
@@ -682,31 +815,10 @@ def run_ir(
             from prompts.ir_prompts import IR_PROMPTS
             file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in IR_PROMPTS.keys()}
 
-        night_file = None
-        day_file = None
-        for file in dataset_folder.rglob("*"):
-            if not file.is_file() or file.suffix.lower() not in video_extensions:
-                continue
-            name = file.name.lower()
-            if "ir" not in name:
-                continue
-            if get_pair_key(file) == pair_key:
-                if "night" in name:
-                    night_file = file
-                elif "day" in name:
-                    day_file = file
-
-        results[pair_key] = {
-            "night_file": str(night_file) if night_file else None,
-            "day_file": str(day_file) if day_file else None,
-            "annotations": file_results,
-        }
+        checkpoint_pair(pair_key, file_results)
         print(f"âœ“ Done: {pair_key}")
 
-    output_file = Path(output_file)
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+    _write_results(output_file, results)
 
     print(f"\n" + "=" * 50)
     print(f"IR QA results saved to: {output_file}")
