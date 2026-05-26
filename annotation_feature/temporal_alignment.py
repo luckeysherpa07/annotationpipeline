@@ -21,6 +21,7 @@ DEFAULT_NIGHT_OUTPUT_PATH = Path("temporal_alignment_night_results.json")
 DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_optical_flow_check_mailbox_day_event.json")
 DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_dtw_check_mailbox_day_event.json")
 DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_feature_check_mailbox_day_event.json")
+DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_cross_correlation_check_mailbox_day_audio.json")
 DEFAULT_PLOT_OUTPUT_FOLDER = Path("temporal_alignment_plots")
 DEFAULT_EXPORT_OUTPUT_FOLDER = Path("temporal_alignment_exports")
 EXPORT_PANEL_WIDTH = 320
@@ -28,6 +29,8 @@ EXPORT_PANEL_HEIGHT = 180
 EXPORT_PREVIEW_FPS = 10
 DTW_EXPORT_PREVIEW_FPS = 30
 DTW_EXPORT_SMOOTHING_SECONDS = 1.5
+AUDIO_ALIGNMENT_SAMPLE_RATE = 16000
+AUDIO_ALIGNMENT_MAX_LAG_SECONDS = 30.0
 FEATURE_ALIGNMENT_SAMPLE_STRIDE_SECONDS = 4.0
 FEATURE_ALIGNMENT_OFFSET_STEP_SECONDS = 0.5
 FEATURE_ALIGNMENT_MAX_OFFSET_SECONDS = 20.0
@@ -109,6 +112,52 @@ def _video_metadata(video_path: Path) -> dict[str, float | int | bool]:
         "frame_count": frame_count,
         "duration_seconds": duration_seconds,
     }
+
+
+def _audio_energy_trace(
+    audio_path: Path,
+    sample_rate: int = AUDIO_ALIGNMENT_SAMPLE_RATE,
+    fps: float = DTW_EXPORT_PREVIEW_FPS,
+) -> tuple[np.ndarray, float]:
+    if not audio_path.exists():
+        raise FileNotFoundError(f"Audio file does not exist: {audio_path}")
+    if fps <= 0:
+        raise ValueError("Audio activity trace requires a positive target FPS.")
+
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-i",
+        str(audio_path),
+        "-ac",
+        "1",
+        "-ar",
+        str(int(sample_rate)),
+        "-f",
+        "f32le",
+        "pipe:1",
+    ]
+    completed = subprocess.run(command, check=False, capture_output=True)
+    if completed.returncode != 0:
+        error = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(f"Failed to decode audio activity trace: {error}")
+
+    samples = np.frombuffer(completed.stdout, dtype=np.float32).astype(np.float32, copy=True)
+    if samples.size < 3:
+        raise ValueError(f"Audio file is too short or empty: {audio_path}")
+    samples = np.nan_to_num(samples, copy=False)
+    duration_seconds = float(samples.size / max(1, int(sample_rate)))
+
+    hop_size = max(1, int(round(sample_rate / fps)))
+    frame_count = int(np.ceil(samples.size / hop_size))
+    padded_size = frame_count * hop_size
+    if padded_size > samples.size:
+        samples = np.pad(samples, (0, padded_size - samples.size), mode="constant")
+    windows = samples.reshape(frame_count, hop_size)
+    rms = np.sqrt(np.mean(windows * windows, axis=1)).astype(np.float32)
+    return rms, duration_seconds
 
 
 def _motion_energy_trace(video_path: Path, resize_width: int = 160) -> np.ndarray:
@@ -732,6 +781,72 @@ def _write_activity_signal_plot(
     cv2.imwrite(str(output_path), canvas)
 
 
+def _write_rgb_audio_activity_signal_plot(
+    output_path: Path,
+    title: str,
+    reference_trace: np.ndarray,
+    reference_fps: float,
+    audio_trace: np.ndarray,
+    audio_fps: float,
+    alignment: dict[str, Any],
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    width, height = 1500, 780
+    canvas = np.full((height, width, 3), 255, dtype=np.uint8)
+    left, right = 90, width - 50
+    raw_bounds = (left, 145, right, 335)
+    aligned_bounds = (left, 485, right, 675)
+
+    rgb_color = MODALITY_COLORS["rgb"]
+    audio_color = (210, 115, 35)
+    offset_seconds = alignment.get("offset_seconds")
+    offset_seconds = float(offset_seconds) if isinstance(offset_seconds, (int, float)) else None
+    correlation = alignment.get("peak_correlation")
+    overlap_ratio = alignment.get("overlap_ratio")
+    confidence = str(alignment.get("confidence_label") or "unknown")
+
+    reference_times = _times_for_trace(reference_trace, reference_fps)
+    audio_times = _times_for_trace(audio_trace, audio_fps)
+    reference_values = _normalize_for_plot(reference_trace)
+    audio_values = _normalize_for_plot(audio_trace)
+    aligned_audio_times = audio_times - offset_seconds if offset_seconds is not None else audio_times
+
+    raw_items = [
+        (reference_times, reference_values, rgb_color, "rgb optical flow"),
+        (audio_times, audio_values, audio_color, "audio RMS"),
+    ]
+    aligned_items = [
+        (reference_times, reference_values, rgb_color, "rgb optical flow"),
+        (aligned_audio_times, audio_values, audio_color, "audio RMS shifted"),
+    ]
+    raw_min_time, raw_max_time = _time_range(raw_items)
+    aligned_min_time, aligned_max_time = _time_range(aligned_items)
+
+    summary = (
+        f"offset {offset_seconds:+.3f}s  " if offset_seconds is not None else "offset unknown  "
+    )
+    if isinstance(correlation, (int, float)):
+        summary += f"correlation {float(correlation):.3f}  "
+    if isinstance(overlap_ratio, (int, float)):
+        summary += f"overlap {float(overlap_ratio):.3f}  "
+    summary += f"confidence {confidence}"
+
+    cv2.putText(canvas, title, (left, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.86, TEXT_COLOR, 2, cv2.LINE_AA)
+    cv2.putText(canvas, summary, (left, 88), cv2.FONT_HERSHEY_SIMPLEX, 0.52, TEXT_COLOR, 1, cv2.LINE_AA)
+    _draw_panel(canvas, "Raw RGB/audio activity traces", raw_bounds, raw_min_time, raw_max_time, raw_items)
+    _draw_panel(
+        canvas,
+        "Fixed-offset audio trace on RGB timeline",
+        aligned_bounds,
+        aligned_min_time,
+        aligned_max_time,
+        aligned_items,
+    )
+
+    cv2.imwrite(str(output_path), canvas)
+
+
 def _write_dtw_activity_signal_plot(
     output_path: Path,
     title: str,
@@ -1042,6 +1157,85 @@ def _estimate_offset(
         "peak_margin": float(peak_margin),
         "lag_fps": float(fps),
         "warnings": warnings,
+    }
+
+
+def _estimate_raw_cross_correlation_offset(
+    reference_trace: np.ndarray,
+    target_trace: np.ndarray,
+    fps: float,
+    max_lag_seconds: float,
+) -> dict[str, Any]:
+    if _is_flat_trace(reference_trace) or _is_flat_trace(target_trace):
+        return {
+            "offset_seconds": None,
+            "offset_frames": None,
+            "peak_correlation": None,
+            "confidence_label": "low",
+            "candidate_offsets": [],
+            "selected_by": "unavailable",
+            "warnings": ["Activity trace is too short or too flat for reliable alignment."],
+        }
+
+    prepared_reference = _prepare_alignment_trace(reference_trace, fps=fps)
+    prepared_target = _prepare_alignment_trace(target_trace, fps=fps)
+    max_lag_frames = min(
+        int(round(max_lag_seconds * fps)),
+        max(0, prepared_reference.size - 3),
+        max(0, prepared_target.size - 3),
+    )
+
+    candidates: list[dict[str, Any]] = []
+    max_overlap = max(1, min(prepared_reference.size, prepared_target.size))
+    for lag in range(-max_lag_frames, max_lag_frames + 1):
+        reference_overlap, target_overlap = _lag_overlaps(prepared_reference, prepared_target, lag)
+        correlation = _overlap_correlation(reference_overlap, target_overlap)
+        if correlation is None:
+            continue
+
+        candidates.append(
+            {
+                "offset_seconds": float(lag / fps),
+                "offset_frames": int(lag),
+                "correlation": float(correlation),
+                "overlap_ratio": float(reference_overlap.size / max_overlap),
+            }
+        )
+
+    if not candidates:
+        return {
+            "offset_seconds": None,
+            "offset_frames": None,
+            "peak_correlation": None,
+            "confidence_label": "low",
+            "candidate_offsets": [],
+            "selected_by": "unavailable",
+            "warnings": ["No valid cross-correlation overlap was available."],
+        }
+
+    candidates_by_correlation = sorted(candidates, key=lambda item: item["correlation"], reverse=True)
+    selected = candidates_by_correlation[0]
+    second_correlation = candidates_by_correlation[1]["correlation"] if len(candidates_by_correlation) > 1 else None
+    peak_margin = float(selected["correlation"] - second_correlation) if second_correlation is not None else 0.0
+
+    return {
+        "offset_seconds": float(selected["offset_seconds"]),
+        "offset_frames": int(selected["offset_frames"]),
+        "peak_correlation": float(selected["correlation"]),
+        "confidence_label": _confidence_from_correlation(float(selected["correlation"]), peak_margin=peak_margin),
+        "candidate_offsets": [
+            {
+                "offset_seconds": round(float(item["offset_seconds"]), 6),
+                "offset_frames": int(item["offset_frames"]),
+                "correlation": round(float(item["correlation"]), 6),
+                "overlap_ratio": round(float(item["overlap_ratio"]), 6),
+            }
+            for item in candidates_by_correlation[:TOP_LAG_CANDIDATE_COUNT]
+        ],
+        "selected_by": "best_raw_correlation",
+        "peak_margin": float(peak_margin),
+        "lag_fps": float(fps),
+        "warnings": [],
     }
 
 
@@ -2750,6 +2944,259 @@ def run_and_export_check_mailbox_day_rgb_event_feature_alignment(
     )
     result["export"] = export_summary
     with open(Path(output_path), "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2, ensure_ascii=False)
+    return result
+
+
+def _export_rgb_audio_cross_correlation_for_result(
+    result: dict[str, Any],
+    output_folder: Path,
+    prefer_gpu: bool = True,
+) -> dict[str, Any]:
+    output_path = output_folder / "check_mailbox_day_rgb_audio_cross_correlation_aligned.mp4"
+    reference_file = Path(str(result.get("reference_file", "")))
+    audio_file = Path(str(result.get("audio_file", "")))
+    reference_duration = float(result.get("reference_duration_seconds") or 0.0)
+    audio_duration = float(result.get("audio_duration_seconds") or 0.0)
+    reference_fps = float(result.get("reference_fps") or DTW_EXPORT_PREVIEW_FPS)
+    alignment = result.get("alignment") if isinstance(result.get("alignment"), dict) else {}
+    offset_seconds = alignment.get("offset_seconds")
+
+    if offset_seconds is None:
+        raise ValueError("RGB/AUDIO alignment must include offset_seconds.")
+    offset_seconds = float(offset_seconds)
+    if not reference_file.exists():
+        raise FileNotFoundError(f"RGB reference file does not exist: {reference_file}")
+    if not audio_file.exists():
+        raise FileNotFoundError(f"Audio file does not exist: {audio_file}")
+    if reference_duration <= 0 or audio_duration <= 0:
+        raise ValueError("RGB/AUDIO export requires positive RGB and audio durations.")
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+    if offset_seconds >= audio_duration:
+        raise ValueError("Selected offset seeks beyond the end of the audio file.")
+
+    preview_fps = min(max(reference_fps, 1.0), DTW_EXPORT_PREVIEW_FPS)
+    audio_seek = max(0.0, offset_seconds)
+    audio_delay_seconds = max(0.0, -offset_seconds)
+    audio_label = _ffmpeg_escape_text(f"AUDIO offset {offset_seconds:+.3f}s")
+    rgb_label = _ffmpeg_escape_text("RGB")
+    summary_label = _ffmpeg_escape_text(
+        f"RGB/AUDIO cross-correlation corr={float(alignment.get('peak_correlation') or 0.0):.3f}"
+    )
+
+    audio_filter = "[1:a]apad[a]"
+    if audio_delay_seconds > 0:
+        delay_ms = int(round(audio_delay_seconds * 1000.0))
+        audio_filter = f"[1:a]adelay={delay_ms}:all=1,apad[a]"
+
+    filter_complex = (
+        f"[0:v]fps={preview_fps:.6f},"
+        f"scale={EXPORT_PANEL_WIDTH * 2}:{EXPORT_PANEL_HEIGHT * 2}:force_original_aspect_ratio=decrease,"
+        f"pad={EXPORT_PANEL_WIDTH * 2}:{EXPORT_PANEL_HEIGHT * 2}:(ow-iw)/2:(oh-ih)/2,"
+        f"drawtext=text='{rgb_label}':x=12:y=12:fontsize={EXPORT_LABEL_FONT_SIZE}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.55:boxborderw=8,"
+        f"drawtext=text='{audio_label}':x=12:y=44:fontsize={EXPORT_LABEL_FONT_SIZE}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.55:boxborderw=8,"
+        f"drawtext=text='{summary_label}':x=12:y=76:fontsize={EXPORT_LABEL_FONT_SIZE}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.55:boxborderw=8,"
+        "setsar=1,format=yuv420p[outv];"
+        f"{audio_filter}"
+    )
+    command_prefix = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        str(reference_file),
+    ]
+    if audio_seek > 0:
+        command_prefix.extend(["-ss", f"{audio_seek:.6f}"])
+    command_prefix.extend(
+        [
+            "-i",
+            str(audio_file),
+            "-filter_complex",
+            filter_complex,
+            "-map",
+            "[outv]",
+            "-map",
+            "[a]",
+            "-t",
+            f"{reference_duration:.6f}",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+        ]
+    )
+    encoder_used, error = _run_ffmpeg_with_optional_gpu(command_prefix, output_path, prefer_gpu=prefer_gpu)
+    if encoder_used is None:
+        raise RuntimeError(f"Failed to export aligned RGB/AUDIO video: {error}")
+
+    reference_overlap, audio_overlap = _overlap_windows(reference_duration, audio_duration, offset_seconds)
+    return {
+        "sample": "check_mailbox",
+        "side": "day",
+        "output_file": str(output_path),
+        "reference_file": str(reference_file),
+        "audio_file": str(audio_file),
+        "offset_seconds": round(offset_seconds, 6),
+        "correlation": round(float(alignment.get("peak_correlation") or 0.0), 6),
+        "overlap_ratio": round(float(alignment.get("overlap_ratio") or 0.0), 6),
+        "overlap_reference_seconds": reference_overlap,
+        "overlap_audio_seconds": audio_overlap,
+        "duration_seconds": round(reference_duration, 6),
+        "preview_fps": round(float(preview_fps), 6),
+        "frames_written": int(round(reference_duration * preview_fps)),
+        "encoder": encoder_used,
+        "audio_encoder": "aac",
+        "audio_shift": {
+            "source_seek_seconds": round(audio_seek, 6),
+            "output_delay_seconds": round(audio_delay_seconds, 6),
+            "speed_warped": False,
+        },
+    }
+
+
+def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_path: Path | str = DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH,
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    output_folder: Path | str = DEFAULT_EXPORT_OUTPUT_FOLDER,
+    resize_width: int = 160,
+    max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
+    prefer_gpu: bool = True,
+) -> dict[str, Any]:
+    """Align check_mailbox day RGB with its separate .m4a audio using one fixed offset."""
+    dataset_folder = Path(dataset_folder)
+    output_path = Path(output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder = Path(output_folder)
+    reference_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb.mp4"
+    audio_file = dataset_folder / "check_mailbox_split" / "check_mailbox_day.m4a"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    result: dict[str, Any] = {
+        "sample": "check_mailbox",
+        "side": "day",
+        "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+        "reference_modality": "rgb",
+        "target_modality": "audio",
+        "reference_file": str(reference_file),
+        "audio_file": str(audio_file),
+        "ignored_files": [str(dataset_folder / "check_mailbox_split" / "check_mailbox_day_rgb_with_audio.mp4")],
+        "speed_warped": False,
+        "plot_file": None,
+        "warnings": [],
+    }
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+
+    try:
+        reference_metadata = _video_metadata(reference_file)
+        if not bool(reference_metadata.get("opened")):
+            raise ValueError(f"Could not open RGB reference video: {reference_file}")
+        reference_fps = float(reference_metadata.get("fps") or 0.0)
+        reference_duration = float(reference_metadata.get("duration_seconds") or 0.0)
+        if reference_fps <= 0 or reference_duration <= 0:
+            raise ValueError("RGB reference video has invalid FPS or duration.")
+
+        reference_trace = _optical_flow_magnitude_trace(reference_file, resize_width=resize_width)
+        audio_trace, audio_duration = _audio_energy_trace(audio_file, fps=reference_fps)
+        alignment = _estimate_raw_cross_correlation_offset(
+            reference_trace,
+            audio_trace,
+            fps=reference_fps,
+            max_lag_seconds=max_lag_seconds,
+        )
+        reference_overlap, audio_overlap = _overlap_windows(
+            reference_duration,
+            audio_duration,
+            alignment.get("offset_seconds"),
+        )
+        alignment["overlap_reference_seconds"] = reference_overlap
+        alignment["overlap_audio_seconds"] = audio_overlap
+        if alignment.get("candidate_offsets"):
+            selected_frames = int(alignment.get("offset_frames") or 0)
+            reference_overlap_trace, audio_overlap_trace = _lag_overlaps(
+                _prepare_alignment_trace(reference_trace, reference_fps),
+                _prepare_alignment_trace(audio_trace, reference_fps),
+                selected_frames,
+            )
+            max_overlap = max(1, min(reference_trace.size, audio_trace.size))
+            alignment["overlap_ratio"] = float(reference_overlap_trace.size / max_overlap)
+            alignment["overlap_samples"] = int(reference_overlap_trace.size)
+            alignment["selected_correlation_recomputed"] = _overlap_correlation(
+                reference_overlap_trace,
+                audio_overlap_trace,
+            )
+        result.update(
+            {
+                "reference_fps": reference_fps,
+                "reference_frame_count": int(reference_metadata.get("frame_count") or 0),
+                "reference_duration_seconds": reference_duration,
+                "audio_duration_seconds": audio_duration,
+                "reference_trace_count": int(reference_trace.size),
+                "audio_trace_count": int(audio_trace.size),
+                "alignment": alignment,
+            }
+        )
+
+        if plot_output_folder is not None:
+            plot_path = plot_output_folder / "check_mailbox_day_rgb_audio_cross_correlation_activity_signal.png"
+            try:
+                _write_rgb_audio_activity_signal_plot(
+                    plot_path,
+                    "RGB/audio cross-correlation: check_mailbox day",
+                    reference_trace=reference_trace,
+                    reference_fps=reference_fps,
+                    audio_trace=audio_trace,
+                    audio_fps=reference_fps,
+                    alignment=alignment,
+                )
+                alignment["activity_plot_file"] = str(plot_path)
+                result["plot_file"] = str(plot_path)
+            except Exception as exc:
+                warning = f"Could not write RGB/AUDIO activity plot: {exc}"
+                result["warnings"].append(warning)
+                alignment.setdefault("warnings", []).append(warning)
+
+        if alignment.get("offset_seconds") is None:
+            raise ValueError("No RGB/AUDIO offset could be estimated.")
+        exported.append(
+            _export_rgb_audio_cross_correlation_for_result(
+                result=result,
+                output_folder=output_folder,
+                prefer_gpu=prefer_gpu,
+            )
+        )
+    except Exception as exc:
+        skipped.append(
+            {
+                "sample": "check_mailbox",
+                "side": "day",
+                "reference_file": str(reference_file),
+                "audio_file": str(audio_file),
+                "reason": str(exc),
+            }
+        )
+
+    export_summary = {
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "rgb_audio_cross_correlation_export_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(export_summary, handle, indent=2)
+    export_summary["summary_file"] = str(summary_path)
+    result["export"] = export_summary
+    with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2, ensure_ascii=False)
     return result
 
