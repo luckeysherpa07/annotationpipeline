@@ -644,30 +644,30 @@ def main():
             print("-" * 60)
             print("Uses local OpenCV processing only; no Gemini/API calls.")
             print("Uses RGB as the reference and aligns event, IR, and depth to it.")
-            print("Writes temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
+            print("Writes temporal_alignment_json/temporal_alignment_day_results.json and temporal_alignment_json/temporal_alignment_night_results.json.")
             print("Writes side-labeled combined and per-modality activity-signal PNG plots under temporal_alignment_plots/.\n")
             alignment_results = run_day_night_temporal_alignment(
                 dataset_folder="dataset",
-                day_output_path="temporal_alignment_day_results.json",
-                night_output_path="temporal_alignment_night_results.json",
+                day_output_path="temporal_alignment_json/temporal_alignment_day_results.json",
+                night_output_path="temporal_alignment_json/temporal_alignment_night_results.json",
                 plot_output_folder="temporal_alignment_plots",
             )
             print(f"Aligned {len(alignment_results['day'])} day multimodal sample(s).")
             print(f"Aligned {len(alignment_results['night'])} night multimodal sample(s).")
-            print("Results saved to temporal_alignment_day_results.json and temporal_alignment_night_results.json")
+            print("Results saved to temporal_alignment_json/temporal_alignment_day_results.json and temporal_alignment_json/temporal_alignment_night_results.json")
             print("Plots saved under temporal_alignment_plots/")
 
         elif choice == "27":
             print("\n" + "-" * 60)
             print("Running: export all day/night RGB/EVENT/DEPTH/IR aligned grid videos")
             print("-" * 60)
-            print("Reads temporal_alignment_day_results.json and temporal_alignment_night_results.json.")
+            print("Reads temporal_alignment_json/temporal_alignment_day_results.json and temporal_alignment_json/temporal_alignment_night_results.json.")
             print("Uses stored EVENT, DEPTH, and IR offset_seconds for each sample.")
             print("Writes low-resolution preview grids under temporal_alignment_exports/.")
             print("Tries GPU h264_nvenc first, then falls back to CPU libx264 if needed.\n")
             export_summary = export_day_night_rgb_event_depth_ir_alignment_grids(
-                day_alignment_input_path="temporal_alignment_day_results.json",
-                night_alignment_input_path="temporal_alignment_night_results.json",
+                day_alignment_input_path="temporal_alignment_json/temporal_alignment_day_results.json",
+                night_alignment_input_path="temporal_alignment_json/temporal_alignment_night_results.json",
                 output_folder="temporal_alignment_exports",
                 prefer_gpu=True,
             )
@@ -686,12 +686,12 @@ def main():
             print("\n" + "-" * 60)
             print("Running: optical-flow temporal alignment for check_mailbox day RGB/EVENT")
             print("-" * 60)
-            print("This is diagnostic only and does not overwrite temporal_alignment_day_results.json.")
-            print("Writes temporal_alignment_optical_flow_check_mailbox_day_event.json.")
+            print("This is diagnostic only and does not overwrite temporal_alignment_json/temporal_alignment_day_results.json.")
+            print("Writes temporal_alignment_json/temporal_alignment_optical_flow_check_mailbox_day_event.json.")
             print("Writes temporal_alignment_plots/check_mailbox_day_rgb_event_optical_flow_activity_signal.png.\n")
             optical_flow_result = run_check_mailbox_day_rgb_event_optical_flow_alignment(
                 dataset_folder="dataset",
-                output_path="temporal_alignment_optical_flow_check_mailbox_day_event.json",
+                output_path="temporal_alignment_json/temporal_alignment_optical_flow_check_mailbox_day_event.json",
                 plot_output_folder="temporal_alignment_plots",
             )
             alignment = optical_flow_result.get("alignment") or {}
@@ -719,12 +719,12 @@ def main():
             print("\n" + "-" * 60)
             print("Running: export optical-flow RGB/EVENT aligned video for check_mailbox day")
             print("-" * 60)
-            print("Reads temporal_alignment_optical_flow_check_mailbox_day_event.json.")
+            print("Reads temporal_alignment_json/temporal_alignment_optical_flow_check_mailbox_day_event.json.")
             print("Uses the stored optical-flow EVENT offset_seconds.")
             print("Writes a low-resolution RGB/EVENT preview under temporal_alignment_exports/.")
             print("Tries GPU h264_nvenc first, then falls back to CPU libx264 if needed.\n")
             export_summary = export_check_mailbox_day_rgb_event_optical_flow_alignment(
-                alignment_input_path="temporal_alignment_optical_flow_check_mailbox_day_event.json",
+                alignment_input_path="temporal_alignment_json/temporal_alignment_optical_flow_check_mailbox_day_event.json",
                 output_folder="temporal_alignment_exports",
                 prefer_gpu=True,
             )
@@ -743,14 +743,14 @@ def main():
             print("\n" + "-" * 60)
             print("Running: DTW temporal alignment + drift-corrected export for check_mailbox day RGB/EVENT")
             print("-" * 60)
-            print("This is diagnostic only and does not overwrite temporal_alignment_day_results.json.")
+            print("This is diagnostic only and does not overwrite temporal_alignment_json/temporal_alignment_day_results.json.")
             print("Uses optical-flow activity traces and Dynamic Time Warping to estimate a time-varying EVENT offset.")
-            print("Writes temporal_alignment_dtw_check_mailbox_day_event.json.")
+            print("Writes temporal_alignment_json/temporal_alignment_dtw_check_mailbox_day_event.json.")
             print("Writes temporal_alignment_plots/check_mailbox_day_rgb_event_dtw_activity_signal.png.")
             print("Writes temporal_alignment_exports/check_mailbox_day_rgb_event_dtw_sliced_aligned.mp4.\n")
             dtw_result = run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
                 dataset_folder="dataset",
-                output_path="temporal_alignment_dtw_check_mailbox_day_event.json",
+                output_path="temporal_alignment_json/temporal_alignment_dtw_check_mailbox_day_event.json",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
                 window_seconds=10.0,
@@ -784,12 +784,12 @@ def main():
             print("-" * 60)
             print("Uses optical-flow activity traces and Dynamic Time Warping for every complete RGB/EVENT pair.")
             print("Includes both day and night videos discovered under dataset/.")
-            print("Writes per-pair temporal_alignment_dtw_<sample>_<side>_event.json files.")
+            print("Writes per-pair temporal_alignment_json/temporal_alignment_dtw_<sample>_<side>_event.json files.")
             print("Writes temporal_alignment_exports/*_rgb_event_dtw_sliced_aligned.mp4.")
             print("Writes temporal_alignment_exports/rgb_event_dtw_all_export_summary.json.\n")
             export_summary = run_and_export_all_rgb_event_dtw_alignments(
                 dataset_folder="dataset",
-                alignment_output_folder=".",
+                alignment_output_folder="temporal_alignment_json",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
                 window_seconds=10.0,
@@ -810,14 +810,14 @@ def main():
             print("\n" + "-" * 60)
             print("Running: feature-based temporal alignment + aligned export for check_mailbox day RGB/EVENT")
             print("-" * 60)
-            print("This is diagnostic only and does not overwrite temporal_alignment_day_results.json.")
+            print("This is diagnostic only and does not overwrite temporal_alignment_json/temporal_alignment_day_results.json.")
             print("Uses ORB feature matches on edge-like RGB/EVENT frames to estimate local EVENT offsets.")
-            print("Writes temporal_alignment_feature_check_mailbox_day_event.json.")
+            print("Writes temporal_alignment_json/temporal_alignment_feature_check_mailbox_day_event.json.")
             print("Writes temporal_alignment_plots/check_mailbox_day_rgb_event_feature_offsets.png.")
             print("Writes temporal_alignment_exports/check_mailbox_day_rgb_event_feature_aligned.mp4.\n")
             feature_result = run_and_export_check_mailbox_day_rgb_event_feature_alignment(
                 dataset_folder="dataset",
-                output_path="temporal_alignment_feature_check_mailbox_day_event.json",
+                output_path="temporal_alignment_json/temporal_alignment_feature_check_mailbox_day_event.json",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
             )
@@ -855,12 +855,12 @@ def main():
             print("Uses RGB optical-flow activity and separate .m4a audio RMS activity.")
             print("Ignores check_mailbox_day_rgb_with_audio.mp4 and embedded RGB audio.")
             print("Uses one fixed offset, so audio playback speed is not warped.")
-            print("Writes temporal_alignment_cross_correlation_check_mailbox_day_audio.json.")
+            print("Writes temporal_alignment_json/temporal_alignment_cross_correlation_check_mailbox_day_audio.json.")
             print("Writes temporal_alignment_plots/check_mailbox_day_rgb_audio_cross_correlation_activity_signal.png.")
             print("Writes temporal_alignment_exports/check_mailbox_day_rgb_audio_cross_correlation_aligned.mp4.\n")
             audio_result = run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
                 dataset_folder="dataset",
-                output_path="temporal_alignment_cross_correlation_check_mailbox_day_audio.json",
+                output_path="temporal_alignment_json/temporal_alignment_cross_correlation_check_mailbox_day_audio.json",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
             )
@@ -897,14 +897,14 @@ def main():
             print("-" * 60)
             print("Discovers every complete RGB/EVENT/IR/DEPTH/.m4a set under dataset/.")
             print("Includes day and night files, and ignores *_rgb_with_audio.mp4 plus embedded RGB audio.")
-            print("Writes per-pair EVENT DTW and RGB/AUDIO JSON files.")
+            print("Writes per-pair EVENT DTW and RGB/AUDIO JSON files under temporal_alignment_json/.")
             print("Aligns IR and DEPTH to RGB with fixed-offset cross-correlation.")
             print("Writes temporal_alignment_exports/*_rgb_event_ir_depth_dtw_with_aligned_audio.mp4.")
             print("Does not keep intermediate no-audio preview videos.")
             print("Writes temporal_alignment_exports/rgb_event_ir_depth_dtw_with_audio_all_export_summary.json.\n")
             combined_summary = run_and_export_all_rgb_event_dtw_with_audio_alignments(
                 dataset_folder="dataset",
-                alignment_output_folder=".",
+                alignment_output_folder="temporal_alignment_json",
                 plot_output_folder="temporal_alignment_plots",
                 output_folder="temporal_alignment_exports",
                 window_seconds=10.0,
@@ -934,7 +934,7 @@ def main():
             summary = run_and_export_cut_carrot_aligned_dataset_segments(
                 dataset_folder="dataset",
                 output_folder="aligned_dataset",
-                alignment_output_folder=".",
+                alignment_output_folder="temporal_alignment_json",
                 plot_output_folder="temporal_alignment_plots",
                 segment_seconds=30.0,
                 window_seconds=10.0,
@@ -963,7 +963,7 @@ def main():
             summary = run_and_export_all_aligned_dataset_segments(
                 dataset_folder="dataset",
                 output_folder="aligned_dataset",
-                alignment_output_folder=".",
+                alignment_output_folder="temporal_alignment_json",
                 plot_output_folder="temporal_alignment_plots",
                 segment_seconds=30.0,
                 window_seconds=10.0,

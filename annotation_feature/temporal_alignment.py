@@ -15,13 +15,20 @@ VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".m
 REFERENCE_MODALITY = "rgb"
 TARGET_MODALITIES = ("event", "ir", "depth")
 ALL_MODALITIES = (REFERENCE_MODALITY, *TARGET_MODALITIES)
-DEFAULT_OUTPUT_PATH = Path("temporal_alignment_results.json")
-DEFAULT_DAY_OUTPUT_PATH = Path("temporal_alignment_day_results.json")
-DEFAULT_NIGHT_OUTPUT_PATH = Path("temporal_alignment_night_results.json")
-DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_optical_flow_check_mailbox_day_event.json")
-DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_dtw_check_mailbox_day_event.json")
-DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_feature_check_mailbox_day_event.json")
-DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_cross_correlation_check_mailbox_day_audio.json")
+DEFAULT_ALIGNMENT_JSON_FOLDER = Path("temporal_alignment_json")
+DEFAULT_OUTPUT_PATH = DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_results.json"
+DEFAULT_DAY_OUTPUT_PATH = DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_day_results.json"
+DEFAULT_NIGHT_OUTPUT_PATH = DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_night_results.json"
+DEFAULT_OPTICAL_FLOW_CHECK_MAILBOX_OUTPUT_PATH = (
+    DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_optical_flow_check_mailbox_day_event.json"
+)
+DEFAULT_DTW_CHECK_MAILBOX_OUTPUT_PATH = DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_dtw_check_mailbox_day_event.json"
+DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH = (
+    DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_feature_check_mailbox_day_event.json"
+)
+DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH = (
+    DEFAULT_ALIGNMENT_JSON_FOLDER / "temporal_alignment_cross_correlation_check_mailbox_day_audio.json"
+)
 DEFAULT_PLOT_OUTPUT_FOLDER = Path("temporal_alignment_plots")
 DEFAULT_EXPORT_OUTPUT_FOLDER = Path("temporal_alignment_exports")
 DEFAULT_ALIGNED_DATASET_FOLDER = Path("aligned_dataset")
@@ -2827,7 +2834,9 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_alignment(
         output_folder=output_folder,
     )
     result["export"] = export_summary
-    with open(Path(output_path), "w", encoding="utf-8") as handle:
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2, ensure_ascii=False)
     return result
 
@@ -3098,7 +3107,9 @@ def run_and_export_check_mailbox_day_rgb_event_feature_alignment(
         output_folder=output_folder,
     )
     result["export"] = export_summary
-    with open(Path(output_path), "w", encoding="utf-8") as handle:
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2, ensure_ascii=False)
     return result
 
@@ -3368,6 +3379,7 @@ def _run_rgb_audio_cross_correlation_alignment(
         json.dump(export_summary, handle, indent=2)
     export_summary["summary_file"] = str(summary_path)
     result["export"] = export_summary
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2, ensure_ascii=False)
     return result
