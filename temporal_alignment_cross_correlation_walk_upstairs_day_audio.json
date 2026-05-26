@@ -1,0 +1,100 @@
+{
+  "sample": "walk_upstairs",
+  "side": "day",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/walk_upstairs_split/walk_upstairs_day_rgb.mp4",
+  "audio_file": "dataset/walk_upstairs_split/walk_upstairs_day.m4a",
+  "ignored_files": [
+    "dataset/walk_upstairs_split/walk_upstairs_day_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/walk_upstairs_day_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 2280,
+  "reference_duration_seconds": 76.0,
+  "audio_duration_seconds": 76.0106875,
+  "reference_trace_count": 2279,
+  "audio_trace_count": 2282,
+  "alignment": {
+    "offset_seconds": -19.6,
+    "offset_frames": -588,
+    "peak_correlation": 0.4180378317832947,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -19.6,
+        "offset_frames": -588,
+        "correlation": 0.418038,
+        "overlap_ratio": 0.741992
+      },
+      {
+        "offset_seconds": -19.566667,
+        "offset_frames": -587,
+        "correlation": 0.418003,
+        "overlap_ratio": 0.742431
+      },
+      {
+        "offset_seconds": -19.633333,
+        "offset_frames": -589,
+        "correlation": 0.417218,
+        "overlap_ratio": 0.741553
+      },
+      {
+        "offset_seconds": -19.533333,
+        "offset_frames": -586,
+        "correlation": 0.417215,
+        "overlap_ratio": 0.74287
+      },
+      {
+        "offset_seconds": -19.5,
+        "offset_frames": -585,
+        "correlation": 0.415812,
+        "overlap_ratio": 0.743308
+      },
+      {
+        "offset_seconds": -19.666667,
+        "offset_frames": -590,
+        "correlation": 0.415437,
+        "overlap_ratio": 0.741115
+      },
+      {
+        "offset_seconds": -19.466667,
+        "offset_frames": -584,
+        "correlation": 0.414005,
+        "overlap_ratio": 0.743747
+      },
+      {
+        "offset_seconds": -19.7,
+        "offset_frames": -591,
+        "correlation": 0.412714,
+        "overlap_ratio": 0.740676
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 3.4481287002563477e-05,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 19.6,
+      "end": 76.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 56.4
+    },
+    "overlap_ratio": 0.7419921017990346,
+    "overlap_samples": 1691,
+    "selected_correlation_recomputed": 0.4180378317832947,
+    "activity_plot_file": "temporal_alignment_plots/walk_upstairs_day_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "walk_upstairs_day_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

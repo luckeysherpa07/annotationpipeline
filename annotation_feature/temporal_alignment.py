@@ -1883,6 +1883,43 @@ def _discover_rgb_event_audio_triplets(dataset_folder: Path) -> list[dict[str, A
     return triplets
 
 
+def _discover_aligned_dataset_sets(dataset_folder: Path) -> list[dict[str, Any]]:
+    sets: list[dict[str, Any]] = []
+    for reference_file in sorted(dataset_folder.rglob("*_rgb.mp4")):
+        if reference_file.name.endswith("_rgb_with_audio.mp4"):
+            continue
+        base_stem = reference_file.name[: -len("_rgb.mp4")]
+        if "_" in base_stem:
+            sample_name, side = base_stem.rsplit("_", 1)
+        else:
+            sample_name = base_stem
+            side = "default"
+        event_file = reference_file.with_name(f"{base_stem}_event.mp4")
+        ir_file = reference_file.with_name(f"{base_stem}_ir.mp4")
+        depth_file = reference_file.with_name(f"{base_stem}_depth.mp4")
+        audio_file = reference_file.with_name(f"{base_stem}.m4a")
+        missing = []
+        for path in (event_file, ir_file, depth_file, audio_file):
+            if not path.exists():
+                missing.append(str(path))
+        sets.append(
+            {
+                "base_stem": base_stem,
+                "sample": sample_name,
+                "side": side,
+                "split_folder_name": reference_file.parent.name,
+                "reference_file": reference_file,
+                "event_file": event_file,
+                "ir_file": ir_file,
+                "depth_file": depth_file,
+                "audio_file": audio_file,
+                "complete": not missing,
+                "missing": missing,
+            }
+        )
+    return sets
+
+
 def _run_rgb_event_dtw_alignment(
     sample_name: str,
     split_folder_name: str,
@@ -4176,7 +4213,9 @@ def _export_event_dtw_segment(
     }
 
 
-def _build_cut_carrot_side_alignment(
+def _build_aligned_dataset_side_alignment(
+    sample_name: str,
+    split_folder_name: str,
     side: str,
     dataset_folder: Path,
     alignment_output_folder: Path,
@@ -4184,8 +4223,6 @@ def _build_cut_carrot_side_alignment(
     resize_width: int,
     window_seconds: float,
 ) -> dict[str, Any]:
-    sample_name = "cut_carrot"
-    split_folder_name = "cut_carrot_split"
     split_folder = dataset_folder / split_folder_name
     reference_file = split_folder / f"{sample_name}_{side}_rgb.mp4"
     event_file = split_folder / f"{sample_name}_{side}_event.mp4"
@@ -4195,7 +4232,7 @@ def _build_cut_carrot_side_alignment(
     required_files = [reference_file, event_file, ir_file, depth_file, audio_file]
     missing = [str(path) for path in required_files if not path.exists()]
     if missing:
-        raise FileNotFoundError("Missing required cut_carrot files: " + ", ".join(missing))
+        raise FileNotFoundError(f"Missing required {sample_name} {side} files: " + ", ".join(missing))
 
     dtw_path = _dtw_alignment_output_path(alignment_output_folder, sample_name, side)
     audio_path = _audio_alignment_output_path(alignment_output_folder, sample_name, side)
@@ -4226,7 +4263,7 @@ def _build_cut_carrot_side_alignment(
         target_file=ir_file,
         target_trace=ir_trace,
         max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
-        plot_output_path=plot_output_folder / f"cut_carrot_{side}_rgb_ir_segment_export_activity_signal.png"
+        plot_output_path=plot_output_folder / f"{sample_name}_{side}_rgb_ir_segment_export_activity_signal.png"
         if plot_output_folder is not None
         else None,
     )
@@ -4238,14 +4275,14 @@ def _build_cut_carrot_side_alignment(
         target_file=depth_file,
         target_trace=depth_trace,
         max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
-        plot_output_path=plot_output_folder / f"cut_carrot_{side}_rgb_depth_segment_export_activity_signal.png"
+        plot_output_path=plot_output_folder / f"{sample_name}_{side}_rgb_depth_segment_export_activity_signal.png"
         if plot_output_folder is not None
         else None,
     )
     if ir_alignment.get("offset_seconds") is None:
-        raise ValueError(f"RGB/IR alignment did not produce an offset for cut_carrot {side}.")
+        raise ValueError(f"RGB/IR alignment did not produce an offset for {sample_name} {side}.")
     if depth_alignment.get("offset_seconds") is None:
-        raise ValueError(f"RGB/DEPTH alignment did not produce an offset for cut_carrot {side}.")
+        raise ValueError(f"RGB/DEPTH alignment did not produce an offset for {sample_name} {side}.")
 
     audio_result = _run_rgb_audio_cross_correlation_alignment(
         sample_name=sample_name,
@@ -4260,16 +4297,16 @@ def _build_cut_carrot_side_alignment(
         reference_file=reference_file,
         audio_file=audio_file,
         export_preview=False,
-        summary_file_name=f"cut_carrot_{side}_rgb_audio_cross_correlation_export_summary.json",
+        summary_file_name=f"{sample_name}_{side}_rgb_audio_cross_correlation_export_summary.json",
     )
     audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
     if audio_alignment.get("offset_seconds") is None:
-        raise ValueError(f"RGB/AUDIO alignment did not produce an offset for cut_carrot {side}.")
+        raise ValueError(f"RGB/AUDIO alignment did not produce an offset for {sample_name} {side}.")
 
     dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
     offset_curve = dtw_alignment.get("offset_curve")
     if not isinstance(offset_curve, list) or not offset_curve:
-        raise ValueError(f"EVENT DTW alignment did not produce an offset curve for cut_carrot {side}.")
+        raise ValueError(f"EVENT DTW alignment did not produce an offset curve for {sample_name} {side}.")
     ir_offset = float(ir_alignment["offset_seconds"])
     depth_offset = float(depth_alignment["offset_seconds"])
     audio_offset = float(audio_alignment["offset_seconds"])
@@ -4288,7 +4325,7 @@ def _build_cut_carrot_side_alignment(
     )
     overlap_duration = max(0.0, overlap_end - overlap_start)
     if overlap_duration < 30.0:
-        raise ValueError(f"cut_carrot {side} has less than one full 30s aligned overlap segment.")
+        raise ValueError(f"{sample_name} {side} has less than one full 30s aligned overlap segment.")
 
     return {
         "sample": sample_name,
@@ -4323,39 +4360,17 @@ def _build_cut_carrot_side_alignment(
     }
 
 
-def run_and_export_cut_carrot_aligned_dataset_segments(
-    dataset_folder: Path | str = "dataset",
-    output_folder: Path | str = DEFAULT_ALIGNED_DATASET_FOLDER,
-    alignment_output_folder: Path | str = ".",
-    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
-    segment_seconds: float = 30.0,
-    resize_width: int = 160,
-    window_seconds: float = 10.0,
+def _export_aligned_dataset_split_segments(
+    sample_name: str,
+    split_folder_name: str,
+    side_results: dict[str, dict[str, Any]],
+    output_folder: Path,
+    segment_seconds: float,
+    summary_file_name: str = "aligned_segments_summary.json",
 ) -> dict[str, Any]:
-    """Export cut_carrot day/night aligned modalities as separated 30-second dataset segments."""
-    dataset_folder = Path(dataset_folder)
-    output_folder = Path(output_folder)
-    alignment_output_folder = Path(alignment_output_folder)
-    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
-    split_output_folder = output_folder / "cut_carrot_split"
+    split_output_folder = output_folder / split_folder_name
     split_output_folder.mkdir(parents=True, exist_ok=True)
-    alignment_output_folder.mkdir(parents=True, exist_ok=True)
-
-    side_results: dict[str, dict[str, Any]] = {}
     skipped: list[dict[str, Any]] = []
-    for side in ("day", "night"):
-        try:
-            side_results[side] = _build_cut_carrot_side_alignment(
-                side=side,
-                dataset_folder=dataset_folder,
-                alignment_output_folder=alignment_output_folder,
-                plot_output_folder=plot_output_folder,
-                resize_width=resize_width,
-                window_seconds=window_seconds,
-            )
-        except Exception as exc:
-            skipped.append({"sample": "cut_carrot", "side": side, "stage": "alignment", "reason": str(exc)})
-
     max_segment_count = max((item["segment_count"] for item in side_results.values()), default=0)
     exported_segments: list[dict[str, Any]] = []
     for segment_index in range(max_segment_count):
@@ -4386,15 +4401,15 @@ def run_and_export_cut_carrot_aligned_dataset_segments(
             try:
                 side_record["outputs"]["rgb"] = _export_aligned_source_video_segment(
                     source_file=files["rgb"],
-                    output_path=segment_folder / f"cut_carrot_{side}_rgb.mp4",
+                    output_path=segment_folder / f"{sample_name}_{side}_rgb.mp4",
                     source_start_seconds=segment_start,
                     duration_seconds=segment_seconds,
                     encoding_info=encoding["rgb"],
-                    description=f"cut_carrot {side} RGB segment",
+                    description=f"{sample_name} {side} RGB segment",
                 )
                 side_record["outputs"]["event"] = _export_event_dtw_segment(
                     dtw_result=bundle["dtw_result"],
-                    output_path=segment_folder / f"cut_carrot_{side}_event.mp4",
+                    output_path=segment_folder / f"{sample_name}_{side}_event.mp4",
                     rgb_start_seconds=segment_start,
                     duration_seconds=segment_seconds,
                     reference_fps=reference_fps,
@@ -4402,23 +4417,23 @@ def run_and_export_cut_carrot_aligned_dataset_segments(
                 )
                 side_record["outputs"]["ir"] = _export_aligned_source_video_segment(
                     source_file=files["ir"],
-                    output_path=segment_folder / f"cut_carrot_{side}_ir.mp4",
+                    output_path=segment_folder / f"{sample_name}_{side}_ir.mp4",
                     source_start_seconds=segment_start + ir_offset,
                     duration_seconds=segment_seconds,
                     encoding_info=encoding["ir"],
-                    description=f"cut_carrot {side} IR segment",
+                    description=f"{sample_name} {side} IR segment",
                 )
                 side_record["outputs"]["depth"] = _export_aligned_source_video_segment(
                     source_file=files["depth"],
-                    output_path=segment_folder / f"cut_carrot_{side}_depth.mp4",
+                    output_path=segment_folder / f"{sample_name}_{side}_depth.mp4",
                     source_start_seconds=segment_start + depth_offset,
                     duration_seconds=segment_seconds,
                     encoding_info=encoding["depth"],
-                    description=f"cut_carrot {side} DEPTH segment",
+                    description=f"{sample_name} {side} DEPTH segment",
                 )
                 side_record["outputs"]["audio"] = _export_aligned_audio_segment(
                     audio_file=files["audio"],
-                    output_path=segment_folder / f"cut_carrot_{side}.m4a",
+                    output_path=segment_folder / f"{sample_name}_{side}.m4a",
                     audio_start_seconds=segment_start + audio_offset,
                     duration_seconds=segment_seconds,
                     encoding_info=encoding["audio"],
@@ -4427,7 +4442,7 @@ def run_and_export_cut_carrot_aligned_dataset_segments(
             except Exception as exc:
                 skipped.append(
                     {
-                        "sample": "cut_carrot",
+                        "sample": sample_name,
                         "side": side,
                         "segment": f"Seg{segment_index + 1}",
                         "stage": "export",
@@ -4438,8 +4453,8 @@ def run_and_export_cut_carrot_aligned_dataset_segments(
             exported_segments.append(segment_record)
 
     summary = {
-        "sample": "cut_carrot",
-        "split_folder_name": "cut_carrot_split",
+        "sample": sample_name,
+        "split_folder_name": split_folder_name,
         "output_folder": str(split_output_folder),
         "segment_seconds": segment_seconds,
         "exported_segment_count": len(exported_segments),
@@ -4481,7 +4496,160 @@ def run_and_export_cut_carrot_aligned_dataset_segments(
         "segments": exported_segments,
         "skipped": skipped,
     }
-    summary_path = split_output_folder / "aligned_segments_summary.json"
+    summary_path = split_output_folder / summary_file_name
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(summary_path)
+    return summary
+
+
+def run_and_export_cut_carrot_aligned_dataset_segments(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = DEFAULT_ALIGNED_DATASET_FOLDER,
+    alignment_output_folder: Path | str = ".",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    segment_seconds: float = 30.0,
+    resize_width: int = 160,
+    window_seconds: float = 10.0,
+) -> dict[str, Any]:
+    """Export cut_carrot day/night aligned modalities as separated 30-second dataset segments."""
+    dataset_folder = Path(dataset_folder)
+    output_folder = Path(output_folder)
+    alignment_output_folder = Path(alignment_output_folder)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder.mkdir(parents=True, exist_ok=True)
+    alignment_output_folder.mkdir(parents=True, exist_ok=True)
+
+    side_results: dict[str, dict[str, Any]] = {}
+    skipped: list[dict[str, Any]] = []
+    for side in ("day", "night"):
+        try:
+            side_results[side] = _build_aligned_dataset_side_alignment(
+                sample_name="cut_carrot",
+                split_folder_name="cut_carrot_split",
+                side=side,
+                dataset_folder=dataset_folder,
+                alignment_output_folder=alignment_output_folder,
+                plot_output_folder=plot_output_folder,
+                resize_width=resize_width,
+                window_seconds=window_seconds,
+            )
+        except Exception as exc:
+            skipped.append({"sample": "cut_carrot", "side": side, "stage": "alignment", "reason": str(exc)})
+
+    summary = _export_aligned_dataset_split_segments(
+        sample_name="cut_carrot",
+        split_folder_name="cut_carrot_split",
+        side_results=side_results,
+        output_folder=output_folder,
+        segment_seconds=segment_seconds,
+    )
+    summary["skipped"] = [*skipped, *summary.get("skipped", [])]
+    summary["skipped_count"] = len(summary["skipped"])
+    summary_path = Path(summary["summary_file"])
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump({key: value for key, value in summary.items() if key != "summary_file"}, handle, indent=2, ensure_ascii=False)
+    return summary
+
+
+def run_and_export_all_aligned_dataset_segments(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = DEFAULT_ALIGNED_DATASET_FOLDER,
+    alignment_output_folder: Path | str = ".",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    segment_seconds: float = 30.0,
+    resize_width: int = 160,
+    window_seconds: float = 10.0,
+) -> dict[str, Any]:
+    """Export every complete dataset sample as separated aligned 30-second segments."""
+    dataset_folder = Path(dataset_folder)
+    output_folder = Path(output_folder)
+    alignment_output_folder = Path(alignment_output_folder)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    output_folder.mkdir(parents=True, exist_ok=True)
+    alignment_output_folder.mkdir(parents=True, exist_ok=True)
+
+    discovered = _discover_aligned_dataset_sets(dataset_folder)
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    skipped: list[dict[str, Any]] = []
+    for item in discovered:
+        sample_name = str(item["sample"])
+        split_folder_name = str(item["split_folder_name"])
+        side = str(item["side"])
+        key = (split_folder_name, sample_name)
+        grouped.setdefault(key, {"sample": sample_name, "split_folder_name": split_folder_name, "sides": {}})
+        if not bool(item.get("complete")):
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "split_folder_name": split_folder_name,
+                    "side": side,
+                    "stage": "discovery",
+                    "reason": "Missing required file(s): " + ", ".join(str(path) for path in item.get("missing", [])),
+                }
+            )
+            continue
+        try:
+            grouped[key]["sides"][side] = _build_aligned_dataset_side_alignment(
+                sample_name=sample_name,
+                split_folder_name=split_folder_name,
+                side=side,
+                dataset_folder=dataset_folder,
+                alignment_output_folder=alignment_output_folder,
+                plot_output_folder=plot_output_folder,
+                resize_width=resize_width,
+                window_seconds=window_seconds,
+            )
+        except Exception as exc:
+            skipped.append(
+                {
+                    "sample": sample_name,
+                    "split_folder_name": split_folder_name,
+                    "side": side,
+                    "stage": "alignment",
+                    "reason": str(exc),
+                }
+            )
+
+    split_summaries: list[dict[str, Any]] = []
+    exported_segment_count = 0
+    for (split_folder_name, sample_name), group in sorted(grouped.items()):
+        side_results = group.get("sides", {})
+        if not side_results:
+            continue
+        split_summary = _export_aligned_dataset_split_segments(
+            sample_name=sample_name,
+            split_folder_name=split_folder_name,
+            side_results=side_results,
+            output_folder=output_folder,
+            segment_seconds=segment_seconds,
+            summary_file_name=f"{sample_name}_aligned_segments_summary.json",
+        )
+        skipped.extend(split_summary.get("skipped", []))
+        exported_segment_count += int(split_summary.get("exported_segment_count") or 0)
+        split_summaries.append(
+            {
+                "sample": sample_name,
+                "split_folder_name": split_folder_name,
+                "summary_file": split_summary.get("summary_file"),
+                "output_folder": split_summary.get("output_folder"),
+                "exported_segment_count": split_summary.get("exported_segment_count", 0),
+                "skipped_count": split_summary.get("skipped_count", 0),
+                "sides": split_summary.get("sides", {}),
+            }
+        )
+
+    summary = {
+        "output_folder": str(output_folder),
+        "segment_seconds": segment_seconds,
+        "discovered_count": len(discovered),
+        "split_count": len(split_summaries),
+        "exported_segment_count": exported_segment_count,
+        "skipped_count": len(skipped),
+        "splits": split_summaries,
+        "skipped": skipped,
+    }
+    summary_path = output_folder / "aligned_dataset_summary.json"
     with open(summary_path, "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, ensure_ascii=False)
     summary["summary_file"] = str(summary_path)

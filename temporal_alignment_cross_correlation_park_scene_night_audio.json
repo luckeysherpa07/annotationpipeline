@@ -1,0 +1,100 @@
+{
+  "sample": "park_scene",
+  "side": "night",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/park_scene_split/park_scene_night_rgb.mp4",
+  "audio_file": "dataset/park_scene_split/park_scene_night.m4a",
+  "ignored_files": [
+    "dataset/park_scene_split/park_scene_night_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/park_scene_night_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 1461,
+  "reference_duration_seconds": 48.7,
+  "audio_duration_seconds": 48.8746875,
+  "reference_trace_count": 1460,
+  "audio_trace_count": 1468,
+  "alignment": {
+    "offset_seconds": 28.966666666666665,
+    "offset_frames": 869,
+    "peak_correlation": 0.42936745285987854,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": 28.966667,
+        "offset_frames": 869,
+        "correlation": 0.429367,
+        "overlap_ratio": 0.410274
+      },
+      {
+        "offset_seconds": 29.0,
+        "offset_frames": 870,
+        "correlation": 0.428972,
+        "overlap_ratio": 0.409589
+      },
+      {
+        "offset_seconds": 28.933333,
+        "offset_frames": 868,
+        "correlation": 0.428929,
+        "overlap_ratio": 0.410959
+      },
+      {
+        "offset_seconds": 28.9,
+        "offset_frames": 867,
+        "correlation": 0.427579,
+        "overlap_ratio": 0.411644
+      },
+      {
+        "offset_seconds": 29.033333,
+        "offset_frames": 871,
+        "correlation": 0.427241,
+        "overlap_ratio": 0.408904
+      },
+      {
+        "offset_seconds": 28.866667,
+        "offset_frames": 866,
+        "correlation": 0.425323,
+        "overlap_ratio": 0.412329
+      },
+      {
+        "offset_seconds": 29.066667,
+        "offset_frames": 872,
+        "correlation": 0.424503,
+        "overlap_ratio": 0.408219
+      },
+      {
+        "offset_seconds": 28.833333,
+        "offset_frames": 865,
+        "correlation": 0.422086,
+        "overlap_ratio": 0.413014
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.00039502978324890137,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 0.0,
+      "end": 19.908021
+    },
+    "overlap_audio_seconds": {
+      "start": 28.966667,
+      "end": 48.874688
+    },
+    "overlap_ratio": 0.41027397260273973,
+    "overlap_samples": 599,
+    "selected_correlation_recomputed": 0.42936745285987854,
+    "activity_plot_file": "temporal_alignment_plots/park_scene_night_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "park_scene_night_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

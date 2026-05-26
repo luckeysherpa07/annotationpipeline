@@ -1,18 +1,18 @@
 {
   "sample": "wash_hands",
-  "pair_key": "dataset/wash_hand_split/wash_hands",
+  "pair_key": "dataset/wash_hands_split/wash_hands",
   "side": "day",
   "method": "dynamic_time_warping_optical_flow",
   "reference_modality": "rgb",
-  "reference_file": "dataset/wash_hand_split/wash_hands_day_rgb.mp4",
+  "reference_file": "dataset/wash_hands_split/wash_hands_day_rgb.mp4",
   "reference_duration_seconds": 124.7,
   "target_modality": "event",
-  "target_file": "dataset/wash_hand_split/wash_hands_day_event.mp4",
+  "target_file": "dataset/wash_hands_split/wash_hands_day_event.mp4",
   "target_duration_seconds": 121.99878,
   "plot_file": "temporal_alignment_plots/wash_hands_day_rgb_event_dtw_activity_signal.png",
   "alignment": {
     "modality": "event",
-    "file": "dataset/wash_hand_split/wash_hands_day_event.mp4",
+    "file": "dataset/wash_hands_split/wash_hands_day_event.mp4",
     "duration_seconds": 121.99878,
     "offset_seconds": -2.8003060817718506,
     "offset_frames": -84,
@@ -4540,12 +4540,6 @@
     "activity_plot_file": "temporal_alignment_plots/wash_hands_day_rgb_event_dtw_activity_signal.png",
     "warnings": []
   },
-  "export": {
-    "exported_count": 0,
-    "skipped_count": 0,
-    "exported": [],
-    "skipped": [],
-    "note": "EVENT DTW is rendered directly inside the final RGB/EVENT/IR/DEPTH video with aligned audio."
-  },
+  "export": null,
   "warnings": []
 }

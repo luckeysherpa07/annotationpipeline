@@ -1,0 +1,100 @@
+{
+  "sample": "pour_water",
+  "side": "day",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/pour_water_split/pour_water_day_rgb.mp4",
+  "audio_file": "dataset/pour_water_split/pour_water_day.m4a",
+  "ignored_files": [
+    "dataset/pour_water_split/pour_water_day_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/pour_water_day_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 2430,
+  "reference_duration_seconds": 81.0,
+  "audio_duration_seconds": 81.3653125,
+  "reference_trace_count": 2429,
+  "audio_trace_count": 2443,
+  "alignment": {
+    "offset_seconds": -18.3,
+    "offset_frames": -549,
+    "peak_correlation": 0.35655856132507324,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -18.3,
+        "offset_frames": -549,
+        "correlation": 0.356559,
+        "overlap_ratio": 0.773981
+      },
+      {
+        "offset_seconds": -18.333333,
+        "offset_frames": -550,
+        "correlation": 0.356464,
+        "overlap_ratio": 0.773569
+      },
+      {
+        "offset_seconds": -18.266667,
+        "offset_frames": -548,
+        "correlation": 0.355521,
+        "overlap_ratio": 0.774393
+      },
+      {
+        "offset_seconds": -18.366667,
+        "offset_frames": -551,
+        "correlation": 0.355063,
+        "overlap_ratio": 0.773158
+      },
+      {
+        "offset_seconds": -18.233333,
+        "offset_frames": -547,
+        "correlation": 0.353551,
+        "overlap_ratio": 0.774804
+      },
+      {
+        "offset_seconds": -18.4,
+        "offset_frames": -552,
+        "correlation": 0.352283,
+        "overlap_ratio": 0.772746
+      },
+      {
+        "offset_seconds": -18.2,
+        "offset_frames": -546,
+        "correlation": 0.350823,
+        "overlap_ratio": 0.775216
+      },
+      {
+        "offset_seconds": -18.433333,
+        "offset_frames": -553,
+        "correlation": 0.348167,
+        "overlap_ratio": 0.772334
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 9.414553642272949e-05,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 18.3,
+      "end": 81.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 62.7
+    },
+    "overlap_ratio": 0.7739810621655002,
+    "overlap_samples": 1880,
+    "selected_correlation_recomputed": 0.35655856132507324,
+    "activity_plot_file": "temporal_alignment_plots/pour_water_day_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "pour_water_day_rgb_audio_cross_correlation_export_summary.json"
+  }
+}
