@@ -1778,10 +1778,16 @@ def _discover_rgb_event_audio_triplets(dataset_folder: Path) -> list[dict[str, A
                 continue
             sample_name = reference_file.name[: -len(f"_{side}_rgb.mp4")]
             event_file = reference_file.with_name(f"{sample_name}_{side}_event.mp4")
+            ir_file = reference_file.with_name(f"{sample_name}_{side}_ir.mp4")
+            depth_file = reference_file.with_name(f"{sample_name}_{side}_depth.mp4")
             audio_file = reference_file.with_name(f"{sample_name}_{side}.m4a")
             missing = []
             if not event_file.exists():
                 missing.append(str(event_file))
+            if not ir_file.exists():
+                missing.append(str(ir_file))
+            if not depth_file.exists():
+                missing.append(str(depth_file))
             if not audio_file.exists():
                 missing.append(str(audio_file))
             triplets.append(
@@ -1792,6 +1798,8 @@ def _discover_rgb_event_audio_triplets(dataset_folder: Path) -> list[dict[str, A
                     "pair_key": str(reference_file.parent / sample_name),
                     "reference_file": reference_file,
                     "event_file": event_file,
+                    "ir_file": ir_file,
+                    "depth_file": depth_file,
                     "audio_file": audio_file,
                     "complete": not missing,
                     "missing": missing,
@@ -3382,6 +3390,273 @@ def _mux_dtw_preview_with_aligned_audio(
     }
 
 
+def _mux_silent_preview_with_aligned_audio(
+    silent_video_file: Path,
+    audio_result: dict[str, Any],
+    output_path: Path,
+    rgb_start_seconds: float,
+    duration_seconds: float,
+) -> dict[str, Any]:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+
+    audio_file = Path(str(audio_result.get("audio_file") or ""))
+    audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
+    audio_offset_seconds = audio_alignment.get("offset_seconds")
+    if audio_offset_seconds is None:
+        raise ValueError("RGB/AUDIO alignment must include offset_seconds for combined export.")
+    audio_offset_seconds = float(audio_offset_seconds)
+    audio_duration = float(audio_result.get("audio_duration_seconds") or 0.0)
+
+    if not silent_video_file.exists():
+        raise FileNotFoundError(f"Silent preview video does not exist: {silent_video_file}")
+    if not audio_file.exists():
+        raise FileNotFoundError(f"Audio file does not exist: {audio_file}")
+    if duration_seconds <= 0:
+        raise ValueError("Combined export requires a positive preview duration.")
+    if audio_duration <= 0:
+        raise ValueError("Combined export requires a positive audio duration.")
+
+    audio_time_at_preview_start = rgb_start_seconds + audio_offset_seconds
+    audio_seek_seconds = max(0.0, audio_time_at_preview_start)
+    audio_delay_seconds = max(0.0, -audio_time_at_preview_start)
+    if audio_seek_seconds >= audio_duration:
+        raise ValueError("Aligned audio seek starts beyond the end of the audio file.")
+
+    audio_filter = "[1:a]apad[a]"
+    if audio_delay_seconds > 0:
+        delay_ms = int(round(audio_delay_seconds * 1000.0))
+        audio_filter = f"[1:a]adelay={delay_ms}:all=1,apad[a]"
+
+    command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(silent_video_file)]
+    if audio_seek_seconds > 0:
+        command.extend(["-ss", f"{audio_seek_seconds:.6f}"])
+    command.extend(
+        [
+            "-i",
+            str(audio_file),
+            "-filter_complex",
+            audio_filter,
+            "-map",
+            "0:v:0",
+            "-map",
+            "[a]",
+            "-t",
+            f"{duration_seconds:.6f}",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            str(tmp_output_path),
+        ]
+    )
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Failed to mux preview with aligned audio: {completed.stderr.strip()}")
+
+    tmp_output_path.replace(output_path)
+    return {
+        "output_file": str(output_path),
+        "silent_video_file": str(silent_video_file),
+        "audio_file": str(audio_file),
+        "duration_seconds": round(duration_seconds, 6),
+        "rgb_start_seconds": round(rgb_start_seconds, 6),
+        "audio_offset_seconds": round(audio_offset_seconds, 6),
+        "audio_correlation": round(float(audio_alignment.get("peak_correlation") or 0.0), 6),
+        "audio_shift": {
+            "source_seek_seconds": round(audio_seek_seconds, 6),
+            "output_delay_seconds": round(audio_delay_seconds, 6),
+            "speed_warped": False,
+        },
+        "video_stream": "rgb_event_ir_depth_preview_copy",
+        "audio_encoder": "aac",
+    }
+
+
+def _export_rgb_event_ir_depth_dtw_audio_grid_preview(
+    dtw_result: dict[str, Any],
+    ir_alignment: dict[str, Any],
+    depth_alignment: dict[str, Any],
+    audio_result: dict[str, Any],
+    output_folder: Path,
+) -> dict[str, Any]:
+    sample_name = str(dtw_result.get("sample") or "sample")
+    side = str(dtw_result.get("side") or "day")
+    silent_output_path = output_folder / f"{sample_name}_{side}_rgb_event_ir_depth_dtw_silent.mp4"
+    final_output_path = output_folder / f"{sample_name}_{side}_rgb_event_ir_depth_dtw_with_aligned_audio.mp4"
+    tmp_silent_path = silent_output_path.with_name(f"{silent_output_path.stem}.tmp{silent_output_path.suffix}")
+    tmp_silent_path.unlink(missing_ok=True)
+
+    reference_file = Path(str(dtw_result.get("reference_file", "")))
+    reference_duration = float(dtw_result.get("reference_duration_seconds") or 0.0)
+    dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
+    event_file = Path(str(dtw_alignment.get("file") or dtw_result.get("target_file") or ""))
+    event_duration = float(dtw_alignment.get("duration_seconds") or dtw_result.get("target_duration_seconds") or 0.0)
+    offset_curve = dtw_alignment.get("offset_curve")
+    if not isinstance(offset_curve, list) or not offset_curve:
+        raise ValueError("DTW alignment must include a non-empty offset_curve.")
+    render_offset_curve = _smooth_dtw_offset_curve_for_export(offset_curve)
+
+    ir_file = Path(str(ir_alignment.get("file") or ""))
+    depth_file = Path(str(depth_alignment.get("file") or ""))
+    ir_duration = float(ir_alignment.get("duration_seconds") or 0.0)
+    depth_duration = float(depth_alignment.get("duration_seconds") or 0.0)
+    ir_offset = ir_alignment.get("offset_seconds")
+    depth_offset = depth_alignment.get("offset_seconds")
+    if ir_offset is None:
+        raise ValueError("IR alignment must include offset_seconds.")
+    if depth_offset is None:
+        raise ValueError("DEPTH alignment must include offset_seconds.")
+    ir_offset = float(ir_offset)
+    depth_offset = float(depth_offset)
+
+    for label, file in (("RGB", reference_file), ("EVENT", event_file), ("IR", ir_file), ("DEPTH", depth_file)):
+        if not file.exists():
+            raise FileNotFoundError(f"{label} file does not exist: {file}")
+    if reference_duration <= 0 or event_duration <= 0 or ir_duration <= 0 or depth_duration <= 0:
+        raise ValueError("Combined visual export requires positive RGB/EVENT/IR/DEPTH durations.")
+
+    reference_start = max(0.0, float(offset_curve[0]["reference_time_seconds"]), -ir_offset, -depth_offset)
+    reference_end = min(
+        reference_duration,
+        float(offset_curve[-1]["reference_time_seconds"]),
+        ir_duration - ir_offset,
+        depth_duration - depth_offset,
+    )
+    duration = max(0.0, reference_end - reference_start)
+    if duration <= 0:
+        raise ValueError("No positive RGB/EVENT/IR/DEPTH overlap window is available.")
+
+    rgb_cap = cv2.VideoCapture(str(reference_file))
+    event_cap = cv2.VideoCapture(str(event_file))
+    ir_cap = cv2.VideoCapture(str(ir_file))
+    depth_cap = cv2.VideoCapture(str(depth_file))
+    caps = [rgb_cap, event_cap, ir_cap, depth_cap]
+    try:
+        if not all(cap.isOpened() for cap in caps):
+            raise ValueError("Could not open one or more RGB/EVENT/IR/DEPTH videos.")
+        reference_fps = float(rgb_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        event_fps = float(event_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        ir_fps = float(ir_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        depth_fps = float(depth_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        if reference_fps <= 0 or event_fps <= 0 or ir_fps <= 0 or depth_fps <= 0:
+            raise ValueError("Could not determine FPS for one or more RGB/EVENT/IR/DEPTH videos.")
+
+        output_folder.mkdir(parents=True, exist_ok=True)
+        writer = cv2.VideoWriter(
+            str(tmp_silent_path),
+            cv2.VideoWriter_fourcc(*"mp4v"),
+            float(DTW_EXPORT_PREVIEW_FPS),
+            (EXPORT_PANEL_WIDTH * 2, EXPORT_PANEL_HEIGHT * 2),
+        )
+        if not writer.isOpened():
+            tmp_silent_path.unlink(missing_ok=True)
+            raise RuntimeError("Could not create OpenCV VideoWriter for 2x2 preview.")
+
+        frame_count = max(1, int(np.floor(duration * DTW_EXPORT_PREVIEW_FPS)))
+        written_count = 0
+        rgb_state: dict[str, Any] = {}
+        event_state: dict[str, Any] = {}
+        ir_state: dict[str, Any] = {}
+        depth_state: dict[str, Any] = {}
+        try:
+            for frame_index in range(frame_count):
+                rgb_time = reference_start + frame_index / float(DTW_EXPORT_PREVIEW_FPS)
+                event_time = min(event_duration, max(0.0, _event_time_from_offset_curve(render_offset_curve, rgb_time)))
+                ir_time = min(ir_duration, max(0.0, rgb_time + ir_offset))
+                depth_time = min(depth_duration, max(0.0, rgb_time + depth_offset))
+
+                rgb_frame_index = int(round(rgb_time * reference_fps))
+                event_position = event_time * event_fps
+                event_frame_index = int(np.floor(event_position))
+                event_blend_weight = float(event_position - event_frame_index)
+                ir_frame_index = int(round(ir_time * ir_fps))
+                depth_frame_index = int(round(depth_time * depth_fps))
+
+                rgb_panel = _prepare_preview_panel(_read_video_frame_forward(rgb_cap, rgb_frame_index, rgb_state))
+                event_a, event_b = _read_video_frame_pair_forward(event_cap, event_frame_index, event_state)
+                event_panel = _prepare_preview_panel(_blend_frames(event_a, event_b, event_blend_weight))
+                ir_panel = _prepare_preview_panel(_read_video_frame_forward(ir_cap, ir_frame_index, ir_state))
+                depth_panel = _prepare_preview_panel(_read_video_frame_forward(depth_cap, depth_frame_index, depth_state))
+
+                _draw_label(rgb_panel, ["RGB", f"t={rgb_time:.2f}s"])
+                _draw_label(event_panel, ["EVENT DTW", f"t={event_time:.2f}s", f"offset={event_time - rgb_time:+.3f}s"])
+                _draw_label(ir_panel, ["IR xcorr", f"t={ir_time:.2f}s", f"offset={ir_offset:+.3f}s"])
+                _draw_label(depth_panel, ["DEPTH xcorr", f"t={depth_time:.2f}s", f"offset={depth_offset:+.3f}s"])
+                writer.write(np.vstack([np.hstack([rgb_panel, event_panel]), np.hstack([ir_panel, depth_panel])]))
+                written_count += 1
+        finally:
+            writer.release()
+
+        if written_count == 0:
+            tmp_silent_path.unlink(missing_ok=True)
+            raise RuntimeError("2x2 preview export wrote zero frames.")
+        tmp_silent_path.replace(silent_output_path)
+    finally:
+        for cap in caps:
+            cap.release()
+
+    silent_removed = False
+    silent_remove_warning = None
+    try:
+        mux_item = _mux_silent_preview_with_aligned_audio(
+            silent_video_file=silent_output_path,
+            audio_result=audio_result,
+            output_path=final_output_path,
+            rgb_start_seconds=reference_start,
+            duration_seconds=duration,
+        )
+    finally:
+        try:
+            silent_output_path.unlink(missing_ok=True)
+            silent_removed = True
+        except Exception as exc:
+            silent_remove_warning = f"Could not remove silent intermediate preview: {exc}"
+    mux_item["silent_intermediate_removed"] = silent_removed
+    if silent_remove_warning is not None:
+        mux_item.setdefault("warnings", []).append(silent_remove_warning)
+
+    mux_item.update(
+        {
+            "sample": sample_name,
+            "side": side,
+            "reference_file": str(reference_file),
+            "event_file": str(event_file),
+            "ir_file": str(ir_file),
+            "depth_file": str(depth_file),
+            "rgb_start_seconds": round(reference_start, 6),
+            "rgb_end_seconds": round(reference_end, 6),
+            "duration_seconds": round(duration, 6),
+            "preview_fps": DTW_EXPORT_PREVIEW_FPS,
+            "frames_written": written_count,
+            "layout": "2x2",
+            "panels": {
+                "top_left": "rgb",
+                "top_right": "event_dtw",
+                "bottom_left": "ir_cross_correlation",
+                "bottom_right": "depth_cross_correlation",
+            },
+            "event_render_curve": {
+                "source": "smoothed_offset_curve",
+                "smoothing_seconds": DTW_EXPORT_SMOOTHING_SECONDS,
+                "points": _sample_offset_curve(render_offset_curve),
+                "full_count": len(render_offset_curve),
+                "monotonic_event_time": True,
+                "event_frame_interpolation": "linear_blend",
+            },
+            "ir_offset_seconds": round(ir_offset, 6),
+            "depth_offset_seconds": round(depth_offset, 6),
+        }
+    )
+    return mux_item
+
+
 def _run_and_export_rgb_event_dtw_with_audio_alignment(
     sample_name: str,
     split_folder_name: str,
@@ -3396,6 +3671,8 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
     resize_width: int,
     reference_file: Path | str | None = None,
     event_file: Path | str | None = None,
+    ir_file: Path | str | None = None,
+    depth_file: Path | str | None = None,
     audio_file: Path | str | None = None,
     keep_intermediate_dtw_video: bool = True,
 ) -> dict[str, Any]:
@@ -3410,16 +3687,20 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
 
     reference_file = Path(reference_file) if reference_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_rgb.mp4"
     event_file = Path(event_file) if event_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_event.mp4"
+    ir_file = Path(ir_file) if ir_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_ir.mp4"
+    depth_file = Path(depth_file) if depth_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}_depth.mp4"
     audio_file = Path(audio_file) if audio_file is not None else dataset_folder / split_folder_name / f"{sample_name}_{side}.m4a"
 
     summary: dict[str, Any] = {
         "sample": sample_name,
         "side": side,
-        "method": "rgb_event_dtw_visual_with_rgb_audio_cross_correlation_audio",
+        "method": "rgb_event_dtw_ir_depth_cross_correlation_visual_with_rgb_audio_cross_correlation_audio",
         "dtw_alignment_file": str(dtw_output_path),
         "audio_alignment_file": str(audio_output_path),
         "source_rgb_file": str(reference_file),
         "source_event_file": str(event_file),
+        "source_ir_file": str(ir_file),
+        "source_depth_file": str(depth_file),
         "source_audio_file": str(audio_file),
         "ignored_files": [str(reference_file.with_name(f"{sample_name}_{side}_rgb_with_audio.mp4"))],
         "exported_count": 0,
@@ -3441,13 +3722,12 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
             reference_file=reference_file,
             event_file=event_file,
         )
-        dtw_export = _export_rgb_event_dtw_for_result(result=dtw_result, output_folder=output_folder)
-        dtw_export["alignment_file"] = str(dtw_output_path)
         dtw_result["export"] = {
-            "exported_count": 1,
+            "exported_count": 0,
             "skipped_count": 0,
-            "exported": [dtw_export],
+            "exported": [],
             "skipped": [],
+            "note": "EVENT DTW is rendered directly inside the final RGB/EVENT/IR/DEPTH video with aligned audio.",
         }
         with open(dtw_output_path, "w", encoding="utf-8") as handle:
             json.dump(dtw_result, handle, indent=2, ensure_ascii=False)
@@ -3462,6 +3742,63 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
             "plot_file": dtw_result.get("plot_file"),
             "export": dtw_result.get("export"),
         }
+
+        reference_meta = _video_metadata(reference_file)
+        if not reference_meta.get("opened"):
+            raise ValueError(f"Could not open RGB reference video: {reference_file}")
+        reference_trace = _motion_energy_trace(reference_file, resize_width=resize_width)
+        ir_trace = _motion_energy_trace(ir_file, resize_width=resize_width)
+        depth_trace = _motion_energy_trace(depth_file, resize_width=resize_width)
+        ir_plot_path = (
+            plot_output_folder / f"{sample_name}_{side}_rgb_ir_cross_correlation_activity_signal.png"
+            if plot_output_folder is not None
+            else None
+        )
+        depth_plot_path = (
+            plot_output_folder / f"{sample_name}_{side}_rgb_depth_cross_correlation_activity_signal.png"
+            if plot_output_folder is not None
+            else None
+        )
+        ir_alignment = _estimate_modality_alignment(
+            reference_file=reference_file,
+            reference_meta=reference_meta,
+            reference_trace=reference_trace,
+            target_modality="ir",
+            target_file=ir_file,
+            target_trace=ir_trace,
+            max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
+            plot_output_path=ir_plot_path,
+        )
+        depth_alignment = _estimate_modality_alignment(
+            reference_file=reference_file,
+            reference_meta=reference_meta,
+            reference_trace=reference_trace,
+            target_modality="depth",
+            target_file=depth_file,
+            target_trace=depth_trace,
+            max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
+            plot_output_path=depth_plot_path,
+        )
+        summary["ir"] = {
+            "offset_seconds": ir_alignment.get("offset_seconds"),
+            "peak_correlation": ir_alignment.get("peak_correlation"),
+            "confidence_label": ir_alignment.get("confidence_label"),
+            "overlap_ratio": ir_alignment.get("overlap_ratio"),
+            "plot_file": ir_alignment.get("activity_plot_file"),
+            "warnings": ir_alignment.get("warnings", []),
+        }
+        summary["depth"] = {
+            "offset_seconds": depth_alignment.get("offset_seconds"),
+            "peak_correlation": depth_alignment.get("peak_correlation"),
+            "confidence_label": depth_alignment.get("confidence_label"),
+            "overlap_ratio": depth_alignment.get("overlap_ratio"),
+            "plot_file": depth_alignment.get("activity_plot_file"),
+            "warnings": depth_alignment.get("warnings", []),
+        }
+        if ir_alignment.get("offset_seconds") is None:
+            raise ValueError("RGB/IR alignment did not produce an offset.")
+        if depth_alignment.get("offset_seconds") is None:
+            raise ValueError("RGB/DEPTH alignment did not produce an offset.")
 
         audio_result = _run_rgb_audio_cross_correlation_alignment(
             sample_name=sample_name,
@@ -3490,26 +3827,17 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
         if audio_alignment.get("offset_seconds") is None:
             raise ValueError("RGB/AUDIO alignment did not produce an offset.")
 
-        combined_export = _mux_dtw_preview_with_aligned_audio(
-            dtw_export=dtw_export,
+        combined_export = _export_rgb_event_ir_depth_dtw_audio_grid_preview(
+            dtw_result=dtw_result,
+            ir_alignment=ir_alignment,
+            depth_alignment=depth_alignment,
             audio_result=audio_result,
             output_folder=output_folder,
         )
-        if not keep_intermediate_dtw_video:
-            intermediate_path = Path(str(dtw_export.get("output_file") or ""))
-            try:
-                if intermediate_path.exists():
-                    intermediate_path.unlink()
-                dtw_export["removed_after_audio_mux"] = True
-                combined_export["intermediate_dtw_video_removed"] = True
-            except Exception as exc:
-                warning = f"Could not remove intermediate no-audio DTW preview: {exc}"
-                dtw_export["removed_after_audio_mux"] = False
-                combined_export["intermediate_dtw_video_removed"] = False
-                combined_export.setdefault("warnings", []).append(warning)
-                summary.setdefault("warnings", []).append(warning)
         combined_export["dtw_alignment_file"] = str(dtw_output_path)
         combined_export["audio_alignment_file"] = str(audio_output_path)
+        combined_export["ir_alignment"] = summary["ir"]
+        combined_export["depth_alignment"] = summary["depth"]
         summary["exported"].append(combined_export)
     except Exception as exc:
         summary["skipped"].append(
@@ -3518,6 +3846,8 @@ def _run_and_export_rgb_event_dtw_with_audio_alignment(
                 "side": side,
                 "reference_file": str(reference_file),
                 "event_file": str(event_file),
+                "ir_file": str(ir_file),
+                "depth_file": str(depth_file),
                 "audio_file": str(audio_file),
                 "reason": str(exc),
             }
@@ -3541,7 +3871,7 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
     window_seconds: float = 10.0,
     resize_width: int = 160,
 ) -> dict[str, Any]:
-    """Export the check_mailbox day RGB/EVENT DTW preview with aligned separate audio."""
+    """Export the check_mailbox day 2x2 RGB/EVENT/IR/DEPTH preview with aligned separate audio."""
     return _run_and_export_rgb_event_dtw_with_audio_alignment(
         sample_name="check_mailbox",
         split_folder_name="check_mailbox_split",
@@ -3549,7 +3879,9 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
         dataset_folder=dataset_folder,
         dtw_output_path=dtw_output_path,
         audio_output_path=audio_output_path,
-        combined_summary_path=Path(output_folder) / "check_mailbox_day_rgb_event_dtw_with_aligned_audio_summary.json",
+        combined_summary_path=(
+            Path(output_folder) / "check_mailbox_day_rgb_event_ir_depth_dtw_with_aligned_audio_summary.json"
+        ),
         plot_output_folder=plot_output_folder,
         output_folder=output_folder,
         window_seconds=window_seconds,
@@ -3566,7 +3898,7 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
     window_seconds: float = 10.0,
     resize_width: int = 160,
 ) -> dict[str, Any]:
-    """Run combined RGB/EVENT DTW + RGB/AUDIO fixed-offset exports for all complete triplets."""
+    """Run combined RGB/EVENT/IR/DEPTH visuals with fixed-offset audio for all complete samples."""
     dataset_folder = Path(dataset_folder)
     alignment_output_folder = Path(alignment_output_folder)
     plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
@@ -3583,10 +3915,14 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
         side = str(triplet["side"])
         reference_file = Path(triplet["reference_file"])
         event_file = Path(triplet["event_file"])
+        ir_file = Path(triplet["ir_file"])
+        depth_file = Path(triplet["depth_file"])
         audio_file = Path(triplet["audio_file"])
         dtw_path = _dtw_alignment_output_path(alignment_output_folder, sample_name, side)
         audio_path = _audio_alignment_output_path(alignment_output_folder, sample_name, side)
-        combined_summary_path = output_folder / f"{sample_name}_{side}_rgb_event_dtw_with_aligned_audio_summary.json"
+        combined_summary_path = (
+            output_folder / f"{sample_name}_{side}_rgb_event_ir_depth_dtw_with_aligned_audio_summary.json"
+        )
 
         if not bool(triplet.get("complete")):
             skipped.append(
@@ -3595,6 +3931,8 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
                     "side": side,
                     "reference_file": str(reference_file),
                     "event_file": str(event_file),
+                    "ir_file": str(ir_file),
+                    "depth_file": str(depth_file),
                     "audio_file": str(audio_file),
                     "dtw_alignment_file": str(dtw_path),
                     "audio_alignment_file": str(audio_path),
@@ -3618,6 +3956,8 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
                 resize_width=resize_width,
                 reference_file=reference_file,
                 event_file=event_file,
+                ir_file=ir_file,
+                depth_file=depth_file,
                 audio_file=audio_file,
                 keep_intermediate_dtw_video=False,
             )
@@ -3630,8 +3970,12 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
                         "pair_summary_file": str(combined_summary_path),
                         "source_rgb_file": str(reference_file),
                         "source_event_file": str(event_file),
+                        "source_ir_file": str(ir_file),
+                        "source_depth_file": str(depth_file),
                         "source_audio_file": str(audio_file),
                         "dtw": pair_summary.get("dtw"),
+                        "ir": pair_summary.get("ir"),
+                        "depth": pair_summary.get("depth"),
                         "audio": pair_summary.get("audio"),
                     }
                 )
@@ -3647,6 +3991,8 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
                         "side": side,
                         "reference_file": str(reference_file),
                         "event_file": str(event_file),
+                        "ir_file": str(ir_file),
+                        "depth_file": str(depth_file),
                         "audio_file": str(audio_file),
                         "dtw_alignment_file": str(dtw_path),
                         "audio_alignment_file": str(audio_path),
@@ -3661,6 +4007,8 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
                     "side": side,
                     "reference_file": str(reference_file),
                     "event_file": str(event_file),
+                    "ir_file": str(ir_file),
+                    "depth_file": str(depth_file),
                     "audio_file": str(audio_file),
                     "dtw_alignment_file": str(dtw_path),
                     "audio_alignment_file": str(audio_path),
@@ -3676,7 +4024,7 @@ def run_and_export_all_rgb_event_dtw_with_audio_alignments(
         "exported": exported,
         "skipped": skipped,
     }
-    summary_path = output_folder / "rgb_event_dtw_with_audio_all_export_summary.json"
+    summary_path = output_folder / "rgb_event_ir_depth_dtw_with_audio_all_export_summary.json"
     with open(summary_path, "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, ensure_ascii=False)
     summary["summary_file"] = str(summary_path)

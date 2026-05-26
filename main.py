@@ -349,7 +349,7 @@ def main():
         print("32. Run feature-based temporal alignment + export aligned video for check_mailbox day RGB/EVENT")
         print("33. Run cross-correlation temporal alignment + export video for check_mailbox day RGB/AUDIO")
         print("\n--- TEMPORAL ALIGNMENT ---")
-        print("34. Run combined RGB/EVENT DTW + RGB/AUDIO alignment for all dataset day/night files")
+        print("34. Run combined RGB/EVENT/IR/DEPTH DTW + RGB/AUDIO alignment for all dataset day/night files")
         print("\n--- LATE FUSION ---")
         print("35. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
@@ -889,14 +889,15 @@ def main():
 
         elif choice == "34":
             print("\n" + "-" * 60)
-            print("Running: combined RGB/EVENT DTW + RGB/AUDIO alignment for all dataset day/night files")
+            print("Running: combined RGB/EVENT/IR/DEPTH DTW + RGB/AUDIO alignment for all dataset day/night files")
             print("-" * 60)
-            print("Discovers every complete RGB/EVENT/.m4a triplet under dataset/.")
+            print("Discovers every complete RGB/EVENT/IR/DEPTH/.m4a set under dataset/.")
             print("Includes day and night files, and ignores *_rgb_with_audio.mp4 plus embedded RGB audio.")
-            print("Writes per-pair DTW and RGB/AUDIO JSON files.")
-            print("Writes temporal_alignment_exports/*_rgb_event_dtw_with_aligned_audio.mp4.")
-            print("Does not keep the intermediate no-audio RGB/EVENT DTW preview videos.")
-            print("Writes temporal_alignment_exports/rgb_event_dtw_with_audio_all_export_summary.json.\n")
+            print("Writes per-pair EVENT DTW and RGB/AUDIO JSON files.")
+            print("Aligns IR and DEPTH to RGB with fixed-offset cross-correlation.")
+            print("Writes temporal_alignment_exports/*_rgb_event_ir_depth_dtw_with_aligned_audio.mp4.")
+            print("Does not keep intermediate no-audio preview videos.")
+            print("Writes temporal_alignment_exports/rgb_event_ir_depth_dtw_with_audio_all_export_summary.json.\n")
             combined_summary = run_and_export_all_rgb_event_dtw_with_audio_alignments(
                 dataset_folder="dataset",
                 alignment_output_folder=".",
@@ -904,9 +905,9 @@ def main():
                 output_folder="temporal_alignment_exports",
                 window_seconds=10.0,
             )
-            print(f"Discovered {combined_summary.get('discovered_count', 0)} RGB/EVENT/AUDIO triplet(s).")
-            print(f"Exported {combined_summary.get('exported_count', 0)} combined preview video(s).")
-            print(f"Skipped {combined_summary.get('skipped_count', 0)} triplet(s).")
+            print(f"Discovered {combined_summary.get('discovered_count', 0)} complete candidate set(s).")
+            print(f"Exported {combined_summary.get('exported_count', 0)} combined 2x2 preview video(s).")
+            print(f"Skipped {combined_summary.get('skipped_count', 0)} set(s).")
             if combined_summary.get("summary_file"):
                 print(f"Summary saved to {combined_summary['summary_file']}")
             for item in combined_summary.get("exported", []):
