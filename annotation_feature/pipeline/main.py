@@ -208,6 +208,7 @@ def run_event(
     test_pair_index: int = 0,
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
+    output_file: Path | str = "event_qa_results.json",
 ):
     """
     Run the EVENT annotation pipeline.
@@ -217,6 +218,7 @@ def run_event(
         test_pair_index: Which video pair to process in test mode (0 = first)
         skip_api: If True, skip Gemini API calls and return empty captions
         dataset_folder: Dataset directory containing the source videos
+        output_file: JSON path to write EVENT QA results
     """
     if test_mode:
         print("=" * 50)
@@ -316,8 +318,8 @@ def run_event(
         }
         print(f"✓ Done: {pair_key}")
 
-    # Save results to JSON file at the project root
-    output_file = Path("event_qa_results.json")
+    output_file = Path(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
@@ -593,6 +595,7 @@ def run_ir(
     test_pair_index: int = 0,
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
+    output_file: Path | str = "ir_qa_results.json",
 ):
     """
     Run the IR annotation pipeline.
@@ -602,6 +605,7 @@ def run_ir(
         test_pair_index: Which video pair to process in test mode (0 = first)
         skip_api: If True, skip Gemini API calls and return demo results
         dataset_folder: Dataset directory containing the source videos
+        output_file: JSON path to write IR QA results
     """
     if test_mode:
         print("=" * 50)
@@ -699,7 +703,8 @@ def run_ir(
         }
         print(f"âœ“ Done: {pair_key}")
 
-    output_file = Path("ir_qa_results.json")
+    output_file = Path(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
