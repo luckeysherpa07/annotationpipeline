@@ -24,6 +24,7 @@ DEFAULT_FEATURE_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_feature_che
 DEFAULT_RGB_AUDIO_CHECK_MAILBOX_OUTPUT_PATH = Path("temporal_alignment_cross_correlation_check_mailbox_day_audio.json")
 DEFAULT_PLOT_OUTPUT_FOLDER = Path("temporal_alignment_plots")
 DEFAULT_EXPORT_OUTPUT_FOLDER = Path("temporal_alignment_exports")
+DEFAULT_ALIGNED_DATASET_FOLDER = Path("aligned_dataset")
 EXPORT_PANEL_WIDTH = 320
 EXPORT_PANEL_HEIGHT = 180
 EXPORT_PREVIEW_FPS = 10
@@ -111,6 +112,80 @@ def _video_metadata(video_path: Path) -> dict[str, float | int | bool]:
         "fps": fps,
         "frame_count": frame_count,
         "duration_seconds": duration_seconds,
+    }
+
+
+def _ffprobe_json(path: Path) -> dict[str, Any]:
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_streams",
+        "-show_format",
+        "-of",
+        "json",
+        str(path),
+    ]
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        return {"streams": [], "format": {}, "error": completed.stderr.strip()}
+    try:
+        data = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        return {"streams": [], "format": {}, "error": "Could not parse ffprobe JSON output."}
+    return data if isinstance(data, dict) else {"streams": [], "format": {}}
+
+
+def _parse_fps(value: str | None) -> float:
+    if not value:
+        return 0.0
+    if "/" in value:
+        numerator, denominator = value.split("/", 1)
+        try:
+            denominator_float = float(denominator)
+            return float(numerator) / denominator_float if denominator_float else 0.0
+        except ValueError:
+            return 0.0
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
+
+
+def _source_video_encoding_info(path: Path) -> dict[str, Any]:
+    data = _ffprobe_json(path)
+    video_stream = next((item for item in data.get("streams", []) if item.get("codec_type") == "video"), {})
+    format_info = data.get("format", {}) if isinstance(data.get("format"), dict) else {}
+    bit_rate = video_stream.get("bit_rate") or format_info.get("bit_rate")
+    try:
+        bit_rate_int = int(float(bit_rate)) if bit_rate is not None else None
+    except (TypeError, ValueError):
+        bit_rate_int = None
+    return {
+        "codec_name": video_stream.get("codec_name"),
+        "width": int(video_stream.get("width") or 0),
+        "height": int(video_stream.get("height") or 0),
+        "fps": _parse_fps(video_stream.get("avg_frame_rate") or video_stream.get("r_frame_rate")),
+        "bit_rate": bit_rate_int,
+        "duration_seconds": float(format_info.get("duration") or 0.0),
+    }
+
+
+def _source_audio_encoding_info(path: Path) -> dict[str, Any]:
+    data = _ffprobe_json(path)
+    audio_stream = next((item for item in data.get("streams", []) if item.get("codec_type") == "audio"), {})
+    format_info = data.get("format", {}) if isinstance(data.get("format"), dict) else {}
+    bit_rate = audio_stream.get("bit_rate") or format_info.get("bit_rate")
+    try:
+        bit_rate_int = int(float(bit_rate)) if bit_rate is not None else None
+    except (TypeError, ValueError):
+        bit_rate_int = None
+    return {
+        "codec_name": audio_stream.get("codec_name"),
+        "sample_rate": int(audio_stream.get("sample_rate") or 0),
+        "channels": int(audio_stream.get("channels") or 0),
+        "bit_rate": bit_rate_int,
+        "duration_seconds": float(format_info.get("duration") or 0.0),
     }
 
 
@@ -3888,6 +3963,529 @@ def run_and_export_check_mailbox_day_rgb_event_dtw_with_audio_alignment(
         resize_width=resize_width,
         keep_intermediate_dtw_video=False,
     )
+
+
+def _bitrate_arg(bit_rate: int | None, fallback: str) -> str:
+    if bit_rate is None or bit_rate <= 0:
+        return fallback
+    return str(int(bit_rate))
+
+
+def _run_ffmpeg_exact(command: list[str], output_path: Path, description: str) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+    completed = subprocess.run([*command, str(tmp_output_path)], check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Failed to export {description}: {completed.stderr.strip()}")
+    tmp_output_path.replace(output_path)
+
+
+def _export_aligned_source_video_segment(
+    source_file: Path,
+    output_path: Path,
+    source_start_seconds: float,
+    duration_seconds: float,
+    encoding_info: dict[str, Any],
+    description: str,
+) -> dict[str, Any]:
+    bit_rate = _bitrate_arg(encoding_info.get("bit_rate"), "12000k")
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-ss",
+        f"{source_start_seconds:.6f}",
+        "-t",
+        f"{duration_seconds:.6f}",
+        "-i",
+        str(source_file),
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-b:v",
+        bit_rate,
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+    ]
+    _run_ffmpeg_exact(command, output_path, description)
+    return {
+        "output_file": str(output_path),
+        "source_file": str(source_file),
+        "source_start_seconds": round(source_start_seconds, 6),
+        "duration_seconds": round(duration_seconds, 6),
+        "bit_rate": encoding_info.get("bit_rate"),
+        "fps": encoding_info.get("fps"),
+        "width": encoding_info.get("width"),
+        "height": encoding_info.get("height"),
+    }
+
+
+def _export_aligned_audio_segment(
+    audio_file: Path,
+    output_path: Path,
+    audio_start_seconds: float,
+    duration_seconds: float,
+    encoding_info: dict[str, Any],
+) -> dict[str, Any]:
+    bit_rate = _bitrate_arg(encoding_info.get("bit_rate"), "128k")
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-ss",
+        f"{audio_start_seconds:.6f}",
+        "-t",
+        f"{duration_seconds:.6f}",
+        "-i",
+        str(audio_file),
+        "-vn",
+        "-c:a",
+        "aac",
+        "-b:a",
+        bit_rate,
+        "-movflags",
+        "+faststart",
+    ]
+    _run_ffmpeg_exact(command, output_path, "aligned audio segment")
+    return {
+        "output_file": str(output_path),
+        "source_file": str(audio_file),
+        "source_start_seconds": round(audio_start_seconds, 6),
+        "duration_seconds": round(duration_seconds, 6),
+        "bit_rate": encoding_info.get("bit_rate"),
+        "sample_rate": encoding_info.get("sample_rate"),
+        "channels": encoding_info.get("channels"),
+    }
+
+
+def _export_event_dtw_segment(
+    dtw_result: dict[str, Any],
+    output_path: Path,
+    rgb_start_seconds: float,
+    duration_seconds: float,
+    reference_fps: float,
+    event_encoding_info: dict[str, Any],
+) -> dict[str, Any]:
+    dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
+    event_file = Path(str(dtw_alignment.get("file") or dtw_result.get("target_file") or ""))
+    event_duration = float(dtw_alignment.get("duration_seconds") or dtw_result.get("target_duration_seconds") or 0.0)
+    offset_curve = dtw_alignment.get("offset_curve")
+    if not isinstance(offset_curve, list) or not offset_curve:
+        raise ValueError("DTW alignment must include a non-empty offset_curve.")
+    if reference_fps <= 0:
+        raise ValueError("EVENT segment export requires a positive RGB reference FPS.")
+
+    render_offset_curve = _smooth_dtw_offset_curve_for_export(offset_curve)
+    event_cap = cv2.VideoCapture(str(event_file))
+    if not event_cap.isOpened():
+        raise ValueError(f"Could not open EVENT video: {event_file}")
+    event_fps = float(event_cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    width = int(event_encoding_info.get("width") or event_cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
+    height = int(event_encoding_info.get("height") or event_cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
+    if event_fps <= 0 or width <= 0 or height <= 0:
+        event_cap.release()
+        raise ValueError("Could not determine EVENT FPS or frame size.")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_output_path = output_path.with_name(f"{output_path.stem}.rawtmp{output_path.suffix}")
+    raw_output_path.unlink(missing_ok=True)
+    writer = cv2.VideoWriter(
+        str(raw_output_path),
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        float(reference_fps),
+        (width, height),
+    )
+    if not writer.isOpened():
+        event_cap.release()
+        raw_output_path.unlink(missing_ok=True)
+        raise RuntimeError("Could not create OpenCV VideoWriter for EVENT DTW segment.")
+
+    frame_count = max(1, int(round(duration_seconds * reference_fps)))
+    event_state: dict[str, Any] = {}
+    written_count = 0
+    try:
+        for frame_index in range(frame_count):
+            rgb_time = rgb_start_seconds + frame_index / reference_fps
+            event_time = min(event_duration, max(0.0, _event_time_from_offset_curve(render_offset_curve, rgb_time)))
+            event_position = event_time * event_fps
+            event_frame_index = int(np.floor(event_position))
+            blend_weight = float(event_position - event_frame_index)
+            event_a, event_b = _read_video_frame_pair_forward(event_cap, event_frame_index, event_state)
+            frame = _blend_frames(event_a, event_b, blend_weight)
+            if frame is None:
+                frame = np.zeros((height, width, 3), dtype=np.uint8)
+            elif frame.shape[1] != width or frame.shape[0] != height:
+                frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+            writer.write(frame)
+            written_count += 1
+    finally:
+        writer.release()
+        event_cap.release()
+
+    if written_count == 0:
+        raw_output_path.unlink(missing_ok=True)
+        raise RuntimeError("EVENT DTW segment export wrote zero frames.")
+
+    bit_rate = _bitrate_arg(event_encoding_info.get("bit_rate"), "56000k")
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        str(raw_output_path),
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-b:v",
+        bit_rate,
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+    ]
+    try:
+        _run_ffmpeg_exact(command, output_path, "EVENT DTW segment")
+    finally:
+        raw_output_path.unlink(missing_ok=True)
+    return {
+        "output_file": str(output_path),
+        "source_file": str(event_file),
+        "rgb_start_seconds": round(rgb_start_seconds, 6),
+        "duration_seconds": round(duration_seconds, 6),
+        "frames_written": written_count,
+        "fps": reference_fps,
+        "source_fps": event_fps,
+        "bit_rate": event_encoding_info.get("bit_rate"),
+        "width": width,
+        "height": height,
+        "dtw_warped": True,
+    }
+
+
+def _build_cut_carrot_side_alignment(
+    side: str,
+    dataset_folder: Path,
+    alignment_output_folder: Path,
+    plot_output_folder: Path | None,
+    resize_width: int,
+    window_seconds: float,
+) -> dict[str, Any]:
+    sample_name = "cut_carrot"
+    split_folder_name = "cut_carrot_split"
+    split_folder = dataset_folder / split_folder_name
+    reference_file = split_folder / f"{sample_name}_{side}_rgb.mp4"
+    event_file = split_folder / f"{sample_name}_{side}_event.mp4"
+    ir_file = split_folder / f"{sample_name}_{side}_ir.mp4"
+    depth_file = split_folder / f"{sample_name}_{side}_depth.mp4"
+    audio_file = split_folder / f"{sample_name}_{side}.m4a"
+    required_files = [reference_file, event_file, ir_file, depth_file, audio_file]
+    missing = [str(path) for path in required_files if not path.exists()]
+    if missing:
+        raise FileNotFoundError("Missing required cut_carrot files: " + ", ".join(missing))
+
+    dtw_path = _dtw_alignment_output_path(alignment_output_folder, sample_name, side)
+    audio_path = _audio_alignment_output_path(alignment_output_folder, sample_name, side)
+    dtw_result = _run_rgb_event_dtw_alignment(
+        sample_name=sample_name,
+        split_folder_name=split_folder_name,
+        side=side,
+        dataset_folder=dataset_folder,
+        output_path=dtw_path,
+        plot_output_folder=plot_output_folder,
+        window_seconds=window_seconds,
+        resize_width=resize_width,
+        reference_file=reference_file,
+        event_file=event_file,
+    )
+
+    reference_meta = _video_metadata(reference_file)
+    if not reference_meta.get("opened"):
+        raise ValueError(f"Could not open RGB reference video: {reference_file}")
+    reference_trace = _motion_energy_trace(reference_file, resize_width=resize_width)
+    ir_trace = _motion_energy_trace(ir_file, resize_width=resize_width)
+    depth_trace = _motion_energy_trace(depth_file, resize_width=resize_width)
+    ir_alignment = _estimate_modality_alignment(
+        reference_file=reference_file,
+        reference_meta=reference_meta,
+        reference_trace=reference_trace,
+        target_modality="ir",
+        target_file=ir_file,
+        target_trace=ir_trace,
+        max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
+        plot_output_path=plot_output_folder / f"cut_carrot_{side}_rgb_ir_segment_export_activity_signal.png"
+        if plot_output_folder is not None
+        else None,
+    )
+    depth_alignment = _estimate_modality_alignment(
+        reference_file=reference_file,
+        reference_meta=reference_meta,
+        reference_trace=reference_trace,
+        target_modality="depth",
+        target_file=depth_file,
+        target_trace=depth_trace,
+        max_lag_seconds=LOW_CONFIDENCE_LARGE_VISUAL_OFFSET_SECONDS,
+        plot_output_path=plot_output_folder / f"cut_carrot_{side}_rgb_depth_segment_export_activity_signal.png"
+        if plot_output_folder is not None
+        else None,
+    )
+    if ir_alignment.get("offset_seconds") is None:
+        raise ValueError(f"RGB/IR alignment did not produce an offset for cut_carrot {side}.")
+    if depth_alignment.get("offset_seconds") is None:
+        raise ValueError(f"RGB/DEPTH alignment did not produce an offset for cut_carrot {side}.")
+
+    audio_result = _run_rgb_audio_cross_correlation_alignment(
+        sample_name=sample_name,
+        split_folder_name=split_folder_name,
+        side=side,
+        dataset_folder=dataset_folder,
+        output_path=audio_path,
+        plot_output_folder=plot_output_folder,
+        output_folder=alignment_output_folder,
+        resize_width=resize_width,
+        prefer_gpu=False,
+        reference_file=reference_file,
+        audio_file=audio_file,
+        export_preview=False,
+        summary_file_name=f"cut_carrot_{side}_rgb_audio_cross_correlation_export_summary.json",
+    )
+    audio_alignment = audio_result.get("alignment") if isinstance(audio_result.get("alignment"), dict) else {}
+    if audio_alignment.get("offset_seconds") is None:
+        raise ValueError(f"RGB/AUDIO alignment did not produce an offset for cut_carrot {side}.")
+
+    dtw_alignment = dtw_result.get("alignment") if isinstance(dtw_result.get("alignment"), dict) else {}
+    offset_curve = dtw_alignment.get("offset_curve")
+    if not isinstance(offset_curve, list) or not offset_curve:
+        raise ValueError(f"EVENT DTW alignment did not produce an offset curve for cut_carrot {side}.")
+    ir_offset = float(ir_alignment["offset_seconds"])
+    depth_offset = float(depth_alignment["offset_seconds"])
+    audio_offset = float(audio_alignment["offset_seconds"])
+    reference_duration = float(dtw_result.get("reference_duration_seconds") or reference_meta.get("duration_seconds") or 0.0)
+    event_duration = float(dtw_alignment.get("duration_seconds") or dtw_result.get("target_duration_seconds") or 0.0)
+    ir_duration = float(ir_alignment.get("duration_seconds") or 0.0)
+    depth_duration = float(depth_alignment.get("duration_seconds") or 0.0)
+    audio_duration = float(audio_result.get("audio_duration_seconds") or 0.0)
+    overlap_start = max(0.0, float(offset_curve[0]["reference_time_seconds"]), -ir_offset, -depth_offset, -audio_offset)
+    overlap_end = min(
+        reference_duration,
+        float(offset_curve[-1]["reference_time_seconds"]),
+        ir_duration - ir_offset,
+        depth_duration - depth_offset,
+        audio_duration - audio_offset,
+    )
+    overlap_duration = max(0.0, overlap_end - overlap_start)
+    if overlap_duration < 30.0:
+        raise ValueError(f"cut_carrot {side} has less than one full 30s aligned overlap segment.")
+
+    return {
+        "sample": sample_name,
+        "side": side,
+        "split_folder_name": split_folder_name,
+        "files": {
+            "rgb": reference_file,
+            "event": event_file,
+            "ir": ir_file,
+            "depth": depth_file,
+            "audio": audio_file,
+        },
+        "encoding": {
+            "rgb": _source_video_encoding_info(reference_file),
+            "event": _source_video_encoding_info(event_file),
+            "ir": _source_video_encoding_info(ir_file),
+            "depth": _source_video_encoding_info(depth_file),
+            "audio": _source_audio_encoding_info(audio_file),
+        },
+        "reference_meta": reference_meta,
+        "dtw_result": dtw_result,
+        "dtw_alignment_file": str(dtw_path),
+        "audio_result": audio_result,
+        "audio_alignment_file": str(audio_path),
+        "ir_alignment": ir_alignment,
+        "depth_alignment": depth_alignment,
+        "overlap_start_seconds": overlap_start,
+        "overlap_end_seconds": overlap_end,
+        "overlap_duration_seconds": overlap_duration,
+        "segment_count": int(np.floor(overlap_duration / 30.0)),
+        "dropped_remainder_seconds": float(overlap_duration - np.floor(overlap_duration / 30.0) * 30.0),
+    }
+
+
+def run_and_export_cut_carrot_aligned_dataset_segments(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = DEFAULT_ALIGNED_DATASET_FOLDER,
+    alignment_output_folder: Path | str = ".",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER,
+    segment_seconds: float = 30.0,
+    resize_width: int = 160,
+    window_seconds: float = 10.0,
+) -> dict[str, Any]:
+    """Export cut_carrot day/night aligned modalities as separated 30-second dataset segments."""
+    dataset_folder = Path(dataset_folder)
+    output_folder = Path(output_folder)
+    alignment_output_folder = Path(alignment_output_folder)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    split_output_folder = output_folder / "cut_carrot_split"
+    split_output_folder.mkdir(parents=True, exist_ok=True)
+    alignment_output_folder.mkdir(parents=True, exist_ok=True)
+
+    side_results: dict[str, dict[str, Any]] = {}
+    skipped: list[dict[str, Any]] = []
+    for side in ("day", "night"):
+        try:
+            side_results[side] = _build_cut_carrot_side_alignment(
+                side=side,
+                dataset_folder=dataset_folder,
+                alignment_output_folder=alignment_output_folder,
+                plot_output_folder=plot_output_folder,
+                resize_width=resize_width,
+                window_seconds=window_seconds,
+            )
+        except Exception as exc:
+            skipped.append({"sample": "cut_carrot", "side": side, "stage": "alignment", "reason": str(exc)})
+
+    max_segment_count = max((item["segment_count"] for item in side_results.values()), default=0)
+    exported_segments: list[dict[str, Any]] = []
+    for segment_index in range(max_segment_count):
+        segment_folder = split_output_folder / f"Seg{segment_index + 1}"
+        segment_folder.mkdir(parents=True, exist_ok=True)
+        segment_record: dict[str, Any] = {
+            "segment": f"Seg{segment_index + 1}",
+            "folder": str(segment_folder),
+            "duration_seconds": segment_seconds,
+            "sides": {},
+        }
+        for side, bundle in side_results.items():
+            if segment_index >= int(bundle["segment_count"]):
+                continue
+            segment_start = float(bundle["overlap_start_seconds"]) + segment_index * segment_seconds
+            files: dict[str, Path] = bundle["files"]
+            encoding: dict[str, dict[str, Any]] = bundle["encoding"]
+            ir_offset = float(bundle["ir_alignment"]["offset_seconds"])
+            depth_offset = float(bundle["depth_alignment"]["offset_seconds"])
+            audio_alignment = bundle["audio_result"].get("alignment", {})
+            audio_offset = float(audio_alignment["offset_seconds"])
+            reference_fps = float(bundle["reference_meta"]["fps"])
+            side_record: dict[str, Any] = {
+                "rgb_start_seconds": round(segment_start, 6),
+                "rgb_end_seconds": round(segment_start + segment_seconds, 6),
+                "outputs": {},
+            }
+            try:
+                side_record["outputs"]["rgb"] = _export_aligned_source_video_segment(
+                    source_file=files["rgb"],
+                    output_path=segment_folder / f"cut_carrot_{side}_rgb.mp4",
+                    source_start_seconds=segment_start,
+                    duration_seconds=segment_seconds,
+                    encoding_info=encoding["rgb"],
+                    description=f"cut_carrot {side} RGB segment",
+                )
+                side_record["outputs"]["event"] = _export_event_dtw_segment(
+                    dtw_result=bundle["dtw_result"],
+                    output_path=segment_folder / f"cut_carrot_{side}_event.mp4",
+                    rgb_start_seconds=segment_start,
+                    duration_seconds=segment_seconds,
+                    reference_fps=reference_fps,
+                    event_encoding_info=encoding["event"],
+                )
+                side_record["outputs"]["ir"] = _export_aligned_source_video_segment(
+                    source_file=files["ir"],
+                    output_path=segment_folder / f"cut_carrot_{side}_ir.mp4",
+                    source_start_seconds=segment_start + ir_offset,
+                    duration_seconds=segment_seconds,
+                    encoding_info=encoding["ir"],
+                    description=f"cut_carrot {side} IR segment",
+                )
+                side_record["outputs"]["depth"] = _export_aligned_source_video_segment(
+                    source_file=files["depth"],
+                    output_path=segment_folder / f"cut_carrot_{side}_depth.mp4",
+                    source_start_seconds=segment_start + depth_offset,
+                    duration_seconds=segment_seconds,
+                    encoding_info=encoding["depth"],
+                    description=f"cut_carrot {side} DEPTH segment",
+                )
+                side_record["outputs"]["audio"] = _export_aligned_audio_segment(
+                    audio_file=files["audio"],
+                    output_path=segment_folder / f"cut_carrot_{side}.m4a",
+                    audio_start_seconds=segment_start + audio_offset,
+                    duration_seconds=segment_seconds,
+                    encoding_info=encoding["audio"],
+                )
+                segment_record["sides"][side] = side_record
+            except Exception as exc:
+                skipped.append(
+                    {
+                        "sample": "cut_carrot",
+                        "side": side,
+                        "segment": f"Seg{segment_index + 1}",
+                        "stage": "export",
+                        "reason": str(exc),
+                    }
+                )
+        if segment_record["sides"]:
+            exported_segments.append(segment_record)
+
+    summary = {
+        "sample": "cut_carrot",
+        "split_folder_name": "cut_carrot_split",
+        "output_folder": str(split_output_folder),
+        "segment_seconds": segment_seconds,
+        "exported_segment_count": len(exported_segments),
+        "skipped_count": len(skipped),
+        "sides": {
+            side: {
+                "segment_count": item["segment_count"],
+                "overlap_start_seconds": round(float(item["overlap_start_seconds"]), 6),
+                "overlap_end_seconds": round(float(item["overlap_end_seconds"]), 6),
+                "overlap_duration_seconds": round(float(item["overlap_duration_seconds"]), 6),
+                "dropped_remainder_seconds": round(float(item["dropped_remainder_seconds"]), 6),
+                "dtw_alignment_file": item["dtw_alignment_file"],
+                "audio_alignment_file": item["audio_alignment_file"],
+                "source_files": {key: str(value) for key, value in item["files"].items()},
+                "source_encoding": item["encoding"],
+                "dtw": {
+                    "start_offset_seconds": item["dtw_result"].get("alignment", {}).get("start_offset_seconds"),
+                    "end_offset_seconds": item["dtw_result"].get("alignment", {}).get("end_offset_seconds"),
+                    "offset_drift_seconds": item["dtw_result"].get("alignment", {}).get("offset_drift_seconds"),
+                },
+                "ir": {
+                    "offset_seconds": item["ir_alignment"].get("offset_seconds"),
+                    "peak_correlation": item["ir_alignment"].get("peak_correlation"),
+                    "confidence_label": item["ir_alignment"].get("confidence_label"),
+                },
+                "depth": {
+                    "offset_seconds": item["depth_alignment"].get("offset_seconds"),
+                    "peak_correlation": item["depth_alignment"].get("peak_correlation"),
+                    "confidence_label": item["depth_alignment"].get("confidence_label"),
+                },
+                "audio": {
+                    "offset_seconds": item["audio_result"].get("alignment", {}).get("offset_seconds"),
+                    "peak_correlation": item["audio_result"].get("alignment", {}).get("peak_correlation"),
+                    "confidence_label": item["audio_result"].get("alignment", {}).get("confidence_label"),
+                },
+            }
+            for side, item in side_results.items()
+        },
+        "segments": exported_segments,
+        "skipped": skipped,
+    }
+    summary_path = split_output_folder / "aligned_segments_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(summary_path)
+    return summary
 
 
 def run_and_export_all_rgb_event_dtw_with_audio_alignments(
