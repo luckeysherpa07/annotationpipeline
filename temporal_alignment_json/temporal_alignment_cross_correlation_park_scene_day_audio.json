@@ -1,0 +1,100 @@
+{
+  "sample": "park_scene",
+  "side": "day",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/park_scene_split/park_scene_day_rgb.mp4",
+  "audio_file": "dataset/park_scene_split/park_scene_day.m4a",
+  "ignored_files": [
+    "dataset/park_scene_split/park_scene_day_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/park_scene_day_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 1872,
+  "reference_duration_seconds": 62.4,
+  "audio_duration_seconds": 62.016,
+  "reference_trace_count": 1871,
+  "audio_trace_count": 1862,
+  "alignment": {
+    "offset_seconds": -29.6,
+    "offset_frames": -888,
+    "peak_correlation": 0.3587498664855957,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -29.6,
+        "offset_frames": -888,
+        "correlation": 0.35875,
+        "overlap_ratio": 0.527927
+      },
+      {
+        "offset_seconds": -29.633333,
+        "offset_frames": -889,
+        "correlation": 0.358665,
+        "overlap_ratio": 0.52739
+      },
+      {
+        "offset_seconds": -29.566667,
+        "offset_frames": -887,
+        "correlation": 0.357844,
+        "overlap_ratio": 0.528464
+      },
+      {
+        "offset_seconds": -29.666667,
+        "offset_frames": -890,
+        "correlation": 0.35745,
+        "overlap_ratio": 0.526853
+      },
+      {
+        "offset_seconds": -29.533333,
+        "offset_frames": -886,
+        "correlation": 0.3559,
+        "overlap_ratio": 0.529001
+      },
+      {
+        "offset_seconds": -29.7,
+        "offset_frames": -891,
+        "correlation": 0.355159,
+        "overlap_ratio": 0.526316
+      },
+      {
+        "offset_seconds": -29.5,
+        "offset_frames": -885,
+        "correlation": 0.353168,
+        "overlap_ratio": 0.529538
+      },
+      {
+        "offset_seconds": -29.733333,
+        "offset_frames": -892,
+        "correlation": 0.352028,
+        "overlap_ratio": 0.525779
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 8.45491886138916e-05,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 29.6,
+      "end": 62.4
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 32.8
+    },
+    "overlap_ratio": 0.5279269602577873,
+    "overlap_samples": 983,
+    "selected_correlation_recomputed": 0.3587498664855957,
+    "activity_plot_file": "temporal_alignment_plots/park_scene_day_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "park_scene_day_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

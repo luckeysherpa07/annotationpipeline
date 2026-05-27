@@ -1,0 +1,100 @@
+{
+  "sample": "cut_potato_and_carrot",
+  "side": "day",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/cut_potato_and_carrot_split/cut_potato_and_carrot_day_rgb.mp4",
+  "audio_file": "dataset/cut_potato_and_carrot_split/cut_potato_and_carrot_day.m4a",
+  "ignored_files": [
+    "dataset/cut_potato_and_carrot_split/cut_potato_and_carrot_day_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/cut_potato_and_carrot_day_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 6510,
+  "reference_duration_seconds": 217.0,
+  "audio_duration_seconds": 217.0026875,
+  "reference_trace_count": 6509,
+  "audio_trace_count": 6515,
+  "alignment": {
+    "offset_seconds": -2.9,
+    "offset_frames": -87,
+    "peak_correlation": 0.21108956634998322,
+    "confidence_label": "low",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -2.9,
+        "offset_frames": -87,
+        "correlation": 0.21109,
+        "overlap_ratio": 0.986634
+      },
+      {
+        "offset_seconds": -2.866667,
+        "offset_frames": -86,
+        "correlation": 0.210791,
+        "overlap_ratio": 0.986788
+      },
+      {
+        "offset_seconds": -2.933333,
+        "offset_frames": -88,
+        "correlation": 0.210676,
+        "overlap_ratio": 0.98648
+      },
+      {
+        "offset_seconds": -7.5,
+        "offset_frames": -225,
+        "correlation": 0.210624,
+        "overlap_ratio": 0.965432
+      },
+      {
+        "offset_seconds": -7.533333,
+        "offset_frames": -226,
+        "correlation": 0.210577,
+        "overlap_ratio": 0.965279
+      },
+      {
+        "offset_seconds": -7.466667,
+        "offset_frames": -224,
+        "correlation": 0.21026,
+        "overlap_ratio": 0.965586
+      },
+      {
+        "offset_seconds": -7.566667,
+        "offset_frames": -227,
+        "correlation": 0.210028,
+        "overlap_ratio": 0.965125
+      },
+      {
+        "offset_seconds": -2.833333,
+        "offset_frames": -85,
+        "correlation": 0.209867,
+        "overlap_ratio": 0.986941
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.0002983361482620239,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 2.9,
+      "end": 217.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 214.1
+    },
+    "overlap_ratio": 0.986633891534798,
+    "overlap_samples": 6422,
+    "selected_correlation_recomputed": 0.21108956634998322,
+    "activity_plot_file": "temporal_alignment_plots/cut_potato_and_carrot_day_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "cut_potato_and_carrot_day_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

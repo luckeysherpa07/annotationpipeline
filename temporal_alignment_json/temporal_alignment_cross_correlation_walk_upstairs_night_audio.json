@@ -1,0 +1,100 @@
+{
+  "sample": "walk_upstairs",
+  "side": "night",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/walk_upstairs_split/walk_upstairs_night_rgb.mp4",
+  "audio_file": "dataset/walk_upstairs_split/walk_upstairs_night.m4a",
+  "ignored_files": [
+    "dataset/walk_upstairs_split/walk_upstairs_night_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/walk_upstairs_night_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 2760,
+  "reference_duration_seconds": 92.0,
+  "audio_duration_seconds": 92.0106875,
+  "reference_trace_count": 2759,
+  "audio_trace_count": 2763,
+  "alignment": {
+    "offset_seconds": -27.5,
+    "offset_frames": -825,
+    "peak_correlation": 0.21055564284324646,
+    "confidence_label": "low",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -27.5,
+        "offset_frames": -825,
+        "correlation": 0.210556,
+        "overlap_ratio": 0.700979
+      },
+      {
+        "offset_seconds": -27.533333,
+        "offset_frames": -826,
+        "correlation": 0.210225,
+        "overlap_ratio": 0.700616
+      },
+      {
+        "offset_seconds": -27.466667,
+        "offset_frames": -824,
+        "correlation": 0.209851,
+        "overlap_ratio": 0.701341
+      },
+      {
+        "offset_seconds": -27.566667,
+        "offset_frames": -827,
+        "correlation": 0.208885,
+        "overlap_ratio": 0.700254
+      },
+      {
+        "offset_seconds": -27.433333,
+        "offset_frames": -823,
+        "correlation": 0.208507,
+        "overlap_ratio": 0.701704
+      },
+      {
+        "offset_seconds": -27.033333,
+        "offset_frames": -811,
+        "correlation": 0.207331,
+        "overlap_ratio": 0.706053
+      },
+      {
+        "offset_seconds": -27.4,
+        "offset_frames": -822,
+        "correlation": 0.206998,
+        "overlap_ratio": 0.702066
+      },
+      {
+        "offset_seconds": -27.0,
+        "offset_frames": -810,
+        "correlation": 0.206884,
+        "overlap_ratio": 0.706415
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.00033061206340789795,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 27.5,
+      "end": 92.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 64.5
+    },
+    "overlap_ratio": 0.700978615440377,
+    "overlap_samples": 1934,
+    "selected_correlation_recomputed": 0.21055564284324646,
+    "activity_plot_file": "temporal_alignment_plots/walk_upstairs_night_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "walk_upstairs_night_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

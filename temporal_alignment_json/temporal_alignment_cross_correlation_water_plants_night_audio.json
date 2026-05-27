@@ -1,0 +1,100 @@
+{
+  "sample": "water_plants",
+  "side": "night",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/water_plants_split/water_plants_night_rgb.mp4",
+  "audio_file": "dataset/water_plants_split/water_plants_night.m4a",
+  "ignored_files": [
+    "dataset/water_plants_split/water_plants_night_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/water_plants_night_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 4950,
+  "reference_duration_seconds": 165.0,
+  "audio_duration_seconds": 164.032,
+  "reference_trace_count": 4949,
+  "audio_trace_count": 4925,
+  "alignment": {
+    "offset_seconds": 0.3,
+    "offset_frames": 9,
+    "peak_correlation": 0.7153595685958862,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": 0.3,
+        "offset_frames": 9,
+        "correlation": 0.71536,
+        "overlap_ratio": 0.998173
+      },
+      {
+        "offset_seconds": 0.266667,
+        "offset_frames": 8,
+        "correlation": 0.715159,
+        "overlap_ratio": 0.998376
+      },
+      {
+        "offset_seconds": 0.333333,
+        "offset_frames": 10,
+        "correlation": 0.715058,
+        "overlap_ratio": 0.99797
+      },
+      {
+        "offset_seconds": 0.233333,
+        "offset_frames": 7,
+        "correlation": 0.714443,
+        "overlap_ratio": 0.998579
+      },
+      {
+        "offset_seconds": 0.366667,
+        "offset_frames": 11,
+        "correlation": 0.714158,
+        "overlap_ratio": 0.997766
+      },
+      {
+        "offset_seconds": 0.2,
+        "offset_frames": 6,
+        "correlation": 0.713179,
+        "overlap_ratio": 0.998782
+      },
+      {
+        "offset_seconds": 0.4,
+        "offset_frames": 12,
+        "correlation": 0.712602,
+        "overlap_ratio": 0.997563
+      },
+      {
+        "offset_seconds": 0.166667,
+        "offset_frames": 5,
+        "correlation": 0.711446,
+        "overlap_ratio": 0.998985
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.00020015239715576172,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 0.0,
+      "end": 163.732
+    },
+    "overlap_audio_seconds": {
+      "start": 0.3,
+      "end": 164.032
+    },
+    "overlap_ratio": 0.9981725888324873,
+    "overlap_samples": 4916,
+    "selected_correlation_recomputed": 0.7153595685958862,
+    "activity_plot_file": "temporal_alignment_plots/water_plants_night_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "water_plants_night_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "sample": "wash_cup_and_drink_water",
+  "side": "night4",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/wash_cup_and_drink_water_split/wash_cup_and_drink_water_night4_rgb.mp4",
+  "audio_file": "dataset/wash_cup_and_drink_water_split/wash_cup_and_drink_water_night4.m4a",
+  "ignored_files": [
+    "dataset/wash_cup_and_drink_water_split/wash_cup_and_drink_water_night4_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/wash_cup_and_drink_water_night4_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 3300,
+  "reference_duration_seconds": 110.0,
+  "audio_duration_seconds": 110.5066875,
+  "reference_trace_count": 3299,
+  "audio_trace_count": 3318,
+  "alignment": {
+    "offset_seconds": 30.0,
+    "offset_frames": 900,
+    "peak_correlation": 0.28723686933517456,
+    "confidence_label": "low",
+    "candidate_offsets": [
+      {
+        "offset_seconds": 30.0,
+        "offset_frames": 900,
+        "correlation": 0.287237,
+        "overlap_ratio": 0.732949
+      },
+      {
+        "offset_seconds": 29.966667,
+        "offset_frames": 899,
+        "correlation": 0.28553,
+        "overlap_ratio": 0.733253
+      },
+      {
+        "offset_seconds": 29.933333,
+        "offset_frames": 898,
+        "correlation": 0.283227,
+        "overlap_ratio": 0.733556
+      },
+      {
+        "offset_seconds": 29.9,
+        "offset_frames": 897,
+        "correlation": 0.280429,
+        "overlap_ratio": 0.733859
+      },
+      {
+        "offset_seconds": 29.866667,
+        "offset_frames": 896,
+        "correlation": 0.27722,
+        "overlap_ratio": 0.734162
+      },
+      {
+        "offset_seconds": 19.266667,
+        "offset_frames": 578,
+        "correlation": 0.273922,
+        "overlap_ratio": 0.830555
+      },
+      {
+        "offset_seconds": 19.233333,
+        "offset_frames": 577,
+        "correlation": 0.273844,
+        "overlap_ratio": 0.830858
+      },
+      {
+        "offset_seconds": 19.3,
+        "offset_frames": 579,
+        "correlation": 0.273747,
+        "overlap_ratio": 0.830252
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.0017063915729522705,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 0.0,
+      "end": 80.506687
+    },
+    "overlap_audio_seconds": {
+      "start": 30.0,
+      "end": 110.506687
+    },
+    "overlap_ratio": 0.7329493785995757,
+    "overlap_samples": 2418,
+    "selected_correlation_recomputed": 0.28723686933517456,
+    "activity_plot_file": "temporal_alignment_plots/wash_cup_and_drink_water_night4_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "wash_cup_and_drink_water_night4_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

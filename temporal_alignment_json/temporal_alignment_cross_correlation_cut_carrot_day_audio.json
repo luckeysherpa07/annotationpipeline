@@ -1,0 +1,100 @@
+{
+  "sample": "cut_carrot",
+  "side": "day",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/cut_carrot_split/cut_carrot_day_rgb.mp4",
+  "audio_file": "dataset/cut_carrot_split/cut_carrot_day.m4a",
+  "ignored_files": [
+    "dataset/cut_carrot_split/cut_carrot_day_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/cut_carrot_day_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 5550,
+  "reference_duration_seconds": 185.0,
+  "audio_duration_seconds": 185.0026875,
+  "reference_trace_count": 5549,
+  "audio_trace_count": 5554,
+  "alignment": {
+    "offset_seconds": -1.1,
+    "offset_frames": -33,
+    "peak_correlation": 0.32548031210899353,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -1.1,
+        "offset_frames": -33,
+        "correlation": 0.32548,
+        "overlap_ratio": 0.994053
+      },
+      {
+        "offset_seconds": -1.066667,
+        "offset_frames": -32,
+        "correlation": 0.323352,
+        "overlap_ratio": 0.994233
+      },
+      {
+        "offset_seconds": -1.133333,
+        "offset_frames": -34,
+        "correlation": 0.322084,
+        "overlap_ratio": 0.993873
+      },
+      {
+        "offset_seconds": -1.033333,
+        "offset_frames": -31,
+        "correlation": 0.31546,
+        "overlap_ratio": 0.994413
+      },
+      {
+        "offset_seconds": -1.166667,
+        "offset_frames": -35,
+        "correlation": 0.31363,
+        "overlap_ratio": 0.993693
+      },
+      {
+        "offset_seconds": -1.0,
+        "offset_frames": -30,
+        "correlation": 0.301658,
+        "overlap_ratio": 0.994594
+      },
+      {
+        "offset_seconds": -1.2,
+        "offset_frames": -36,
+        "correlation": 0.301418,
+        "overlap_ratio": 0.993512
+      },
+      {
+        "offset_seconds": -1.233333,
+        "offset_frames": -37,
+        "correlation": 0.286411,
+        "overlap_ratio": 0.993332
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 0.0021278858184814453,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 1.1,
+      "end": 185.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 183.9
+    },
+    "overlap_ratio": 0.9940529825193729,
+    "overlap_samples": 5516,
+    "selected_correlation_recomputed": 0.32548031210899353,
+    "activity_plot_file": "temporal_alignment_plots/cut_carrot_day_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "cut_carrot_day_rgb_audio_cross_correlation_export_summary.json"
+  }
+}

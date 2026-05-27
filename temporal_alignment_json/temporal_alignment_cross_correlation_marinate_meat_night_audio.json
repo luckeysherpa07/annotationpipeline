@@ -1,0 +1,100 @@
+{
+  "sample": "marinate_meat",
+  "side": "night",
+  "method": "raw_cross_correlation_rgb_optical_flow_audio_rms",
+  "reference_modality": "rgb",
+  "target_modality": "audio",
+  "reference_file": "dataset/marinate_meat_split/marinate_meat_night_rgb.mp4",
+  "audio_file": "dataset/marinate_meat_split/marinate_meat_night.m4a",
+  "ignored_files": [
+    "dataset/marinate_meat_split/marinate_meat_night_rgb_with_audio.mp4"
+  ],
+  "speed_warped": false,
+  "plot_file": "temporal_alignment_plots/marinate_meat_night_rgb_audio_cross_correlation_activity_signal.png",
+  "warnings": [],
+  "reference_fps": 30.0,
+  "reference_frame_count": 4350,
+  "reference_duration_seconds": 145.0,
+  "audio_duration_seconds": 145.0026875,
+  "reference_trace_count": 4349,
+  "audio_trace_count": 4353,
+  "alignment": {
+    "offset_seconds": -4.633333333333334,
+    "offset_frames": -139,
+    "peak_correlation": 0.3791631758213043,
+    "confidence_label": "medium",
+    "candidate_offsets": [
+      {
+        "offset_seconds": -4.633333,
+        "offset_frames": -139,
+        "correlation": 0.379163,
+        "overlap_ratio": 0.968039
+      },
+      {
+        "offset_seconds": -4.6,
+        "offset_frames": -138,
+        "correlation": 0.379068,
+        "overlap_ratio": 0.968269
+      },
+      {
+        "offset_seconds": -4.666667,
+        "offset_frames": -140,
+        "correlation": 0.378246,
+        "overlap_ratio": 0.967809
+      },
+      {
+        "offset_seconds": -4.566667,
+        "offset_frames": -137,
+        "correlation": 0.378033,
+        "overlap_ratio": 0.968499
+      },
+      {
+        "offset_seconds": -4.7,
+        "offset_frames": -141,
+        "correlation": 0.376272,
+        "overlap_ratio": 0.967579
+      },
+      {
+        "offset_seconds": -4.533333,
+        "offset_frames": -136,
+        "correlation": 0.376109,
+        "overlap_ratio": 0.968728
+      },
+      {
+        "offset_seconds": -4.5,
+        "offset_frames": -135,
+        "correlation": 0.373397,
+        "overlap_ratio": 0.968958
+      },
+      {
+        "offset_seconds": -4.733333,
+        "offset_frames": -142,
+        "correlation": 0.373258,
+        "overlap_ratio": 0.967349
+      }
+    ],
+    "selected_by": "best_raw_correlation",
+    "peak_margin": 9.521842002868652e-05,
+    "lag_fps": 30.0,
+    "warnings": [],
+    "overlap_reference_seconds": {
+      "start": 4.633333,
+      "end": 145.0
+    },
+    "overlap_audio_seconds": {
+      "start": 0.0,
+      "end": 140.366667
+    },
+    "overlap_ratio": 0.9680386295700161,
+    "overlap_samples": 4210,
+    "selected_correlation_recomputed": 0.3791631758213043,
+    "activity_plot_file": "temporal_alignment_plots/marinate_meat_night_rgb_audio_cross_correlation_activity_signal.png"
+  },
+  "export": {
+    "exported_count": 0,
+    "skipped_count": 0,
+    "exported": [],
+    "skipped": [],
+    "summary_file": "marinate_meat_night_rgb_audio_cross_correlation_export_summary.json"
+  }
+}
