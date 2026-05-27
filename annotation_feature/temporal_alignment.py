@@ -40,6 +40,7 @@ DTW_EXPORT_PREVIEW_FPS = 30
 DTW_EXPORT_SMOOTHING_SECONDS = 1.5
 AUDIO_ALIGNMENT_SAMPLE_RATE = 16000
 AUDIO_ALIGNMENT_MAX_LAG_SECONDS = 30.0
+SOURCE_RGB_AUDIO_ALIGNMENT_MAX_LAG_SECONDS = 2.0
 FEATURE_ALIGNMENT_SAMPLE_STRIDE_SECONDS = 4.0
 FEATURE_ALIGNMENT_OFFSET_STEP_SECONDS = 0.5
 FEATURE_ALIGNMENT_MAX_OFFSET_SECONDS = 20.0
@@ -3962,6 +3963,26 @@ def _write_source_rgb_audio_alignment_plot(
     return str(plot_path)
 
 
+def _source_rgb_audio_alignment_summary(alignment: dict[str, Any]) -> dict[str, Any]:
+    summary = {
+        "offset_seconds": round(float(alignment["offset_seconds"]), 6),
+        "offset_frames": alignment.get("offset_frames"),
+        "peak_correlation": round(float(alignment.get("peak_correlation") or 0.0), 6),
+        "confidence_label": alignment.get("confidence_label"),
+        "overlap_ratio": (
+            round(float(alignment.get("overlap_ratio")), 6)
+            if alignment.get("overlap_ratio") is not None
+            else None
+        ),
+        "candidate_offsets": alignment.get("candidate_offsets", []),
+    }
+    if alignment.get("confidence_label") == "low":
+        summary["warnings"] = [
+            "Low-confidence RGB/audio cross-correlation; selected offset is constrained by the conservative source-audio search window."
+        ]
+    return summary
+
+
 def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
     source_dataset_folder: Path | str = "dataset",
     aligned_dataset_folder: Path | str = "aligned_dataset",
@@ -3969,10 +3990,11 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
     plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER / "aligned_rgb_audio",
     segment_seconds: float = 30.0,
     resize_width: int = 160,
-    max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
+    max_lag_seconds: float = SOURCE_RGB_AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
     overwrite: bool = False,
     max_pair_groups: int | None = 1,
     start_pair_group_index: int = 0,
+    verbose: bool = False,
 ) -> dict[str, Any]:
     """Create aligned_dataset 30s *_rgb_with_audio.mp4 segments from source dataset RGB/.m4a files."""
     source_dataset_folder = Path(source_dataset_folder)
@@ -4000,6 +4022,7 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
             dropped_remainder = float(reference_duration - full_segment_count * segment_seconds)
             if full_segment_count <= 0:
                 raise ValueError("Source RGB video has no full 30-second segments.")
+            alignment_summary = _source_rgb_audio_alignment_summary(alignment_bundle["alignment"])
 
             plot_file = None
             if plot_output_folder is not None:
@@ -4014,8 +4037,12 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                         pair,
                         alignment_bundle,
                     )
+                    if verbose:
+                        print(f"Plot written: {plot_file}")
                 else:
                     plot_file = str(plot_path)
+                    if verbose:
+                        print(f"Plot exists: {plot_file}")
 
             for segment_index in range(full_segment_count):
                 segment_name = f"Seg{segment_index + 1}"
@@ -4031,6 +4058,11 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                 )
 
                 if output_file.exists() and not overwrite:
+                    if verbose:
+                        print(
+                            "Reusing existing RGB-with-audio segment: "
+                            f"{pair['split_folder_name']} {pair['sample_name']} {pair['side']} {segment_name} -> {output_file}"
+                        )
                     exported.append(
                         {
                             **pair,
@@ -4041,20 +4073,7 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                             "plot_file": plot_file,
                             "status": "reused",
                             "reason": "Output already exists.",
-                            "alignment": {
-                                "offset_seconds": round(float(alignment_bundle["alignment"]["offset_seconds"]), 6),
-                                "offset_frames": alignment_bundle["alignment"].get("offset_frames"),
-                                "peak_correlation": round(
-                                    float(alignment_bundle["alignment"].get("peak_correlation") or 0.0),
-                                    6,
-                                ),
-                                "confidence_label": alignment_bundle["alignment"].get("confidence_label"),
-                                "overlap_ratio": (
-                                    round(float(alignment_bundle["alignment"].get("overlap_ratio")), 6)
-                                    if alignment_bundle["alignment"].get("overlap_ratio") is not None
-                                    else None
-                                ),
-                            },
+                            "alignment": alignment_summary,
                         }
                     )
                     continue
@@ -4067,6 +4086,11 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                     duration_seconds=segment_seconds,
                     audio_offset_seconds=float(alignment_bundle["alignment"]["offset_seconds"]),
                 )
+                if verbose:
+                    print(
+                        "Exported RGB-with-audio segment: "
+                        f"{pair['split_folder_name']} {pair['sample_name']} {pair['side']} {segment_name} -> {output_file}"
+                    )
                 exported.append(
                     {
                         **pair,
@@ -4076,25 +4100,18 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                         "output_file": str(output_file),
                         "plot_file": plot_file,
                         "status": "exported",
-                        "alignment": {
-                            "offset_seconds": round(float(alignment_bundle["alignment"]["offset_seconds"]), 6),
-                            "offset_frames": alignment_bundle["alignment"].get("offset_frames"),
-                            "peak_correlation": round(
-                                float(alignment_bundle["alignment"].get("peak_correlation") or 0.0),
-                                6,
-                            ),
-                            "confidence_label": alignment_bundle["alignment"].get("confidence_label"),
-                            "overlap_ratio": (
-                                round(float(alignment_bundle["alignment"].get("overlap_ratio")), 6)
-                                if alignment_bundle["alignment"].get("overlap_ratio") is not None
-                                else None
-                            ),
-                        },
+                        "alignment": alignment_summary,
                         "mux": mux,
                     }
                 )
 
             if dropped_remainder > 0:
+                if verbose:
+                    print(
+                        "Dropped trailing remainder: "
+                        f"{pair['split_folder_name']} {pair['sample_name']} {pair['side']} "
+                        f"{dropped_remainder:.3f}s"
+                    )
                 skipped.append(
                     {
                         **pair,
@@ -4110,12 +4127,14 @@ def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
         "aligned_dataset_folder": str(aligned_dataset_folder),
         "method": "source_rgb_audio_cross_correlation_fixed_offset_30s_segments",
         "segment_seconds": segment_seconds,
+        "max_lag_seconds": max_lag_seconds,
         "output_naming": "*_rgb_with_audio.mp4",
         "plot_output_folder": str(plot_output_folder) if plot_output_folder else None,
         "total_discovered_count": len(all_discovered),
         "start_pair_group_index": start_pair_group_index,
         "max_pair_groups": max_pair_groups,
         "selected_pair_groups": selected_pair_groups,
+        "overwrite": overwrite,
         "discovered_count": len(discovered),
         "exported_count": len(exported),
         "skipped_count": len(skipped),

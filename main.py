@@ -1146,19 +1146,20 @@ def main():
             print("Computes full-source RGB/audio cross-correlation before cutting 30s segments.")
             print("Writes *_rgb_with_audio.mp4 files into matching aligned_dataset/<split>/SegN/ folders.")
             print("Writes one full-source RGB/audio activity plot per source side.")
+            print("Existing *_rgb_with_audio.mp4 files will be replaced.")
             summary = run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
                 source_dataset_folder="dataset",
                 aligned_dataset_folder="aligned_dataset",
                 summary_output_path="aligned_dataset/source_rgb_with_audio_export_summary.json",
-                overwrite=False,
+                overwrite=True,
                 max_pair_groups=None,
+                verbose=True,
             )
             exported = summary.get("exported_count", 0)
             skipped = summary.get("skipped_count", 0)
-            reused = sum(1 for item in summary.get("exported", []) if item.get("status") == "reused")
             print(
                 f"Source-aligned RGB-with-audio export complete: "
-                f"{exported} exported/reused ({reused} reused), {skipped} skipped."
+                f"{exported} exported/replaced, {skipped} skipped."
             )
             print(f"Summary: {summary.get('summary_file')}")
 
