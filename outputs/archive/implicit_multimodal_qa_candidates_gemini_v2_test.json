@@ -1,0 +1,3432 @@
+{
+  "metadata": {
+    "source_file": "segmented_normalized_evidence_units.json",
+    "generation_mode": "gemini",
+    "qa_style": "implicit_cross_modal",
+    "generation_policy": {
+      "candidate_generation": "one_candidate_per_available_role_direction_and_supported_challenge_type",
+      "evidence_selection": {
+        "template": "rule_selected_evidence_from_section_preferences",
+        "gemini": "rule_retrieved_candidates_then_gemini_selects_related_evidence_ids"
+      },
+      "challenge_selection": "all_supported_challenge_types",
+      "unsupported_challenge_types": "skipped",
+      "direction_sampling": "balanced_candidate_coverage",
+      "direction_weighting": false,
+      "direction_quotas": false,
+      "final_resampling": false,
+      "selection_policy": "quality_filtering_only",
+      "kept_after_filtering": "all_passing_items",
+      "gemini_batch_scope": "segment",
+      "max_bundles_per_gemini_call": 5
+    },
+    "benchmark_design": {
+      "night": [
+        [
+          "event",
+          "ir"
+        ],
+        [
+          "event",
+          "audio"
+        ],
+        [
+          "event",
+          "depth"
+        ],
+        [
+          "rgb",
+          "ir"
+        ],
+        [
+          "rgb",
+          "event"
+        ]
+      ],
+      "day": [
+        [
+          "rgb",
+          "audio"
+        ],
+        [
+          "rgb",
+          "event"
+        ],
+        [
+          "rgb",
+          "depth"
+        ],
+        [
+          "rgb",
+          "ir"
+        ]
+      ],
+      "role_specs": {
+        "rgb__audio": {
+          "capability": "audio-visual implicit grounding",
+          "directions": [
+            {
+              "context_modality": "rgb",
+              "decisive_modality": "audio",
+              "challenge_types": [
+                "audio_as_material_ground_truth",
+                "audio_as_action_confirmation",
+                "audio_as_sound_source_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "audio",
+              "decisive_modality": "rgb",
+              "challenge_types": [
+                "rgb_as_sound_source_localization",
+                "rgb_as_object_ground_truth"
+              ]
+            }
+          ]
+        },
+        "rgb__event": {
+          "capability": "visible context with event-motion evidence",
+          "directions": [
+            {
+              "context_modality": "rgb",
+              "decisive_modality": "event",
+              "challenge_types": [
+                "event_as_motion_ground_truth",
+                "event_as_action_phase_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "event",
+              "decisive_modality": "rgb",
+              "challenge_types": [
+                "rgb_as_object_ground_truth",
+                "rgb_as_color_ground_truth"
+              ]
+            }
+          ]
+        },
+        "rgb__depth": {
+          "capability": "visible context with spatial/depth evidence",
+          "directions": [
+            {
+              "context_modality": "rgb",
+              "decisive_modality": "depth",
+              "challenge_types": [
+                "depth_as_spatial_ground_truth",
+                "depth_as_navigation_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "depth",
+              "decisive_modality": "rgb",
+              "challenge_types": [
+                "rgb_as_object_ground_truth",
+                "rgb_as_text_or_label_ground_truth"
+              ]
+            }
+          ]
+        },
+        "rgb__ir": {
+          "capability": "visible-light and IR complementarity",
+          "directions": [
+            {
+              "context_modality": "ir",
+              "decisive_modality": "rgb",
+              "challenge_types": [
+                "rgb_as_color_ground_truth",
+                "rgb_as_text_or_label_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "rgb",
+              "decisive_modality": "ir",
+              "challenge_types": [
+                "ir_as_low_light_ground_truth",
+                "ir_as_visibility_ground_truth"
+              ]
+            }
+          ]
+        },
+        "event__ir": {
+          "capability": "low-light scene context with event-motion evidence",
+          "directions": [
+            {
+              "context_modality": "ir",
+              "decisive_modality": "event",
+              "challenge_types": [
+                "event_as_motion_ground_truth",
+                "event_as_navigation_change_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "event",
+              "decisive_modality": "ir",
+              "challenge_types": [
+                "ir_as_low_light_ground_truth",
+                "ir_as_scene_structure_ground_truth"
+              ]
+            }
+          ]
+        },
+        "event__audio": {
+          "capability": "motion-sound implicit alignment",
+          "directions": [
+            {
+              "context_modality": "event",
+              "decisive_modality": "audio",
+              "challenge_types": [
+                "audio_as_sound_source_ground_truth",
+                "audio_as_action_confirmation"
+              ]
+            },
+            {
+              "context_modality": "audio",
+              "decisive_modality": "event",
+              "challenge_types": [
+                "event_as_motion_ground_truth",
+                "event_as_repetition_ground_truth"
+              ]
+            }
+          ]
+        },
+        "event__depth": {
+          "capability": "motion and spatial-layout implicit grounding",
+          "directions": [
+            {
+              "context_modality": "depth",
+              "decisive_modality": "event",
+              "challenge_types": [
+                "event_as_motion_ground_truth",
+                "event_as_navigation_change_ground_truth"
+              ]
+            },
+            {
+              "context_modality": "event",
+              "decisive_modality": "depth",
+              "challenge_types": [
+                "depth_as_spatial_ground_truth",
+                "depth_as_navigation_ground_truth"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "run_status": {
+      "planned_bundles": 33,
+      "completed_bundles": 33,
+      "resumed_items": 0,
+      "max_concurrent_calls": 1,
+      "gemini_batch_scope": "segment",
+      "max_bundles_per_gemini_call": 5
+    },
+    "model_name": "gemini-3.1-flash-lite",
+    "total_qa_items": 33,
+    "passed_validation": 31,
+    "failed_validation": 2,
+    "skipped_pairs": 0,
+    "gemini_calls": 12,
+    "distribution": {
+      "by_side": {
+        "day": 33
+      },
+      "by_pair": {
+        "rgb+audio": 9,
+        "rgb+depth": 8,
+        "rgb+event": 8,
+        "rgb+ir": 8
+      },
+      "by_direction": {
+        "audio->rgb": 4,
+        "depth->rgb": 4,
+        "event->rgb": 4,
+        "ir->rgb": 4,
+        "rgb->audio": 5,
+        "rgb->depth": 4,
+        "rgb->event": 4,
+        "rgb->ir": 4
+      },
+      "by_context_modality": {
+        "audio": 4,
+        "depth": 4,
+        "event": 4,
+        "ir": 4,
+        "rgb": 17
+      },
+      "by_decisive_modality": {
+        "audio": 5,
+        "depth": 4,
+        "event": 4,
+        "ir": 4,
+        "rgb": 16
+      },
+      "by_challenge_type": {
+        "audio_as_action_confirmation": 2,
+        "audio_as_material_ground_truth": 1,
+        "audio_as_sound_source_ground_truth": 2,
+        "depth_as_navigation_ground_truth": 2,
+        "depth_as_spatial_ground_truth": 2,
+        "event_as_action_phase_ground_truth": 2,
+        "event_as_motion_ground_truth": 2,
+        "ir_as_low_light_ground_truth": 2,
+        "ir_as_visibility_ground_truth": 2,
+        "rgb_as_color_ground_truth": 4,
+        "rgb_as_object_ground_truth": 6,
+        "rgb_as_sound_source_localization": 2,
+        "rgb_as_text_or_label_ground_truth": 4
+      },
+      "by_validation_status": {
+        "failed": 2,
+        "passed": 31
+      },
+      "by_task_label": {
+        "check mailbox": 17,
+        "walk to mailbox": 16
+      }
+    }
+  },
+  "qa_items": [
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_audio__audio_context__rgb_decisive__rgb_as_object_ground_truth__004",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "audio",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "What kind of sign is located above the door that I transition toward as the echoing indoor sounds of the hallway begin to fade?",
+      "answer": "A green emergency exit sign featuring a running man symbol.",
+      "modality_roles": {
+        "audio": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition",
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::text_recognition::11::1",
+            "check_mailbox_day_seg_001::rgb::object_recognition::8::1"
+          ],
+          "evidence": "In frame 001140, a green sign above the door shows a running man and an arrow, signifying an emergency exit. A green emergency exit sign with a running man symbol is visible above a doorway."
+        },
+        "audio": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "audio_ambient_environment_understanding"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::audio::audio_ambient_environment_understanding::34::1"
+          ],
+          "evidence": "A transition from a quiet indoor environment to a slightly more open outdoor space. Existing QA: How does the ambient audio change during this segment? Answer: The audio transitions from the echoing, contained sounds of a hallway and stairwell to the open, briefly captured ambient noise of the outdoors as the user exits the building."
+        }
+      },
+      "shared_object_or_event": "The emergency exit door transition",
+      "context_constraint": "the door that I transition toward as the echoing indoor sounds of the hallway begin to fade",
+      "decisive_answer_cue": "A green emergency exit sign with a running man symbol is visible above a doorway",
+      "why_context_is_needed": "The audio evidence defines the moment of transition from the hallway, grounding which door's signage is relevant.",
+      "why_decisive_is_needed": "The RGB evidence provides the specific visual details (color, symbol, text) of the sign above that door.",
+      "why_decisive_alone_is_not_grounded": "The decisive evidence describes multiple doors and signs; the audio is needed to anchor the question to the specific 'exit door' phase of the navigation.",
+      "evidence_selection_rationale": "I selected the audio segment describing the transition out of the hallway to ground the timing of reaching the exit door, and the RGB evidence that explicitly identifies the sign above said exit door.",
+      "why_multimodal": "The query links an auditory experience (fading hallway echoes) to a specific visual object (the exit sign) identified in the RGB stream.",
+      "single_modality_limits": {
+        "audio": "Audio provides the temporal context of the movement but cannot see the visual sign.",
+        "rgb": "RGB shows the sign but does not inherently capture the 'fading echo' context that defines which door is the exit transition point."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_audio__audio_context__rgb_decisive__rgb_as_sound_source_localization__003",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "audio",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_sound_source_localization",
+      "question": "What text is displayed on the object located on the windowsill in the room where the sound of footsteps initially originates?",
+      "answer": "REVOLUTION GAME OVER",
+      "modality_roles": {
+        "audio": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 000000, a poster on the window sill displays 'REVOLUTION' and 'GAME OVER' in bold capital letters, likely a decorative or political print."
+        },
+        "audio": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Footsteps on various surfaces and the mechanical sound of doors opening and closing."
+        }
+      },
+      "shared_object_or_event": "The starting room/scene.",
+      "context_constraint": "The room where the user is initially walking (grounded by the footsteps sound).",
+      "decisive_answer_cue": "The poster on the window sill displays 'REVOLUTION GAME OVER'.",
+      "why_context_is_needed": "The context audio confirms the initial environment is an indoor space where the user is walking, helping to identify the 'starting room' mentioned in the visual evidence.",
+      "why_decisive_is_needed": "The visual evidence is required to read the specific text printed on the poster.",
+      "why_decisive_alone_is_not_grounded": "Decisive evidence describes objects but does not link them to the specific point in the audio-visual progression (the start) that defines the 'initial' room.",
+      "evidence_selection_rationale": "I selected the audio identifying the footsteps to anchor the starting location and the RGB text recognition to provide the visual content of the poster identified in the start.",
+      "why_multimodal": "The question requires temporal grounding of the 'initial' scene (provided by audio-tracked movement) and visual extraction of text (provided by RGB).",
+      "single_modality_limits": {
+        "audio": "Audio cannot provide visual text identification.",
+        "rgb": "RGB evidence lacks the narrative flow identifying the start of the sequence without audio context of the user's movement."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_audio__rgb_context__audio_decisive__audio_as_action_confirmation__001",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "rgb",
+      "decisive_modality": "audio",
+      "challenge_type": "audio_as_action_confirmation",
+      "question": "Which specific architectural structure do I transition to, which is confirmed by the sound of my footsteps changing to a metallic, grating surface?",
+      "answer": "A metal stairwell.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "audio": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "I then encounter a metal stairwell made of galvanized steel grating, leading downwards."
+        },
+        "audio": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Footsteps on various surfaces and the mechanical sound of doors opening and closing."
+        }
+      },
+      "shared_object_or_event": "the metal stairwell",
+      "context_constraint": "metal stairwell",
+      "decisive_answer_cue": "Footsteps on various surfaces",
+      "why_context_is_needed": "The context modality identifies the specific object (metal stairwell) that the user is traversing, which is necessary to categorize the sound being heard.",
+      "why_decisive_is_needed": "The audio modality provides the definitive cue that the user is actually walking on a metallic surface, confirming the nature of the stairwell.",
+      "why_decisive_alone_is_not_grounded": "Audio alone could represent any metallic surface and does not specify that it is a stairwell as opposed to a metal floor or door.",
+      "evidence_selection_rationale": "I selected the scene sequence evidence because it identifies the stairwell as the key transition point, and the audio sound identification evidence because it provides the sonic confirmation of the surface interaction.",
+      "why_multimodal": "Binding the visual identification of the staircase to the auditory confirmation of the surface texture requires cross-modal integration.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB does not allow for identifying the sound of the surface.",
+        "decisive_modality_name": "Audio does not allow for identifying the visual structure."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_audio__rgb_context__audio_decisive__audio_as_sound_source_ground_truth__002",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "rgb",
+      "decisive_modality": "audio",
+      "challenge_type": "audio_as_sound_source_ground_truth",
+      "question": "When moving from the sterile hallway into the outdoor stairwell area, what mechanical sound occurs?",
+      "answer": "The sound of a door being opened and closed.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "audio": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "The sequence begins in a private room (bedroom or study), then moves into a sterile hallway with grey walls. I pass several closed doors before reaching an internal building junction. I then proceed through a doorway to an outdoor-style hallway or balcony that leads to a metal external stairwell."
+        },
+        "audio": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Footsteps on various surfaces and the mechanical sound of doors opening and closing."
+        }
+      },
+      "shared_object_or_event": "The transition from the hallway to the stairwell through the exit door.",
+      "context_constraint": "moving from the sterile hallway into the outdoor stairwell area",
+      "decisive_answer_cue": "mechanical sound of doors opening and closing",
+      "why_context_is_needed": "The context is required to establish the specific scene transition point where the user interacts with the door, as opposed to simply walking down the hallway or the stairs.",
+      "why_decisive_is_needed": "The decisive evidence provides the specific auditory classification of the interaction that occurred at that transition point.",
+      "why_decisive_alone_is_not_grounded": "The audio evidence mentions doors generally but does not specify that this sound occurred precisely at the transition between the hallway and the external stairwell.",
+      "evidence_selection_rationale": "I selected the scene sequence evidence to pinpoint the transition location and the audio identification evidence to characterize the specific mechanical sound heard during the transit.",
+      "why_multimodal": "It requires the visual scene transition to define the temporal and spatial context, and the audio to determine what specific sound corresponds to the interaction with the exit door.",
+      "single_modality_limits": {
+        "rgb": "Visuals can show the door being manipulated but cannot identify the sound characteristics associated with it.",
+        "audio": "Audio can identify the sounds of doors but cannot explicitly link the occurrence of that sound to the visual navigation point of the hallway-to-stairwell transition."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_depth__depth_context__rgb_decisive__rgb_as_object_ground_truth__011",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "depth",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "What specifically is situated on the window sill in the room I occupy?",
+      "answer": "A black and white poster with a Guy Fawkes mask.",
+      "modality_roles": {
+        "depth": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::object_recognition::8::1"
+          ],
+          "evidence": "On the window sill, there is a black and white poster with the Guy Fawkes mask and the text 'REVOLUTION GAME OVER'."
+        },
+        "depth": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "depth_object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::depth::depth_object_recognition::19::1"
+          ],
+          "evidence": "The sequence begins in an indoor room where a flat desk surface occupies the near-to-mid depth, with a laptop and various small items placed on it. Beyond the desk, vertical walls define the room's boundaries."
+        }
+      },
+      "shared_object_or_event": "the poster on the window sill",
+      "context_constraint": "the window sill in the room I occupy",
+      "decisive_answer_cue": "black and white poster with the Guy Fawkes mask",
+      "why_context_is_needed": "Depth data establishes the physical environment and the location of the window sill relative to the starting position.",
+      "why_decisive_is_needed": "RGB provides the visual description and content of the poster on that sill.",
+      "why_decisive_alone_is_not_grounded": "Without context, the location (window sill) could refer to any scene or segment.",
+      "evidence_selection_rationale": "I selected the depth evidence that defines the room's physical layout and the RGB evidence that provides the visual identification of the poster.",
+      "why_multimodal": "Binding the physical existence of the window sill from the depth map with the visual content from the RGB stream.",
+      "single_modality_limits": {
+        "context_modality_name": "Depth cannot describe the text or artistic pattern of the poster.",
+        "decisive_modality_name": "RGB provides the content, but context frames the scene-specific object location."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_depth__depth_context__rgb_decisive__rgb_as_text_or_label_ground_truth__012",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "depth",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_text_or_label_ground_truth",
+      "question": "What numbers are indicated on the grey door I encounter in the hallway?",
+      "answer": "1'233 | 1'234 | 1'235.",
+      "modality_roles": {
+        "depth": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 001230, numbers '1'233 | 1'234 | 1'235' are printed on a grey door, indicating the apartment or room numbers accessible through that entrance."
+        },
+        "depth": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "depth_navigation"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::depth::depth_navigation::17::1"
+          ],
+          "evidence": "The path follows a clear navigable channel forward from the desk through a doorway. I then take a slight turn into the corridor which provides a straight, unobstructed route."
+        }
+      },
+      "shared_object_or_event": "the grey door in the hallway",
+      "context_constraint": "the grey door I encounter in the hallway",
+      "decisive_answer_cue": "1'233 | 1'234 | 1'235",
+      "why_context_is_needed": "Depth confirms the presence and spatial progression of the hallway door along the path.",
+      "why_decisive_is_needed": "RGB is required to read the specific text printed on that door.",
+      "why_decisive_alone_is_not_grounded": "Decisive evidence labels the door, but doesn't explain the path taken to reach it.",
+      "evidence_selection_rationale": "I used the depth navigation section to confirm the transition into the hallway corridor and RGB text recognition to read the door numbers.",
+      "why_multimodal": "The identification of the door's purpose requires navigating the hallway (depth) and reading the label (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "Depth captures the door's 3D presence but lacks optical character recognition for the numbers.",
+        "decisive_modality_name": "RGB captures the label, but context confirms the room is part of the navigated hallway."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_depth__rgb_context__depth_decisive__depth_as_navigation_ground_truth__010",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "depth",
+      "challenge_type": "depth_as_navigation_ground_truth",
+      "question": "When entering the stairwell, where is the railing located relative to my walking path?",
+      "answer": "To the right side.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "depth": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "I encounter a metal stairwell made of galvanized steel grating, leading downwards."
+        },
+        "depth": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "depth_spatial_reasoning"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::depth::depth_spatial_reasoning::21::1"
+          ],
+          "evidence": "Entering the stairwell, the steps are located below my current level, and the railing is positioned to the right of the walking path."
+        }
+      },
+      "shared_object_or_event": "the stairwell and walking path",
+      "context_constraint": "When entering the stairwell",
+      "decisive_answer_cue": "railing is positioned to the right of the walking path",
+      "why_context_is_needed": "Context identifies the scene as entering the stairwell.",
+      "why_decisive_is_needed": "Depth modality allows for precise spatial positioning of the railing relative to the path.",
+      "why_decisive_alone_is_not_grounded": "The depth information does not specify which 'path' or 'entry' is being referred to without the context.",
+      "evidence_selection_rationale": "Linked the entry into the stairwell from the scene sequence to the depth-based spatial reasoning.",
+      "why_multimodal": "Requires visual ground (RGB) and spatial measurement (depth).",
+      "single_modality_limits": {
+        "context_modality_name": "RGB identifies the railing presence but not its spatial relation to the path in 3D.",
+        "decisive_modality_name": "Depth defines the right-side orientation but requires an action context to be meaningful."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_depth__rgb_context__depth_decisive__depth_as_spatial_ground_truth__009",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "depth",
+      "challenge_type": "depth_as_spatial_ground_truth",
+      "question": "As I leave the corridor and move onto the stairwell, what is the spatial change in floor height observed in the 3D layout?",
+      "answer": "The floor height drops downward.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "depth": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "I pass several closed doors before reaching an internal building junction. I then proceed through a doorway to an outdoor-style hallway or balcony that leads to a metal external stairwell."
+        },
+        "depth": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "depth_navigation"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::depth::depth_navigation::17::1"
+          ],
+          "evidence": "The navigation continues down a flight of stairs where the depth cues clearly show the drop in floor height."
+        }
+      },
+      "shared_object_or_event": "transition from corridor to stairwell",
+      "context_constraint": "as I leave the corridor and move onto the stairwell",
+      "decisive_answer_cue": "drop in floor height",
+      "why_context_is_needed": "Context sets the scene of moving from the corridor to the stairwell.",
+      "why_decisive_is_needed": "Depth modality provides the specific 3D spatial change occurring at that transition point.",
+      "why_decisive_alone_is_not_grounded": "Without context, 'the drop in floor height' lacks a reference to the specific path transition.",
+      "evidence_selection_rationale": "RGB defines the transition path, while depth defines the spatial geometry of the stairs.",
+      "why_multimodal": "Requires RGB for the sequence and depth for the spatial measurement.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB lacks the quantitative depth cue of the floor drop.",
+        "decisive_modality_name": "Depth does not explicitly describe the hallway transition in semantic terms."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_event__event_context__rgb_decisive__rgb_as_color_ground_truth__008",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "event",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_color_ground_truth",
+      "question": "What is the source of light in the stairwell area I enter from the hallway?",
+      "answer": "Ambient daylight from the open sides of the structure.",
+      "modality_roles": {
+        "event": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "light_recongnition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::light_recongnition::5::1"
+          ],
+          "evidence": "The stairwell area is lit by ambient daylight from the open sides of the structure."
+        },
+        "event": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "event_scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::event::event_scene_sequence::15::1"
+          ],
+          "evidence": "Transition 2: Passing through a door into a stairwell area."
+        }
+      },
+      "shared_object_or_event": "the stairwell area",
+      "context_constraint": "stairwell area I enter from the hallway",
+      "decisive_answer_cue": "ambient daylight from the open sides",
+      "why_context_is_needed": "Context confirms the transition to the stairwell area to ground the inquiry.",
+      "why_decisive_is_needed": "Decisive modality provides specific lighting information about that environment.",
+      "why_decisive_alone_is_not_grounded": "Lighting information is disconnected from the location without the context of the navigation transition.",
+      "evidence_selection_rationale": "Linked the transition scene from the event stream to the lighting property of that scene in RGB.",
+      "why_multimodal": "Requires knowing the path (navigation) and the environmental property (lighting).",
+      "single_modality_limits": {
+        "context_modality_name": "Event data covers motion/structure but not light quality.",
+        "decisive_modality_name": "RGB mentions the lighting but doesn't define the navigation path to get there."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_event__event_context__rgb_decisive__rgb_as_object_ground_truth__007",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "event",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "What specifically identifies the exit door I pass through when leaving the hallway?",
+      "answer": "A green emergency exit sign with a running man symbol.",
+      "modality_roles": {
+        "event": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::object_recognition::8::1"
+          ],
+          "evidence": "A green emergency exit sign with a running man symbol is visible above a doorway."
+        },
+        "event": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "event_navigation"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::event::event_navigation::12::1"
+          ],
+          "evidence": "I maintain a forward direction until reaching a door on the right. After opening the door, I turn right to enter the stairwell."
+        }
+      },
+      "shared_object_or_event": "the door leading to the stairwell",
+      "context_constraint": "the exit door I pass through when leaving the hallway",
+      "decisive_answer_cue": "green emergency exit sign with a running man symbol",
+      "why_context_is_needed": "Context provides the event-based navigation of moving through the hallway to the exit door.",
+      "why_decisive_is_needed": "Decisive provides the visual object details (the sign) that identify the door mentioned in the navigation sequence.",
+      "why_decisive_alone_is_not_grounded": "Without context, the door is just an object without being associated with the navigation sequence of leaving the hallway.",
+      "evidence_selection_rationale": "Navigation event links to RGB object recognition of the exit door features.",
+      "why_multimodal": "Combines spatial navigation event data with visual identification of signs.",
+      "single_modality_limits": {
+        "context_modality_name": "Event data identifies the door existence but not its specific visual marking.",
+        "decisive_modality_name": "RGB provides the visual sign but not the functional context that this is the door exited from the hallway."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_event__rgb_context__event_decisive__event_as_action_phase_ground_truth__006",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "event",
+      "challenge_type": "event_as_action_phase_ground_truth",
+      "question": "After exiting my room and traversing the hallway, what structural change in the path characterizes my transition into the stairwell?",
+      "answer": "A right turn leads into the stairwell where the path begins a downward spiral.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "event": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::action::0::1"
+          ],
+          "evidence": "I stand up from the desk, likely to go check the mail. I walk across the room, navigate through the apartment door, and traverse the building's hallway. I then push open the exit door to reach the stairwell and carefully walk down the metal steps."
+        },
+        "event": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "event_navigation"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::event::event_navigation::12::1"
+          ],
+          "evidence": "After opening the door, I turn right to enter the stairwell. The path follows a downward spiral, with the camera viewpoint rotating as the subject descends."
+        }
+      },
+      "shared_object_or_event": "transition into the stairwell",
+      "context_constraint": "After exiting my room and traversing the hallway",
+      "decisive_answer_cue": "turn right to enter the stairwell... downward spiral",
+      "why_context_is_needed": "Context confirms the sequence of rooms and hallways leading to the stairwell to ground the question.",
+      "why_decisive_is_needed": "The event modality provides the specific navigational motion and directional changes during the transition that are not fully detailed in the RGB text.",
+      "why_decisive_alone_is_not_grounded": "Without context, the 'turn' and 'downward spiral' have no reference point regarding what precedes them.",
+      "evidence_selection_rationale": "Selected the action section from RGB and navigation section from event to link the transition event to the physical movement.",
+      "why_multimodal": "Requires RGB to establish the sequence of movement and event to describe the specific motion pattern of the transition.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB lacks precise turn-by-turn navigation data during the transition.",
+        "decisive_modality_name": "Event data lacks visual context of the room/hallway environment prior to the transition."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_event__rgb_context__event_decisive__event_as_motion_ground_truth__005",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "event",
+      "challenge_type": "event_as_motion_ground_truth",
+      "question": "While navigating the metal stairwell, on which side of the camera are the railings located?",
+      "answer": "On the right side.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "event": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::object_recognition::8::1"
+          ],
+          "evidence": "In this segment, I am in a brightly lit room featuring white walls and a large window that offers a view of a grassy outdoor area. A bed with a light green duvet is situated near a desk. On the window sill, there is a black and white poster with the Guy Fawkes mask and the text 'REVOLUTION GAME OVER'. As I move out of the room, I transition into a hallway with grey doors and a white ceiling. A green emergency exit sign with a running man symbol is visible above a doorway. I then encounter a metal stairwell made of galvanized steel grating, leading downwards."
+        },
+        "event": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "event_spatial_reasoning"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::event::event_spatial_reasoning::16::1"
+          ],
+          "evidence": "Initially, the desk and laptop occupy the lower foreground. As I turn, the doorway enters from the right and eventually surrounds the field of view. In the hallway, door frames are aligned on the left and right walls. Upon reaching the stairs, the handrail is closer to the camera on the right side, while the steps are located below the central point of the frame. The wall of the building stays to the left as I walk along the balcony. The distance between the camera and the floor remains constant, but the floor texture changes from carpet to metal grating, which is more visually distinct in the event stream."
+        }
+      },
+      "shared_object_or_event": "the metal stairwell",
+      "context_constraint": "the metal stairwell",
+      "decisive_answer_cue": "handrail is closer to the camera on the right side",
+      "why_context_is_needed": "The context evidence establishes the location as a metal stairwell, which provides the scene necessary to interpret the spatial navigation described in the event modality.",
+      "why_decisive_is_needed": "The decisive evidence provides the specific spatial orientation of objects (railings) relative to the camera that is not explicitly detailed in the RGB descriptive text.",
+      "why_decisive_alone_is_not_grounded": "The decisive evidence mentions 'the stairs' but relies on the context evidence to define the environment as a building's metal stairwell.",
+      "evidence_selection_rationale": "I chose the RGB segment identifying the metal stairwell to ground the location and the event segment detailing the specific spatial layout of the stairwell as captured by motion-sensitive hardware.",
+      "why_multimodal": "The prompt requires mapping a specific physical location (grounded by RGB) to its precise spatial characteristics observed through motion/event patterns.",
+      "single_modality_limits": {
+        "rgb": "The RGB text identifies the presence of the stairwell but lacks the precise spatial navigation data regarding camera-relative positioning.",
+        "event": "The event text provides spatial relations but requires context to identify that these correspond to the specific building stairwell mentioned in the scene."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_ir__ir_context__rgb_decisive__rgb_as_color_ground_truth__013",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "ir",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_color_ground_truth",
+      "question": "What is the color of the duvet on the bed found in the room where I begin?",
+      "answer": "Light green.",
+      "modality_roles": {
+        "ir": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::object_recognition::8::1"
+          ],
+          "evidence": "In this segment, I am in a brightly lit room... A bed with a light green duvet is situated near a desk."
+        },
+        "ir": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::ir::scene_sequence::31::1"
+          ],
+          "evidence": "The sequence starts in my bedroom, transitions to the hallway, passes the kitchen counter, moves through the shoe and coat rack area."
+        }
+      },
+      "shared_object_or_event": "the bed in the starting room",
+      "context_constraint": "the bed found in the room where I begin",
+      "decisive_answer_cue": "light green",
+      "why_context_is_needed": "IR context confirms the sequence starts in the bedroom where the bed is located.",
+      "why_decisive_is_needed": "RGB captures the color information of the objects.",
+      "why_decisive_alone_is_not_grounded": "Without context, there's no confirmation that the bed is the one in the starting room of the provided path.",
+      "evidence_selection_rationale": "I paired the IR evidence of the scene starting in the bedroom with the RGB object recognition evidence identifying the duvet color.",
+      "why_multimodal": "Combining the structural sequence (IR) with the visual color information (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "IR lacks color information.",
+        "decisive_modality_name": "RGB lacks the temporal sequence structure provided by IR."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_ir__ir_context__rgb_decisive__rgb_as_text_or_label_ground_truth__014",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "ir",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_text_or_label_ground_truth",
+      "question": "What are the specific words written on the poster located on my desk?",
+      "answer": "REVOLUTION and GAME OVER.",
+      "modality_roles": {
+        "ir": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 000000, a poster on the window sill displays 'REVOLUTION' and 'GAME OVER' in bold capital letters."
+        },
+        "ir": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::ir::object_recognition::30::1"
+          ],
+          "evidence": "I begin in a room where a window overlooks a park. A poster with a 'V for Vendetta' mask and the words 'REVOLUTION' and 'GAME OVER' is visible on the desk."
+        }
+      },
+      "shared_object_or_event": "the poster on the desk/window sill",
+      "context_constraint": "the poster located on my desk",
+      "decisive_answer_cue": "REVOLUTION and GAME OVER",
+      "why_context_is_needed": "IR identifies the object (poster) and its placement relative to the user's starting point (desk/window).",
+      "why_decisive_is_needed": "RGB clarifies the text characters.",
+      "why_decisive_alone_is_not_grounded": "Standalone text recognition lacks the grounding of the poster in the room layout provided by IR.",
+      "evidence_selection_rationale": "I matched the IR identification of the desk poster with the RGB reading of its text.",
+      "why_multimodal": "The user needs to locate the item (IR) before querying its contents (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "IR has low resolution for specific small text.",
+        "decisive_modality_name": "RGB misses the overarching situational scene context."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_ir__rgb_context__ir_decisive__ir_as_low_light_ground_truth__015",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "rgb",
+      "decisive_modality": "ir",
+      "challenge_type": "ir_as_low_light_ground_truth",
+      "question": "Does the intensity of light change in a way that suggests transitioning to a warmer or brighter environment as I exit the building?",
+      "answer": "Yes, it becomes significantly brighter with higher thermal intensity.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "ir": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::action::0::1"
+          ],
+          "evidence": "I then push open the exit door to reach the stairwell and carefully walk down the metal steps."
+        },
+        "ir": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "light_change"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::ir::light_change::26::1"
+          ],
+          "evidence": "Moving from the dimly lit indoor hallway to the outdoor walkway (frame 001530) results in a significant increase in brightness and thermal intensity."
+        }
+      },
+      "shared_object_or_event": "the exit door transition",
+      "context_constraint": "as I exit the building",
+      "decisive_answer_cue": "significant increase in brightness and thermal intensity",
+      "why_context_is_needed": "RGB defines the action of exiting the door as the moment the light change should be queried.",
+      "why_decisive_is_needed": "IR accurately measures the thermal/light change that the RGB light sensors might misinterpret during the bright-outdoor transition.",
+      "why_decisive_alone_is_not_grounded": "The IR data shows a change, but context defines that this happens upon 'exiting the building'.",
+      "evidence_selection_rationale": "I tied the action of exiting the building (RGB) to the thermal/light intensity data measured during that frame (IR).",
+      "why_multimodal": "Identifying the event trigger (RGB) for the sensory change (IR).",
+      "single_modality_limits": {
+        "context_modality_name": "RGB sensors often struggle with high dynamic range when exiting a dark room into sunlight.",
+        "decisive_modality_name": "IR records raw thermal intensity but lacks the semantic description of the 'door' being opened."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_001__rgb_ir__rgb_context__ir_decisive__ir_as_visibility_ground_truth__016",
+      "segment_id": "check_mailbox_day_seg_001",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "walk to mailbox",
+      "start_seconds": 0.0,
+      "end_seconds": 64.0,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:01:04.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "rgb",
+      "decisive_modality": "ir",
+      "challenge_type": "ir_as_visibility_ground_truth",
+      "question": "What is the primary light source illuminating the external stairwell I walk down?",
+      "answer": "Natural sunlight.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "ir": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "The sequence begins in a private room (bedroom or study), then moves into a sterile hallway with grey walls. I pass several closed doors before reaching an internal building junction. I then proceed through a doorway to an outdoor-style hallway or balcony that leads to a metal external stairwell. I walk down the stairs to reach the ground level. Existing QA: What scene is shown at the very beginning of the video? Answer: A bedroom or study."
+        },
+        "ir": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "light_recongnition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_001::ir::light_recongnition::27::1"
+          ],
+          "evidence": "The room has soft overhead lighting. As I move into the hallway, the kitchen area is lit by under-cabinet lights. Upon exiting the building, I encounter natural sunlight which creates strong thermal contrast on the metal surfaces and the ground. Existing QA: What is the primary light source once I exit the building? Answer: Natural sunlight."
+        }
+      },
+      "shared_object_or_event": "the metal stairwell",
+      "context_constraint": "the external stairwell I walk down",
+      "decisive_answer_cue": "natural sunlight",
+      "why_context_is_needed": "The context evidence establishes the location and identifies the target object (the metal external stairwell) that I am traversing.",
+      "why_decisive_is_needed": "The decisive evidence identifies the specific environmental lighting condition (natural sunlight) present when accessing that location, which is not described in the RGB context.",
+      "why_decisive_alone_is_not_grounded": "The decisive evidence describes general lighting conditions after exiting the building but does not explicitly connect them to the stairwell sequence without the context's identification of the path.",
+      "evidence_selection_rationale": "Selected the scene sequence from RGB to ground the location of the stairs and the light recognition section from IR to provide the specific lighting answer.",
+      "why_multimodal": "This requires binding a visual event (walking down the stairs) from RGB to its thermal/light source characteristic in IR.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB provides spatial context but lacks explicit detail about the natural lighting properties of the outdoor scene.",
+        "decisive_modality_name": "IR describes the lighting change but requires the context to know which specific part of the sequence it applies to."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_audio__audio_context__rgb_decisive__rgb_as_object_ground_truth__021",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "audio",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "Which of the labeled mailbox doors corresponds to the sounds heard?",
+      "answer": "The one labeled 1'234.",
+      "modality_roles": {
+        "audio": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors. Existing QA: What is the specific number on the green mailbox I am checking? Answer: 1'234."
+        },
+        "audio": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Metallic clicks, the sound of a metal door opening and closing"
+        }
+      },
+      "shared_object_or_event": "The mailbox being opened",
+      "context_constraint": "the mailbox door being opened/closed",
+      "decisive_answer_cue": "1'234",
+      "why_context_is_needed": "The audio establishes that a specific mailbox door is being operated.",
+      "why_decisive_is_needed": "The visual evidence identifies the specific room number of the mailbox being used.",
+      "why_decisive_alone_is_not_grounded": "The visual provides labels for many mailboxes, but doesn't specify which one is currently generating the sound.",
+      "evidence_selection_rationale": "Used the audio as the trigger for identifying the target object (mailbox 1'234) from visual text.",
+      "why_multimodal": "Links the sound event of opening a door to the visually identified mailbox.",
+      "single_modality_limits": {
+        "context_modality_name": "Audio cannot provide the ID label on the box.",
+        "decisive_modality_name": "RGB shows multiple doors and labels, making it unclear which is in use without the audio context."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_audio__audio_context__rgb_decisive__rgb_as_sound_source_localization__020",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "audio",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_sound_source_localization",
+      "question": "What specific feature of the mailbox doors is likely responsible for the sharp sounds identified in the audio?",
+      "answer": "They are metal.",
+      "modality_roles": {
+        "audio": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::object_recognition::8::1"
+          ],
+          "evidence": "This segment shows an outdoor mailbox station with several grey and green metal boxes."
+        },
+        "audio": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "audio_event_detection"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::audio::audio_event_detection::34::1"
+          ],
+          "evidence": "Yes, there are sharp metallic clicks and clangs when the mailbox is opened and then finally closed."
+        }
+      },
+      "shared_object_or_event": "The mailbox",
+      "context_constraint": "the sharp metallic sounds heard",
+      "decisive_answer_cue": "metal boxes",
+      "why_context_is_needed": "The audio confirms sharp metallic sounds, which are explained by the composition of the boxes.",
+      "why_decisive_is_needed": "The visual confirms the material property that causes the metallic sounds.",
+      "why_decisive_alone_is_not_grounded": "The visual identifies the objects as metal, but doesn't connect them to the audio events.",
+      "evidence_selection_rationale": "Used the audio event as the basis to inquire about the physical cause (material) from the RGB evidence.",
+      "why_multimodal": "Connects an auditory property (sharp metallic sound) to a visual material property (metal box).",
+      "single_modality_limits": {
+        "context_modality_name": "Audio tells us the sound is metallic, but not what is making it.",
+        "decisive_modality_name": "RGB shows the boxes, but not their sonic characteristics."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": true,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [
+          "question explicitly mentions modality names"
+        ],
+        "validation_status": "failed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_audio__rgb_context__audio_decisive__audio_as_action_confirmation__018",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "rgb",
+      "decisive_modality": "audio",
+      "challenge_type": "audio_as_action_confirmation",
+      "question": "Based on the sounds, what was the final action taken to close the mailbox?",
+      "answer": "Closing the metal door.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "audio": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "The scene remains focused on the outdoor mailbox area. I approach the mailboxes from the walkway, stand in front of them to locate my unit, and then use my keys."
+        },
+        "audio": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "audio_event_detection"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::audio::audio_event_detection::34::1"
+          ],
+          "evidence": "Yes, there are sharp metallic clicks and clangs when the mailbox is opened and then finally closed."
+        }
+      },
+      "shared_object_or_event": "Closing the mailbox",
+      "context_constraint": "the mailbox I am checking",
+      "decisive_answer_cue": "metallic clicks and clangs when... finally closed",
+      "why_context_is_needed": "The context identifies the subject is interacting with a specific metal mailbox.",
+      "why_decisive_is_needed": "The audio provides the auditory confirmation of the mechanical closure.",
+      "why_decisive_alone_is_not_grounded": "The sound of a metal clang could be any object; the visual context confirms it is a mailbox.",
+      "evidence_selection_rationale": "Used scene description to ground the event and audio to confirm the completion.",
+      "why_multimodal": "The visual confirms the mailbox structure; the audio confirms the event completion.",
+      "single_modality_limits": {
+        "context_modality_name": "Visual does not capture the sharp sound of the metal door closing.",
+        "decisive_modality_name": "Audio does not show the mailbox door specifically."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_audio__rgb_context__audio_decisive__audio_as_material_ground_truth__017",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "rgb",
+      "decisive_modality": "audio",
+      "challenge_type": "audio_as_material_ground_truth",
+      "question": "What kind of material, besides the metallic lock, is being handled in the mailbox?",
+      "answer": "Paper.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "audio": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::action::0::1"
+          ],
+          "evidence": "I approach the mailbox bank and scan the labels to find room 1'234. I then take out my keys and attempt to insert one into the lock to check for mail. The purpose is to retrieve any correspondence."
+        },
+        "audio": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Metallic clicks, the sound of a metal door opening and closing, and the rustling of paper."
+        }
+      },
+      "shared_object_or_event": "Checking the mailbox",
+      "context_constraint": "within the mailbox I am checking",
+      "decisive_answer_cue": "rustling of paper",
+      "why_context_is_needed": "The context establishes that the user is interacting with a mailbox, which explains why there would be paper (mail) inside.",
+      "why_decisive_is_needed": "The audio provides the explicit evidence of the rustling sound characteristic of paper.",
+      "why_decisive_alone_is_not_grounded": "Without the context of a mailbox, the sound of paper rustling could be occurring in any environment.",
+      "evidence_selection_rationale": "Selected the action description for the context and the sound identification for the audio.",
+      "why_multimodal": "Requires knowing the user is interacting with a mailbox to interpret the rustling sound as mail.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB provides no acoustic information about the material inside the box.",
+        "decisive_modality_name": "Audio does not visually confirm the mailbox is the source of the rustling."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_audio__rgb_context__audio_decisive__audio_as_sound_source_ground_truth__019",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "audio"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "audio-visual implicit grounding",
+      "context_modality": "rgb",
+      "decisive_modality": "audio",
+      "challenge_type": "audio_as_sound_source_ground_truth",
+      "question": "What is the primary sound source accompanying the visual action of using the keys?",
+      "answer": "Metallic clicks of the lock.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "audio": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::action::0::1"
+          ],
+          "evidence": "I then take out my keys and attempt to insert one into the lock to check for mail."
+        },
+        "audio": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "audio_sound_source_identification"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::audio::audio_sound_source_identification::35::1"
+          ],
+          "evidence": "Metallic clicks, the sound of a metal door opening and closing, and the rustling of paper."
+        }
+      },
+      "shared_object_or_event": "Using keys in the mailbox lock",
+      "context_constraint": "the action of inserting keys into the lock",
+      "decisive_answer_cue": "Metallic clicks of the lock",
+      "why_context_is_needed": "Context confirms the keys are being used in a lock, grounding the sound source.",
+      "why_decisive_is_needed": "The audio provides the specific sound profile resulting from the key interaction.",
+      "why_decisive_alone_is_not_grounded": "The metallic clicking sound could be any mechanical device without visual grounding.",
+      "evidence_selection_rationale": "Linked the key-insertion action to the resulting mechanical sound.",
+      "why_multimodal": "Combines the visual action with the expected sound consequence.",
+      "single_modality_limits": {
+        "context_modality_name": "Visual shows the keys but not the resulting sound.",
+        "decisive_modality_name": "Audio captures the sound but not the act of inserting a specific key."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_depth__depth_context__rgb_decisive__rgb_as_object_ground_truth__028",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "depth",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "What colors are the mailboxes being interacted with in the stationary scene?",
+      "answer": "Grey and green.",
+      "modality_roles": {
+        "depth": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::object_recognition::8::1"
+          ],
+          "evidence": "This segment shows an outdoor mailbox station with several grey and green metal boxes."
+        },
+        "depth": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "depth_object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::depth::depth_object_recognition::19::1"
+          ],
+          "evidence": "In this segment, the primary object is a large, flat vertical surface located at mid-depth, which contains a grid of rectangular mailbox units."
+        }
+      },
+      "shared_object_or_event": "The mailbox unit grid.",
+      "context_constraint": "mailbox unit at mid-depth",
+      "decisive_answer_cue": "grey and green",
+      "why_context_is_needed": "The context depth identifies the specific physical structure of the mailbox as a 'flat vertical surface at mid-depth', grounding the object.",
+      "why_decisive_is_needed": "The RGB evidence contains the color information necessary to answer the question, which is absent in the monochromatic depth data.",
+      "why_decisive_alone_is_not_grounded": "Without context, 'grey and green' could apply to any object in the segment; the depth data confirms the object is the specific mailbox grid.",
+      "evidence_selection_rationale": "Used depth object recognition to ground the mailbox structure and RGB to provide the color details.",
+      "why_multimodal": "Combines spatial structural grounding (Depth) with descriptive appearance (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "Depth defines the geometry but has no color properties.",
+        "decisive_modality_name": "RGB identifies colors but doesn't define the spatial relationship/depth range."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_depth__depth_context__rgb_decisive__rgb_as_text_or_label_ground_truth__029",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "depth",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_text_or_label_ground_truth",
+      "question": "What is the number on the mailbox being reached toward in the identified unit?",
+      "answer": "1'234.",
+      "modality_roles": {
+        "depth": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors."
+        },
+        "depth": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "depth_object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::depth::depth_object_recognition::19::1"
+          ],
+          "evidence": "I reach out toward the unit, and my hand/arm appears as a moving object at a very near depth range, partially occluding the mailbox grid as I interact with it."
+        }
+      },
+      "shared_object_or_event": "The mailbox currently being reached for by the subject.",
+      "context_constraint": "reached toward",
+      "decisive_answer_cue": "1'234",
+      "why_context_is_needed": "Context confirms the interaction point (the mailbox unit) and the specific act of reaching toward it.",
+      "why_decisive_is_needed": "Decisive evidence is needed to resolve the text label on the mailbox doors, which cannot be parsed from depth maps.",
+      "why_decisive_alone_is_not_grounded": "Decisive evidence identifies several numbers, but does not identify which one corresponds to the subject's active reach.",
+      "evidence_selection_rationale": "Paired depth interaction information with the corresponding textual labels in RGB.",
+      "why_multimodal": "Binds physical interaction (Depth) to information-dense signage (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "Depth observes the reach action but cannot read the text.",
+        "decisive_modality_name": "RGB text recognition is ambiguous about which box is being targeted without the context of the hand's depth."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_depth__rgb_context__depth_decisive__depth_as_navigation_ground_truth__027",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "depth",
+      "challenge_type": "depth_as_navigation_ground_truth",
+      "question": "Can I move further into the space after reaching the mailbox bank?",
+      "answer": "No, there is only a wall behind the mailbox unit.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "depth": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::scene_sequence::9::1"
+          ],
+          "evidence": "The scene remains focused on the outdoor mailbox area. I approach the mailboxes from the walkway, stand in front of them to locate my unit, and then use my keys."
+        },
+        "depth": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "depth_navigation"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::depth::depth_navigation::17::1"
+          ],
+          "evidence": "Is there a navigable path visible beyond the mailboxes? Answer: No, just the wall."
+        }
+      },
+      "shared_object_or_event": "The mailbox bank and the area behind it.",
+      "context_constraint": "after reaching the mailbox bank",
+      "decisive_answer_cue": "No, just the wall",
+      "why_context_is_needed": "The context RGB evidence establishes that the subject is interacting with the mailbox bank, providing the anchor for the navigation query.",
+      "why_decisive_is_needed": "The depth modality is required to understand the spatial layout behind the mailbox and confirm the lack of a navigable path, which is not clearly defined in the RGB evidence.",
+      "why_decisive_alone_is_not_grounded": "Without the context of the subject being at the mailbox bank, the depth information about the wall does not define the task of checking mail or the subject's current position.",
+      "evidence_selection_rationale": "Selected the scene sequence to establish location and the navigation depth evidence to answer the spatial feasibility query.",
+      "why_multimodal": "Requires RGB to ground the specific task at the mailbox and Depth to verify the spatial obstruction behind it.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB provides the visual intent but cannot measure depth/navigability.",
+        "decisive_modality_name": "Depth provides the spatial constraint but lacks semantic information about the mailbox interaction."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_depth__rgb_context__depth_decisive__depth_as_spatial_ground_truth__026",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "depth"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with spatial/depth evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "depth",
+      "challenge_type": "depth_as_spatial_ground_truth",
+      "question": "What occupies the near depth range while I check my mail?",
+      "answer": "My hand and arm.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "depth": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::action::0::1"
+          ],
+          "evidence": "I then take out my keys and attempt to insert one into the lock to check for mail."
+        },
+        "depth": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "depth_object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::depth::depth_object_recognition::19::1"
+          ],
+          "evidence": "I reach out toward the unit, and my hand/arm appears as a moving object at a very near depth range."
+        }
+      },
+      "shared_object_or_event": "The interaction with the mailbox lock",
+      "context_constraint": "while I check my mail",
+      "decisive_answer_cue": "hand and arm",
+      "why_context_is_needed": "Context clarifies the task (checking mail) to specify the time and activity to be checked in the depth data.",
+      "why_decisive_is_needed": "Decisive evidence provides the depth mapping of objects, identifying what is in the foreground (near-field).",
+      "why_decisive_alone_is_not_grounded": "Depth data notes an object at a certain range but lacks the semantic description of the 'mail check' activity.",
+      "evidence_selection_rationale": "Used RGB action context to define the activity and depth object recognition to define the spatial depth property of the subject's arm.",
+      "why_multimodal": "Links the semantic activity (RGB) to the geometric depth of the acting limbs (Depth).",
+      "single_modality_limits": {
+        "context_modality_name": "RGB describes the action but not the depth distance of objects.",
+        "decisive_modality_name": "Depth describes distances but requires RGB to confirm the activity being performed."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": true,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [
+          "question explicitly mentions modality names"
+        ],
+        "validation_status": "failed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_event__event_context__rgb_decisive__rgb_as_color_ground_truth__025",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "event",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_color_ground_truth",
+      "question": "What is the color of the metal mailboxes that I am currently interacting with?",
+      "answer": "Grey and green.",
+      "modality_roles": {
+        "event": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::object_recognition::8::1"
+          ],
+          "evidence": "This segment shows an outdoor mailbox station with several grey and green metal boxes."
+        },
+        "event": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "event_object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::event::event_object_recognition::14::1"
+          ],
+          "evidence": "This segment shows the camera stopping in front of a mailbox unit. The event stream highlights the grid-like structure of the mailbox array."
+        }
+      },
+      "shared_object_or_event": "The metal mailbox station",
+      "context_constraint": "currently interacting with",
+      "decisive_answer_cue": "grey and green",
+      "why_context_is_needed": "Context identifies that an interaction with the unit is occurring, making the color query relevant to the object in focus.",
+      "why_decisive_is_needed": "Decisive RGB evidence provides the color property absent in the motion-focused event stream.",
+      "why_decisive_alone_is_not_grounded": "RGB evidence lists colors but does not describe the context of the current interaction or user focus.",
+      "evidence_selection_rationale": "Anchored the query on the object being interacted with via event stream (the mailbox unit) and retrieved color via RGB object recognition.",
+      "why_multimodal": "Combines spatial interaction grounding (event) with visual attribute properties (RGB).",
+      "single_modality_limits": {
+        "context_modality_name": "Event logs structure and movement but not color.",
+        "decisive_modality_name": "RGB identifies colors but lacks the interaction context provided by the event stream."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_event__event_context__rgb_decisive__rgb_as_object_ground_truth__024",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "event",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_object_ground_truth",
+      "question": "After arriving at the mailbox bank, what are the identifiers visible on the green doors?",
+      "answer": "Room numbers like 1'233, 1'234, and 1'235.",
+      "modality_roles": {
+        "event": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors."
+        },
+        "event": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "event_scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::event::event_scene_sequence::15::1"
+          ],
+          "evidence": "Arrival and focus on mailbox 1'234."
+        }
+      },
+      "shared_object_or_event": "The labels on the mailboxes",
+      "context_constraint": "after arriving at the mailbox bank",
+      "decisive_answer_cue": "room numbers '1'233', '1'234', and '1'235'",
+      "why_context_is_needed": "Context confirms the event of the subject arriving and looking at the specific area to be queried.",
+      "why_decisive_is_needed": "Decisive evidence contains the text details that were not extracted in the event logs.",
+      "why_decisive_alone_is_not_grounded": "The RGB text recognition evidence identifies text but doesn't state the event context of when they are examined.",
+      "evidence_selection_rationale": "Used event sequences to anchor the 'arrival' and RGB text recognition to retrieve the specific content.",
+      "why_multimodal": "Links the event of checking the boxes to the specific visual information content.",
+      "single_modality_limits": {
+        "context_modality_name": "Event data recognizes geometry but lacks semantic text detail.",
+        "decisive_modality_name": "RGB identifies text labels but lacks the context of the user's focus during the arrival."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_event__rgb_context__event_decisive__event_as_action_phase_ground_truth__023",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "event",
+      "challenge_type": "event_as_action_phase_ground_truth",
+      "question": "What is the very first motion-based phase I perform after reaching the mailbox bank?",
+      "answer": "Reach for mailbox 1'234.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "event": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::action::0::1"
+          ],
+          "evidence": "I approach the mailbox bank and scan the labels to find room 1'234."
+        },
+        "event": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "event_scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::event::event_scene_sequence::15::1"
+          ],
+          "evidence": "1. Arrival and focus on mailbox 1'234. 2. Hand enters frame and inserts a key."
+        }
+      },
+      "shared_object_or_event": "The arrival and initiation of the mailbox check",
+      "context_constraint": "after reaching the mailbox bank",
+      "decisive_answer_cue": "Reach for mailbox 1'234",
+      "why_context_is_needed": "Context confirms the goal (checking mail/finding 1'234) at the mailbox bank.",
+      "why_decisive_is_needed": "Decisive evidence details the specific sequential order of physical actions as they occur in the event stream.",
+      "why_decisive_alone_is_not_grounded": "The event evidence lists actions but does not specify the subject's intent or the location of the bank relative to the arrival.",
+      "evidence_selection_rationale": "RGB context establishes the task (checking mail at the bank), while the event stream provides the granular action phases.",
+      "why_multimodal": "Combines the semantic intent (RGB) with temporal action phase identification (Event).",
+      "single_modality_limits": {
+        "context_modality_name": "RGB gives general task context but not granular action phase timestamps.",
+        "decisive_modality_name": "Event logs movement but needs RGB to clarify the spatial goal (the bank)."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_event__rgb_context__event_decisive__event_as_motion_ground_truth__022",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "event"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible context with event-motion evidence",
+      "context_modality": "rgb",
+      "decisive_modality": "event",
+      "challenge_type": "event_as_motion_ground_truth",
+      "question": "What happens at the lock of mailbox 1'234 immediately after the initial key insertion?",
+      "answer": "The mailbox door swings open.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "event": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors."
+        },
+        "event": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "event_scene_sequence"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::event::event_scene_sequence::15::1"
+          ],
+          "evidence": "1. Arrival and focus on mailbox 1'234. 2. Hand enters frame and inserts a key. 3. Mailbox door swings open. 4. Hand retrieves contents."
+        }
+      },
+      "shared_object_or_event": "The opening of mailbox 1'234",
+      "context_constraint": "mailbox 1'234",
+      "decisive_answer_cue": "Mailbox door swings open",
+      "why_context_is_needed": "The context identifies the specific mailbox (1'234) as the target of the action.",
+      "why_decisive_is_needed": "The event modality provides the sequence of physical motion following the key insertion.",
+      "why_decisive_alone_is_not_grounded": "Without context, 'the mailbox' is ambiguous as there are many at the bank.",
+      "evidence_selection_rationale": "Selected the text recognition evidence to pin the target unit 1'234 and the event sequence to determine the specific subsequent motion.",
+      "why_multimodal": "Requires visual target grounding from RGB text identification and temporal motion sequencing from the event stream.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB provides the identity but not the specific event dynamics at high temporal resolution.",
+        "decisive_modality_name": "Event data details the motion but lacks the static text labels needed to identify which specific mailbox is meant."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_ir__ir_context__rgb_decisive__rgb_as_color_ground_truth__030",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "ir",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_color_ground_truth",
+      "question": "What colors are the mailboxes found in the lobby?",
+      "answer": "Grey and green.",
+      "modality_roles": {
+        "ir": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::object_recognition::8::1"
+          ],
+          "evidence": "This segment shows an outdoor mailbox station with several grey and green metal boxes."
+        },
+        "ir": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::ir::object_recognition::30::1"
+          ],
+          "evidence": "I enter a lobby area where a large bank of metal mailboxes is mounted on the wall."
+        }
+      },
+      "shared_object_or_event": "The wall-mounted mailbox bank.",
+      "context_constraint": "found in the lobby",
+      "decisive_answer_cue": "grey and green",
+      "why_context_is_needed": "IR context confirms the presence of a mailbox bank in the lobby/indoor environment, anchoring the object.",
+      "why_decisive_is_needed": "Color appearance is not available in infrared imaging.",
+      "why_decisive_alone_is_not_grounded": "Decisive evidence does not explicitly confirm that the mailboxes in the RGB scene are the same ones identified in the lobby context.",
+      "evidence_selection_rationale": "IR identified the objects in the lobby, and RGB provided the visual appearance data.",
+      "why_multimodal": "Maps IR thermal presence to RGB color features.",
+      "single_modality_limits": {
+        "context_modality_name": "IR captures object structure/presence but lacks color.",
+        "decisive_modality_name": "RGB provides color but no thermal/lobby environment context."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_ir__ir_context__rgb_decisive__rgb_as_text_or_label_ground_truth__031",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "ir",
+      "decisive_modality": "rgb",
+      "challenge_type": "rgb_as_text_or_label_ground_truth",
+      "question": "What is the text on the doors of the mailbox bank seen in the lobby?",
+      "answer": "1'233, 1'234, and 1'235.",
+      "modality_roles": {
+        "ir": "context_object_or_event_grounding",
+        "rgb": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "text_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::text_recognition::11::1"
+          ],
+          "evidence": "In frame 002160, room numbers '1'233', '1'234', and '1'235' are clearly visible on the green mailbox doors."
+        },
+        "ir": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::ir::object_recognition::30::1"
+          ],
+          "evidence": "I enter a lobby area where a large bank of metal mailboxes is mounted on the wall. Each mailbox has a small handle and a number."
+        }
+      },
+      "shared_object_or_event": "The doors of the lobby mailbox bank.",
+      "context_constraint": "seen in the lobby",
+      "decisive_answer_cue": "1'233, 1'234, and 1'235",
+      "why_context_is_needed": "Context confirms the mailboxes are located in the lobby, which distinguishes them from other potential objects.",
+      "why_decisive_is_needed": "Text reading requires the high resolution/spectrum of the RGB modality.",
+      "why_decisive_alone_is_not_grounded": "Without context, the labels could belong to any mailbox setup in the scene.",
+      "evidence_selection_rationale": "Used IR to identify the location of the mailbox doors and RGB to transcribe the text on them.",
+      "why_multimodal": "Requires context grounding of the object in IR and text extraction via RGB.",
+      "single_modality_limits": {
+        "context_modality_name": "IR identifies the door as an object but fails to read the numeric text.",
+        "decisive_modality_name": "RGB can read text but doesn't inherently verify the thermal lobby context."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_ir__rgb_context__ir_decisive__ir_as_low_light_ground_truth__032",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "rgb",
+      "decisive_modality": "ir",
+      "challenge_type": "ir_as_low_light_ground_truth",
+      "question": "What is the primary feature of the indoor area where I am checking for mail?",
+      "answer": "A large unit of wall-mounted mailboxes.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "ir": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "action"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::action::0::1"
+          ],
+          "evidence": "I approach the mailbox bank and scan the labels to find room 1'234. I then take out my keys and attempt to insert one into the lock to check for mail. The purpose is to retrieve any correspondence."
+        },
+        "ir": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::ir::object_recognition::30::1"
+          ],
+          "evidence": "I enter a lobby area where a large bank of metal mailboxes is mounted on the wall. Each mailbox has a small handle and a number. I approach the mailboxes, which show high thermal contrast against the wall. A glass entrance door is also visible."
+        }
+      },
+      "shared_object_or_event": "The bank of mailboxes",
+      "context_constraint": "where I am checking for mail",
+      "decisive_answer_cue": "large bank of metal mailboxes mounted on the wall",
+      "why_context_is_needed": "The context identifies the subject's intent (checking mail) and the location, which binds the question to the specific mailbox station mentioned in the IR modality.",
+      "why_decisive_is_needed": "The IR modality provides the structural and environmental layout details of the lobby that are not explicitly detailed in the RGB metadata.",
+      "why_decisive_alone_is_not_grounded": "Without context, the IR evidence describes an arbitrary indoor lobby, whereas the RGB frames ground this specifically as the location of the subject's previously initiated action.",
+      "evidence_selection_rationale": "Used action evidence to ground the intent and the IR object recognition evidence to define the lobby's structural feature.",
+      "why_multimodal": "Requires linking the subject's intent in RGB with the scene-specific object description in IR.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB lacks the thermal contrast and detailed structural summary of the indoor room layout.",
+        "decisive_modality_name": "IR lacks the subject's action intent to distinguish which specific room features are relevant to the task."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    },
+    {
+      "qa_id": "check_mailbox_day_seg_002__rgb_ir__rgb_context__ir_decisive__ir_as_visibility_ground_truth__033",
+      "segment_id": "check_mailbox_day_seg_002",
+      "source_prefix": "check_mailbox_day",
+      "side": "day",
+      "task_label": "check mailbox",
+      "start_seconds": 64.0,
+      "end_seconds": 105.0,
+      "start_timestamp": "00:01:04.000",
+      "end_timestamp": "00:01:45.000",
+      "modalities": [
+        "rgb",
+        "ir"
+      ],
+      "qa_style": "implicit_cross_modal",
+      "capability": "visible-light and IR complementarity",
+      "context_modality": "rgb",
+      "decisive_modality": "ir",
+      "challenge_type": "ir_as_visibility_ground_truth",
+      "question": "What kind of illumination is present in the lobby where I am looking for my mailbox?",
+      "answer": "Artificial overhead lighting.",
+      "modality_roles": {
+        "rgb": "context_object_or_event_grounding",
+        "ir": "decisive_answer_evidence"
+      },
+      "evidence_by_modality": {
+        "rgb": {
+          "role": "context",
+          "role_description": "context_object_or_event_grounding",
+          "source_sections": [
+            "object_recognition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::rgb::object_recognition::8::1"
+          ],
+          "evidence": "This segment shows an outdoor mailbox station with several grey and green metal boxes. The mailboxes are numbered with white digits. The ground is made of grey concrete tiles. I am holding a set of keys to unlock a specific mailbox."
+        },
+        "ir": {
+          "role": "decisive",
+          "role_description": "decisive_answer_evidence",
+          "source_sections": [
+            "light_recongnition"
+          ],
+          "evidence_ids": [
+            "check_mailbox_day_seg_002::ir::light_recongnition::27::1"
+          ],
+          "evidence": "The lobby is brightly lit with artificial overhead lights, creating an even thermal background on the walls but reflecting strongly off the metallic mailbox surfaces."
+        }
+      },
+      "shared_object_or_event": "The lobby area",
+      "context_constraint": "where I am looking for my mailbox",
+      "decisive_answer_cue": "artificial overhead lights",
+      "why_context_is_needed": "The context defines the task-oriented search (looking for the mailbox), which links to the interior lobby transition found in the IR data.",
+      "why_decisive_is_needed": "The decisive modality contains the specific light detection information regarding the indoor environment that is not present in the RGB imagery.",
+      "why_decisive_alone_is_not_grounded": "The decisive evidence mentions 'the lobby' without explaining that it is the site of the user's current mailbox search.",
+      "evidence_selection_rationale": "Used RGB object evidence to confirm the mailbox-oriented task and IR light recognition to identify the lighting type.",
+      "why_multimodal": "The user's action and location are grounded in RGB, while the environmental conditions (lighting) are derived from the IR signal.",
+      "single_modality_limits": {
+        "context_modality_name": "RGB lacks explicit categorization of the indoor artificial lighting type.",
+        "decisive_modality_name": "IR lacks the task context that explains why the user is in that specific location."
+      },
+      "answerability_verification": {
+        "status": "unverified",
+        "schema_version": "context_decisive_v2",
+        "context_only": null,
+        "decisive_only_answer_cue": null,
+        "decisive_only_grounding": null,
+        "combined": null,
+        "cross_modal_dependency": null,
+        "verifier": null,
+        "rationale": null
+      },
+      "quality_control": {
+        "question_mentions_modalities": false,
+        "context_grounding_required": true,
+        "decisive_evidence_required": true,
+        "cross_modal_binding_required": true,
+        "ground_truth_confidence": 1.0,
+        "validation_errors": [],
+        "validation_status": "passed"
+      },
+      "selection": {
+        "candidate_status": "candidate",
+        "quality_status": "unreviewed",
+        "benchmark_keep": null,
+        "strict_keep": null,
+        "keep": null,
+        "review_notes": null
+      },
+      "generation": {
+        "mode": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "source": "segmented_normalized_evidence_units"
+      }
+    }
+  ],
+  "skipped": []
+}

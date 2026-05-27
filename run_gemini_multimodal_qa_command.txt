@@ -1,0 +1,3 @@
+# Full generation with the updated context/decisive QA prompt.
+# Output is written to a new v2 candidates file so the previous results are preserved.
+powershell -ExecutionPolicy Bypass -Command "& .\.venv\Scripts\python.exe -m annotation_feature.multimodal_qa_pipeline --input segmented_normalized_evidence_units.json --output outputs/implicit_multimodal_qa_candidates_gemini_v2.json --generation-mode gemini --model-name gemini-3.1-flash-lite --gemini-batch-scope segment --max-bundles-per-gemini-call 5 --max-concurrent-calls 1 --delay-between-calls 5 --max-retries 3 --checkpoint-every 1"

@@ -1,0 +1,3 @@
+# Full verifier/filter pass for the updated v2 candidates file.
+# Output includes benchmark_keep and strict_keep. The default keep field equals benchmark_keep.
+powershell -ExecutionPolicy Bypass -Command "& .\.venv\Scripts\python.exe -m annotation_feature.multimodal_qa_verifier --input outputs/implicit_multimodal_qa_candidates_gemini_v2.json --output outputs/implicit_multimodal_qa_verified_gemini_v2.json --model-name gemini-3.1-flash-lite --batch-size 5 --max-concurrent-calls 1 --delay-between-calls 5 --checkpoint-every 1"
