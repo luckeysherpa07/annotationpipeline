@@ -54,6 +54,30 @@ from annotation_feature.temporal_alignment import (
 )
 
 
+ALIGNED_QA_OUTPUT_DIR = Path("qa_pairs/aligned")
+ALIGNED_QA_OUTPUT_FILES = {
+    "rgb": ALIGNED_QA_OUTPUT_DIR / "rgb_qa_results_aligned.json",
+    "event": ALIGNED_QA_OUTPUT_DIR / "event_qa_results_aligned.json",
+    "ir": ALIGNED_QA_OUTPUT_DIR / "ir_qa_results_aligned.json",
+    "audio": ALIGNED_QA_OUTPUT_DIR / "audio_qa_results_aligned.json",
+    "marigold_depth": ALIGNED_QA_OUTPUT_DIR / "marigold_depth_qa_results_aligned.json",
+}
+LEGACY_ALIGNED_QA_OUTPUT_FILES = {
+    modality: Path("aligned_dataset") / output_path.name
+    for modality, output_path in ALIGNED_QA_OUTPUT_FILES.items()
+}
+
+
+def _migrate_legacy_aligned_qa_results() -> None:
+    """Move old aligned QA JSON files into qa_pairs/aligned when the new file is absent."""
+    ALIGNED_QA_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    for modality, legacy_path in LEGACY_ALIGNED_QA_OUTPUT_FILES.items():
+        output_path = ALIGNED_QA_OUTPUT_FILES[modality]
+        if legacy_path.exists() and not output_path.exists():
+            legacy_path.replace(output_path)
+            print(f"Migrated {legacy_path} -> {output_path}")
+
+
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
     return input(prompt).strip().lower() == "yes"
 
@@ -298,6 +322,8 @@ def _run_all_segmented_qa_menu_option() -> None:
 
 
 def main():
+    _migrate_legacy_aligned_qa_results()
+
     print("\n" + "=" * 60)
     print("BATCH + PARALLEL ANNOTATION PIPELINE TEST RUNNER")
     print("=" * 60)
@@ -1009,14 +1035,14 @@ def main():
             print("WARNING: This will use Gemini API quota!")
             print("Reads RGB videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache for extracted frames.")
-            print("Writes aligned_dataset/rgb_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['rgb']}.")
             print("-" * 60)
             if _confirm():
                 run(
                     test_mode=True,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/rgb_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["rgb"]),
                 )
             else:
                 print("Cancelled.")
@@ -1027,7 +1053,7 @@ def main():
             print("WARNING: This will use Gemini API quota for each aligned segment pair!")
             print("Reads RGB videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache for extracted frames.")
-            print("Writes aligned_dataset/rgb_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['rgb']}.")
             print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
             print("-" * 60)
             if _confirm():
@@ -1035,7 +1061,7 @@ def main():
                     test_mode=False,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/rgb_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["rgb"]),
                 )
             else:
                 print("Cancelled.")
@@ -1046,14 +1072,14 @@ def main():
             print("WARNING: This will use Gemini API quota!")
             print("Reads EVENT videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache_event for extracted frames.")
-            print("Writes aligned_dataset/event_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['event']}.")
             print("-" * 60)
             if _confirm():
                 run_event(
                     test_mode=True,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/event_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["event"]),
                 )
             else:
                 print("Cancelled.")
@@ -1064,7 +1090,7 @@ def main():
             print("WARNING: This will use Gemini API quota for each aligned segment pair!")
             print("Reads EVENT videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache_event for extracted frames.")
-            print("Writes aligned_dataset/event_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['event']}.")
             print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
             print("-" * 60)
             if _confirm():
@@ -1072,7 +1098,7 @@ def main():
                     test_mode=False,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/event_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["event"]),
                 )
             else:
                 print("Cancelled.")
@@ -1083,14 +1109,14 @@ def main():
             print("WARNING: This will use Gemini API quota!")
             print("Reads IR videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache_ir for extracted frames.")
-            print("Writes aligned_dataset/ir_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['ir']}.")
             print("-" * 60)
             if _confirm():
                 run_ir(
                     test_mode=True,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/ir_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["ir"]),
                 )
             else:
                 print("Cancelled.")
@@ -1101,7 +1127,7 @@ def main():
             print("WARNING: This will use Gemini API quota for each aligned segment pair!")
             print("Reads IR videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache_ir for extracted frames.")
-            print("Writes aligned_dataset/ir_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['ir']}.")
             print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
             print("-" * 60)
             if _confirm():
@@ -1109,7 +1135,7 @@ def main():
                     test_mode=False,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/ir_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["ir"]),
                 )
             else:
                 print("Cancelled.")
@@ -1169,14 +1195,14 @@ def main():
             print("WARNING: This will use Gemini API quota!")
             print("Reads existing *_rgb_with_audio.mp4 files from aligned_dataset/.")
             print("Run option 43 first if the needed with-audio segment videos are missing.")
-            print("Writes aligned_dataset/audio_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['audio']}.")
             print("-" * 60)
             if _confirm():
                 run_audio(
                     test_mode=True,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/audio_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["audio"]),
                 )
             else:
                 print("Cancelled.")
@@ -1187,7 +1213,7 @@ def main():
             print("WARNING: This will use Gemini API quota for each aligned segment pair!")
             print("Reads generated *_rgb_with_audio.mp4 files from aligned_dataset/.")
             print("Ensures RGB/audio cross-correlation plots exist before QA.")
-            print("Writes aligned_dataset/audio_qa_results_aligned.json.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['audio']}.")
             print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
             print("-" * 60)
             if _confirm():
@@ -1205,7 +1231,7 @@ def main():
                     test_mode=False,
                     skip_api=False,
                     dataset_folder="aligned_dataset",
-                    output_file="aligned_dataset/audio_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["audio"]),
                 )
             else:
                 print("Cancelled.")
@@ -1216,7 +1242,7 @@ def main():
             print("WARNING: QA will use Gemini API quota for each incomplete aligned Marigold pair!")
             print("Day depth maps are estimated from aligned RGB frames.")
             print("Night depth maps are estimated from aligned IR frames.")
-            print("Writes aligned_dataset/.frames_cache_marigold and aligned_dataset/marigold_depth_qa_results_aligned.json.")
+            print(f"Writes aligned_dataset/.frames_cache_marigold and {ALIGNED_QA_OUTPUT_FILES['marigold_depth']}.")
             print("-" * 60)
             if _confirm():
                 marigold_frames = run_aligned_marigold_depth_estimation(
@@ -1228,7 +1254,7 @@ def main():
                     skip_api=False,
                     dataset_folder="aligned_dataset",
                     cache_subdir=".frames_cache_marigold",
-                    output_file="aligned_dataset/marigold_depth_qa_results_aligned.json",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["marigold_depth"]),
                 )
                 print(f"Aligned Marigold depth QA results saved for {len(qa_results)} segment pair(s).")
             else:
