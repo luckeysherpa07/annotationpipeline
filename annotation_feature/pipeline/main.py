@@ -3,6 +3,7 @@ import asyncio
 import copy
 import json
 import os
+import re
 import sys
 from typing import Dict
 
@@ -36,6 +37,8 @@ ANNOTATION_PROMPT_KEYS = {
     "ir": tuple(IR_PROMPTS.keys()),
     "depth": tuple(DEPTH_PROMPTS.keys()),
 }
+
+AUDIO_RGB_SOURCE_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$")
 
 
 def _load_existing_results(output_file: Path) -> Dict:
@@ -167,12 +170,42 @@ def _resume_filter_pairs(
     return pending_pairs, complete_count, partial_count, empty_count
 
 
+def _audio_entry_complete(entry: Dict) -> bool:
+    if not isinstance(entry, dict):
+        return False
+
+    annotations = entry.get("annotations", {})
+    if not isinstance(annotations, dict):
+        return False
+
+    for section_name in ("audio_hia", "audio_chronological_caption"):
+        section = annotations.get(section_name, {})
+        if not isinstance(section, dict) or not str(section.get("caption", "")).strip():
+            return False
+
+    categories = annotations.get("categories", {})
+    if not isinstance(categories, dict) or not categories:
+        return False
+
+    return all(_annotation_item_complete(item) for item in categories.values())
+
+
+def _audio_annotations_have_content(annotations: Dict) -> bool:
+    if not isinstance(annotations, dict):
+        return False
+    if _annotation_item_has_content(annotations.get("audio_hia", {})):
+        return True
+    if _annotation_item_has_content(annotations.get("audio_chronological_caption", {})):
+        return True
+    categories = annotations.get("categories", {})
+    if isinstance(categories, dict):
+        return _annotations_have_content(categories)
+    return False
+
+
 def _audio_source_pair_key(file: Path) -> str:
-    stem = file.stem.lower()
-    for suffix in ("_night_rgb", "_day_rgb"):
-        if stem.endswith(suffix):
-            stem = stem[: -len(suffix)]
-            break
+    match = AUDIO_RGB_SOURCE_STEM_RE.match(file.stem.lower())
+    stem = match.group("sample") if match else file.stem.lower()
     return str(file.parent / stem)
 
 
@@ -187,11 +220,12 @@ def _discover_audio_rgb_videos(dataset_folder: Path) -> Dict[str, Dict[str, Path
         stem = file.stem.lower()
         if not is_modality_file(file, "rgb") or "with_audio" in name:
             continue
-        if not (stem.endswith("_day_rgb") or stem.endswith("_night_rgb")):
+        stem_match = AUDIO_RGB_SOURCE_STEM_RE.match(stem)
+        if not stem_match:
             continue
 
         pair_key = _audio_source_pair_key(file)
-        side = "night" if stem.endswith("_night_rgb") else "day"
+        side = "night" if stem_match.group("side").startswith("night") else "day"
         rgb_videos.setdefault(pair_key, {"day": None, "night": None})
 
         if rgb_videos[pair_key][side] is not None:
@@ -204,7 +238,11 @@ def _discover_audio_rgb_videos(dataset_folder: Path) -> Dict[str, Dict[str, Path
 
 
 def _load_or_extract_audio_hia_frames(day_rgb_video: Path, dataset_folder: Path) -> list[Path]:
-    frame_output_dir = dataset_folder / ".frames_cache" / day_rgb_video.stem
+    try:
+        relative_parent = day_rgb_video.relative_to(dataset_folder).parent
+    except ValueError:
+        relative_parent = Path()
+    frame_output_dir = dataset_folder / ".frames_cache_audio_hia" / relative_parent / day_rgb_video.stem
     cached_frames = sorted(frame_output_dir.glob("frame_*.png"))
 
     if cached_frames:
@@ -843,6 +881,7 @@ def run_audio(
     test_pair_index: int = 0,
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
+    output_file: Path | str = "audio_qa_results.json",
 ):
     """
     Run the AUDIO annotation pipeline.
@@ -852,6 +891,7 @@ def run_audio(
         test_pair_index: Which pair to process in test mode (0 = first)
         skip_api: If True, skip Gemini API calls and use demo results
         dataset_folder: Dataset directory containing source media files
+        output_file: JSON file to write annotation results to
     """
     if test_mode:
         print("=" * 50)
@@ -860,12 +900,9 @@ def run_audio(
         if skip_api:
             print("Gemini API calls disabled - using cascade demo results\n")
 
-    client = None
-    if not skip_api:
-        client = create_gemini_client()
-
     dataset_folder = Path(dataset_folder)
-    results = {}
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
 
     if not dataset_folder.exists():
         print("ERROR: Dataset folder not found!")
@@ -898,11 +935,43 @@ def run_audio(
         print("ERROR: No audio-visual pairs to process.")
         return results
 
+    complete_count = 0
+    partial_count = 0
+    empty_count = 0
+    pending_pairs = []
+    for pair_key, audio_path in pairs_to_process:
+        existing_entry = results.get(pair_key)
+        if _audio_entry_complete(existing_entry):
+            complete_count += 1
+            continue
+
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        if _audio_annotations_have_content(existing_annotations):
+            partial_count += 1
+        else:
+            empty_count += 1
+        pending_pairs.append((pair_key, audio_path))
+
     print(
-        f"Processing {len(pairs_to_process)} audio-visual pairs with up to 3 concurrent tasks and 4-second spacing..."
+        "Resume scan for AUDIO: "
+        f"{complete_count} complete skipped, {partial_count} partial retry, "
+        f"{empty_count} empty/missing retry."
     )
 
-    selected_audio_pairs = dict(pairs_to_process)
+    if not pending_pairs:
+        print("No incomplete AUDIO pairs remain. Skipping Gemini client creation and API calls.")
+        print(f"Existing Audio QA results kept at: {output_file}")
+        return results
+
+    client = None
+    if not skip_api:
+        client = create_gemini_client()
+
+    print(
+        f"Processing {len(pending_pairs)} audio-visual pairs with up to 3 concurrent tasks and 4-second spacing..."
+    )
+
+    selected_audio_pairs = dict(pending_pairs)
     selected_rgb_videos = {}
     for pair_key in selected_audio_pairs.keys():
         rgb_videos = rgb_videos_dict.get(pair_key, {"day": None, "night": None}).copy()
@@ -922,6 +991,21 @@ def run_audio(
 
         selected_rgb_videos[pair_key] = rgb_videos
 
+    def checkpoint_audio_pair(pair_key: str, file_results: Dict) -> None:
+        audio_path = selected_audio_pairs.get(pair_key)
+        rgb_videos = selected_rgb_videos.get(pair_key, {})
+        day_rgb_file = rgb_videos.get("day") if isinstance(rgb_videos, dict) else None
+        night_rgb_file = rgb_videos.get("night") if isinstance(rgb_videos, dict) else None
+
+        results[pair_key] = {
+            "audio_file": str(audio_path) if audio_path else None,
+            "day_rgb_file": str(day_rgb_file) if day_rgb_file else None,
+            "night_rgb_file": str(night_rgb_file) if night_rgb_file else None,
+            "annotations": format_audio_annotations(file_results),
+        }
+        _write_results(output_file, results)
+        print(f"Checkpoint saved: {pair_key}")
+
     batch_results = asyncio.run(
         run_audio_parallel_pipeline(
             client,
@@ -930,10 +1014,11 @@ def run_audio(
             max_concurrent=3,
             delay_between_pairs=4,
             skip_api=skip_api,
+            on_pair_complete=checkpoint_audio_pair,
         )
     )
 
-    for pair_key, audio_path in pairs_to_process:
+    for pair_key, audio_path in pending_pairs:
         if not audio_path:
             print(f"Skipping {pair_key} - no audio file found")
             continue
@@ -943,22 +1028,10 @@ def run_audio(
             print(f"WARNING: No cascade output for pair {pair_key}. Using empty cascade result.")
             file_results = {"hia": "", "caption": "", "qa_pairs": []}
 
-        rgb_videos = selected_rgb_videos.get(pair_key, {})
-        day_rgb_file = rgb_videos.get("day") if isinstance(rgb_videos, dict) else None
-        night_rgb_file = rgb_videos.get("night") if isinstance(rgb_videos, dict) else None
-
-        results[pair_key] = {
-            "audio_file": str(audio_path),
-            "day_rgb_file": str(day_rgb_file) if day_rgb_file else None,
-            "night_rgb_file": str(night_rgb_file) if night_rgb_file else None,
-            "annotations": format_audio_annotations(file_results),
-        }
+        checkpoint_audio_pair(pair_key, file_results)
         print(f"Done: {pair_key}")
 
-    # Save results to JSON file at the project root
-    output_file = Path("audio_qa_results.json")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+    _write_results(output_file, results)
 
     print(f"\n" + "=" * 50)
     print(f"Audio QA results saved to: {output_file}")

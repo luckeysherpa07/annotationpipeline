@@ -1,27 +1,21 @@
 from pathlib import Path
+import re
 from typing import Dict
 
 
+WITH_AUDIO_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_(?:rgb_)?with_audio$")
+RGB_SOURCE_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$")
+
+
 def _audio_pair_key(file: Path) -> str:
-    stem = file.stem.lower()
-    for suffix in (
-        "_night_rgb_with_audio",
-        "_day_rgb_with_audio",
-        "_night_with_audio",
-        "_day_with_audio",
-    ):
-        if stem.endswith(suffix):
-            stem = stem[: -len(suffix)]
-            break
+    match = WITH_AUDIO_STEM_RE.match(file.stem.lower())
+    stem = match.group("sample") if match else file.stem.lower()
     return str(file.parent / stem)
 
 
 def _rgb_source_pair_key(file: Path) -> str:
-    stem = file.stem.lower()
-    for suffix in ("_night_rgb", "_day_rgb"):
-        if stem.endswith(suffix):
-            stem = stem[: -len(suffix)]
-            break
+    match = RGB_SOURCE_STEM_RE.match(file.stem.lower())
+    stem = match.group("sample") if match else file.stem.lower()
     return str(file.parent / stem)
 
 
@@ -61,23 +55,19 @@ def preprocess_audio(dataset_folder: Path) -> Dict[str, Path]:
         
         name = file.name.lower()
 
-        if file.parent.name.lower().endswith("_split") and "rgb" in name and "with_audio" not in name:
-            if "_day_rgb" in name or "_night_rgb" in name:
+        if "rgb" in name and "with_audio" not in name:
+            if RGB_SOURCE_STEM_RE.match(file.stem.lower()):
                 rgb_source_pairs.add(_rgb_source_pair_key(file))
 
         if "with_audio" not in file.stem.lower():
             continue
 
-        if not (
-            file.stem.lower().endswith("_day_with_audio")
-            or file.stem.lower().endswith("_night_with_audio")
-            or file.stem.lower().endswith("_day_rgb_with_audio")
-            or file.stem.lower().endswith("_night_rgb_with_audio")
-        ):
+        stem_match = WITH_AUDIO_STEM_RE.match(file.stem.lower())
+        if not stem_match:
             continue
 
         pair_key = _audio_pair_key(file)
-        side = "night" if "_night" in name else "day"
+        side = "night" if stem_match.group("side").startswith("night") else "day"
         candidates.setdefault(pair_key, {})
 
         if side in candidates[pair_key]:

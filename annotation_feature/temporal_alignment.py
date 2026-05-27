@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import subprocess
 from typing import Any
 
@@ -1927,6 +1928,91 @@ def _discover_aligned_dataset_sets(dataset_folder: Path) -> list[dict[str, Any]]
     return sets
 
 
+def _parse_aligned_rgb_audio_segment_file(reference_file: Path) -> dict[str, Any] | None:
+    match = re.match(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$", reference_file.stem.lower())
+    if not match:
+        return None
+    return {
+        "sample_name": match.group("sample"),
+        "side": match.group("side"),
+        "split_folder_name": reference_file.parent.parent.name,
+        "segment_name": reference_file.parent.name,
+    }
+
+
+def discover_aligned_rgb_audio_segment_pairs(
+    dataset_folder: Path | str = "aligned_dataset",
+) -> list[dict[str, Any]]:
+    """Discover aligned RGB/.m4a segment pairs that can be muxed into with-audio videos."""
+    dataset_folder = Path(dataset_folder)
+    discovered: list[dict[str, Any]] = []
+
+    for reference_file in sorted(dataset_folder.rglob("*_rgb.mp4")):
+        if not reference_file.is_file() or reference_file.stem.lower().endswith("_rgb_with_audio"):
+            continue
+
+        parsed = _parse_aligned_rgb_audio_segment_file(reference_file)
+        if not parsed:
+            continue
+
+        audio_file = reference_file.with_name(f"{parsed['sample_name']}_{parsed['side']}.m4a")
+        output_file = reference_file.with_name(f"{parsed['sample_name']}_{parsed['side']}_rgb_with_audio.mp4")
+        if not audio_file.exists():
+            continue
+
+        discovered.append(
+            {
+                **parsed,
+                "reference_file": str(reference_file),
+                "audio_file": str(audio_file),
+                "output_file": str(output_file),
+            }
+        )
+
+    return discovered
+
+
+def _parse_source_rgb_audio_file(reference_file: Path) -> dict[str, Any] | None:
+    match = re.match(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$", reference_file.stem.lower())
+    if not match:
+        return None
+    return {
+        "sample_name": match.group("sample"),
+        "side": match.group("side"),
+        "split_folder_name": reference_file.parent.name,
+    }
+
+
+def discover_source_rgb_audio_pairs(
+    dataset_folder: Path | str = "dataset",
+) -> list[dict[str, Any]]:
+    """Discover source RGB/.m4a pairs that can be segmented into with-audio videos."""
+    dataset_folder = Path(dataset_folder)
+    discovered: list[dict[str, Any]] = []
+
+    for reference_file in sorted(dataset_folder.glob("*_split/*_rgb.mp4")):
+        if not reference_file.is_file() or reference_file.stem.lower().endswith("_rgb_with_audio"):
+            continue
+
+        parsed = _parse_source_rgb_audio_file(reference_file)
+        if not parsed:
+            continue
+
+        audio_file = reference_file.with_name(f"{parsed['sample_name']}_{parsed['side']}.m4a")
+        if not audio_file.exists():
+            continue
+
+        discovered.append(
+            {
+                **parsed,
+                "reference_file": str(reference_file),
+                "audio_file": str(audio_file),
+            }
+        )
+
+    return discovered
+
+
 def _run_rgb_event_dtw_alignment(
     sample_name: str,
     split_folder_name: str,
@@ -3409,6 +3495,638 @@ def run_and_export_check_mailbox_day_rgb_audio_cross_correlation_alignment(
         export_preview=True,
         summary_file_name="rgb_audio_cross_correlation_export_summary.json",
     )
+
+
+def _mux_rgb_video_with_aligned_audio(
+    reference_file: Path,
+    audio_file: Path,
+    output_file: Path,
+    audio_offset_seconds: float,
+    reference_duration_seconds: float,
+    audio_duration_seconds: float,
+) -> dict[str, Any]:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_file.with_name(f"{output_file.stem}.tmp{output_file.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+
+    audio_seek_seconds = max(0.0, audio_offset_seconds)
+    audio_delay_seconds = max(0.0, -audio_offset_seconds)
+    if audio_seek_seconds >= audio_duration_seconds:
+        raise ValueError("Aligned audio seek starts beyond the end of the audio file.")
+
+    audio_filter = "[1:a]apad[a]"
+    if audio_delay_seconds > 0:
+        delay_ms = int(round(audio_delay_seconds * 1000.0))
+        audio_filter = f"[1:a]adelay={delay_ms}:all=1,apad[a]"
+
+    command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(reference_file)]
+    if audio_seek_seconds > 0:
+        command.extend(["-ss", f"{audio_seek_seconds:.6f}"])
+    command.extend(
+        [
+            "-i",
+            str(audio_file),
+            "-filter_complex",
+            audio_filter,
+            "-map",
+            "0:v:0",
+            "-map",
+            "[a]",
+            "-t",
+            f"{reference_duration_seconds:.6f}",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            str(tmp_output_path),
+        ]
+    )
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Failed to mux RGB video with aligned audio: {completed.stderr.strip()}")
+
+    tmp_output_path.replace(output_file)
+    return {
+        "output_file": str(output_file),
+        "reference_file": str(reference_file),
+        "audio_file": str(audio_file),
+        "duration_seconds": round(reference_duration_seconds, 6),
+        "audio_shift": {
+            "source_seek_seconds": round(audio_seek_seconds, 6),
+            "output_delay_seconds": round(audio_delay_seconds, 6),
+            "speed_warped": False,
+        },
+        "video_stream": "rgb_video_copy",
+        "audio_encoder": "aac",
+    }
+
+
+def _mux_rgb_video_segment_with_aligned_audio(
+    reference_file: Path,
+    audio_file: Path,
+    output_file: Path,
+    segment_start_seconds: float,
+    duration_seconds: float,
+    audio_offset_seconds: float,
+) -> dict[str, Any]:
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    tmp_output_path = output_file.with_name(f"{output_file.stem}.tmp{output_file.suffix}")
+    tmp_output_path.unlink(missing_ok=True)
+
+    audio_segment_start = segment_start_seconds + audio_offset_seconds
+    audio_seek_seconds = max(0.0, audio_segment_start)
+    audio_delay_seconds = max(0.0, -audio_segment_start)
+    audio_filter = "[1:a]apad[a]"
+    if audio_delay_seconds > 0:
+        delay_ms = int(round(audio_delay_seconds * 1000.0))
+        audio_filter = f"[1:a]adelay={delay_ms}:all=1,apad[a]"
+
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-ss",
+        f"{segment_start_seconds:.6f}",
+        "-t",
+        f"{duration_seconds:.6f}",
+        "-i",
+        str(reference_file),
+    ]
+    if audio_seek_seconds > 0:
+        command.extend(["-ss", f"{audio_seek_seconds:.6f}"])
+    command.extend(
+        [
+            "-i",
+            str(audio_file),
+            "-filter_complex",
+            audio_filter,
+            "-map",
+            "0:v:0",
+            "-map",
+            "[a]",
+            "-t",
+            f"{duration_seconds:.6f}",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            str(tmp_output_path),
+        ]
+    )
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    if completed.returncode != 0:
+        tmp_output_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Failed to mux RGB segment with aligned audio: {completed.stderr.strip()}")
+
+    tmp_output_path.replace(output_file)
+    return {
+        "output_file": str(output_file),
+        "reference_file": str(reference_file),
+        "audio_file": str(audio_file),
+        "segment_start_seconds": round(segment_start_seconds, 6),
+        "duration_seconds": round(duration_seconds, 6),
+        "audio_shift": {
+            "source_seek_seconds": round(audio_seek_seconds, 6),
+            "output_delay_seconds": round(audio_delay_seconds, 6),
+            "speed_warped": False,
+        },
+        "video_stream": "rgb_video_copy",
+        "audio_encoder": "aac",
+    }
+
+
+def _export_one_aligned_rgb_with_audio(
+    pair: dict[str, Any],
+    resize_width: int,
+    max_lag_seconds: float,
+    overwrite: bool,
+    plot_output_folder: Path | None,
+) -> dict[str, Any]:
+    reference_file = Path(str(pair["reference_file"]))
+    audio_file = Path(str(pair["audio_file"]))
+    output_file = Path(str(pair["output_file"]))
+    plot_path = None
+    if plot_output_folder is not None:
+        plot_path = (
+            plot_output_folder
+            / str(pair.get("split_folder_name", "unknown_split"))
+            / str(pair.get("segment_name", "unknown_segment"))
+            / f"{pair.get('sample_name', output_file.stem)}_{pair.get('side', 'unknown')}_rgb_audio_cross_correlation_activity_signal.png"
+        )
+
+    output_exists = output_file.exists() and not overwrite
+    if output_exists and (plot_path is None or plot_path.exists()):
+        return {
+            **pair,
+            "output_file": str(output_file),
+            "plot_file": str(plot_path) if plot_path else None,
+            "status": "reused",
+            "reason": "Output already exists.",
+        }
+
+    reference_metadata = _video_metadata(reference_file)
+    if not bool(reference_metadata.get("opened")):
+        raise ValueError(f"Could not open RGB reference video: {reference_file}")
+    reference_fps = float(reference_metadata.get("fps") or 0.0)
+    reference_duration = float(reference_metadata.get("duration_seconds") or 0.0)
+    if reference_fps <= 0 or reference_duration <= 0:
+        raise ValueError("RGB reference video has invalid FPS or duration.")
+
+    reference_trace = _optical_flow_magnitude_trace(reference_file, resize_width=resize_width)
+    audio_trace, audio_duration = _audio_energy_trace(audio_file, fps=reference_fps)
+    alignment = _estimate_raw_cross_correlation_offset(
+        reference_trace,
+        audio_trace,
+        fps=reference_fps,
+        max_lag_seconds=max_lag_seconds,
+    )
+    if alignment.get("offset_seconds") is None:
+        raise ValueError("No RGB/AUDIO offset could be estimated.")
+    if alignment.get("candidate_offsets"):
+        selected_frames = int(alignment.get("offset_frames") or 0)
+        reference_overlap_trace, audio_overlap_trace = _lag_overlaps(
+            _prepare_alignment_trace(reference_trace, reference_fps),
+            _prepare_alignment_trace(audio_trace, reference_fps),
+            selected_frames,
+        )
+        max_overlap = max(1, min(reference_trace.size, audio_trace.size))
+        alignment["overlap_ratio"] = float(reference_overlap_trace.size / max_overlap)
+        alignment["overlap_samples"] = int(reference_overlap_trace.size)
+
+    plot_warning = None
+    if plot_path is not None:
+        try:
+            _write_rgb_audio_activity_signal_plot(
+                plot_path,
+                (
+                    "Aligned RGB/audio cross-correlation: "
+                    f"{pair.get('sample_name')} {pair.get('side')} {pair.get('segment_name')}"
+                ),
+                reference_trace=reference_trace,
+                reference_fps=reference_fps,
+                audio_trace=audio_trace,
+                audio_fps=reference_fps,
+                alignment=alignment,
+            )
+            alignment["activity_plot_file"] = str(plot_path)
+        except Exception as exc:
+            plot_warning = f"Could not write RGB/AUDIO activity plot: {exc}"
+
+    alignment_summary = {
+        "offset_seconds": round(float(alignment["offset_seconds"]), 6),
+        "offset_frames": alignment.get("offset_frames"),
+        "peak_correlation": round(float(alignment.get("peak_correlation") or 0.0), 6),
+        "confidence_label": alignment.get("confidence_label"),
+        "overlap_ratio": (
+            round(float(alignment.get("overlap_ratio")), 6)
+            if alignment.get("overlap_ratio") is not None
+            else (
+                round(float(alignment["candidate_offsets"][0].get("overlap_ratio")), 6)
+                if alignment.get("candidate_offsets")
+                else None
+            )
+        ),
+        "candidate_offsets": alignment.get("candidate_offsets", []),
+        "activity_plot_file": str(plot_path) if plot_path and plot_path.exists() else None,
+    }
+    if plot_warning:
+        alignment_summary["plot_warning"] = plot_warning
+
+    if output_exists:
+        return {
+            **pair,
+            "status": "reused",
+            "reason": "Output already exists.",
+            "reference_duration_seconds": round(reference_duration, 6),
+            "audio_duration_seconds": round(audio_duration, 6),
+            "reference_fps": round(reference_fps, 6),
+            "alignment": alignment_summary,
+            "plot_file": alignment_summary.get("activity_plot_file"),
+        }
+
+    mux = _mux_rgb_video_with_aligned_audio(
+        reference_file=reference_file,
+        audio_file=audio_file,
+        output_file=output_file,
+        audio_offset_seconds=float(alignment["offset_seconds"]),
+        reference_duration_seconds=reference_duration,
+        audio_duration_seconds=audio_duration,
+    )
+    return {
+        **pair,
+        "status": "exported",
+        "reference_duration_seconds": round(reference_duration, 6),
+        "audio_duration_seconds": round(audio_duration, 6),
+        "reference_fps": round(reference_fps, 6),
+        "alignment": alignment_summary,
+        "plot_file": alignment_summary.get("activity_plot_file"),
+        "mux": mux,
+    }
+
+
+def run_and_export_aligned_rgb_with_audio_segments(
+    dataset_folder: Path | str = "aligned_dataset",
+    summary_output_path: Path | str = "aligned_dataset/aligned_rgb_with_audio_export_summary.json",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER / "aligned_rgb_audio",
+    resize_width: int = 160,
+    max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
+    overwrite: bool = False,
+    max_pairs: int | None = None,
+    start_pair_index: int = 0,
+    max_pair_groups: int | None = None,
+    start_pair_group_index: int = 0,
+) -> dict[str, Any]:
+    """Create *_rgb_with_audio.mp4 files for aligned RGB/.m4a segment pairs."""
+    dataset_folder = Path(dataset_folder)
+    summary_output_path = Path(summary_output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    all_discovered = discover_aligned_rgb_audio_segment_pairs(dataset_folder)
+    discovered = all_discovered[start_pair_index:]
+    selected_pair_groups: list[dict[str, str]] = []
+    if max_pair_groups is not None:
+        pair_group_keys: list[tuple[str, str]] = []
+        for pair in all_discovered:
+            group_key = (
+                str(pair.get("split_folder_name", "")),
+                str(pair.get("sample_name", "")),
+            )
+            if group_key not in pair_group_keys:
+                pair_group_keys.append(group_key)
+        selected_keys = pair_group_keys[start_pair_group_index:]
+        selected_keys = selected_keys[:max_pair_groups]
+        selected_key_set = set(selected_keys)
+        discovered = [
+            pair
+            for pair in all_discovered
+            if (
+                str(pair.get("split_folder_name", "")),
+                str(pair.get("sample_name", "")),
+            )
+            in selected_key_set
+        ]
+        selected_pair_groups = [
+            {"split_folder_name": split_folder_name, "sample_name": sample_name}
+            for split_folder_name, sample_name in selected_keys
+        ]
+    if max_pairs is not None:
+        discovered = discovered[:max_pairs]
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+
+    for pair in discovered:
+        try:
+            result = _export_one_aligned_rgb_with_audio(
+                pair,
+                resize_width=resize_width,
+                max_lag_seconds=max_lag_seconds,
+                overwrite=overwrite,
+                plot_output_folder=plot_output_folder,
+            )
+            exported.append(result)
+        except Exception as exc:
+            skipped.append({**pair, "reason": str(exc)})
+
+    summary = {
+        "dataset_folder": str(dataset_folder),
+        "method": "rgb_optical_flow_audio_rms_cross_correlation_fixed_offset_mux",
+        "output_naming": "*_rgb_with_audio.mp4",
+        "plot_output_folder": str(plot_output_folder) if plot_output_folder else None,
+        "total_discovered_count": len(all_discovered),
+        "start_pair_index": start_pair_index,
+        "max_pairs": max_pairs,
+        "start_pair_group_index": start_pair_group_index,
+        "max_pair_groups": max_pair_groups,
+        "selected_pair_groups": selected_pair_groups,
+        "discovered_count": len(discovered),
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(summary_output_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(summary_output_path)
+    return summary
+
+
+def _source_pair_group_key(pair: dict[str, Any]) -> tuple[str, str]:
+    return (
+        str(pair.get("split_folder_name", "")),
+        str(pair.get("sample_name", "")),
+    )
+
+
+def _select_source_rgb_audio_pairs(
+    discovered: list[dict[str, Any]],
+    max_pair_groups: int | None,
+    start_pair_group_index: int,
+) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    if max_pair_groups is None:
+        return discovered, []
+
+    pair_group_keys: list[tuple[str, str]] = []
+    for pair in discovered:
+        group_key = _source_pair_group_key(pair)
+        if group_key not in pair_group_keys:
+            pair_group_keys.append(group_key)
+
+    selected_keys = pair_group_keys[start_pair_group_index:]
+    selected_keys = selected_keys[:max_pair_groups]
+    selected_key_set = set(selected_keys)
+    selected_pairs = [pair for pair in discovered if _source_pair_group_key(pair) in selected_key_set]
+    selected_groups = [
+        {"split_folder_name": split_folder_name, "sample_name": sample_name}
+        for split_folder_name, sample_name in selected_keys
+    ]
+    return selected_pairs, selected_groups
+
+
+def _estimate_rgb_audio_alignment_for_source_pair(
+    pair: dict[str, Any],
+    resize_width: int,
+    max_lag_seconds: float,
+) -> dict[str, Any]:
+    reference_file = Path(str(pair["reference_file"]))
+    audio_file = Path(str(pair["audio_file"]))
+    reference_metadata = _video_metadata(reference_file)
+    if not bool(reference_metadata.get("opened")):
+        raise ValueError(f"Could not open RGB source video: {reference_file}")
+    reference_fps = float(reference_metadata.get("fps") or 0.0)
+    reference_duration = float(reference_metadata.get("duration_seconds") or 0.0)
+    if reference_fps <= 0 or reference_duration <= 0:
+        raise ValueError("RGB source video has invalid FPS or duration.")
+
+    reference_trace = _optical_flow_magnitude_trace(reference_file, resize_width=resize_width)
+    audio_trace, audio_duration = _audio_energy_trace(audio_file, fps=reference_fps)
+    alignment = _estimate_raw_cross_correlation_offset(
+        reference_trace,
+        audio_trace,
+        fps=reference_fps,
+        max_lag_seconds=max_lag_seconds,
+    )
+    if alignment.get("offset_seconds") is None:
+        raise ValueError("No RGB/AUDIO offset could be estimated.")
+    if alignment.get("candidate_offsets"):
+        selected_frames = int(alignment.get("offset_frames") or 0)
+        reference_overlap_trace, audio_overlap_trace = _lag_overlaps(
+            _prepare_alignment_trace(reference_trace, reference_fps),
+            _prepare_alignment_trace(audio_trace, reference_fps),
+            selected_frames,
+        )
+        max_overlap = max(1, min(reference_trace.size, audio_trace.size))
+        alignment["overlap_ratio"] = float(reference_overlap_trace.size / max_overlap)
+        alignment["overlap_samples"] = int(reference_overlap_trace.size)
+
+    return {
+        "reference_fps": reference_fps,
+        "reference_duration_seconds": reference_duration,
+        "audio_duration_seconds": audio_duration,
+        "reference_trace": reference_trace,
+        "audio_trace": audio_trace,
+        "alignment": alignment,
+    }
+
+
+def _write_source_rgb_audio_alignment_plot(
+    plot_path: Path | None,
+    pair: dict[str, Any],
+    alignment_bundle: dict[str, Any],
+) -> str | None:
+    if plot_path is None:
+        return None
+
+    _write_rgb_audio_activity_signal_plot(
+        plot_path,
+        (
+            "Source RGB/audio cross-correlation: "
+            f"{pair.get('sample_name')} {pair.get('side')}"
+        ),
+        reference_trace=alignment_bundle["reference_trace"],
+        reference_fps=float(alignment_bundle["reference_fps"]),
+        audio_trace=alignment_bundle["audio_trace"],
+        audio_fps=float(alignment_bundle["reference_fps"]),
+        alignment=alignment_bundle["alignment"],
+    )
+    return str(plot_path)
+
+
+def run_and_export_source_rgb_with_audio_segments_for_aligned_dataset(
+    source_dataset_folder: Path | str = "dataset",
+    aligned_dataset_folder: Path | str = "aligned_dataset",
+    summary_output_path: Path | str = "aligned_dataset/source_rgb_with_audio_one_pair_export_summary.json",
+    plot_output_folder: Path | str | None = DEFAULT_PLOT_OUTPUT_FOLDER / "aligned_rgb_audio",
+    segment_seconds: float = 30.0,
+    resize_width: int = 160,
+    max_lag_seconds: float = AUDIO_ALIGNMENT_MAX_LAG_SECONDS,
+    overwrite: bool = False,
+    max_pair_groups: int | None = 1,
+    start_pair_group_index: int = 0,
+) -> dict[str, Any]:
+    """Create aligned_dataset 30s *_rgb_with_audio.mp4 segments from source dataset RGB/.m4a files."""
+    source_dataset_folder = Path(source_dataset_folder)
+    aligned_dataset_folder = Path(aligned_dataset_folder)
+    summary_output_path = Path(summary_output_path)
+    plot_output_folder = Path(plot_output_folder) if plot_output_folder is not None else None
+    all_discovered = discover_source_rgb_audio_pairs(source_dataset_folder)
+    discovered, selected_pair_groups = _select_source_rgb_audio_pairs(
+        all_discovered,
+        max_pair_groups=max_pair_groups,
+        start_pair_group_index=start_pair_group_index,
+    )
+    exported: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+
+    for pair in discovered:
+        try:
+            alignment_bundle = _estimate_rgb_audio_alignment_for_source_pair(
+                pair,
+                resize_width=resize_width,
+                max_lag_seconds=max_lag_seconds,
+            )
+            reference_duration = float(alignment_bundle["reference_duration_seconds"])
+            full_segment_count = int(np.floor(reference_duration / segment_seconds))
+            dropped_remainder = float(reference_duration - full_segment_count * segment_seconds)
+            if full_segment_count <= 0:
+                raise ValueError("Source RGB video has no full 30-second segments.")
+
+            plot_file = None
+            if plot_output_folder is not None:
+                plot_path = (
+                    plot_output_folder
+                    / str(pair["split_folder_name"])
+                    / f"{pair['sample_name']}_{pair['side']}_rgb_audio_cross_correlation_activity_signal.png"
+                )
+                if overwrite or not plot_path.exists():
+                    plot_file = _write_source_rgb_audio_alignment_plot(
+                        plot_path,
+                        pair,
+                        alignment_bundle,
+                    )
+                else:
+                    plot_file = str(plot_path)
+
+            for segment_index in range(full_segment_count):
+                segment_name = f"Seg{segment_index + 1}"
+                segment_start = segment_index * segment_seconds
+                output_folder = (
+                    aligned_dataset_folder
+                    / str(pair["split_folder_name"])
+                    / segment_name
+                )
+                output_file = (
+                    output_folder
+                    / f"{pair['sample_name']}_{pair['side']}_rgb_with_audio.mp4"
+                )
+
+                if output_file.exists() and not overwrite:
+                    exported.append(
+                        {
+                            **pair,
+                            "segment": segment_name,
+                            "segment_start_seconds": round(segment_start, 6),
+                            "duration_seconds": round(segment_seconds, 6),
+                            "output_file": str(output_file),
+                            "plot_file": plot_file,
+                            "status": "reused",
+                            "reason": "Output already exists.",
+                            "alignment": {
+                                "offset_seconds": round(float(alignment_bundle["alignment"]["offset_seconds"]), 6),
+                                "offset_frames": alignment_bundle["alignment"].get("offset_frames"),
+                                "peak_correlation": round(
+                                    float(alignment_bundle["alignment"].get("peak_correlation") or 0.0),
+                                    6,
+                                ),
+                                "confidence_label": alignment_bundle["alignment"].get("confidence_label"),
+                                "overlap_ratio": (
+                                    round(float(alignment_bundle["alignment"].get("overlap_ratio")), 6)
+                                    if alignment_bundle["alignment"].get("overlap_ratio") is not None
+                                    else None
+                                ),
+                            },
+                        }
+                    )
+                    continue
+
+                mux = _mux_rgb_video_segment_with_aligned_audio(
+                    reference_file=Path(str(pair["reference_file"])),
+                    audio_file=Path(str(pair["audio_file"])),
+                    output_file=output_file,
+                    segment_start_seconds=segment_start,
+                    duration_seconds=segment_seconds,
+                    audio_offset_seconds=float(alignment_bundle["alignment"]["offset_seconds"]),
+                )
+                exported.append(
+                    {
+                        **pair,
+                        "segment": segment_name,
+                        "segment_start_seconds": round(segment_start, 6),
+                        "duration_seconds": round(segment_seconds, 6),
+                        "output_file": str(output_file),
+                        "plot_file": plot_file,
+                        "status": "exported",
+                        "alignment": {
+                            "offset_seconds": round(float(alignment_bundle["alignment"]["offset_seconds"]), 6),
+                            "offset_frames": alignment_bundle["alignment"].get("offset_frames"),
+                            "peak_correlation": round(
+                                float(alignment_bundle["alignment"].get("peak_correlation") or 0.0),
+                                6,
+                            ),
+                            "confidence_label": alignment_bundle["alignment"].get("confidence_label"),
+                            "overlap_ratio": (
+                                round(float(alignment_bundle["alignment"].get("overlap_ratio")), 6)
+                                if alignment_bundle["alignment"].get("overlap_ratio") is not None
+                                else None
+                            ),
+                        },
+                        "mux": mux,
+                    }
+                )
+
+            if dropped_remainder > 0:
+                skipped.append(
+                    {
+                        **pair,
+                        "reason": "Dropped trailing remainder shorter than full segment duration.",
+                        "dropped_remainder_seconds": round(dropped_remainder, 6),
+                    }
+                )
+        except Exception as exc:
+            skipped.append({**pair, "reason": str(exc)})
+
+    summary = {
+        "source_dataset_folder": str(source_dataset_folder),
+        "aligned_dataset_folder": str(aligned_dataset_folder),
+        "method": "source_rgb_audio_cross_correlation_fixed_offset_30s_segments",
+        "segment_seconds": segment_seconds,
+        "output_naming": "*_rgb_with_audio.mp4",
+        "plot_output_folder": str(plot_output_folder) if plot_output_folder else None,
+        "total_discovered_count": len(all_discovered),
+        "start_pair_group_index": start_pair_group_index,
+        "max_pair_groups": max_pair_groups,
+        "selected_pair_groups": selected_pair_groups,
+        "discovered_count": len(discovered),
+        "exported_count": len(exported),
+        "skipped_count": len(skipped),
+        "exported": exported,
+        "skipped": skipped,
+    }
+    summary_output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(summary_output_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    summary["summary_file"] = str(summary_output_path)
+    return summary
 
 
 def _mux_dtw_preview_with_aligned_audio(

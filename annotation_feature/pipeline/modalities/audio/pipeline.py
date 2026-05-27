@@ -409,6 +409,7 @@ async def run_parallel_pipeline(
     max_concurrent: int = 3,
     delay_between_pairs: int = 4,
     skip_api: bool = False,
+    on_pair_complete=None,
 ) -> Dict[str, dict]:
     """Run the audio-visual cascade in parallel."""
     semaphore = asyncio.Semaphore(max_concurrent)
@@ -434,5 +435,7 @@ async def run_parallel_pipeline(
     for completed_task in asyncio.as_completed(tasks):
         pair_key, annotation_results = await completed_task
         results[pair_key] = annotation_results
+        if on_pair_complete:
+            on_pair_complete(pair_key, annotation_results)
 
     return results
