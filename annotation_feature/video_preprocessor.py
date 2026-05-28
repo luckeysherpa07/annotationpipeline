@@ -92,8 +92,7 @@ def preprocess_videos(dataset_folder: Path, fps: int = 1, video_type: str = "rgb
         if not file.is_file() or file.suffix.lower() not in video_extensions:
             continue
         
-        name = file.name.lower()
-        from annotation_feature.pipeline.utils import get_pair_key, is_modality_file
+        from annotation_feature.pipeline.utils import get_pair_key, infer_recording_side, is_modality_file
         if not is_modality_file(file, video_type):
             continue
         
@@ -119,10 +118,11 @@ def preprocess_videos(dataset_folder: Path, fps: int = 1, video_type: str = "rgb
         if pair_key not in paired_frames:
             paired_frames[pair_key] = {"night": None, "day": None}
         
-        if "night" in name:
-            paired_frames[pair_key]["night"] = frames
-        elif "day" in name:
-            paired_frames[pair_key]["day"] = frames
+        side = infer_recording_side(file)
+        if side is None:
+            print(f"WARNING: Could not infer day/night side for: {file.name}")
+            continue
+        paired_frames[pair_key][side] = frames
     
     return paired_frames
 
@@ -150,11 +150,12 @@ def load_preprocessed_frames(pair_key: str, dataset_folder: Path) -> Tuple[List[
             if frame_dir.is_dir():
                 frames = sorted(frame_dir.glob("frame_*.png"))
                 if frames:
-                    # Heuristic: check if directory name contains "night" or "day"
-                    dir_name = frame_dir.name.lower()
-                    if "night" in dir_name:
+                    from annotation_feature.pipeline.utils import infer_recording_side
+
+                    side = infer_recording_side(frame_dir)
+                    if side == "night":
                         night_frames = frames
-                    elif "day" in dir_name:
+                    elif side == "day":
                         day_frames = frames
     
     return night_frames, day_frames

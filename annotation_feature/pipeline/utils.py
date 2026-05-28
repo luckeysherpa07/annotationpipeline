@@ -1,5 +1,6 @@
 from pathlib import Path
 import base64
+import re
 from typing import List
 
 try:
@@ -11,14 +12,50 @@ video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".m
 audio_extensions = {".m4a", ".mp3", ".wav", ".aac", ".flac"}
 
 
+SIDE_ALIAS_PATTERNS = {
+    "night": (
+        r"night\d*",
+        r"cloudy_no_light",
+        r"no_light",
+    ),
+    "day": (
+        r"day",
+        r"with_light",
+    ),
+}
+
+
+def _stem_from_name(value: str | Path) -> str:
+    return Path(value).stem.lower()
+
+
+def _contains_side_alias(stem: str, alias_pattern: str) -> bool:
+    return re.search(rf"(?:^|_){alias_pattern}(?:_|$)", stem) is not None
+
+
+def infer_recording_side(value: str | Path) -> str | None:
+    """Infer whether a media/cache name represents the day or night side."""
+    stem = _stem_from_name(value)
+    for side, alias_patterns in SIDE_ALIAS_PATTERNS.items():
+        for alias_pattern in alias_patterns:
+            if _contains_side_alias(stem, alias_pattern):
+                return side
+    return None
+
+
+def _remove_side_aliases(stem: str) -> str:
+    for alias_patterns in SIDE_ALIAS_PATTERNS.values():
+        for alias_pattern in alias_patterns:
+            stem = re.sub(rf"(?:^|_){alias_pattern}(?=_|$)", "_", stem)
+    return re.sub(r"__+", "_", stem).strip("_")
+
+
 def get_pair_key(file: Path) -> str:
     """
     Build a shared key for matching day/night RGB videos from the same scene.
     """
     stem = file.stem.lower()
-    for token in ("_night", "_day", "night", "day"):
-        stem = stem.replace(token, "")
-    stem = stem.replace("__", "_").strip("_")
+    stem = _remove_side_aliases(stem)
     return str(file.parent / stem)
 
 
