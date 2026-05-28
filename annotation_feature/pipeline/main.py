@@ -15,7 +15,7 @@ from annotation_feature.demo_result import DEMO_RESULT
 from annotation_feature.video_preprocessor import extract_frames, preprocess_videos
 from annotation_feature.audio_preprocessor import preprocess_audio
 from .client import create_gemini_client
-from .utils import get_pair_key, is_modality_file, video_extensions, audio_extensions
+from .utils import get_pair_key, infer_recording_side, is_modality_file, video_extensions, audio_extensions
 from .modalities.rgb import run_parallel_pipeline
 from .modalities.event import run_event_parallel_pipeline
 from .modalities.depth import run_depth_parallel_pipeline
@@ -56,7 +56,7 @@ def _load_existing_results(output_file: Path) -> Dict:
         print(f"WARNING: Existing results file is not a JSON object: {output_file}")
         return {}
 
-    return data
+    return {str(key).replace("\\", "/"): value for key, value in data.items()}
 
 
 def _annotation_item_has_content(item: Dict) -> bool:
@@ -118,13 +118,13 @@ def _result_entry_for_pair(dataset_folder: Path, pair_key: str, modality: str, a
     for file in dataset_folder.rglob("*"):
         if not file.is_file() or file.suffix.lower() not in video_extensions:
             continue
-        name = file.name.lower()
         if not is_modality_file(file, modality):
             continue
         if get_pair_key(file) == pair_key:
-            if "night" in name:
+            side = infer_recording_side(file)
+            if side == "night":
                 night_file = file
-            elif "day" in name:
+            elif side == "day":
                 day_file = file
 
     return {

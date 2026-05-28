@@ -5212,5 +5212,71 @@
         "answer": "Accessing the mailbox with a key, likely to retrieve or check mail"
       }
     }
+  },
+  "aligned_dataset/brew_tea_split/Seg1/rgb": {
+    "night_file": "aligned_dataset\\brew_tea_split\\Seg1\\cloudy_no_light_rgb.mp4",
+    "day_file": "aligned_dataset\\brew_tea_split\\Seg1\\with_light_rgb.mp4",
+    "annotations": {
+      "object_recognition": {
+        "caption": "The video shows a collection of items on a wooden tea table. There is a black tea tray with gold Chinese characters. On the tray, a small dark brown clay teapot sits in the center, and a polished silver kettle with a wooden handle is positioned to its right. To the left of the tray, there is a white teacup with a blue raindrop pattern. Behind the cup, a glass jar with a gray lid contains a white substance. On the far left, several long, dark, jointed sugarcane stalks rest on a red and white striped towel. A large stainless steel pot with a glass lid is also on the table. Behind these items is a red woven basket containing various cylindrical containers and a green package. The floor is light-colored tile.",
+        "question": "What is the pattern on the white teacup located to the left of the tea tray?",
+        "answer": "A blue raindrop pattern."
+      },
+      "spatial_reasoning": {
+        "caption": "The white teacup is situated to the left of the black tea tray. The small clay teapot is centered on the tea tray, while the silver kettle is to its right. The glass jar is located behind the teacup and to the left of the tea tray. The sugarcane stalks are on the far left of the scene, resting on a towel. The large pot with the glass lid is positioned behind the silver kettle. I am standing approximately 1 step away from the edge of the tea table.",
+        "question": "Where is the glass jar located relative to the patterned teacup?",
+        "answer": "It is located behind the teacup."
+      },
+      "text_recognition": {
+        "caption": "The digital display on the tea tray shows temperature readings: '100' in frame 000180, '96' in frame 000600, '95' in frame 000690, '97' in frame 000750, '98' in frame 000840, and '99' in frame 000870. In the red basket, one white container has the word 'KEEP' (frame 000180) and another container nearby has the word 'LOVE' (frame 000210). There are Chinese characters etched in gold on the black tea tray.",
+        "question": "1. What word is visible on one of the containers in the red basket? 2. What is the temperature shown on the digital display in frame 000600? 3. What word is visible on another container near the first one in the red basket? 4. What language are the characters on the tea tray in? 5. What is the temperature reading in frame 000690? 6. What temperature is displayed in frame 000840? 7. What is the final temperature shown in the video? 8. What color are the characters on the tea tray?",
+        "answer": "1. KEEP. 2. 96. 3. LOVE. 4. Chinese. 5. 95. 6. 98. 7. 99. 8. Gold."
+      },
+      "scene_sequence": {
+        "caption": "The video starts with a completely dark screen for the first 150 frames. Then, the scene brightens to reveal a tea table setup. The sequence begins with a static shot of the tea tray and surrounding objects. Around frame 000420, a hand enters the frame from the right to manipulate the silver kettle. The camera remains mostly stationary, focused on the tea preparation area, showing the cup, sugarcane, and the basket in the background throughout the rest of the video.",
+        "question": "1. What is the first thing I see after the darkness? 2. What object did I see before the silver kettle? 3. What is on the far left of the scene? 4. What is behind the tea tray? 5. What did the hand interact with first? 6. What is the final scene shown in the video? 7. Did the camera move between different rooms? 8. What is to the right of the clay teapot? 9. What is located behind the glass jar? 10. What is the color of the basket in the background?",
+        "answer": "1. A tea table setup. 2. A small clay teapot. 3. Sugarcane stalks. 4. A red woven basket. 5. The silver kettle. 6. The tea table with all objects. 7. No. 8. A silver kettle. 9. Part of the red basket. 10. Red."
+      },
+      "light_recongnition": {
+        "caption": "The primary light source is an overhead room light that illuminates the scene from above, creating strong highlights on the metallic surfaces of the silver kettle and the large pot lid. The light is a cool white color, and there are reflections of the windows or lights visible on the polished wooden table and the black glass surface of the tea tray.",
+        "question": "Where are the strongest light reflections visible in the scene?",
+        "answer": "On the metallic kettle and the pot lid."
+      },
+      "light_change": {
+        "caption": "The video transitions from total darkness to a well-lit indoor environment. The light levels remain consistent once the lights are turned on, with no significant changes in intensity or direction. The metallic objects maintain their bright reflections throughout the well-lit portion of the sequence.",
+        "question": "1. Did the lights turn on or off at the beginning? 2. Is the light getting brighter or darker after the initial transition? 3. Is the light source moving? 4. Does the light color change? 5. Is there a flickering of the light? 6. Are there shadows moving across the table? 7. Does any external light like a car's headlight pass by? 8. Is the final frame well-lit?",
+        "answer": "1. Turn on. 2. No, it remains consistent. 3. No. 4. No. 5. No. 6. No. 7. No. 8. Yes."
+      },
+      "counting": {
+        "caption": "I can identify several objects: about 6 sugarcane stalks on the left, 1 patterned teacup, 1 small clay teapot, 1 silver kettle, 1 large stainless steel pot, 1 glass jar, and 1 red woven basket. There is also 1 electric tea tray unit.",
+        "question": "1. How many sugarcane stalks are visible? 2. How many teacups are on the table? 3. How many clay teapots are there? 4. How many silver kettles do I see? 5. How many glass jars are present? 6. How many red baskets are in the background? 7. How many large pots with glass lids are there? 8. How many handles does the silver kettle have? 9. How many tea tray units are on the table? 10. How many striped towels are used to hold objects?",
+        "answer": "1. 6. 2. 1. 3. 1. 4. 1. 5. 1. 6. 1. 7. 1. 8. 1. 9. 1. 10. 1."
+      },
+      "dynamic_counting": {
+        "caption": "The main moving element is the subject's right hand, which enters the frame to handle the silver kettle starting from frame 000420. The hand moves the kettle and then retreats several times. No other dynamic objects or humans are present in the scene.",
+        "question": "1. How many hands enter the frame to interact with the tea set? 2. Does any other person appear in the video? 3. Do any animals move across the scene? 4. Does the teapot move by itself? 5. Are there any flying insects? 6. Does the red basket move? 7. Is there more than one person visible? 8. How many times does the hand enter the frame?",
+        "answer": "1. One. 2. No. 3. No. 4. No. 5. No. 6. No. 7. No. 8. Multiple times."
+      },
+      "non_common": {
+        "caption": "The layout is standard for a tea ceremony area, though having raw sugarcane stalks lying on a towel right next to a formal tea set is a bit unusual for typical interior design. There are no unrealistic physical law violations or mesh clipping observed in the footage.",
+        "question": "What is slightly unusual about the placement of the sugarcane stalks?",
+        "answer": "They are lying on a towel on the tea table."
+      },
+      "navigation": {
+        "caption": "I am standing at the tea table. To reach the rest of the room, I would need to turn around or step back. The table is oriented horizontally in front of me. To my left are the sugarcane stalks, and to my right is the electric kettle. The red basket is directly in front of me behind the tray.",
+        "question": "1. Which direction are the sugarcane stalks relative to me? 2. How many steps am I from the table? 3. What is directly in front of me? 4. Where is the silver kettle? 5. What is behind the kettle? 6. How do I reach the cup from the kettle? 7. What is on the far left? 8. What is behind the tray? 9. What direction do I move to see the basket better? 10. Where is the glass lid pot?",
+        "answer": "1. Left. 2. One. 3. The tea tray. 4. To the right of the clay teapot. 5. A large pot. 6. Move left across the tray. 7. Sugarcane. 8. A red basket. 9. Forward. 10. To the right, behind the kettle."
+      },
+      "dynamic_recognition": {
+        "caption": "The right hand appears at frame 000420 and starts moving the silver kettle. It stops moving the kettle around frame 000570, then reappears to adjust it again later. No other dynamic changes occur.",
+        "question": "When does the hand first start interacting with the kettle?",
+        "answer": "Around frame 420."
+      },
+      "action": {
+        "caption": "I am preparing tea on an induction tea tray. My hand reaches out to move the silver kettle, likely to check the water level or temperature. The digital display shows the temperature is around boiling point (100 degrees Celsius). This interaction is part of the tea-making process, ensuring the water is ready for brewing.",
+        "question": "1. What am I doing with my hand? 2. What object am I interacting with? 3. What is the purpose of moving the kettle? 4. What does the digital display indicate? 5. What is the overall activity? 6. Am I using both hands? 7. Is the kettle being poured? 8. What is the outcome of the action?",
+        "answer": "1. Moving it. 2. The silver kettle. 3. Preparing to make tea. 4. Water temperature. 5. Tea preparation. 6. No, just one. 7. Not in this segment. 8. Adjusting the kettle's position."
+      }
+    }
   }
 }

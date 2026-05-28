@@ -56,7 +56,7 @@ def get_pair_key(file: Path) -> str:
     """
     stem = file.stem.lower()
     stem = _remove_side_aliases(stem)
-    return str(file.parent / stem)
+    return (file.parent / stem).as_posix()
 
 
 def is_modality_file(file: Path, modality: str) -> bool:
@@ -65,6 +65,8 @@ def is_modality_file(file: Path, modality: str) -> bool:
     This avoids false IR matches in names like walk_upstairs_day_rgb.mp4.
     """
     tokens = file.stem.lower().split("_")
+    if modality.lower() != "audio" and "with_audio" in file.stem.lower():
+        return False
     return modality.lower() in tokens
 
 
