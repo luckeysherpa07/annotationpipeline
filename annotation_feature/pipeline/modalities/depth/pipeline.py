@@ -17,6 +17,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from prompts.depth_prompts import DEPTH_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
+DEPTH_MODEL_NAME = "gemini-3-flash-preview"
+DEPTH_SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
+
 try:
     from google.genai import types
 except ImportError:
@@ -160,7 +163,7 @@ async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -
         try:
             response = await asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-3-flash-preview",
+                model=DEPTH_MODEL_NAME,
                 contents=contents,
             )
             return response.text
@@ -176,7 +179,9 @@ async def process_depth_pair_batch(
     day_frames: list[Path],
     night_frames: list[Path],
     skip_api: bool = False,
-) -> dict:
+    empty_on_failure: bool = True,
+    mark_missing_side: bool = False,
+) -> dict | None:
     """Process a single depth video pair.
     
     Args:
@@ -200,6 +205,14 @@ async def process_depth_pair_batch(
         return demo_results
 
     if not day_frames or not night_frames:
+        if mark_missing_side:
+            print(f"    WARNING: Missing day or night frames for pair {pair_key}; marking as skipped")
+            return {
+                "status": DEPTH_SKIPPED_MISSING_SIDE_STATUS,
+                "reason": "missing_day_or_night_frames",
+                "day_depth_count": len(day_frames),
+                "night_depth_count": len(night_frames),
+            }
         print(f"    WARNING: Missing day or night frames for pair {pair_key}; falling back to empty results")
         return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
 
@@ -211,6 +224,9 @@ async def process_depth_pair_batch(
     night_encoded = encode_frames_to_base64(selected_night)
 
     if not day_encoded or not night_encoded:
+        if not empty_on_failure:
+            print(f"    WARNING: Could not encode frames for pair {pair_key}; keeping it pending for resume")
+            return None
         print(f"    WARNING: Could not encode frames for pair {pair_key}; falling back to empty results")
         return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
 
@@ -224,6 +240,9 @@ async def process_depth_pair_batch(
         return normalize_depth_results(parsed)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
+        if not empty_on_failure:
+            print(f"    Skipping checkpoint for pair {pair_key}; it will remain pending for resume.")
+            return None
         print(f"    Falling back to empty results for pair {pair_key}")
         return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
 
@@ -234,6 +253,8 @@ async def run_depth_parallel_pipeline(
     max_concurrent: int = 3,
     delay_between_pairs: int = 4,
     skip_api: bool = False,
+    empty_on_failure: bool = True,
+    mark_missing_side: bool = False,
     on_pair_complete=None,
 ) -> Dict[str, dict]:
     """Run depth annotation pipeline in parallel.
@@ -251,16 +272,33 @@ async def run_depth_parallel_pipeline(
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
 
-    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict]:
+    async def run_one(pair_key: str, frames: Dict[str, list]) -> dict | None:
+        print(f"\nProcessing depth pair: {pair_key}")
+        return await process_depth_pair_batch(
+            client,
+            pair_key,
+            frames.get("day", []) or [],
+            frames.get("night", []) or [],
+            skip_api=skip_api,
+            empty_on_failure=empty_on_failure,
+            mark_missing_side=mark_missing_side,
+        )
+
+    if max_concurrent <= 1:
+        items = list(paired_frames.items())
+        for index, (pair_key, frames) in enumerate(items):
+            annotation_results = await run_one(pair_key, frames)
+            if annotation_results is not None:
+                results[pair_key] = annotation_results
+                if on_pair_complete is not None:
+                    on_pair_complete(pair_key, annotation_results)
+            if index < len(items) - 1 and delay_between_pairs > 0:
+                await asyncio.sleep(delay_between_pairs)
+        return results
+
+    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict | None]:
         async with semaphore:
-            print(f"\nProcessing depth pair: {pair_key}")
-            return pair_key, await process_depth_pair_batch(
-                client,
-                pair_key,
-                frames.get("day", []) or [],
-                frames.get("night", []) or [],
-                skip_api=skip_api,
-            )
+            return pair_key, await run_one(pair_key, frames)
 
     tasks = []
     for pair_key, frames in paired_frames.items():
@@ -269,6 +307,8 @@ async def run_depth_parallel_pipeline(
 
     for completed_task in asyncio.as_completed(tasks):
         pair_key, annotation_results = await completed_task
+        if annotation_results is None:
+            continue
         results[pair_key] = annotation_results
         if on_pair_complete is not None:
             on_pair_complete(pair_key, annotation_results)

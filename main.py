@@ -1306,6 +1306,7 @@ def main():
             print("Day depth maps are estimated from aligned RGB frames.")
             print("Night depth maps are estimated from aligned IR frames.")
             print(f"Writes aligned_dataset/.frames_cache_marigold and {ALIGNED_QA_OUTPUT_FILES['marigold_depth']}.")
+            print("Quota-friendly QA execution: 1 pair at a time, 70-second spacing")
             print("-" * 60)
             if _confirm():
                 marigold_frames = run_aligned_marigold_depth_estimation(
@@ -1318,6 +1319,8 @@ def main():
                     dataset_folder="aligned_dataset",
                     cache_subdir=".frames_cache_marigold",
                     output_file=str(ALIGNED_QA_OUTPUT_FILES["marigold_depth"]),
+                    max_concurrent=1,
+                    delay_between_pairs=70,
                 )
                 print(f"Aligned Marigold depth QA results saved for {len(qa_results)} segment pair(s).")
             else:

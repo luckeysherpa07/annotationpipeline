@@ -643,6 +643,8 @@ def run_marigold_depth_qa(
     dataset_folder: Path | str = "dataset",
     cache_subdir: str = ".frames_cache_marigold",
     output_file: Path | str = "marigold_depth_qa_results.json",
+    max_concurrent: int = 3,
+    delay_between_pairs: int = 4,
 ):
     """
     Run the MARIGOLD DEPTH QA annotation pipeline.
@@ -657,6 +659,8 @@ def run_marigold_depth_qa(
         dataset_folder: Dataset directory containing the source videos
         cache_subdir: Marigold depth cache directory name
         output_file: JSON path to write Marigold depth QA results
+        max_concurrent: Maximum concurrent Gemini calls
+        delay_between_pairs: Delay between scheduling pair processing, in seconds
     """
     if test_mode:
         print("=" * 50)
@@ -718,7 +722,8 @@ def run_marigold_depth_qa(
         return results
 
     print(
-        f"Processing {len(available_pairs)} Marigold depth pairs with up to 3 concurrent tasks and 4-second spacing..."
+        f"Processing {len(available_pairs)} Marigold depth pairs with up to {max_concurrent} "
+        f"concurrent task(s) and {delay_between_pairs}-second spacing..."
     )
 
     client = None
@@ -726,10 +731,21 @@ def run_marigold_depth_qa(
         client = create_gemini_client()
 
     def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        frames = paired_frames.get(pair_key, {"day": [], "night": []})
+        if annotation_results.get("status") == SKIPPED_MISSING_SIDE_STATUS:
+            results[pair_key] = {
+                "day_depth_count": len(frames.get("day", [])),
+                "night_depth_count": len(frames.get("night", [])),
+                "annotations": {},
+            }
+            results[pair_key].update(annotation_results)
+            _write_results(output_file, results)
+            print(f"Checkpoint saved for skipped pair: {pair_key}")
+            return
+
         existing_entry = results.get(pair_key, {})
         existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
         merged_annotations = _merge_annotations(existing_annotations, annotation_results)
-        frames = paired_frames.get(pair_key, {"day": [], "night": []})
         results[pair_key] = {
             "day_depth_count": len(frames.get("day", [])),
             "night_depth_count": len(frames.get("night", [])),
@@ -742,9 +758,11 @@ def run_marigold_depth_qa(
         run_depth_parallel_pipeline(
             client,
             available_pairs,
-            max_concurrent=3,
-            delay_between_pairs=4,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
             skip_api=skip_api,
+            empty_on_failure=False,
+            mark_missing_side=True,
             on_pair_complete=checkpoint_pair,
         )
     )
@@ -759,9 +777,12 @@ def run_marigold_depth_qa(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No batch output for pair {pair_key}. Using empty results.")
-            from prompts.depth_prompts import DEPTH_PROMPTS
-            file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
+            print(f"WARNING: No batch output for pair {pair_key}. Keeping it pending for resume.")
+            continue
+
+        if _entry_complete(results.get(pair_key), expected_keys):
+            print(f"✓ Done: {pair_key}")
+            continue
 
         checkpoint_pair(pair_key, file_results)
         print(f"✓ Done: {pair_key}")
