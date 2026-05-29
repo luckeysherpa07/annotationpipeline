@@ -5,7 +5,7 @@ import json
 import os
 import re
 import sys
-from typing import Dict
+from typing import Any, Dict
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +20,7 @@ from .modalities.rgb import run_parallel_pipeline
 from .modalities.event import run_event_parallel_pipeline
 from .modalities.depth import run_depth_parallel_pipeline
 from .modalities.ir import run_ir_parallel_pipeline
+from .modalities.ir.pipeline import run_ir_missing_sections_pipeline
 from .modalities.audio import (
     format_audio_annotations,
     run_parallel_pipeline as run_audio_parallel_pipeline,
@@ -82,6 +83,19 @@ def _annotations_have_content(annotations: Dict) -> bool:
     if not isinstance(annotations, dict):
         return False
     return any(_annotation_item_has_content(item) for item in annotations.values())
+
+
+def _missing_annotation_sections(entry: Dict, expected_keys: tuple[str, ...]) -> list[str]:
+    if not isinstance(entry, dict):
+        return list(expected_keys)
+    annotations = entry.get("annotations", {})
+    if not isinstance(annotations, dict):
+        return list(expected_keys)
+    return [
+        annotation_type
+        for annotation_type in expected_keys
+        if not _annotation_item_complete(annotations.get(annotation_type, {}))
+    ]
 
 
 def _entry_complete(entry: Dict, expected_keys: tuple[str, ...]) -> bool:
@@ -874,9 +888,8 @@ def run_ir(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No batch output for pair {pair_key}. Using empty results.")
-            from prompts.ir_prompts import IR_PROMPTS
-            file_results = {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in IR_PROMPTS.keys()}
+            print(f"WARNING: No batch output for pair {pair_key}. Keeping it pending for resume.")
+            continue
 
         checkpoint_pair(pair_key, file_results)
         print(f"âœ“ Done: {pair_key}")
@@ -888,6 +901,113 @@ def run_ir(
     if test_mode:
         print("TEST MODE COMPLETE")
     print("=" * 50)
+    return results
+
+
+def run_ir_missing_section_repair(
+    dataset_folder: Path | str = "aligned_dataset",
+    output_file: Path | str = "qa_pairs/aligned/ir_qa_results_aligned.json",
+    skip_api: bool = False,
+    max_concurrent: int = 1,
+    delay_between_pairs: int = 70,
+) -> Dict:
+    """Repair partial IR results by requesting only missing annotation sections."""
+    dataset_folder = Path(dataset_folder)
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
+
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find videos in: {dataset_folder}")
+        return results
+
+    print(f"Dataset directory listing for {dataset_folder}:")
+    print(os.listdir(dataset_folder))
+    print("Preprocessing IR videos...")
+    paired_frames = preprocess_videos(dataset_folder, fps=1, video_type="ir")
+    print(f"Found {len(paired_frames)} IR video pairs\n")
+
+    expected_keys = ANNOTATION_PROMPT_KEYS["ir"]
+    repair_jobs: Dict[str, Dict[str, Any]] = {}
+    skipped_count = 0
+    complete_count = 0
+    missing_side_count = 0
+    unstarted_count = 0
+
+    for pair_key, frames in paired_frames.items():
+        if not (frames.get("day") or frames.get("night")):
+            continue
+
+        existing_entry = results.get(pair_key)
+        if _entry_complete(existing_entry, expected_keys):
+            complete_count += 1
+            continue
+
+        if not frames.get("day") or not frames.get("night"):
+            results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "ir", {})
+            results[pair_key].update(
+                {
+                    "status": SKIPPED_MISSING_SIDE_STATUS,
+                    "reason": "missing_day_or_night_frames",
+                    "day_frame_count": len(frames.get("day") or []),
+                    "night_frame_count": len(frames.get("night") or []),
+                }
+            )
+            _write_results(output_file, results)
+            missing_side_count += 1
+            continue
+
+        if not isinstance(existing_entry, dict) or not isinstance(existing_entry.get("annotations"), dict):
+            unstarted_count += 1
+            continue
+
+        missing_sections = _missing_annotation_sections(existing_entry, expected_keys)
+        if not missing_sections:
+            skipped_count += 1
+            continue
+
+        repair_jobs[pair_key] = {
+            "day": frames.get("day") or [],
+            "night": frames.get("night") or [],
+            "missing_sections": missing_sections,
+        }
+
+    print(
+        "IR missing-section repair scan: "
+        f"{complete_count} complete/skipped, "
+        f"{len(repair_jobs)} partial repair job(s), "
+        f"{missing_side_count} missing-side pair(s) marked skipped, "
+        f"{unstarted_count} unstarted pair(s) left for full run, "
+        f"{skipped_count} no-op."
+    )
+
+    if not repair_jobs:
+        print(f"No IR missing sections to repair. Existing results kept at: {output_file}")
+        return results
+
+    client = None if skip_api else create_gemini_client()
+
+    def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        existing_entry = results.get(pair_key, {})
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        merged_annotations = _merge_annotations(existing_annotations, annotation_results)
+        results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "ir", merged_annotations)
+        _write_results(output_file, results)
+        print(f"Repair checkpoint saved for: {pair_key}")
+
+    asyncio.run(
+        run_ir_missing_sections_pipeline(
+            client,
+            repair_jobs,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
+            skip_api=skip_api,
+            on_pair_complete=checkpoint_pair,
+        )
+    )
+
+    _write_results(output_file, results)
+    print(f"IR missing-section repair results saved to: {output_file}")
     return results
 
 

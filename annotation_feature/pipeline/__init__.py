@@ -1,5 +1,13 @@
 # Pipeline package for video annotation
-from .main import run, run_audio, run_depth, run_event, run_ir, run_marigold_depth_qa
+from .main import (
+    run,
+    run_audio,
+    run_depth,
+    run_event,
+    run_ir,
+    run_ir_missing_section_repair,
+    run_marigold_depth_qa,
+)
 from ..fusion import run_late_fusion
 
 
@@ -51,6 +59,7 @@ __all__ = [
     "run_event",
     "run_depth",
     "run_ir",
+    "run_ir_missing_section_repair",
     "run_marigold_depth_estimation",
     "run_marigold_ir_depth_estimation",
     "run_aligned_marigold_depth_estimation",

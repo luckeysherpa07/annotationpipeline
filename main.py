@@ -10,6 +10,7 @@ import sys
 # Add parent directory to path so we can import annotation_feature
 sys.path.insert(0, str(Path(__file__).parent))
 
+from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.pipeline import (
     run,
     run_audio,
@@ -87,6 +88,12 @@ MULTIMODAL_QA_VERIFIED_PATH = Path("outputs/implicit_multimodal_qa_verified_gemi
 
 def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
     return input(prompt).strip().lower() == "yes"
+
+
+REGISTERED_MENU_ACTIONS = build_aligned_ir_actions(
+    output_file=ALIGNED_QA_OUTPUT_FILES["ir"],
+    confirm=_confirm,
+)
 
 
 def _select_cache_folder(dataset_folder: Path | str = "dataset") -> str | None:
@@ -478,6 +485,7 @@ def main():
         print("\n--- ALIGNED IR PIPELINE ---")
         print("41. Test aligned IR batch pipeline on 1 segment pair (with real Gemini API calls)")
         print("42. Run aligned IR batch pipeline on all segment pairs (production)")
+        print("42r. Repair aligned IR missing sections")
         print("\n--- ALIGNED AUDIO PIPELINE ---")
         print("43. Export source-aligned RGB-with-audio 30s segment videos for all segments of 1 pair")
         print("44. Export source-aligned RGB-with-audio 30s segment videos for all pairs")
@@ -507,7 +515,7 @@ def main():
         print("62. Verify/filter v2 implicit multimodal QA candidates")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-63): ").strip()
+        choice = input("\nEnter choice (1-63 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1192,44 +1200,8 @@ def main():
             else:
                 print("Cancelled.")
 
-        elif choice == "41":
-            print("\n" + "-" * 60)
-            print("Running: aligned IR batch pipeline on 1 segment pair (real Gemini API calls)")
-            print("WARNING: This will use Gemini API quota!")
-            print("Reads IR videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache_ir for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['ir']}.")
-            print("-" * 60)
-            if _confirm():
-                run_ir(
-                    test_mode=True,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["ir"]),
-                )
-            else:
-                print("Cancelled.")
-
-        elif choice == "42":
-            print("\n" + "-" * 60)
-            print("Running: aligned IR batch pipeline on all segment pairs (production)")
-            print("WARNING: This will use Gemini API quota for each aligned segment pair!")
-            print("Reads IR videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache_ir for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['ir']}.")
-            print("Quota-friendly execution: 1 pair at a time, 70-second spacing")
-            print("-" * 60)
-            if _confirm():
-                run_ir(
-                    test_mode=False,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["ir"]),
-                    max_concurrent=1,
-                    delay_between_pairs=70,
-                )
-            else:
-                print("Cancelled.")
+        elif choice in REGISTERED_MENU_ACTIONS:
+            REGISTERED_MENU_ACTIONS[choice].run()
 
         elif choice == "43":
             print("\n" + "-" * 60)
