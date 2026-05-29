@@ -16,6 +16,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from prompts.ir_prompts import IR_PROMPTS
 
+IR_MODEL_NAME = "gemini-3.1-flash-lite"
+IR_SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
+
 try:
     from google.genai import types
 except ImportError:
@@ -122,7 +125,7 @@ async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -
         try:
             response = await asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-3-flash-preview",
+                model=IR_MODEL_NAME,
                 contents=contents,
             )
             return response.text
@@ -150,14 +153,19 @@ async def process_ir_pair_batch(
     day_frames: list[Path],
     night_frames: list[Path],
     skip_api: bool = False,
-) -> dict:
+) -> dict | None:
     """Process a single IR video pair."""
     if skip_api:
         return build_demo_ir_results()
 
     if not day_frames or not night_frames:
-        print(f"    WARNING: Missing day or night frames for pair {pair_key}; falling back to empty results")
-        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in IR_PROMPTS.keys()}
+        print(f"    WARNING: Missing day or night frames for pair {pair_key}; marking as skipped")
+        return {
+            "status": IR_SKIPPED_MISSING_SIDE_STATUS,
+            "reason": "missing_day_or_night_frames",
+            "day_frame_count": len(day_frames),
+            "night_frame_count": len(night_frames),
+        }
 
     selected_day = day_frames
     selected_night = night_frames
@@ -180,8 +188,8 @@ async def process_ir_pair_batch(
         return normalize_ir_results(parsed)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
-        print(f"    Falling back to empty results for pair {pair_key}")
-        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in IR_PROMPTS.keys()}
+        print(f"    Skipping checkpoint for pair {pair_key}; it will remain pending for resume.")
+        return None
 
 
 async def run_ir_parallel_pipeline(
@@ -193,10 +201,30 @@ async def run_ir_parallel_pipeline(
     on_pair_complete=None,
 ) -> Dict[str, dict]:
     """Run IR annotation pipeline in parallel."""
+    if max_concurrent <= 1:
+        results: Dict[str, dict] = {}
+        items = list(paired_frames.items())
+        for index, (pair_key, frames) in enumerate(items):
+            print(f"\nProcessing IR pair: {pair_key}")
+            annotation_results = await process_ir_pair_batch(
+                client,
+                pair_key,
+                frames.get("day", []) or [],
+                frames.get("night", []) or [],
+                skip_api=skip_api,
+            )
+            if annotation_results is not None:
+                results[pair_key] = annotation_results
+                if on_pair_complete is not None:
+                    on_pair_complete(pair_key, annotation_results)
+            if index < len(items) - 1 and delay_between_pairs > 0:
+                await asyncio.sleep(delay_between_pairs)
+        return results
+
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
 
-    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict]:
+    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict | None]:
         async with semaphore:
             print(f"\nProcessing IR pair: {pair_key}")
             return pair_key, await process_ir_pair_batch(
@@ -214,6 +242,8 @@ async def run_ir_parallel_pipeline(
 
     for completed_task in asyncio.as_completed(tasks):
         pair_key, annotation_results = await completed_task
+        if annotation_results is None:
+            continue
         results[pair_key] = annotation_results
         if on_pair_complete is not None:
             on_pair_complete(pair_key, annotation_results)

@@ -39,6 +39,7 @@ ANNOTATION_PROMPT_KEYS = {
 }
 
 AUDIO_RGB_SOURCE_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$")
+SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
 
 
 def _load_existing_results(output_file: Path) -> Dict:
@@ -86,6 +87,8 @@ def _annotations_have_content(annotations: Dict) -> bool:
 def _entry_complete(entry: Dict, expected_keys: tuple[str, ...]) -> bool:
     if not isinstance(entry, dict):
         return False
+    if entry.get("status") == SKIPPED_MISSING_SIDE_STATUS:
+        return True
     return _annotations_complete(entry.get("annotations", {}), expected_keys)
 
 
@@ -765,6 +768,8 @@ def run_ir(
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
     output_file: Path | str = "ir_qa_results.json",
+    max_concurrent: int = 3,
+    delay_between_pairs: int = 4,
 ):
     """
     Run the IR annotation pipeline.
@@ -775,6 +780,8 @@ def run_ir(
         skip_api: If True, skip Gemini API calls and return demo results
         dataset_folder: Dataset directory containing the source videos
         output_file: JSON path to write IR QA results
+        max_concurrent: Maximum concurrent Gemini calls
+        delay_between_pairs: Delay between scheduling pair processing, in seconds
     """
     if test_mode:
         print("=" * 50)
@@ -823,7 +830,8 @@ def run_ir(
         return results
 
     print(
-        f"Processing {len(available_pairs)} IR pairs with up to 3 concurrent tasks and 4-second spacing..."
+        f"Processing {len(available_pairs)} IR pairs with up to {max_concurrent} "
+        f"concurrent task(s) and {delay_between_pairs}-second spacing..."
     )
 
     client = None
@@ -831,6 +839,13 @@ def run_ir(
         client = create_gemini_client()
 
     def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        if annotation_results.get("status") == SKIPPED_MISSING_SIDE_STATUS:
+            results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "ir", {})
+            results[pair_key].update(annotation_results)
+            _write_results(output_file, results)
+            print(f"Checkpoint saved for skipped pair: {pair_key}")
+            return
+
         existing_entry = results.get(pair_key, {})
         existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
         merged_annotations = _merge_annotations(existing_annotations, annotation_results)
@@ -842,8 +857,8 @@ def run_ir(
         run_ir_parallel_pipeline(
             client,
             available_pairs,
-            max_concurrent=3,
-            delay_between_pairs=4,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
             skip_api=skip_api,
             on_pair_complete=checkpoint_pair,
         )

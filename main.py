@@ -1217,7 +1217,7 @@ def main():
             print("Reads IR videos from aligned_dataset/.")
             print("Uses aligned_dataset/.frames_cache_ir for extracted frames.")
             print(f"Writes {ALIGNED_QA_OUTPUT_FILES['ir']}.")
-            print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
+            print("Quota-friendly execution: 1 pair at a time, 70-second spacing")
             print("-" * 60)
             if _confirm():
                 run_ir(
@@ -1225,6 +1225,8 @@ def main():
                     skip_api=False,
                     dataset_folder="aligned_dataset",
                     output_file=str(ALIGNED_QA_OUTPUT_FILES["ir"]),
+                    max_concurrent=1,
+                    delay_between_pairs=70,
                 )
             else:
                 print("Cancelled.")
