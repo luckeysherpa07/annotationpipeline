@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
 from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
+from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
 from annotation_feature.pipeline import (
     run,
     run_audio,
@@ -90,10 +91,16 @@ def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
     return input(prompt).strip().lower() == "yes"
 
 
-REGISTERED_MENU_ACTIONS = build_aligned_ir_actions(
-    output_file=ALIGNED_QA_OUTPUT_FILES["ir"],
-    confirm=_confirm,
-)
+REGISTERED_MENU_ACTIONS = {
+    **build_aligned_ir_actions(
+        output_file=ALIGNED_QA_OUTPUT_FILES["ir"],
+        confirm=_confirm,
+    ),
+    **build_aligned_marigold_actions(
+        output_file=ALIGNED_QA_OUTPUT_FILES["marigold_depth"],
+        confirm=_confirm,
+    ),
+}
 
 
 def _select_cache_folder(dataset_folder: Path | str = "dataset") -> str | None:
@@ -493,6 +500,9 @@ def main():
         print("46. Run aligned AUDIO pipeline on all segment pairs (production)")
         print("\n--- ALIGNED MARIGOLD DEPTH ---")
         print("47. Run aligned Marigold depth estimation + QA on all segment pairs")
+        print("47e. Run aligned Marigold depth estimation only")
+        print("47q. Run aligned Marigold depth QA only")
+        print("47r. Repair aligned Marigold depth missing sections")
         print("\n--- LATE FUSION ---")
         print("48. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
@@ -1296,33 +1306,6 @@ def main():
                     dataset_folder="aligned_dataset",
                     output_file=str(ALIGNED_QA_OUTPUT_FILES["audio"]),
                 )
-            else:
-                print("Cancelled.")
-
-        elif choice == "47":
-            print("\n" + "-" * 60)
-            print("Running: aligned Marigold depth estimation + QA on all segment pairs")
-            print("WARNING: QA will use Gemini API quota for each incomplete aligned Marigold pair!")
-            print("Day depth maps are estimated from aligned RGB frames.")
-            print("Night depth maps are estimated from aligned IR frames.")
-            print(f"Writes aligned_dataset/.frames_cache_marigold and {ALIGNED_QA_OUTPUT_FILES['marigold_depth']}.")
-            print("Quota-friendly QA execution: 1 pair at a time, 70-second spacing")
-            print("-" * 60)
-            if _confirm():
-                marigold_frames = run_aligned_marigold_depth_estimation(
-                    dataset_folder="aligned_dataset",
-                )
-                print(f"Resolved/generated aligned Marigold depth maps for {len(marigold_frames)} segment pair(s).")
-                qa_results = run_marigold_depth_qa(
-                    test_mode=False,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    cache_subdir=".frames_cache_marigold",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["marigold_depth"]),
-                    max_concurrent=1,
-                    delay_between_pairs=70,
-                )
-                print(f"Aligned Marigold depth QA results saved for {len(qa_results)} segment pair(s).")
             else:
                 print("Cancelled.")
 

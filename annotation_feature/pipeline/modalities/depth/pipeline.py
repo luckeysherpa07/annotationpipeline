@@ -17,7 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from prompts.depth_prompts import DEPTH_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
-DEPTH_MODEL_NAME = "gemini-3-flash-preview"
+DEPTH_MODEL_NAME = "gemini-3.1-flash-lite"
 DEPTH_SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
 
 try:
@@ -110,7 +110,7 @@ def parse_json_response(text: str) -> dict:
     return json.loads(json_text)
 
 
-def normalize_depth_results(raw_results: Any) -> dict:
+def normalize_depth_results(raw_results: Any, annotation_types: list[str] | None = None) -> dict:
     """Normalize depth annotation results to ensure consistency.
     
     Args:
@@ -120,7 +120,8 @@ def normalize_depth_results(raw_results: Any) -> dict:
         Normalized results dictionary with all annotation types
     """
     normalized: dict = {}
-    for annotation_type in DEPTH_PROMPTS.keys():
+    expected_types = annotation_types or list(DEPTH_PROMPTS.keys())
+    for annotation_type in expected_types:
         fallback = {"caption": "", "question": "", "answer": ""}
         item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
 
@@ -194,15 +195,38 @@ async def process_depth_pair_batch(
     Returns:
         Annotation results dictionary
     """
+    return await process_depth_pair_sections(
+        client,
+        pair_key,
+        day_frames,
+        night_frames,
+        list(DEPTH_PROMPTS.keys()),
+        skip_api=skip_api,
+        empty_on_failure=empty_on_failure,
+        mark_missing_side=mark_missing_side,
+    )
+
+
+async def process_depth_pair_sections(
+    client,
+    pair_key: str,
+    day_frames: list[Path],
+    night_frames: list[Path],
+    annotation_types: list[str],
+    skip_api: bool = False,
+    empty_on_failure: bool = True,
+    mark_missing_side: bool = False,
+) -> dict | None:
+    """Process selected depth annotation sections for a single video pair."""
     if skip_api:
-        demo_results = {}
-        for annotation_type in DEPTH_PROMPTS.keys():
-            demo_results[annotation_type] = {
+        return {
+            annotation_type: {
                 "caption": "Demo caption",
                 "question": "Demo question?",
-                "answer": "Demo answer"
+                "answer": "Demo answer",
             }
-        return demo_results
+            for annotation_type in annotation_types
+        }
 
     if not day_frames or not night_frames:
         if mark_missing_side:
@@ -214,7 +238,10 @@ async def process_depth_pair_batch(
                 "night_depth_count": len(night_frames),
             }
         print(f"    WARNING: Missing day or night frames for pair {pair_key}; falling back to empty results")
-        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in annotation_types}
+
+    if not annotation_types:
+        return {}
 
     selected_day = day_frames
     selected_night = night_frames
@@ -228,23 +255,23 @@ async def process_depth_pair_batch(
             print(f"    WARNING: Could not encode frames for pair {pair_key}; keeping it pending for resume")
             return None
         print(f"    WARNING: Could not encode frames for pair {pair_key}; falling back to empty results")
-        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in annotation_types}
 
     image_parts = build_image_parts(day_encoded) + build_image_parts(night_encoded)
-    prompt = build_depth_mega_prompt(list(DEPTH_PROMPTS.keys()), selected_day, selected_night)
+    prompt = build_depth_mega_prompt(annotation_types, selected_day, selected_night)
     contents = image_parts + [prompt]
 
     try:
         response_text = await call_gemini_with_retry(client, contents, max_retries=3)
         parsed = parse_json_response(response_text)
-        return normalize_depth_results(parsed)
+        return normalize_depth_results(parsed, annotation_types)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
         if not empty_on_failure:
             print(f"    Skipping checkpoint for pair {pair_key}; it will remain pending for resume.")
             return None
         print(f"    Falling back to empty results for pair {pair_key}")
-        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in DEPTH_PROMPTS.keys()}
+        return {anno_type: {"caption": "", "question": "", "answer": ""} for anno_type in annotation_types}
 
 
 async def run_depth_parallel_pipeline(
@@ -303,6 +330,67 @@ async def run_depth_parallel_pipeline(
     tasks = []
     for pair_key, frames in paired_frames.items():
         tasks.append(asyncio.create_task(worker(pair_key, frames)))
+        await asyncio.sleep(delay_between_pairs)
+
+    for completed_task in asyncio.as_completed(tasks):
+        pair_key, annotation_results = await completed_task
+        if annotation_results is None:
+            continue
+        results[pair_key] = annotation_results
+        if on_pair_complete is not None:
+            on_pair_complete(pair_key, annotation_results)
+
+    return results
+
+
+async def run_depth_missing_sections_pipeline(
+    client,
+    repair_jobs: Dict[str, Dict[str, Any]],
+    max_concurrent: int = 1,
+    delay_between_pairs: int = 70,
+    skip_api: bool = False,
+    on_pair_complete=None,
+) -> Dict[str, dict]:
+    """Run depth repair for selected missing annotation sections."""
+    results: Dict[str, dict] = {}
+    items = list(repair_jobs.items())
+
+    async def run_one(pair_key: str, job: Dict[str, Any]) -> dict | None:
+        print(
+            f"\nRepairing depth pair: {pair_key} "
+            f"({len(job.get('missing_sections', []))} missing section(s))"
+        )
+        return await process_depth_pair_sections(
+            client,
+            pair_key,
+            job.get("day", []) or [],
+            job.get("night", []) or [],
+            job.get("missing_sections", []) or [],
+            skip_api=skip_api,
+            empty_on_failure=False,
+            mark_missing_side=True,
+        )
+
+    if max_concurrent <= 1:
+        for index, (pair_key, job) in enumerate(items):
+            annotation_results = await run_one(pair_key, job)
+            if annotation_results is not None:
+                results[pair_key] = annotation_results
+                if on_pair_complete is not None:
+                    on_pair_complete(pair_key, annotation_results)
+            if index < len(items) - 1 and delay_between_pairs > 0:
+                await asyncio.sleep(delay_between_pairs)
+        return results
+
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def worker(pair_key: str, job: Dict[str, Any]) -> tuple[str, dict | None]:
+        async with semaphore:
+            return pair_key, await run_one(pair_key, job)
+
+    tasks = []
+    for pair_key, job in items:
+        tasks.append(asyncio.create_task(worker(pair_key, job)))
         await asyncio.sleep(delay_between_pairs)
 
     for completed_task in asyncio.as_completed(tasks):

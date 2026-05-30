@@ -7,6 +7,7 @@ from .main import (
     run_ir,
     run_ir_missing_section_repair,
     run_marigold_depth_qa,
+    run_marigold_depth_missing_section_repair,
 )
 from ..fusion import run_late_fusion
 
@@ -64,6 +65,7 @@ __all__ = [
     "run_marigold_ir_depth_estimation",
     "run_aligned_marigold_depth_estimation",
     "run_marigold_depth_qa",
+    "run_marigold_depth_missing_section_repair",
     "run_late_fusion",
     "run_task_slicing",
     "run_segmented_pipeline",
