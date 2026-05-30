@@ -200,7 +200,6 @@ CATEGORY_SECTION_MAP = {
     "scene_sequence": "temporal_sequence",
     "event_scene_sequence": "temporal_sequence",
     "depth_scene_sequence": "temporal_sequence",
-    "light_recongnition": "scene_and_context",
     "light_recognition": "scene_and_context",
     "light_change": "scene_and_context",
     "object_recognition": "objects_and_attributes",
@@ -236,7 +235,6 @@ CATEGORY_SECTIONS_MAP = {
     "scene_sequence": ("temporal_sequence", "motion_and_action"),
     "event_scene_sequence": ("temporal_sequence", "motion_and_action"),
     "depth_scene_sequence": ("temporal_sequence", "spatial_and_layout"),
-    "light_recongnition": ("scene_and_context",),
     "light_recognition": ("scene_and_context",),
     "light_change": ("scene_and_context",),
     "object_recognition": ("objects_and_attributes",),
@@ -305,12 +303,6 @@ CATEGORY_RELIABILITY_PROFILES = {
         "gate": "support_soft",
         "modality_weight_profile": "temporal",
         "support_weights": {"lexical": 0.4, "semantic": 0.6},
-        "requires_lexical_support": False,
-    },
-    "light_recongnition": {
-        "gate": "support_exempt",
-        "modality_weight_profile": "visual_light",
-        "support_weights": {"lexical": 0.45, "semantic": 0.55},
         "requires_lexical_support": False,
     },
     "light_recognition": {
@@ -709,7 +701,7 @@ def _infer_fact_type(section: str, question: str, answer: str, caption: str) -> 
     if "action" in section_lower:
         return "action"
 
-    if any(word in section_lower for word in ("light_recongnition", "light_recognition", "light_change")):
+    if any(word in section_lower for word in ("light_recognition", "light_change")):
         return "lighting"
 
     if "text_recognition" in section_lower:

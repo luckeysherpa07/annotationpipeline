@@ -23,11 +23,6 @@
         "question": "What is the sequence of rooms or areas I pass through from the start to the end?",
         "answer": "Bedroom, hallway, shoe area, exit hallway, corridor, workshop."
       },
-      "light_recongnition": {
-        "caption": "The initial room is lit by natural light from a window and dim ambient light. As I move into the hallway, overhead lights provide consistent illumination, visible as bright hotspots on the ceiling and walls. The exit to the common corridor shows a significant light source, likely powerful overhead fluorescent or LED panels, creating high thermal contrast with the interior rooms.",
-        "question": "Where is the strongest source of light located throughout the sequence?",
-        "answer": "The common hallway."
-      },
       "light_change": {
         "caption": "The lighting transitions from the dim environment of the bedroom and interior hallway to a very bright common corridor. When the exit door is opened around frame 720, the scene becomes much brighter as I move into the well-lit building hallway. The light intensity decreases slightly as I enter the final workshop room, though it remains brightly lit by overhead sources.",
         "question": "Does it get brighter or darker as I open the door to exit the apartment?",
@@ -62,6 +57,11 @@
         "caption": "I begin by walking out of a bedroom. I then reach down to interact with a pair of sneakers, presumably putting them on or adjusting them. Following this, I walk down the hallway to the exit, grasp the door handle to open the door, and walk out into the building's common corridor. Finally, I walk into another room and approach a table.",
         "question": "What am I doing when I stop in the hallway with the shoes?",
         "answer": "Putting on sneakers."
+      },
+      "light_recognition": {
+        "caption": "The initial room is lit by natural light from a window and dim ambient light. As I move into the hallway, overhead lights provide consistent illumination, visible as bright hotspots on the ceiling and walls. The exit to the common corridor shows a significant light source, likely powerful overhead fluorescent or LED panels, creating high thermal contrast with the interior rooms.",
+        "question": "Where is the strongest source of light located throughout the sequence?",
+        "answer": "The common hallway."
       }
     }
   },
@@ -88,11 +88,6 @@
         "caption": "The video starts with a wide shot of the room, showing the sofa and furniture. I move closer to the tea table, focusing on the equipment. First, I see the general layout with the kettle and thermos on the right and sugar cane on the left. As I get closer, the induction tray with the teapot becomes the central focus. I observe the temperature display rising. Eventually, my hands enter the frame to interact with the teapot and the controls on the tray.",
         "question": "1. What is the first scene shown in the video? 2. What do I pass before reaching the tea table? 3. Which object is seen first on the left side? 4. What is the focus after moving closer to the table? 5. When do I see the sofa in the sequence? 6. What part of the scene remains constant as the focus? 7. What environmental elements are visible before the table? 8. When does the kettle enter the frame? 9. What is the sequence of temperature readings observed? 10. What is the final focused area of the video?",
         "answer": "1. The living room. 2. The sofa area. 3. Sugar cane stalks. 4. The induction tea tray. 5. At the beginning. 6. The tea table. 7. Sofa and side table. 8. From the start. 9. 96, 97, 98, 99, 100. 10. The tea tray controls."
-      },
-      "light_recongnition": {
-        "caption": "The main light sources are a low ambient overhead light and the emissive digital display on the induction heating tray. the display emits a sharp, high-contrast thermal signature. There are reflections of the room lighting on the metallic surface of the electric kettle and the glass jar.",
-        "question": "What is the most distinct thermal light source on the table?",
-        "answer": "The digital temperature display."
       },
       "light_change": {
         "caption": "The overall illumination remains consistent throughout the video. There are no lights being turned on or off. The most notable change is the shifting light from the digital display as the numbers change from 96 to 100, slightly altering the local thermal reflection on nearby surfaces. The camera moves, changing the perspective of the reflections on the kettle.",
@@ -128,6 +123,11 @@
         "caption": "I am preparing tea. I approach the table, check the temperature on the induction tray, and adjust the settings with my hand to ensure the water reaches the boiling point (100 degrees). I also touch the teapot lid to check its status. The consequence is the water reaching boiling temperature for brewing.",
         "question": "1. What is my main action? 2. What object do I interact with first? 3. Why am I looking at the digital display? 4. Do I lift the kettle? 5. What button do I press on the tray? 6. Do I pour water in the video? 7. What is the goal of the action? 8. Do I move the tea cup?",
         "answer": "1. Making tea. 2. The heating tray controls. 3. To check temperature. 4. No. 5. Temperature/power adjustment. 6. No. 7. Boiling water. 8. No."
+      },
+      "light_recognition": {
+        "caption": "The main light sources are a low ambient overhead light and the emissive digital display on the induction heating tray. the display emits a sharp, high-contrast thermal signature. There are reflections of the room lighting on the metallic surface of the electric kettle and the glass jar.",
+        "question": "What is the most distinct thermal light source on the table?",
+        "answer": "The digital temperature display."
       }
     }
   },
@@ -154,11 +154,6 @@
         "caption": "The sequence starts in an outdoor corridor near a building corner, moves through the courtyard past the glass facade, passes by the building entrance, approaches the wall-mounted safety box, and finally moves towards a set of mailboxes located in the outdoor area.",
         "question": "Which object do I encounter after passing the building entrance?",
         "answer": "The wall-mounted fire safety box."
-      },
-      "light_recongnition": {
-        "caption": "The scene relies on ambient daylight in the day frames and artificial lighting from overhead fixtures along the corridor during the night frames. These overhead lights have a circular shape and provide downward illumination.",
-        "question": "What is the shape of the artificial light sources in the corridor?",
-        "answer": "Circular"
       },
       "light_change": {
         "caption": "The light changes from natural daylight in the initial sequence to artificial illumination provided by ceiling-mounted lights as the camera moves through the corridor during the night sequence.",
@@ -194,6 +189,11 @@
         "caption": "The subject navigates through the outdoor building area, performing an inspection-like walk to view the fire safety equipment and the mailbox array, likely for navigation or facility checking.",
         "question": "What is the likely purpose of walking through the building area?",
         "answer": "Inspection or facility checking."
+      },
+      "light_recognition": {
+        "caption": "The scene relies on ambient daylight in the day frames and artificial lighting from overhead fixtures along the corridor during the night frames. These overhead lights have a circular shape and provide downward illumination.",
+        "question": "What is the shape of the artificial light sources in the corridor?",
+        "answer": "Circular"
       }
     }
   },
@@ -220,11 +220,6 @@
         "caption": "The sequence starts with a focused view of the upper-numbered mailboxes. The camera then pans left and down to reveal the full grid of numbered mailboxes, including both '1' series and 'T' series. The camera then moves through the glass doorway into a hallway. Finally, it passes a bulletin board and exits into an outdoor area.",
         "question": "What is the last area I encounter after passing through the glass doorway and the hallway?",
         "answer": "An outdoor area."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by ceiling-mounted fluorescent or LED light fixtures, which appear as bright, high-intensity streaks in the IR spectrum. These lights are concentrated above the mailbox area and along the ceiling of the hallway, providing uniform illumination across the tiled surfaces.",
-        "question": "What kind of light sources are visible on the ceiling in the hallway?",
-        "answer": "Linear fluorescent or LED light fixtures."
       },
       "light_change": {
         "caption": "As the camera moves from the indoor entryway toward the exterior, the intensity of the light shifts. The bright indoor lights disappear as the camera exits the building, transitioning to the ambient light of the outdoor environment. The transition indicates movement from a highly illuminated indoor space to a potentially darker or differently lit exterior.",
@@ -260,6 +255,11 @@
         "caption": "The subject approaches the mailbox grid, selects a key, and interacts with a specific mailbox lock (label 1'235) to open it. The action appears to be checking or retrieving mail.",
         "question": "What is the primary action I perform at the mailbox labeled 1'235?",
         "answer": "I unlock and open the mailbox."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ceiling-mounted fluorescent or LED light fixtures, which appear as bright, high-intensity streaks in the IR spectrum. These lights are concentrated above the mailbox area and along the ceiling of the hallway, providing uniform illumination across the tiled surfaces.",
+        "question": "What kind of light sources are visible on the ceiling in the hallway?",
+        "answer": "Linear fluorescent or LED light fixtures."
       }
     }
   },
@@ -286,11 +286,6 @@
         "caption": "The sequence starts with an external view of a courtyard featuring a staircase. Then, it transitions to moving through an outdoor corridor or walkway, passing by doors, eventually entering an interior lobby area with an elevator.",
         "question": "What sequence of areas do I traverse through in the video?",
         "answer": "I traverse from an exterior courtyard with stairs, through an outdoor hallway, and into an interior lobby with an elevator."
-      },
-      "light_recongnition": {
-        "caption": "The scene includes natural daylight and artificial lighting from ceiling-mounted fixtures in the hallway, which provide clear visibility of the walls and doors.",
-        "question": "What is the primary source of illumination in the interior hallway segment?",
-        "answer": "Artificial ceiling lights."
       },
       "light_change": {
         "caption": "The video transitions from bright outdoor natural light to lower intensity artificial light in the interior hallway, and finally to a well-lit lobby environment.",
@@ -326,6 +321,11 @@
         "caption": "I am walking through an outdoor residential complex, descending a flight of metal stairs, following a pathway, and entering a building lobby, likely to reach a specific apartment or exit.",
         "question": "What is my primary action during the middle segment of the video?",
         "answer": "Walking along an outdoor corridor."
+      },
+      "light_recognition": {
+        "caption": "The scene includes natural daylight and artificial lighting from ceiling-mounted fixtures in the hallway, which provide clear visibility of the walls and doors.",
+        "question": "What is the primary source of illumination in the interior hallway segment?",
+        "answer": "Artificial ceiling lights."
       }
     }
   },
@@ -362,11 +362,6 @@
         "question": "1. Which sign do I see first? 2. What do I pass before reaching the second sign? 3. Is there a staircase in the scene? 4. Does the scene change from a corridor to an open courtyard view? 5. What is the last sign I see? 6. Does the path lead away from the stairs? 7. What type of building is this? 8. Are the doors all on one side? 9. Where does the corridor lead? 10. Do I see multiple floors?",
         "answer": "1. 1'233 | 1'234 | 1'235. 2. A staircase and several doors. 3. Yes. 4. Yes. 5. N° 1'129 | 1'130. 6. Yes. 7. An apartment complex or dormitory. 8. Yes. 9. It leads down the hallway. 10. Yes, the view shows multiple stories."
       },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by several overhead artificial lights mounted on the ceiling of the outdoor walkway, casting a distinct light pattern on the concrete floor and walls. These act as the primary light source in the IR spectrum.",
-        "question": "What is the primary light source in this walkway?",
-        "answer": "Overhead artificial lights."
-      },
       "light_change": {
         "caption": "The lighting remains generally consistent as I walk along the corridor, though the intensity fluctuates as I move under the different overhead light fixtures and further away from the initial brightly lit doorway area.",
         "question": "1. Does the light intensity change as I move? 2. Is there a consistent light source throughout? 3. Do any lights turn off? 4. Does the path get darker? 5. Is there a flicker in the lights? 6. Does the light source move? 7. Is the light coming from the front or side? 8. Do the ceiling lights provide sufficient coverage?",
@@ -401,6 +396,11 @@
         "caption": "The subject is walking forward along an outdoor corridor, likely to inspect or navigate through the building's residential units. The purpose is to move from one section of the building to another.",
         "question": "1. What is the primary action I am performing? 2. Am I interacting with any objects? 3. What is the probable purpose of my movement? 4. Am I walking towards a destination? 5. Do I stop at any doors? 6. Is this a casual walk or a purposeful movement? 7. Is the action consistent? 8. Do I change my pace?",
         "answer": "1. Walking along a corridor. 2. No. 3. Navigating the building. 4. Yes. 5. No. 6. Purposeful movement. 7. Yes. 8. No."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by several overhead artificial lights mounted on the ceiling of the outdoor walkway, casting a distinct light pattern on the concrete floor and walls. These act as the primary light source in the IR spectrum.",
+        "question": "What is the primary light source in this walkway?",
+        "answer": "Overhead artificial lights."
       }
     }
   },
@@ -427,11 +427,6 @@
         "caption": "The sequence starts in an exterior apartment corridor with metal walkways and railings. I then walk along the corridor towards a door, pass through it, and enter an apartment unit containing a dining area with a table and chairs, followed by a storage area.",
         "question": "What sequence of areas do I transition through in the video?",
         "answer": "I move from the external corridor, through a doorway, and into the apartment's dining area."
-      },
-      "light_recongnition": {
-        "caption": "The scene displays typical IR characteristics where light sources, such as overhead lamps in the corridor and interior ceiling lights, appear as hotspots compared to their surroundings.",
-        "question": "Are there any artificial light sources visible in the corridor?",
-        "answer": "Yes, overhead lights are visible along the corridor ceiling."
       },
       "light_change": {
         "caption": "As I transition from the corridor to the interior of the apartment, the thermal intensity changes due to the shift from an outdoor ambient environment to a controlled indoor climate.",
@@ -467,6 +462,11 @@
         "caption": "I am walking along a corridor, approaching a room, and entering it to inspect the interior layout, likely for navigation or assessment purposes.",
         "question": "What is my primary action in the video?",
         "answer": "Walking through a corridor and entering a room."
+      },
+      "light_recognition": {
+        "caption": "The scene displays typical IR characteristics where light sources, such as overhead lamps in the corridor and interior ceiling lights, appear as hotspots compared to their surroundings.",
+        "question": "Are there any artificial light sources visible in the corridor?",
+        "answer": "Yes, overhead lights are visible along the corridor ceiling."
       }
     }
   },
@@ -493,11 +493,6 @@
         "caption": "The video shows a single static scene of a kitchen counter with a laptop, cutting board, and bowl. There is no movement between different rooms or sequences, as the camera remains in a fixed top-down position throughout the recording.",
         "question": "1. What is the sequence of rooms I pass? 2. What object is visible from the start? 3. Does the camera move to a different room? 4. Is there a change in the environment? 5. What follows the initial view? 6. Are there multiple scenes shown? 7. Did I move from the kitchen? 8. What is the last scene in the sequence? 9. Is there any transition between areas? 10. How many distinct locations are depicted?",
         "answer": "1. None, I stay in the kitchen. 2. The laptop. 3. No. 4. No. 5. The same static view. 6. No. 7. No. 8. The kitchen. 9. No. 10. One."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by ambient room lighting, which creates thermal contrast on the surfaces of the metal counter and objects. There is no specific point-source light being used in the thermal view, just the ambient temperature environment.",
-        "question": "What is the primary source of thermal contrast in the scene?",
-        "answer": "The ambient temperature difference between the materials like the metal counter, plastic, and organic matter."
       },
       "light_change": {
         "caption": "The illumination in the IR frames remains consistent throughout the video with no significant changes in intensity or light source behavior, as it is a static scene.",
@@ -533,6 +528,11 @@
         "caption": "The subject is using a peeler to peel the carrot. This interaction allows the subject to remove the outer layer of the vegetable for cooking or eating, which is a standard food preparation action.",
         "question": "1. What is being peeled? 2. What tool is being used for the peeling? 3. Where is the peeling happening? 4. What is the purpose of the action? 5. Is the knife being used? 6. What will the result of this action be? 7. Is the action performed with one or two hands? 8. What is the consequence of this action?",
         "answer": "1. The carrot. 2. A vegetable peeler. 3. On the cutting board. 4. To remove the skin from the carrot. 5. No. 6. A peeled carrot. 7. Two hands. 8. The vegetable is prepared for consumption or cooking."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ambient room lighting, which creates thermal contrast on the surfaces of the metal counter and objects. There is no specific point-source light being used in the thermal view, just the ambient temperature environment.",
+        "question": "What is the primary source of thermal contrast in the scene?",
+        "answer": "The ambient temperature difference between the materials like the metal counter, plastic, and organic matter."
       }
     }
   },
@@ -559,11 +559,6 @@
         "caption": "The sequence shows the subject peeling a vegetable into a bowl, then proceeding to use a knife to slice the vegetable on the cutting board.",
         "question": "What is the sequence of tasks performed by me in the video?",
         "answer": "First, I peel the vegetable into a bowl, and then I slice the vegetable on the cutting board."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in IR, showing thermal contrast between the objects; no visible light sources are identified in the IR spectrum.",
-        "question": "What is the primary heat source indicated in the frame?",
-        "answer": "The power strip outlets show higher thermal intensity."
       },
       "light_change": {
         "caption": "The lighting intensity remains consistent throughout the IR video stream.",
@@ -599,6 +594,11 @@
         "caption": "I am peeling a vegetable into a bowl, followed by slicing it on a cutting board, likely to prepare food.",
         "question": "What is the main action I am performing with the vegetable?",
         "answer": "I am peeling and then slicing the vegetable."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in IR, showing thermal contrast between the objects; no visible light sources are identified in the IR spectrum.",
+        "question": "What is the primary heat source indicated in the frame?",
+        "answer": "The power strip outlets show higher thermal intensity."
       }
     }
   },
@@ -625,11 +625,6 @@
         "caption": "The video displays a static scene sequence of vegetable preparation. It starts with the arrangement of tools, followed by the repeated action of slicing vegetables, and finally accumulating the sliced pieces in the bowl.",
         "question": "Does the scene change or move to a different room throughout the video?",
         "answer": "No, the scene remains in the same kitchen area throughout the video."
-      },
-      "light_recongnition": {
-        "caption": "The infrared video shows uniform thermal emission from the kitchen environment with no distinct artificial light sources acting as hotspots.",
-        "question": "Are there any obvious thermal hotspots indicating a heat source like a stove or light bulb?",
-        "answer": "No, there are no significant thermal hotspots visible."
       },
       "light_change": {
         "caption": "The overall thermal signature of the scene is stable with no fluctuations in intensity or brightness levels.",
@@ -665,6 +660,11 @@
         "caption": "The subject is using a knife to slice vegetable strips on a cutting board. The purpose is food preparation.",
         "question": "What is the primary action I am performing in the video?",
         "answer": "I am slicing vegetables on a cutting board."
+      },
+      "light_recognition": {
+        "caption": "The infrared video shows uniform thermal emission from the kitchen environment with no distinct artificial light sources acting as hotspots.",
+        "question": "Are there any obvious thermal hotspots indicating a heat source like a stove or light bulb?",
+        "answer": "No, there are no significant thermal hotspots visible."
       }
     }
   },
@@ -691,11 +691,6 @@
         "caption": "The scene is a stationary top-down view of a kitchen counter throughout the entire duration of the video.",
         "question": "1. What is the primary setting of the video? 2. Did the scene change during the recording? 3. What objects are present in the scene throughout? 4. Is the camera moving during the video? 5. How many distinct locations are shown? 6. What is the camera orientation? 7. Does the scene transition between different rooms? 8. Are there any background changes? 9. Is this an indoor or outdoor setting? 10. Can you describe the background environment?",
         "answer": "1. A kitchen counter. 2. No. 3. Cutting board, knife, bowl, peeler, and vegetables. 4. No. 5. Only one. 6. Top-down. 7. No. 8. No. 9. Indoor. 10. A stainless steel kitchen workspace."
-      },
-      "light_recongnition": {
-        "caption": "The video is in infrared, showing heat signatures. There are no traditional light sources like lamps or windows visible; illumination is represented by thermal contrast.",
-        "question": "How is the scene illuminated in the video?",
-        "answer": "The scene is depicted in infrared, utilizing thermal contrast rather than traditional light."
       },
       "light_change": {
         "caption": "There are no significant changes in the thermal lighting or intensity throughout the video.",
@@ -731,6 +726,11 @@
         "caption": "The subject is slicing vegetables on a cutting board using a knife. This action is likely for food preparation.",
         "question": "1. What is the primary action being performed? 2. What object is being interacted with? 3. What is the likely purpose of this action? 4. Is the action performed with one hand? 5. What tool is being used? 6. Does the action change over the course of the video? 7. What is the result of the action? 8. Is the action controlled?",
         "answer": "1. Slicing vegetables. 2. Vegetables and a knife. 3. Food preparation. 4. No, both hands are used. 5. A knife. 6. No, it remains consistent. 7. Sliced vegetable strips. 8. Yes."
+      },
+      "light_recognition": {
+        "caption": "The video is in infrared, showing heat signatures. There are no traditional light sources like lamps or windows visible; illumination is represented by thermal contrast.",
+        "question": "How is the scene illuminated in the video?",
+        "answer": "The scene is depicted in infrared, utilizing thermal contrast rather than traditional light."
       }
     }
   },
@@ -776,11 +776,6 @@
         "question": "What sequence of kitchen areas do I encounter in this video?",
         "answer": "I encounter the countertop with the toaster and potato, followed by the sink and dish rack area."
       },
-      "light_recongnition": {
-        "caption": "The IR video depicts thermal radiation. No artificial light sources are visible, only thermal signatures of objects and the room.",
-        "question": "Are there any active thermal hotspots indicating a light source?",
-        "answer": "No, there are no significant thermal hotspots suggesting an active light source."
-      },
       "light_change": {
         "caption": "The thermal signature remains consistent throughout the video, showing no changes in lighting or thermal intensity that would indicate a light transition.",
         "question": "Did the lighting conditions change at any point in the video?",
@@ -815,6 +810,11 @@
         "caption": "The subject is using a peeler to remove skin from an object over the sink, likely a vegetable, as part of food preparation.",
         "question": "What tool am I holding and using in my hands?",
         "answer": "I am holding and using a peeler."
+      },
+      "light_recognition": {
+        "caption": "The IR video depicts thermal radiation. No artificial light sources are visible, only thermal signatures of objects and the room.",
+        "question": "Are there any active thermal hotspots indicating a light source?",
+        "answer": "No, there are no significant thermal hotspots suggesting an active light source."
       }
     }
   },
@@ -841,11 +841,6 @@
         "caption": "The video captures a sequence of preparing a potato for cooking. First, I retrieve a potato and a peeler. Then, I begin peeling the potato over the sink. Finally, I move the finished potato to the side.",
         "question": "1. What is the first item I pick up? 2. What action do I perform with the peeler? 3. Where do I perform the peeling task? 4. Are there any dishes visible in the background? 5. What do I do after finishing peeling? 6. Do I wash the potato at any point? 7. Is the sink empty at the start of the video? 8. What is the final state of the potato? 9. Which room am I in based on the objects present? 10. Does the sequence change throughout the recording?",
         "answer": "1. A potato. 2. Peeling. 3. Over the kitchen sink. 4. Yes, plates in a rack. 5. Set it aside. 6. Yes. 7. Yes. 8. Peeled. 9. Kitchen. 10. No, it is a consistent task."
-      },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by standard indoor lighting, providing enough thermal contrast to distinguish the sink, the faucet, and the soap bottles. There are no direct sunlight sources visible.",
-        "question": "What is the primary source of light in this kitchen sink scene?",
-        "answer": "Standard indoor overhead or under-cabinet lighting."
       },
       "light_change": {
         "caption": "The lighting remains stable throughout the process of peeling the potato. There are no sudden changes in illumination level or source behavior.",
@@ -881,6 +876,11 @@
         "caption": "The subject is peeling a potato using a vegetable peeler over a sink. The purpose is to prepare the vegetable for cooking or boiling, which will result in a clean, skinless potato.",
         "question": "1. What is the main action being performed? 2. What tool is being used for this action? 3. What object is being interacted with? 4. What is the purpose of this action? 5. Where is the action taking place? 6. Is the action completed in the video? 7. What is the consequence of this action for the potato? 8. How many hands are involved in the interaction?",
         "answer": "1. Peeling a potato. 2. A vegetable peeler. 3. A potato. 4. Food preparation. 5. Over the kitchen sink. 6. Yes. 7. It becomes peeled/skinless. 8. Two."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by standard indoor lighting, providing enough thermal contrast to distinguish the sink, the faucet, and the soap bottles. There are no direct sunlight sources visible.",
+        "question": "What is the primary source of light in this kitchen sink scene?",
+        "answer": "Standard indoor overhead or under-cabinet lighting."
       }
     }
   },
@@ -907,11 +907,6 @@
         "caption": "The video shows a sequence of a person peeling a potato over a kitchen sink. The person retrieves a potato, uses a peeler to remove the skin, and discards the peelings into the sink. The sequence concludes with the person placing the peeled potato on a cutting board.",
         "question": "1. What is the first item I interact with in the sequence? 2. What action do I perform after picking up the potato? 3. Where do the peelings go? 4. What tool do I use to remove the skin? 5. What is the final object I place the potato on? 6. Did I wash the potato before peeling it? 7. Did I use a knife during the process? 8. Is the sink used for anything other than catching peels? 9. Does the sequence start at the sink? 10. Where is the cutting board located relative to the sink?",
         "answer": "1. A potato. 2. I begin to peel it. 3. They fall into the sink. 4. A vegetable peeler. 5. A cutting board. 6. No. 7. No. 8. Yes, for general kitchen cleaning. 9. Yes. 10. It is beside the sink area."
-      },
-      "light_recongnition": {
-        "caption": "The kitchen scene is illuminated by ambient kitchen lighting, likely overhead, creating consistent thermal reflections on the stainless steel sink and faucet. There are no direct, harsh point light sources identified in the frame.",
-        "question": "What is the approximate shape and orientation of the primary light source reflections on the faucet?",
-        "answer": "The reflections are elongated and vertical, following the shape of the faucet neck."
       },
       "light_change": {
         "caption": "The video shows a stable lighting environment throughout the task. There are no significant changes in ambient illumination, as the light remains constant while the subject performs the peeling action at the sink.",
@@ -947,6 +942,11 @@
         "caption": "The subject is performing a vegetable peeling task. They are holding a potato in one hand and a vegetable peeler in the other, methodically removing the peel and discarding it into the sink. This is a standard food preparation action.",
         "question": "1. What is the specific action I am performing? 2. What objects am I interacting with? 3. What is the likely purpose of this action? 4. What is the consequence of my action? 5. Am I using both hands? 6. What kind of vegetable am I peeling? 7. Do I stop to rest during the action? 8. Is the action completed by the end of the video?",
         "answer": "1. Peeling a potato. 2. A potato and a peeler. 3. Food preparation. 4. The potato is being cleaned and prepped for cooking. 5. Yes. 6. A potato. 7. No. 8. Yes."
+      },
+      "light_recognition": {
+        "caption": "The kitchen scene is illuminated by ambient kitchen lighting, likely overhead, creating consistent thermal reflections on the stainless steel sink and faucet. There are no direct, harsh point light sources identified in the frame.",
+        "question": "What is the approximate shape and orientation of the primary light source reflections on the faucet?",
+        "answer": "The reflections are elongated and vertical, following the shape of the faucet neck."
       }
     }
   },
@@ -973,11 +973,6 @@
         "caption": "The video starts with a close-up of a kitchen sink and dish rack, then moves the camera across the counter to show the toaster, power strip, and eventually focuses on a cutting board being handled.",
         "question": "What is the sequence of items I passed while moving the camera along the counter?",
         "answer": "I passed the dish rack, the utensil holder, the toaster, and the power strip."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared, showing heat signatures of objects. There is a distinct hotspot on the toaster and the power strip, indicating active electrical components.",
-        "question": "Which object in the kitchen emits a significant thermal hotspot indicating electrical activity?",
-        "answer": "The toaster."
       },
       "light_change": {
         "caption": "The scene begins with standard ambient infrared visibility, but as the video progresses toward the end, the scene becomes significantly darker, indicating a reduction in thermal emission or a transition to a very low-light state.",
@@ -1013,6 +1008,11 @@
         "caption": "The subject picks up and moves a white cutting board from the sink area to the counter to prepare for a task.",
         "question": "What object is the subject interacting with at the end of the video?",
         "answer": "The subject is interacting with a white cutting board."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared, showing heat signatures of objects. There is a distinct hotspot on the toaster and the power strip, indicating active electrical components.",
+        "question": "Which object in the kitchen emits a significant thermal hotspot indicating electrical activity?",
+        "answer": "The toaster."
       }
     }
   },
@@ -1067,11 +1067,6 @@
         "question": "1. What object do I focus on before turning to the coffee station? 2. Did I visit the bookshelf before or after the kitchen table? 3. What piece of furniture is next to the window? 4. What is the sequence of my movement? 5. Where do I end my exploration? 6. Do I pass the ironing board before the counter? 7. What is the last area I interact with? 8. Is the storage unit located between the table and the counter? 9. Where is the couch located relative to my path? 10. Do I show the stove at the beginning or end of the video?",
         "answer": "1. The storage shelves. 2. After the kitchen table. 3. The couch. 4. Table to shelf, then to counter. 5. The kitchen counter/coffee station. 6. Yes. 7. The kitchen counter/coffee station. 8. Yes. 9. The couch is near the window area. 10. The end."
       },
-      "light_recongnition": {
-        "caption": "The scene is lit by ambient room light, and there is a direct, strong light source coming from the window area, creating distinct thermal contrasts on the furniture.",
-        "question": "What is the primary source of illumination for the kitchen scene?",
-        "answer": "The window."
-      },
       "light_change": {
         "caption": "The lighting remains mostly consistent throughout the video, though the camera perspective shifts between the kitchen furniture and the dark corner containing the storage unit.",
         "question": "1. Does the ambient light level change significantly? 2. Is the storage shelf area darker than the table? 3. Does the window light create shadows? 4. Is the light source behind the camera? 5. Does the room get brighter as I move? 6. Is the counter area well-lit? 7. Are there any artificial light changes? 8. How does the thermal contrast change near the window?",
@@ -1106,6 +1101,11 @@
         "caption": "The subject is interacting with the kitchen electrical setup, specifically plugging or unplugging a device from the power strip near the coffee machine, likely to manage power for appliances.",
         "question": "1. What is the subject doing with the electrical cables? 2. Which appliance are they interacting with? 3. Is the subject cleaning the counter? 4. What is the goal of the interaction with the power strip? 5. Do they use both hands? 6. Are they adjusting the stove? 7. What is the consequence of their action? 8. Are they preparing coffee?",
         "answer": "1. Plugging/unplugging a cable. 2. A coffee grinder/appliance. 3. No. 4. Power management. 5. Yes. 6. No. 7. The device is powered or disconnected. 8. No."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ambient room light, and there is a direct, strong light source coming from the window area, creating distinct thermal contrasts on the furniture.",
+        "question": "What is the primary source of illumination for the kitchen scene?",
+        "answer": "The window."
       }
     }
   },
@@ -1132,11 +1132,6 @@
         "caption": "The video sequence shows a person interacting with a power strip, then moving to open a bag of coffee beans and prepare the coffee grinder on a kitchen counter.",
         "question": "What activity does the person perform after adjusting the plugs on the power strip?",
         "answer": "The person opens a bag of coffee beans."
-      },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by ambient light and specific indicators on the electronic devices, showing thermal contrast on the stainless steel surface.",
-        "question": "What indicates that the power strip is receiving electricity?",
-        "answer": "The indicator light on the power strip."
       },
       "light_change": {
         "caption": "There is a significant decrease in brightness as the scene transitions into a darker state, likely due to a change in the environment or light source control.",
@@ -1172,6 +1167,11 @@
         "caption": "The subject is preparing to make coffee, which involves organizing the power supply and opening the coffee bean package to begin grinding.",
         "question": "What is the primary action being performed by the person at the end of the video?",
         "answer": "The person is opening a bag of coffee beans."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by ambient light and specific indicators on the electronic devices, showing thermal contrast on the stainless steel surface.",
+        "question": "What indicates that the power strip is receiving electricity?",
+        "answer": "The indicator light on the power strip."
       }
     }
   },
@@ -1198,11 +1198,6 @@
         "caption": "The scene begins with the user preparing to grind coffee. They handle a bag of beans, place a portafilter under the grinder, tamp the grounds, and finally move to the coffee machine area to prepare for extraction.",
         "question": "What action does the user perform after tamping the coffee grounds?",
         "answer": "The user moves to the coffee machine area."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by overhead kitchen lighting, creating a consistent illumination across the stainless steel surface, with no obvious shadows.",
-        "question": "What is the primary surface material reflecting the ambient light in the scene?",
-        "answer": "Stainless steel."
       },
       "light_change": {
         "caption": "The lighting remains constant throughout the video sequence until the final transition to darkness.",
@@ -1238,6 +1233,11 @@
         "caption": "The user is performing a coffee extraction workflow: grinding, tamping, and moving to the espresso machine.",
         "question": "What is the final object the user interacts with before the video ends?",
         "answer": "The portafilter."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by overhead kitchen lighting, creating a consistent illumination across the stainless steel surface, with no obvious shadows.",
+        "question": "What is the primary surface material reflecting the ambient light in the scene?",
+        "answer": "Stainless steel."
       }
     }
   },
@@ -1264,11 +1264,6 @@
         "caption": "The sequence starts with the preparation of coffee components on a counter. Then, it transitions to the user picking up a portafilter and moving towards a sink to rinse it. The final scene shows the user at the sink area in a darker environment.",
         "question": "1. What is the sequence of the main areas shown? 2. Did I move from the counter to the sink? 3. What object was I holding while moving to the sink? 4. Was the coffee grinder at the sink? 5. Did I return to the counter after the sink? 6. What was the last scene in the video? 7. What connects the counter and the sink? 8. Did I use a cloth during the transition? 9. Which area was shown first? 10. Was the lighting the same in all locations?",
         "answer": "1. Counter to sink. 2. Yes. 3. The portafilter. 4. No. 5. No. 6. The sink area. 7. The countertop surface. 8. No. 9. The counter. 10. No."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by overhead ambient light and some indicator lights on the coffee machine. The thermal signatures of the electronic power strip and the coffee machine buttons are clearly visible.",
-        "question": "What is the source of the illuminated indicators visible on the appliance in the later part of the video?",
-        "answer": "The coffee machine's control panel/buttons."
       },
       "light_change": {
         "caption": "Initially, the lighting is bright and uniform across the counter. As the video progresses and the action moves towards the sink, the overall intensity decreases significantly, resulting in a much darker scene.",
@@ -1304,6 +1299,11 @@
         "caption": "The subject prepares a coffee using a portafilter, then moves to a sink to rinse it. The purpose is to clean the equipment. The consequence is a clean portafilter ready for use.",
         "question": "1. What am I doing with the portafilter? 2. Why am I going to the sink? 3. What is the goal of the action? 4. Do I interact with any other objects? 5. Is the action completed by the end? 6. What does the action imply? 7. How do I hold the portafilter? 8. What is the final state of the portafilter?",
         "answer": "1. Cleaning/rinsing it. 2. To rinse it. 3. Preparing the equipment for brewing. 4. Only briefly touching the machine. 5. Yes. 6. That the coffee machine is being readied. 7. By the handle. 8. It has been rinsed."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by overhead ambient light and some indicator lights on the coffee machine. The thermal signatures of the electronic power strip and the coffee machine buttons are clearly visible.",
+        "question": "What is the source of the illuminated indicators visible on the appliance in the later part of the video?",
+        "answer": "The coffee machine's control panel/buttons."
       }
     }
   },
@@ -1330,11 +1330,6 @@
         "caption": "The video begins in a kitchen area where I am tamping coffee in a portafilter. I then move the camera to look at the dish drying rack near the stove. Finally, I move the camera to show the coffee station, which includes the grinder, scale, and coffee beans, and then I return to the sink area.",
         "question": "1. What activity am I performing at the beginning? 2. What do I look at after the tamping area? 3. Where is the dish drying rack located relative to the stove? 4. What is the final location of the camera? 5. Do I visit the coffee grinder area? 6. Is the stove shown before or after the sink? 7. What is the sequence of the main areas shown? 8. Where do I find the coffee beans? 9. Is there a transition between the sink and the stove? 10. Does the video end at the sink or the coffee station?",
         "answer": "1. Tamping coffee in a portafilter. 2. The dish drying rack. 3. To the left. 4. The sink area. 5. Yes. 6. The stove is shown after the sink area. 7. Tamping area, dish drying rack, coffee station, sink area. 8. On the counter near the grinder. 9. Yes, the camera pans from one to the other. 10. The sink area."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by ambient room lighting, which is relatively dim in this IR capture, with the brightest spots being the digital displays on the scale and coffee grinder, and the glowing indicator lights on the espresso machine.",
-        "question": "What is the primary source of bright light in this dark room?",
-        "answer": "The digital displays and indicator lights on the kitchen appliances."
       },
       "light_change": {
         "caption": "The overall illumination in the scene is consistently low as it is an IR-recorded video. There is no significant change in light intensity throughout the sequence, though there are minor fluctuations when the camera moves to display the backlit control panels of the appliances.",
@@ -1370,6 +1365,11 @@
         "caption": "I am preparing to make coffee. I first tamp the coffee grounds into the portafilter using a tamper to ensure a uniform bed. Then, I move to the coffee machine, insert the portafilter, and press the brew button on the espresso machine, likely to extract a shot of espresso.",
         "question": "1. What is the first action I perform on the portafilter? 2. What tool do I use to press the coffee? 3. Where do I go after tamping the coffee? 4. What is the purpose of inserting the portafilter into the machine? 5. What do I do once the portafilter is in the machine? 6. Is the machine on during this process? 7. What does pressing the button accomplish? 8. What is the ultimate goal of these actions?",
         "answer": "1. Tamping the coffee grounds. 2. A wooden tamper. 3. To the espresso machine. 4. To prepare for the brewing process. 5. I press the button to start the extraction. 6. Yes. 7. It starts the water flow for espresso extraction. 8. To brew a cup of coffee."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ambient room lighting, which is relatively dim in this IR capture, with the brightest spots being the digital displays on the scale and coffee grinder, and the glowing indicator lights on the espresso machine.",
+        "question": "What is the primary source of bright light in this dark room?",
+        "answer": "The digital displays and indicator lights on the kitchen appliances."
       }
     }
   },
@@ -1406,11 +1406,6 @@
         "question": "What is the sequence of areas I visit in the kitchen, starting from the initial view?",
         "answer": "You start at the kitchen corner, move across the counter to the stove area, and finish by accessing the refrigerator."
       },
-      "light_recongnition": {
-        "caption": "The scene is lit by ambient room light and the interior light of the refrigerator, which provides a bright hotspot when the door is opened.",
-        "question": "What is the source of the bright hotspot that appears when I access the refrigerator?",
-        "answer": "The interior light of the refrigerator."
-      },
       "light_change": {
         "caption": "The lighting remains stable until the user opens the refrigerator door, which introduces a new, intense light source into the scene.",
         "question": "1. Does the light level change significantly in the video? 2. What action causes an increase in brightness? 3. Is the scene getting darker or brighter overall? 4. Does opening the refrigerator door change the scene's lighting? 5. Is there a light source that turns on during the video? 6. Is the light source natural or artificial? 7. Does the kitchen area experience any flickering lights? 8. Are the overhead lights on during the entire video?",
@@ -1445,6 +1440,11 @@
         "caption": "The user approaches the kitchen area, interacts with a cutting board, moves it to the sink, and then opens the refrigerator to get a container of meat, presumably to prepare food.",
         "question": "1. What is the primary action I perform at the sink? 2. What object do I move first? 3. What is the purpose of opening the refrigerator? 4. What do I do after moving the cutting board? 5. Which appliance do I interact with last? 6. Is the meat container cold? 7. Do I use a knife in this video? 8. What is the consequence of opening the refrigerator?",
         "answer": "1. Cleaning or preparing to clean a cutting board. 2. A white cutting board. 3. To retrieve a container of meat. 4. I open the refrigerator. 5. The refrigerator. 6. Yes, it is kept in the refrigerator. 7. No. 8. It provides access to the food inside."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ambient room light and the interior light of the refrigerator, which provides a bright hotspot when the door is opened.",
+        "question": "What is the source of the bright hotspot that appears when I access the refrigerator?",
+        "answer": "The interior light of the refrigerator."
       }
     }
   },
@@ -1471,11 +1471,6 @@
         "caption": "The sequence starts with a focus on the dish drying rack, then moves to the sink area where a white cutting board is handled, and finally transitions to the countertop where raw meat is being prepared and sliced.",
         "question": "What is the primary activity performed after setting down the cutting board?",
         "answer": "The primary activity performed after setting down the cutting board is slicing the raw meat."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared, showing heat signatures of household items. There are no direct light sources identified as lamps, but the thermal contrast highlights the kitchen appliances and objects.",
-        "question": "What is the primary thermal source visible on the countertop near the wall?",
-        "answer": "The primary thermal source visible near the wall is the power strip."
       },
       "light_change": {
         "caption": "There is no significant change in overall illumination; the video maintains a consistent infrared view of the kitchen.",
@@ -1511,6 +1506,11 @@
         "caption": "The subject is preparing raw pork chops on a white cutting board using a kitchen knife. The purpose is to slice the meat into smaller portions for cooking.",
         "question": "What is the subject doing with the knife and the meat?",
         "answer": "The subject is using the knife to slice the raw meat on the cutting board."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared, showing heat signatures of household items. There are no direct light sources identified as lamps, but the thermal contrast highlights the kitchen appliances and objects.",
+        "question": "What is the primary thermal source visible on the countertop near the wall?",
+        "answer": "The primary thermal source visible near the wall is the power strip."
       }
     }
   },
@@ -1537,11 +1537,6 @@
         "caption": "The sequence begins with the preparation of a pork chop on a cutting board, moves to accessing a kitchen cabinet to retrieve a container, and ends with the application of seasoning to the meat.",
         "question": "What is the first step I perform in the kitchen?",
         "answer": "Slicing or preparing the pork chop on the cutting board."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by overhead kitchen lights with a fairly uniform distribution. There is a strong hotspot on the cutting board due to direct overhead illumination.",
-        "question": "What is the primary source of light in the kitchen scene?",
-        "answer": "Overhead kitchen lighting."
       },
       "light_change": {
         "caption": "The lighting remains stable throughout the food preparation steps. A transition occurs when the camera moves to the cabinet area, but intensity remains consistent.",
@@ -1577,6 +1572,11 @@
         "caption": "The subject is preparing a pork chop by scoring the fat, then moves to a cabinet to retrieve a container of salt to season the meat.",
         "question": "What is the purpose of using the knife on the pork chop?",
         "answer": "To score the fat for better cooking."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by overhead kitchen lights with a fairly uniform distribution. There is a strong hotspot on the cutting board due to direct overhead illumination.",
+        "question": "What is the primary source of light in the kitchen scene?",
+        "answer": "Overhead kitchen lighting."
       }
     }
   },
@@ -1603,11 +1603,6 @@
         "caption": "The sequence starts at the kitchen counter with meal preparation, involves moving to an overhead shelf to retrieve spices, and returns to the counter to season the meat.",
         "question": "What task did I perform at the kitchen shelf before returning to the cutting board?",
         "answer": "I retrieved a spice container to season the meat."
-      },
-      "light_recongnition": {
-        "caption": "The kitchen workspace is illuminated by ambient kitchen lighting and a distinct hotspot from the wall-mounted power strip LED indicators.",
-        "question": "What is the primary source of artificial light on the wall behind the counter?",
-        "answer": "The primary source of artificial light on the wall is the power strip."
       },
       "light_change": {
         "caption": "There is a transition in light intensity as the camera shifts focus from the bright, reflective metal surface of the kitchen counter to the darker interior of the overhead storage shelf.",
@@ -1643,6 +1638,11 @@
         "caption": "The user is preparing pork chops: they first move a container, retrieve salt from a shelf, and season the meat on the cutting board.",
         "question": "What is the final action I perform with the salt shaker on the cutting board?",
         "answer": "I sprinkle salt over the pork chop."
+      },
+      "light_recognition": {
+        "caption": "The kitchen workspace is illuminated by ambient kitchen lighting and a distinct hotspot from the wall-mounted power strip LED indicators.",
+        "question": "What is the primary source of artificial light on the wall behind the counter?",
+        "answer": "The primary source of artificial light on the wall is the power strip."
       }
     }
   },
@@ -1679,11 +1679,6 @@
         "question": "What is the starting location in the hallway? What structure is visible to the left when the video begins? Does the path involve turning into any rooms? Which type of area does the video end in? How many doors do I pass on the right side of the hallway? Was there a stairway visible at the end of the video? Do I walk through any open doors during the sequence? Does the hallway have a consistent flooring texture? Are there any intersections in the hallway I pass through? Is the final scene a dead end or an open space?",
         "answer": "The video starts in an office building hallway near a staircase. A staircase is visible to the left. No, the path follows the main corridor without turning into rooms. The video ends in a long corridor with several office doors. I pass three doors on the right side. No, there is no stairway visible at the end of the corridor. No, I do not walk through any open doors. Yes, the flooring appears to be consistent throughout the hallway. No, the hallway remains a straight path without side corridors. The final scene is a continuation of the hallway."
       },
-      "light_recongnition": {
-        "caption": "The scene is lit by overhead fluorescent lights, which create consistent thermal patterns on the floor and walls, highlighting the geometric layout of the corridors.",
-        "question": "What is the primary light source type illuminating the hallway?",
-        "answer": "Overhead fluorescent lights."
-      },
       "light_change": {
         "caption": "The IR video depicts a indoor environment where the lighting appears consistent as the camera moves through the hallway. There are no significant shifts in brightness or shadows that suggest artificial light being toggled or daylight changes during the duration of the recording.",
         "question": "Is there a noticeable change in the ambient light levels throughout the video? Did the camera pass any light sources that flickered? Does the overall brightness of the hallway remain constant? Are there any moments where the scene goes completely dark due to light changes? Does the lighting profile suggest artificial overhead illumination? Did any external light source influence the hallway's brightness? Is there any point where the hallway becomes significantly brighter? Was there any adjustment in camera exposure due to light changes?",
@@ -1718,6 +1713,11 @@
         "caption": "The subject behind the camera is walking forward through an office building's hallway. The action is a steady, deliberate movement to traverse the length of the corridor, likely to move between office locations or reach a destination within the building.",
         "question": "What is the main action I am performing while holding the camera? Does my movement suggest I am looking for a specific room? Is there an interaction with any door handles during the walk? Why would I be walking down this hallway? Does my speed of movement change during the recording? Am I carrying any items visible in the frame? Do I stop at any of the doors I pass? Is the purpose of this walk likely related to professional or student activity?",
         "answer": "The main action is walking forward along the corridor. No, the consistent speed suggests a commute rather than a search. No, I do not touch any doors. The likely purpose is to move from the staircase area to an office or room located further down the corridor. No, the speed is constant. No, no items are visible in the frame. No, I pass all doors without stopping. Yes, the sign about students and the office numbering suggests a professional or educational building environment."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by overhead fluorescent lights, which create consistent thermal patterns on the floor and walls, highlighting the geometric layout of the corridors.",
+        "question": "What is the primary light source type illuminating the hallway?",
+        "answer": "Overhead fluorescent lights."
       }
     }
   },
@@ -1744,11 +1744,6 @@
         "caption": "The camera moves down a long hallway, passing several doors on both sides. The sequence includes walking past the fire extinguisher on the left, passing multiple office/room doors, and finally arriving at a door with a sign at the end of the hallway before turning slightly.",
         "question": "What object did I pass on the left side shortly after beginning to walk down the hall?",
         "answer": "I passed a fire extinguisher."
-      },
-      "light_recongnition": {
-        "caption": "The scene is evenly lit by overhead lights, providing consistent illumination throughout the corridor.",
-        "question": "What is the primary source of light in the hallway?",
-        "answer": "Overhead lights."
       },
       "light_change": {
         "caption": "The light levels remain constant throughout the video as the camera moves down the hallway.",
@@ -1784,6 +1779,11 @@
         "caption": "The subject is walking down a hallway, presumably conducting a survey or inspection of the building's corridor.",
         "question": "What is the main action I am performing in the video?",
         "answer": "I am walking through the hallway."
+      },
+      "light_recognition": {
+        "caption": "The scene is evenly lit by overhead lights, providing consistent illumination throughout the corridor.",
+        "question": "What is the primary source of light in the hallway?",
+        "answer": "Overhead lights."
       }
     }
   },
@@ -1810,11 +1810,6 @@
         "caption": "I start in a corridor, walk past several doors on the left and right, approach a fire extinguisher on the left wall, continue down the hallway, and finally reach a doorway leading to a brightly lit area with a tiled floor.",
         "question": "1. What is the first major object I pass on the left? 2. What kind of flooring is in the hallway? 3. What does the hallway lead into at the end? 4. Did I turn any corners? 5. What is the sequence of the hall passage? 6. How many doors did I pass on the right? 7. What is the final destination in the video? 8. Was the floor material consistent throughout? 9. Did I pass any furniture? 10. Where is the fire extinguisher located in the sequence?",
         "answer": "1. A fire extinguisher. 2. A dark-colored wooden laminate. 3. A brightly lit room or lobby area with tile floors. 4. No. 5. Start in corridor, pass doors, pass extinguisher, reach doorway at end. 6. Multiple. 7. The doorway at the far end of the hall. 8. Yes. 9. No, mostly just doors and wall features. 10. Near the beginning of the hall on the left side."
-      },
-      "light_recongnition": {
-        "caption": "The hallway is lit by overhead lights installed along the ceiling, creating a consistent light path down the center of the corridor. The light is relatively uniform, casting soft shadows.",
-        "question": "What is the primary source of illumination in the hallway?",
-        "answer": "Overhead ceiling lights."
       },
       "light_change": {
         "caption": "The lighting remains constant as I walk down the hallway. There is no significant change in brightness or color temperature until I reach the doorway at the end, which opens into a much brighter, possibly natural-light-filled area.",
@@ -1850,6 +1845,11 @@
         "caption": "The subject (behind the camera) is walking forward down a hallway. They are likely moving from one room to another, possibly performing a routine building inspection or navigating to an exit.",
         "question": "1. What is the main action of the person holding the camera? 2. Is the person running or walking? 3. What is the purpose of this movement? 4. What object is being interacted with, if any? 5. What is the consequence of this movement? 6. Is the person turning? 7. Does the person stop at the fire extinguisher? 8. What is the likely destination?",
         "answer": "1. Walking forward. 2. Walking. 3. Navigation/travel. 4. None. 5. Progress through the hallway. 6. No. 7. No. 8. The room at the end of the hall."
+      },
+      "light_recognition": {
+        "caption": "The hallway is lit by overhead lights installed along the ceiling, creating a consistent light path down the center of the corridor. The light is relatively uniform, casting soft shadows.",
+        "question": "What is the primary source of illumination in the hallway?",
+        "answer": "Overhead ceiling lights."
       }
     }
   },
@@ -1904,11 +1904,6 @@
         "question": "What is the sequence of items I passed by or looked at on the desk from left to right?",
         "answer": "I looked at the white cylindrical container, the circular white cap, the dark-colored cup, and the metallic jug."
       },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared, showing thermal signatures. There are no active light sources like bulbs or lamps visible, just the thermal contrast of the room and objects.",
-        "question": "What is the primary source of illumination in the scene?",
-        "answer": "The scene is captured using thermal imaging, so there is no primary visual light source."
-      },
       "light_change": {
         "caption": "The light level transitions from a bright, high-contrast state to a very dark state, effectively turning off or obscuring the scene as the video concludes.",
         "question": "What happens to the visibility in the scene as the video progresses?",
@@ -1943,6 +1938,11 @@
         "caption": "The subject is interacting with objects on a desk. They reach toward the cup and then appear to place or adjust a lid/cap on it, likely for the purpose of sealing or covering the container.",
         "question": "What action am I performing with the cup on the desk?",
         "answer": "I am placing or adjusting a lid/cap onto the cup."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared, showing thermal signatures. There are no active light sources like bulbs or lamps visible, just the thermal contrast of the room and objects.",
+        "question": "What is the primary source of illumination in the scene?",
+        "answer": "The scene is captured using thermal imaging, so there is no primary visual light source."
       }
     }
   },
@@ -1969,11 +1969,6 @@
         "caption": "The camera is held by the subject in a kitchen or pantry area. The sequence involves a tabletop with a water pitcher on the left, a dark open container, a small circular lid, and a stainless steel electric kettle on the right. The subject's hands interact with the lid and the kettle.",
         "question": "1. What is the sequence of objects seen from left to right? 2. What object is located on the far left of the scene? 3. Is the electric kettle placed before or after the dark container? 4. What is the first object I interact with? 5. What object is positioned between the pitcher and the kettle? 6. Do I pass through any doors in this sequence? 7. What is the final object focused on in the sequence? 8. Is the scene changing or static? 9. Which object is closest to my hands at the start? 10. How many main items are arranged on the table?",
         "answer": "1. The sequence from left to right is the water pitcher, the dark container, the lid, and the stainless steel electric kettle. 2. A water pitcher. 3. The kettle is placed after the container. 4. The lid. 5. The dark container and the lid. 6. No, the scene is static and limited to the tabletop. 7. The kettle. 8. The scene is static. 9. The lid. 10. Four main items."
-      },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by ambient light in the room, creating thermal contrast between the room temperature objects and the warm surface of the kettle.",
-        "question": "What is the main source of thermal contrast on the table surface?",
-        "answer": "The stainless steel kettle."
       },
       "light_change": {
         "caption": "The lighting in the scene undergoes a dramatic shift. Initially, the environment is well-lit, allowing clear identification of the kitchen objects. Over the course of the video, the scene progressively darkens until it becomes almost entirely black, suggesting an intentional change in the environment's illumination.",
@@ -2009,6 +2004,11 @@
         "caption": "The subject is performing a series of kitchen tasks, including handling a circular lid and manipulating an electric kettle. The likely purpose is preparing to boil water or cleaning, given the presence of the pitcher and kettle.",
         "question": "1. What is the subject doing with their hands? 2. What object is being interacted with at the beginning? 3. Is the subject using a kitchen tool? 4. What is the likely purpose of these actions? 5. What is the consequence of moving the lid? 6. Are the hands performing a complex task? 7. Is the kettle being prepared for use? 8. Does the subject appear to be cleaning the area?",
         "answer": "1. The subject is manipulating a lid and adjusting the position of a kettle. 2. A circular lid. 3. The subject is interacting with the kettle and its components. 4. Likely preparing to boil water. 5. The lid is being moved to access or cover the container. 6. No, they are simple positioning tasks. 7. Yes, it appears so. 8. The subject seems to be organizing the items on the table."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by ambient light in the room, creating thermal contrast between the room temperature objects and the warm surface of the kettle.",
+        "question": "What is the main source of thermal contrast on the table surface?",
+        "answer": "The stainless steel kettle."
       }
     }
   },
@@ -2035,11 +2035,6 @@
         "caption": "The sequence starts with the camera mounted on a bicycle riding along a sidewalk. I then pass by parked cars, a storm drain, and eventually approach a building frontage at night.",
         "question": "What is the final landmark seen?",
         "answer": "A building wall with a sign."
-      },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by streetlights, which appear as bright hotspots in the infrared spectrum, casting long, dark shadows on the ground.",
-        "question": "What is the primary source of illumination for the outdoor scene?",
-        "answer": "Streetlights."
       },
       "light_change": {
         "caption": "The light intensity changes as the camera moves past streetlights, with shadows shifting in length and intensity across the frame throughout the ride.",
@@ -2075,6 +2070,11 @@
         "caption": "I am riding a bicycle along a sidewalk at night. The purpose is to navigate through the residential area.",
         "question": "What is the consequence of my action?",
         "answer": "I am moving along the street."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by streetlights, which appear as bright hotspots in the infrared spectrum, casting long, dark shadows on the ground.",
+        "question": "What is the primary source of illumination for the outdoor scene?",
+        "answer": "Streetlights."
       }
     }
   },
@@ -2101,11 +2101,6 @@
         "caption": "The video begins with an outdoor night scene walking along a street lined with parked RVs and cars. The camera then moves indoors, transitioning into a bicycle storage area where multiple bicycles are parked in racks.",
         "question": "What environment do I move into after walking along the street?",
         "answer": "A bicycle storage room."
-      },
-      "light_recongnition": {
-        "caption": "The infrared video displays natural thermal signatures of objects and structures. In the indoor section, overhead fluorescent lights provide artificial illumination, creating clear thermal contrast on the bicycles and storage racks.",
-        "question": "What is the primary light source illuminating the bicycles in the storage room?",
-        "answer": "Overhead fluorescent lights."
       },
       "light_change": {
         "caption": "The video transitions from an outdoor night environment with low ambient thermal variation to an indoor environment with consistent, bright artificial light sources reflecting off the bicycles.",
@@ -2141,6 +2136,11 @@
         "caption": "The subject walks along a street, approaches a building door, opens it, and enters a bicycle storage room, likely to park or retrieve a bicycle.",
         "question": "What is the final action I perform upon reaching the door in the indoor scene?",
         "answer": "I open the door."
+      },
+      "light_recognition": {
+        "caption": "The infrared video displays natural thermal signatures of objects and structures. In the indoor section, overhead fluorescent lights provide artificial illumination, creating clear thermal contrast on the bicycles and storage racks.",
+        "question": "What is the primary light source illuminating the bicycles in the storage room?",
+        "answer": "Overhead fluorescent lights."
       }
     }
   },
@@ -2177,11 +2177,6 @@
         "question": "Does the camera perspective or the scene change throughout the video?",
         "answer": "No, the camera perspective remains a consistent top-down view of the desk throughout the video, and the scene does not change."
       },
-      "light_recongnition": {
-        "caption": "The scene is lit by a desk lamp positioned to the left, which creates a prominent bright vertical reflection or hotspot on the laptop screen and illuminates the workspace.",
-        "question": "What is the primary source of illumination for the workspace?",
-        "answer": "The primary light source is the desk lamp located to the left of the laptop."
-      },
       "light_change": {
         "caption": "The lighting remains stable throughout the recording, with the desk lamp maintaining a consistent intensity on the workspace.",
         "question": "Does the intensity of the desk lamp light change during the video?",
@@ -2216,6 +2211,11 @@
         "caption": "The subject is writing in a notebook using a pen, likely taking notes or practicing German writing skills based on the content visible on the page.",
         "question": "What action is the subject performing with the pen?",
         "answer": "The subject is writing in the notebook."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by a desk lamp positioned to the left, which creates a prominent bright vertical reflection or hotspot on the laptop screen and illuminates the workspace.",
+        "question": "What is the primary source of illumination for the workspace?",
+        "answer": "The primary light source is the desk lamp located to the left of the laptop."
       }
     }
   },
@@ -2242,11 +2242,6 @@
         "caption": "The scene is static, showing a workspace setup. The video focuses on the activity of someone taking notes with a pen on a notepad, while the laptop screen remains on throughout the sequence.",
         "question": "What activity is being performed by the person at the desk throughout the video?",
         "answer": "Writing on a notepad with a pen."
-      },
-      "light_recongnition": {
-        "caption": "There is a desk lamp active on the left, casting light on the work area. The laptop screen is also a source of ambient light. There is no other significant light source in the immediate frame.",
-        "question": "Is there a light source visible on the left side of the desk?",
-        "answer": "Yes, a desk lamp."
       },
       "light_change": {
         "caption": "The lighting remains constant throughout the video as the user performs the writing task. No significant changes in illumination were detected.",
@@ -2282,6 +2277,11 @@
         "caption": "The subject is writing on a notepad with a pen. The action is likely for note-taking or completing a task, resulting in written characters on the paper.",
         "question": "What action is the subject performing with the pen?",
         "answer": "Writing on the notepad."
+      },
+      "light_recognition": {
+        "caption": "There is a desk lamp active on the left, casting light on the work area. The laptop screen is also a source of ambient light. There is no other significant light source in the immediate frame.",
+        "question": "Is there a light source visible on the left side of the desk?",
+        "answer": "Yes, a desk lamp."
       }
     }
   },
@@ -2308,11 +2308,6 @@
         "caption": "The video captures a static view of a desk workspace. The scene remains consistent throughout the sequence, showing the subject's hands writing in a notebook while a German language video plays on the laptop screen.",
         "question": "Does the workspace layout change significantly during the video?",
         "answer": "No, the layout remains the same."
-      },
-      "light_recongnition": {
-        "caption": "The desk is illuminated by an overhead light source and the screen of the laptop, which provides a significant local light source to the work area.",
-        "question": "What is the main local light source illuminating the notebook?",
-        "answer": "The laptop screen."
       },
       "light_change": {
         "caption": "The overall ambient lighting remains constant throughout the video sequence.",
@@ -2348,6 +2343,11 @@
         "caption": "The subject is writing in a notebook with a pen, likely transcribing or practicing phrases from the video on the laptop screen. The purpose is educational.",
         "question": "What is the subject doing with the pen?",
         "answer": "Writing in the notebook."
+      },
+      "light_recognition": {
+        "caption": "The desk is illuminated by an overhead light source and the screen of the laptop, which provides a significant local light source to the work area.",
+        "question": "What is the main local light source illuminating the notebook?",
+        "answer": "The laptop screen."
       }
     }
   },
@@ -2374,11 +2374,6 @@
         "caption": "The video displays a static view of a workstation, beginning with a laptop screen showing a video, then panning slightly towards the notepad as the hand writes, maintaining a consistent desk layout.",
         "question": "1. What is the initial scene shown in the video? 2. Does the camera move significantly? 3. What object does the hand interact with first? 4. Is the lamp moved during the video? 5. Does the notepad change position? 6. What is the last item focused on by the hand? 7. Are there any other rooms shown? 8. Does the laptop screen change content? 9. Is the desk cleaned during the recording? 10. Does the camera focus on the power strip at any point?",
         "answer": "1. A desk setup with a laptop. 2. No, it is mostly static. 3. The trackpad. 4. No. 5. No. 6. The notepad. 7. No. 8. Yes, the video content changes. 9. No. 10. Yes, the camera view covers the area with the power strip."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by the ambient glow of the laptop screen and an external light source, likely the lamp on the desk, which creates thermal contrast on the surface.",
-        "question": "What is the primary light source illuminating the desk surface in front of the laptop?",
-        "answer": "The screen of the laptop and the desk lamp."
       },
       "light_change": {
         "caption": "The lighting remains stable throughout the recording, provided primarily by the desk lamp and the laptop screen.",
@@ -2414,6 +2409,11 @@
         "caption": "The subject is sitting at a desk, using a laptop and periodically writing in a notepad, likely working or studying.",
         "question": "1. What is the subject doing with the laptop? 2. Is the subject writing on paper? 3. What is the purpose of the notepad? 4. Is the subject using a mouse? 5. Does the subject look at the laptop screen? 6. Is the subject multitasking? 7. What object is held in the hand? 8. Does the subject type on the keyboard?",
         "answer": "1. Using the trackpad. 2. Yes. 3. Taking notes. 4. No. 5. Yes. 6. Yes. 7. A pen. 8. No, only the trackpad."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by the ambient glow of the laptop screen and an external light source, likely the lamp on the desk, which creates thermal contrast on the surface.",
+        "question": "What is the primary light source illuminating the desk surface in front of the laptop?",
+        "answer": "The screen of the laptop and the desk lamp."
       }
     }
   },
@@ -2440,11 +2440,6 @@
         "caption": "The video provides a consistent view of a desk from a first-person perspective. The sequence remains static as the camera focuses on the desk surface while the user interacts with the laptop using a pen on the trackpad.",
         "question": "Does the camera change its perspective during the video?",
         "answer": "No, the camera maintains a consistent, static first-person view of the desk throughout the video."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by the ambient light from the screen of the laptop, which serves as a primary source of illumination for the desk area, and a desk lamp on the left side of the desk.",
-        "question": "What is the primary source of light illuminating the desk area?",
-        "answer": "The primary light sources are the laptop screen and the desk lamp."
       },
       "light_change": {
         "caption": "The illumination levels are relatively stable throughout the video. The light cast by the laptop screen remains constant while the user is active, with no significant changes in brightness.",
@@ -2480,6 +2475,11 @@
         "caption": "The subject is using a pen to operate the trackpad of their laptop to navigate a website.",
         "question": "What is the subject doing with the pen and the laptop?",
         "answer": "The subject is using the pen to operate the laptop's trackpad."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by the ambient light from the screen of the laptop, which serves as a primary source of illumination for the desk area, and a desk lamp on the left side of the desk.",
+        "question": "What is the primary source of light illuminating the desk area?",
+        "answer": "The primary light sources are the laptop screen and the desk lamp."
       }
     }
   },
@@ -2506,11 +2506,6 @@
         "caption": "The video sequence begins at the top of a short flight of stairs, progresses down the stairs, moves across the tiled landing, and proceeds through a glass door into a long, dimly lit hallway with multiple doors and overhead lights.",
         "question": "What is the sequence of areas I traverse throughout the video?",
         "answer": "I descend a staircase, cross a landing, and walk through a glass door into a long hallway."
-      },
-      "light_recongnition": {
-        "caption": "The video shows light entering through windows at the top of the stairs, casting bright, elongated thermal patches on the walls and doors. Artificial overhead lighting is present in the hallway corridor further into the video.",
-        "question": "What is the primary source of the bright thermal patches observed on the walls near the stairs?",
-        "answer": "Natural light from windows."
       },
       "light_change": {
         "caption": "The video starts in a bright, naturally lit area at the top of the stairs and transitions into a corridor where artificial overhead lights provide the main illumination. The light becomes more uniform as I move deeper into the hallway.",
@@ -2546,6 +2541,11 @@
         "caption": "I am walking through a building, transitioning from a staircase area into an office or research department hallway.",
         "question": "What is my primary action while filming the video?",
         "answer": "Walking through a building."
+      },
+      "light_recognition": {
+        "caption": "The video shows light entering through windows at the top of the stairs, casting bright, elongated thermal patches on the walls and doors. Artificial overhead lighting is present in the hallway corridor further into the video.",
+        "question": "What is the primary source of the bright thermal patches observed on the walls near the stairs?",
+        "answer": "Natural light from windows."
       }
     }
   },
@@ -2582,11 +2582,6 @@
         "question": "1. What is the first scene I see when I open the cupboard? 2. Which area do I transition to after viewing the interior of the cupboard? 3. What object do I interact with in the kitchen sink area? 4. Before the kitchen sink, what was the primary focus of my view? 5. What follows the interaction with the kitchen sink? 6. Is the cupboard interior the final scene of the video? 7. What connects the view of the cupboard and the sink? 8. Which part of the kitchen do I visit last before the screen goes dark? 9. What is the sequence of the main areas shown? 10. Can you identify the sequence of operations performed in the kitchen?",
         "answer": "1. The first scene is inside a kitchen cupboard with mugs and a bowl. 2. I transition to the kitchen sink area. 3. I interact with a mug and a sponge at the sink. 4. The primary focus was the interior of the cupboard. 5. The video transitions to darkness. 6. No, the cupboard interior was the initial scene. 7. A downward pan connects the cupboard view to the sink view. 8. I am at the kitchen sink area before the screen turns dark. 9. The sequence is cupboard view, followed by kitchen sink view, then darkness. 10. I start by looking at cupboard contents, then move to wash a mug at the sink."
       },
-      "light_recongnition": {
-        "caption": "The scene is initially illuminated by ambient kitchen light, followed by a transition where the scene becomes dark as the light is turned off, and finally, a bright phone flashlight is used to illuminate the sink area.",
-        "question": "What is the primary source of illumination once the main kitchen light is turned off?",
-        "answer": "The primary source of illumination becomes the light from a mobile phone."
-      },
       "light_change": {
         "caption": "The video starts in a well-lit kitchen environment. Towards the end of the sequence, the environment undergoes a drastic transition to total darkness (black screen).",
         "question": "1. Did the lights in the kitchen turn on or off? 2. Is the environment getting brighter or darker as the video progresses? 3. Was there a sudden change in illumination? 4. At what stage of the video does the light level decrease significantly? 5. Is there a light source that is fading out? 6. Does the final scene show any light? 7. How does the illumination change compared to the beginning? 8. Is the room completely dark by the end?",
@@ -2621,6 +2616,11 @@
         "caption": "The subject reaches into a kitchen cupboard, then moves their hand down to a kitchen sink area. The subject performs a cleaning action, which involves holding a sponge and interacting with a mug, likely for washing dishes.",
         "question": "1. What is the primary task being performed in the sink? 2. What object is being held by the hand during the cleaning process? 3. What is the goal of the movement within the sink? 4. What is the consequence of the hand interacting with the mug and sponge? 5. Does the action change as the video progresses? 6. What objects are being interacted with throughout the sequence? 7. Is the action consistent with washing dishes? 8. What is the likely purpose of the cleaning action?",
         "answer": "1. The primary task is cleaning a mug. 2. The hand is holding a sponge. 3. The goal is to wash or scrub the mug. 4. The mug becomes cleaner through the interaction with the sponge. 5. Yes, the hand moves from holding the mug to using the sponge. 6. A mug and a sponge are the main objects. 7. Yes, the motions are consistent with washing dishes. 8. The purpose is to maintain kitchen hygiene by cleaning the dishes."
+      },
+      "light_recognition": {
+        "caption": "The scene is initially illuminated by ambient kitchen light, followed by a transition where the scene becomes dark as the light is turned off, and finally, a bright phone flashlight is used to illuminate the sink area.",
+        "question": "What is the primary source of illumination once the main kitchen light is turned off?",
+        "answer": "The primary source of illumination becomes the light from a mobile phone."
       }
     }
   },
@@ -2647,11 +2647,6 @@
         "caption": "The scene sequence consists of the subject standing in front of a kitchen sink. The action begins with the subject holding a mug in the sink, scrubbing it with a sponge. The scene is static, focusing on the washing activity within the same kitchen environment throughout the video.",
         "question": "What is the primary activity I am performing throughout this video sequence?",
         "answer": "Washing a mug in the sink."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in an indoor kitchen environment with uniform, diffuse lighting typical of an overhead light source, providing consistent visibility across the sink and surrounding surfaces.",
-        "question": "What is the primary source of illumination for the kitchen sink area?",
-        "answer": "Overhead lighting."
       },
       "light_change": {
         "caption": "The lighting remains stable and consistent throughout the video. There are no sudden changes in illumination, flickers, or significant shifts in brightness, suggesting a controlled environment.",
@@ -2687,6 +2682,11 @@
         "caption": "The subject is washing a ceramic mug in a kitchen sink. The action involves holding the mug under the faucet and using a sponge to scrub the surface. The purpose is to clean the mug, and the consequence is a cleaner utensil ready for use.",
         "question": "What object am I cleaning in the sink?",
         "answer": "A ceramic mug."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in an indoor kitchen environment with uniform, diffuse lighting typical of an overhead light source, providing consistent visibility across the sink and surrounding surfaces.",
+        "question": "What is the primary source of illumination for the kitchen sink area?",
+        "answer": "Overhead lighting."
       }
     }
   },
@@ -2713,11 +2713,6 @@
         "caption": "The video sequence begins with the user preparing to pour water from a kettle into a mug on the kitchen sink, followed by the pouring action, and concludes with the user holding the filled mug.",
         "question": "What is the final action performed in the video sequence?",
         "answer": "The final action is holding the mug."
-      },
-      "light_recongnition": {
-        "caption": "The video is recorded in infrared. No external light sources are visible; the scene is illuminated by thermal signatures of the objects.",
-        "question": "Are there any artificial light sources visible in the scene?",
-        "answer": "No, the scene is displayed in infrared thermal view."
       },
       "light_change": {
         "caption": "The infrared video shows a consistent thermal environment without significant fluctuations in overall scene brightness or thermal intensity.",
@@ -2753,6 +2748,11 @@
         "caption": "The subject is pouring water from a kettle into a mug. The purpose is to fill the mug with water for drinking or preparing a beverage.",
         "question": "What is the subject doing with the kettle?",
         "answer": "The subject is pouring water from the kettle into the mug."
+      },
+      "light_recognition": {
+        "caption": "The video is recorded in infrared. No external light sources are visible; the scene is illuminated by thermal signatures of the objects.",
+        "question": "Are there any artificial light sources visible in the scene?",
+        "answer": "No, the scene is displayed in infrared thermal view."
       }
     }
   },
@@ -2789,11 +2789,6 @@
         "question": "What object do I interact with before reaching for the dish soap? What is the last object I focus on after using the soap? Did I touch the drying rack during the sequence? Which area of the kitchen was shown first? What action did I perform on the cloth? Did I move the trash bin? What was the final state of the sink? How many distinct actions did I perform? Did I interact with the faucet? Which object was moved to the side?",
         "answer": "I interacted with a cloth. The last object I focused on was the cup/mug in the rack. No, I did not touch the drying rack. The kitchen sink area was shown first. I picked up and moved the cloth. No, I did not move the trash bin. The sink remained empty. I performed four distinct actions: moving a cloth, picking up soap, applying soap, and rinsing. No, I did not interact with the faucet. The cloth was moved to the side."
       },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared; there are no visible light sources, but thermal gradients define the objects.",
-        "question": "What is the primary heat source reflected in the sink area?",
-        "answer": "The primary thermal signatures come from the objects themselves, with no specific external heat source."
-      },
       "light_change": {
         "caption": "The illumination in the scene remains stable throughout the IR video, with no changes in ambient or local light intensity.",
         "question": "Did the lighting intensity change during the recording? Was there any flickering of light? Did the scene get brighter or darker? Was there a light source turned on? Was there a light source turned off? Did any shadows move? Was the illumination consistent? Did the infrared reflection change?",
@@ -2828,6 +2823,11 @@
         "caption": "I am interacting with kitchen items, specifically moving a cloth, picking up and using dish soap, and eventually organizing or checking the contents of the drying rack. This is likely to perform cleaning or dishwashing.",
         "question": "What is the primary action I am performing in the video? What object do I pick up first? Why would I be moving the cloth? What do I do with the soap bottle? Am I washing dishes? What is the purpose of checking the cup? Am I cleaning the sink? What is my final action?",
         "answer": "I am performing a kitchen cleaning task. I picked up a cloth first. I moved it to clear space. I picked up the soap bottle to apply it. I am preparing to wash or rinsing items. I checked the cup to see if it was clean. No, I am just organizing. My final action was checking the cup in the drying rack."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared; there are no visible light sources, but thermal gradients define the objects.",
+        "question": "What is the primary heat source reflected in the sink area?",
+        "answer": "The primary thermal signatures come from the objects themselves, with no specific external heat source."
       }
     }
   },
@@ -2854,11 +2854,6 @@
         "caption": "The video sequence captures a person putting on cleaning gloves in a kitchen environment. The scene starts at the counter by the sink, with various kitchen objects like a soap bottle, a dish rack, and a sponge in a container visible.",
         "question": "What is the sequence of actions I perform in this kitchen scene? What objects do I interact with before starting to put on the gloves? Is there a transition between different rooms in this video? What is the first object I touch? Which object do I manipulate last? Do I pass through any doors or hallways in this sequence? What is the final state of my hands at the end of the video? Do I move the dish rack at any point? What is the central focus of the room environment? Do I leave the kitchen area at any point during this video?",
         "answer": "The sequence is: putting on a cleaning glove, adjusting it, then using it to interact with the sponge. I interact with the glove and the soap bottle. There is no transition; the scene remains in the kitchen. The first object I touch is the cleaning glove. The last object I manipulate is the cleaning sponge. No, I do not move through any doors or hallways. At the end, my hands are wearing gloves and I am holding a cleaning sponge. I do not touch the dish rack. The kitchen sink and counter are the focus. No, I do not leave the kitchen."
-      },
-      "light_recongnition": {
-        "caption": "The light source in this IR scene is ambient, likely from overhead kitchen lighting, creating diffuse thermal signatures on the countertop and sink surfaces.",
-        "question": "What is the primary source of illumination for the kitchen scene?",
-        "answer": "The scene is illuminated by ambient overhead light."
       },
       "light_change": {
         "caption": "The video shows a kitchen scene under consistent indoor lighting. There are no significant changes in ambient lighting, though the thermal perspective highlights different heat signatures of the objects.",
@@ -2894,6 +2889,11 @@
         "caption": "The subject is putting on a pair of rubber cleaning gloves and then picking up a sponge to prepare for cleaning the kitchen. The purpose is to protect the hands during dishwashing or counter cleaning.",
         "question": "What is the primary action I am performing in the video? What is the purpose of wearing the gloves before grabbing the sponge? What object do I interact with immediately after putting on the gloves? Can you describe the consequence of my actions? Am I cleaning the sink or the dishes? Do I prepare any cleaning agent before grabbing the sponge? Why do I choose to put on gloves first? Is the action completed by the end of the video?",
         "answer": "I am putting on cleaning gloves. The purpose is hygiene and hand protection. I grab the cleaning sponge. The consequence is that I am now ready to begin a cleaning task. I am preparing to clean surfaces in the kitchen. No, I do not add soap, just pick up the sponge. I put on gloves to protect my skin from chemicals or hot water. Yes, the action of preparing to clean is completed."
+      },
+      "light_recognition": {
+        "caption": "The light source in this IR scene is ambient, likely from overhead kitchen lighting, creating diffuse thermal signatures on the countertop and sink surfaces.",
+        "question": "What is the primary source of illumination for the kitchen scene?",
+        "answer": "The scene is illuminated by ambient overhead light."
       }
     }
   },
@@ -2920,11 +2920,6 @@
         "caption": "The sequence follows the process of washing a mug in a kitchen sink. I start by holding the mug under the running water, then use a sponge to scrub the interior and exterior of the mug, and finally rinse it again.",
         "question": "1. What is the first action I perform in the kitchen sink? 2. What object do I use to clean the mug? 3. Do I rinse the mug after scrubbing it? 4. Where is the mug located at the beginning of the sequence? 5. Is the faucet running throughout the cleaning process? 6. What is the final step I take with the mug? 7. Is there a point where I stop scrubbing the mug? 8. Do I use soap during the cleaning process? 9. What is the orientation of the mug while being washed? 10. Do I place the mug in the dish rack at the end of the video?",
         "answer": "1. I start by holding the mug under the faucet. 2. I use a sponge. 3. Yes, I rinse it after scrubbing. 4. It is in the sink. 5. Yes, the water is running. 6. I continue scrubbing the mug. 7. Yes, after rinsing, the video ends. 8. Yes, liquid soap is implied by the bottles. 9. The mug is held upright and then tilted. 10. No, the video ends while I am still washing."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by the ambient light in the kitchen. There is a strong hotspot from the faucet and the water stream, indicating it is cooler than the surroundings.",
-        "question": "What is the primary source of illumination for the sink area?",
-        "answer": "The ambient light of the room."
       },
       "light_change": {
         "caption": "The lighting remains constant throughout the video as I am washing the mug in the sink.",
@@ -2960,6 +2955,11 @@
         "caption": "I am washing a mug in a kitchen sink. The action involves holding the mug under running water and scrubbing it with a sponge. The purpose is to clean the mug, and the consequence is a cleaner surface.",
         "question": "1. What am I doing in the video? 2. What object am I interacting with? 3. Why am I cleaning the mug? 4. What tool am I using? 5. Is the water running? 6. Are my hands in gloves? 7. Is the mug being held firmly? 8. What is the expected outcome of this action?",
         "answer": "1. I am washing a mug. 2. I am interacting with a mug. 3. To clean it. 4. A sponge. 5. Yes. 6. Yes. 7. Yes. 8. A clean mug."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by the ambient light in the kitchen. There is a strong hotspot from the faucet and the water stream, indicating it is cooler than the surroundings.",
+        "question": "What is the primary source of illumination for the sink area?",
+        "answer": "The ambient light of the room."
       }
     }
   },
@@ -2986,11 +2986,6 @@
         "caption": "I begin in an office room with two desks and computers. I move toward the door, passing the desks, then I reach the door, grasp the handle, and open it. After opening the door, I exit the room into a hallway.",
         "question": "1. Where does the video start? 2. What do I see first? 3. What do I do after observing the desks? 4. What is the action I perform at the door? 5. Where do I go after exiting the room? 6. What objects do I pass in the room? 7. Is the room empty? 8. What is the last thing I see before the video ends? 9. What is the sequence of my movement? 10. Do I close the door after leaving?",
         "answer": "1. In an office. 2. Two desks with computers. 3. I walk toward the door. 4. I turn the door handle to open it. 5. Into the hallway. 6. Desks, chairs, and computers. 7. No, it contains furniture. 8. A hallway. 9. Start at desks, move to door, open door, exit room. 10. The video ends while I am at the door/entering the hallway."
-      },
-      "light_recongnition": {
-        "caption": "The room is lit by natural light coming through the large windows during the day. As the video progresses to the night, the room becomes significantly darker, relying on artificial light reflected from computer monitors.",
-        "question": "What is the primary source of light in the room during the night?",
-        "answer": "The primary light source at night is the light from the computer monitors."
       },
       "light_change": {
         "caption": "The video starts in a well-lit environment during the day. As I move around the office and approach the door, the overall scene transitions into a dark night setting with minimal illumination.",
@@ -3026,6 +3021,11 @@
         "caption": "I am walking through an office, approaching a door, and then opening the door to leave the room. The purpose is to exit the office area, and the consequence is moving into the hallway.",
         "question": "1. What is my main action? 2. What object am I interacting with? 3. What is the purpose of my action? 4. What is the consequence of opening the door? 5. Am I carrying anything? 6. Is my movement fast or slow? 7. Do I stop at the desk? 8. What is my final state in the video?",
         "answer": "1. Walking and opening a door. 2. The door handle. 3. To exit the office. 4. I move into the hallway. 5. No. 6. Steady pace. 7. No, I move past it. 8. I am entering the hallway."
+      },
+      "light_recognition": {
+        "caption": "The room is lit by natural light coming through the large windows during the day. As the video progresses to the night, the room becomes significantly darker, relying on artificial light reflected from computer monitors.",
+        "question": "What is the primary source of light in the room during the night?",
+        "answer": "The primary light source at night is the light from the computer monitors."
       }
     }
   },
@@ -3052,11 +3052,6 @@
         "caption": "The sequence begins inside the restroom, showing the sink and toilet. The subject then approaches the mirror to sanitize their hands, interacts with the wall-mounted dispenser, and proceeds to wash hands in the sink. Finally, the subject turns to exit, opening the door and stepping into a hallway.",
         "question": "What is the first scene I see? What do I do at the mirror? What is the last scene of the video? Which object do I touch before the sink? Do I wash my hands before leaving? Did I walk into a corridor? Is there a sequence of door opening? What room was I in? Did I exit the restroom? What was the final destination in the sequence?",
         "answer": "1. The restroom interior. 2. Sanitize hands. 3. A hallway/corridor. 4. The soap dispenser. 5. Yes. 6. Yes. 7. Yes, I opened the door to leave. 8. A restroom. 9. Yes. 10. The hallway."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by overhead artificial lighting, which is standard for a restroom facility. There is a consistent, diffuse light source that does not create strong shadows or hotspots, typical of fluorescent ceiling lights.",
-        "question": "What is the nature of the light source in the restroom?",
-        "answer": "Artificial overhead lighting."
       },
       "light_change": {
         "caption": "The lighting remains constant throughout the restroom segment. Upon exiting the restroom into the hallway, the scene becomes significantly darker, indicating a transition to a hallway with lower ambient light levels.",
@@ -3092,6 +3087,11 @@
         "caption": "The subject enters the restroom to perform hygiene tasks. The subject sanitizes their hands using the wall-mounted dispenser, then washes them in the sink, and finally exits the room. The purpose is personal hygiene.",
         "question": "What is the subject doing at the sink? Why did the subject touch the dispenser? What is the consequence of opening the door? Did the subject wash their hands? What was the main activity? Is the subject cleaning? What is the purpose of the visit? What happened after washing?",
         "answer": "1. Washing hands. 2. To get soap/sanitizer. 3. Leaving the room. 4. Yes. 5. Hand washing. 6. Yes. 7. Personal hygiene. 8. Left the room."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by overhead artificial lighting, which is standard for a restroom facility. There is a consistent, diffuse light source that does not create strong shadows or hotspots, typical of fluorescent ceiling lights.",
+        "question": "What is the nature of the light source in the restroom?",
+        "answer": "Artificial overhead lighting."
       }
     }
   },
@@ -3118,11 +3118,6 @@
         "caption": "The sequence shows the user standing in a bathroom, approaching the sink, turning on the water, washing hands, and reaching for a paper towel from a dispenser, ending by drying hands.",
         "question": "What concludes my task at the sink?",
         "answer": "Drying my hands with a paper towel."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared, showing typical thermal radiation of bathroom fixtures. There are no active visible light sources like lamps, but the faucet reflects ambient thermal energy.",
-        "question": "What is the primary thermal characteristic of the faucet?",
-        "answer": "The faucet appears as a highly reflective, bright thermal object compared to the sink surface."
       },
       "light_change": {
         "caption": "The lighting remains stable throughout the sequence, typical of a constant indoor infrared environment.",
@@ -3158,6 +3153,11 @@
         "caption": "I am performing a hand-washing task. I first turn on the water, rinse my hands by rubbing them together under the stream, and then wipe them dry with a paper towel. The purpose is personal hygiene.",
         "question": "What is the final state of my hands?",
         "answer": "They are clean and dry."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared, showing typical thermal radiation of bathroom fixtures. There are no active visible light sources like lamps, but the faucet reflects ambient thermal energy.",
+        "question": "What is the primary thermal characteristic of the faucet?",
+        "answer": "The faucet appears as a highly reflective, bright thermal object compared to the sink surface."
       }
     }
   },
@@ -3184,11 +3184,6 @@
         "caption": "The subject starts in front of a bathroom sink, washes their hands, reaches for a paper towel, and then exits the bathroom by opening the door with an access card, entering a hallway with computer desks.",
         "question": "What is the sequence of rooms I transition through?",
         "answer": "I move from the restroom into a hallway containing computer workstations."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by interior ceiling lights, which provide consistent, even illumination throughout the room, creating clear visibility of the walls, sink, and exit door.",
-        "question": "What is the primary source of illumination in this room?",
-        "answer": "Ceiling-mounted interior lights."
       },
       "light_change": {
         "caption": "The light levels remain generally stable throughout the video as the subject moves from the restroom into the hallway, though there is a subtle shift in intensity upon entering the next space.",
@@ -3224,6 +3219,11 @@
         "caption": "The subject performs a hand-washing routine at the sink, dries their hands with a paper towel, and then navigates to the door to unlock it with a key card to exit.",
         "question": "What is the final action I perform before the video ends?",
         "answer": "I open the door using my key card."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by interior ceiling lights, which provide consistent, even illumination throughout the room, creating clear visibility of the walls, sink, and exit door.",
+        "question": "What is the primary source of illumination in this room?",
+        "answer": "Ceiling-mounted interior lights."
       }
     }
   },
@@ -3250,11 +3250,6 @@
         "caption": "The video starts with a view of an office room with two desks and chairs. I then move towards the door of the office. After focusing on the door handle and the sign, I open the door and move out of the room, finishing with a view of the hallway or the immediate area outside the room.",
         "question": "What is the sequence of movements I perform in the room?",
         "answer": "You start by viewing the desks in the office, then you approach the door, read the sign, open the door, and exit the room."
-      },
-      "light_recongnition": {
-        "caption": "The room is lit by natural light coming through the large windows and ambient light from the office environment. There are no artificial point light sources visible in the room, and the computer monitors provide some localized illumination.",
-        "question": "Are there any artificial light sources visible in the room?",
-        "answer": "No, there are no artificial light sources visible in the room; lighting is provided by natural light from the windows and computer screens."
       },
       "light_change": {
         "caption": "The lighting remains relatively consistent while I am in the room. As I approach the door and move into the hallway, the light levels drop significantly as I transition into a darker space or corridor.",
@@ -3290,6 +3285,11 @@
         "caption": "I am walking through the office, approaching the door, and then using my hand to operate the door handle to open it and leave the room.",
         "question": "What action am I performing as I reach the end of the video?",
         "answer": "You are opening the door using the handle to exit the room."
+      },
+      "light_recognition": {
+        "caption": "The room is lit by natural light coming through the large windows and ambient light from the office environment. There are no artificial point light sources visible in the room, and the computer monitors provide some localized illumination.",
+        "question": "Are there any artificial light sources visible in the room?",
+        "answer": "No, there are no artificial light sources visible in the room; lighting is provided by natural light from the windows and computer screens."
       }
     }
   },
@@ -3316,11 +3316,6 @@
         "caption": "The sequence starts with me entering a bathroom, passing the toilet area, moving toward the sink to wash my hands in the mirror's reflection, and then exiting the bathroom back into a hallway.",
         "question": "1. What is the first thing I encounter upon entering the room? 2. After passing the toilet, what do I do next? 3. What is the last scene I see before the video ends? 4. What kind of room does the hallway lead to? 5. Do I visit the sink before or after the toilet? 6. Where do I go after washing my hands? 7. Is there a mirror in the room I visit? 8. Can I see the hallway before I enter the bathroom? 9. What is the sequence of my movement? 10. Do I return to the same location I started from?",
         "answer": "1. I encounter the toilet area upon entering the bathroom. 2. After passing the toilet, I move toward the sink. 3. The last scene is the view of the hallway as I exit. 4. The hallway leads to a bathroom. 5. I visit the toilet first, then go to the sink. 6. After washing my hands, I turn and exit the bathroom. 7. Yes, there is a mirror above the sink. 8. Yes, the video starts with a view that transitions into the bathroom. 9. I enter the bathroom, approach the toilet, move to the sink, wash my hands, and exit into the hallway. 10. Yes, the video ends with me back in the hallway."
-      },
-      "light_recongnition": {
-        "caption": "The bathroom is lit by artificial overhead lighting, creating consistent thermal signatures on the fixtures and surfaces. There are no natural light sources visible.",
-        "question": "Is the lighting in the bathroom natural or artificial?",
-        "answer": "Artificial."
       },
       "light_change": {
         "caption": "The video transitions from a well-lit bathroom environment to a very dim, near-blackout state when the camera moves toward the hallway at the end.",
@@ -3356,6 +3351,11 @@
         "caption": "I enter the bathroom, briefly note the toilet area, proceed to the sink to perform a hand-washing action by pressing the soap dispenser, rinsing, and drying my hands, then leave the room.",
         "question": "1. What is my primary action in this video? 2. What object do I interact with first at the sink? 3. Why do I wash my hands? 4. Is my action finished before I leave the room? 5. What do I do after washing my hands? 6. What part of the sink do I use? 7. Do I use any soap? 8. What is the consequence of my action?",
         "answer": "1. My primary action is washing my hands. 2. I interact with the soap dispenser first. 3. Hygiene is the likely purpose. 4. Yes, the washing action is completed before I head to the door. 5. I turn around to face the door and exit. 6. I use the sink basin and the soap dispenser. 7. Yes, I press the dispenser to get soap. 8. The consequence is that my hands are washed."
+      },
+      "light_recognition": {
+        "caption": "The bathroom is lit by artificial overhead lighting, creating consistent thermal signatures on the fixtures and surfaces. There are no natural light sources visible.",
+        "question": "Is the lighting in the bathroom natural or artificial?",
+        "answer": "Artificial."
       }
     }
   },
@@ -3382,11 +3382,6 @@
         "caption": "The video displays a static scene of a person washing their hands in a bathroom sink. The sequence captures the hands moving under the faucet, the water flowing, and the final action of grabbing a paper towel from a dispenser.",
         "question": "1. What is the primary activity I am performing in the video? 2. Is there a sequence of multiple rooms involved? 3. Do I transition between different locations? 4. What is the first object I interact with? 5. What is the final object I interact with? 6. Is the scene sequence limited to just the sink area? 7. What is the sequence of hand movements I perform under the faucet? 8. Do I use soap before rinsing? 9. Is there any transition after finishing hand washing? 10. Does the scene change perspective at any point?",
         "answer": "1. I am washing my hands. 2. No, the entire sequence takes place in the same bathroom. 3. No, there is no transition between locations. 4. I first interact with the faucet to turn on the water. 5. The final object I interact with is the paper towel dispenser. 6. Yes, the entire sequence is restricted to the sink and the immediate wall area. 7. I move my hands under the stream, rub them together, and rinse them. 8. The IR frames do not show a clear application of soap, only rinsing and rubbing. 9. No, the video ends after I dry my hands with a paper towel. 10. No, the perspective remains fixed throughout."
-      },
-      "light_recongnition": {
-        "caption": "The room lighting is uniform, as indicated by the consistent thermal signature across the walls and sink area, suggesting a standard artificial light source typical of a bathroom environment.",
-        "question": "What is the source of the uniform thermal distribution on the walls?",
-        "answer": "The uniform distribution is due to the artificial lighting in the room."
       },
       "light_change": {
         "caption": "The video shows a consistent bathroom environment under static lighting conditions, with no changes in illumination observed throughout the sequence.",
@@ -3422,6 +3417,11 @@
         "caption": "I am washing my hands by placing them under a faucet, rubbing them together, and then using a paper towel to dry them. The purpose is to clean my hands, and the consequence is that my hands are clean and dry.",
         "question": "1. What is the main action I am performing? 2. Which objects am I interacting with? 3. What is the likely purpose of this action? 4. What is the consequence of rubbing my hands together under the water? 5. How do I initiate the drying phase? 6. Is this a multi-step task? 7. Do I use any equipment for the cleaning process? 8. How is the process concluded?",
         "answer": "1. I am washing and drying my hands. 2. I am interacting with the faucet and the paper towel dispenser. 3. The purpose is personal hygiene. 4. It helps remove dirt or bacteria from the skin surface. 5. I reach to the side and pull a paper towel from the dispenser. 6. Yes, it involves washing, rinsing, and drying. 7. Yes, the sink, faucet, and dispenser. 8. The process is concluded once my hands are dried with the paper towel."
+      },
+      "light_recognition": {
+        "caption": "The room lighting is uniform, as indicated by the consistent thermal signature across the walls and sink area, suggesting a standard artificial light source typical of a bathroom environment.",
+        "question": "What is the source of the uniform thermal distribution on the walls?",
+        "answer": "The uniform distribution is due to the artificial lighting in the room."
       }
     }
   },
@@ -3448,11 +3448,6 @@
         "caption": "The sequence begins with me standing in front of a bathroom mirror, drying my hands with a paper towel. I then proceed to open the bathroom door, walk out into a hallway, and move towards a room filled with multiple computer workstations, concluding by looking at the desks and chairs.",
         "question": "What type of room did I enter after walking out of the bathroom?",
         "answer": "A room with multiple computer workstations."
-      },
-      "light_recongnition": {
-        "caption": "The scene is illuminated by ambient lighting, which appears as varying thermal intensities in the infrared frames. The light switch on the wall suggests an artificial light source is present in the room.",
-        "question": "What object on the wall controls the artificial lighting in the room?",
-        "answer": "A light switch."
       },
       "light_change": {
         "caption": "The overall light levels remain relatively consistent throughout the video as I move from the bathroom into the hallway and computer room, indicating consistent indoor lighting conditions.",
@@ -3488,6 +3483,11 @@
         "caption": "I am initially drying my hands using a paper towel in front of the mirror. Afterward, I dispose of the towel, open the door, and exit the bathroom to navigate through the office space.",
         "question": "What item was I holding in my hands while looking at the mirror?",
         "answer": "A paper towel."
+      },
+      "light_recognition": {
+        "caption": "The scene is illuminated by ambient lighting, which appears as varying thermal intensities in the infrared frames. The light switch on the wall suggests an artificial light source is present in the room.",
+        "question": "What object on the wall controls the artificial lighting in the room?",
+        "answer": "A light switch."
       }
     }
   },
@@ -3514,11 +3514,6 @@
         "caption": "The video starts with the subject facing the mirror in the bathroom, using a towel. Then, the subject turns away and exits through the door, moving into a darker hallway area.",
         "question": "What happens after the subject finishes using the towel in front of the mirror?",
         "answer": "The subject turns around and exits the bathroom into the hallway."
-      },
-      "light_recongnition": {
-        "caption": "The primary light source is the ambient light from the window, and there is a ceiling light that gets turned off by the subject at the end of the sequence.",
-        "question": "What does the subject do to the lighting in the room before exiting?",
-        "answer": "The subject turns off the light."
       },
       "light_change": {
         "caption": "The room transitions from a lit state to total darkness as the subject flips the light switch upon leaving.",
@@ -3554,6 +3549,11 @@
         "caption": "The subject is using a towel to dry their face, then folds/lowers the towel, turns around, and reaches for the light switch to exit the room.",
         "question": "What is the final action I perform before the video goes dark?",
         "answer": "I switch off the light."
+      },
+      "light_recognition": {
+        "caption": "The primary light source is the ambient light from the window, and there is a ceiling light that gets turned off by the subject at the end of the sequence.",
+        "question": "What does the subject do to the lighting in the room before exiting?",
+        "answer": "The subject turns off the light."
       }
     }
   },
@@ -3580,11 +3580,6 @@
         "caption": "The video sequence captures a static scene in a bathroom. The person is standing in front of the mirror, wiping their face with a towel, and then finishes the action. The environment remains consistent throughout the entire clip.",
         "question": "What activity is being performed in the bathroom throughout the video?",
         "answer": "The person is using a towel to wipe or cover their face in front of the mirror."
-      },
-      "light_recongnition": {
-        "caption": "The primary light sources are the ambient light coming from the window on the left and the doorway in the background. These provide thermal contrast in the scene.",
-        "question": "What are the two main sources of illumination in the bathroom scene?",
-        "answer": "The window on the left and the doorway in the background."
       },
       "light_change": {
         "caption": "The light levels in the video are generally stable. Towards the end of the video, the scene transitions into total darkness, indicating an end to the active capture or a light source being turned off.",
@@ -3620,6 +3615,11 @@
         "caption": "The subject is wiping their face with a towel. The object interacted with is a towel. The purpose is facial hygiene or drying, with the consequence of cleaning the face.",
         "question": "What is the primary action I am performing in the mirror?",
         "answer": "I am wiping my face with a towel."
+      },
+      "light_recognition": {
+        "caption": "The primary light sources are the ambient light coming from the window on the left and the doorway in the background. These provide thermal contrast in the scene.",
+        "question": "What are the two main sources of illumination in the bathroom scene?",
+        "answer": "The window on the left and the doorway in the background."
       }
     }
   },
@@ -3646,11 +3646,6 @@
         "caption": "The video starts with a wide view of the kitchen counter. The focus shifts to the sink and counter area as a hand enters the frame. The camera then tracks the interaction with the spray bottle being placed into the sink, followed by the camera panning to reveal a rice cooker on an adjacent table.",
         "question": "1. What is the first object I encounter at the start? 2. What action do I perform after focusing on the counter? 3. Does the camera move towards the sink? 4. What appears after the sink interaction? 5. Is there a trash bin in the initial scene? 6. What do I focus on after the sink? 7. Does the scene change from the kitchen to another room? 8. What is the last major item I look at? 9. Did I pass the stove before the table? 10. What sequence leads me to the table?",
         "answer": "1. A kitchen counter and trash bin. 2. I pick up or interact with a spray bottle. 3. Yes. 4. The sink area where the bottle is placed. 5. Yes. 6. A rice cooker. 7. It moves to an adjacent surface within the same area. 8. A rice cooker. 9. No, the camera transitions directly to the table. 10. The camera pans from the kitchen counter area to the adjacent table."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in infrared, showing thermal emission patterns rather than visible light. No artificial light sources or natural sunlight are visible, only the thermal signatures of objects based on their heat retention and ambient temperatures.",
-        "question": "What is the primary source of 'illumination' in this infrared video?",
-        "answer": "Thermal radiation emitted by the objects and surfaces themselves."
       },
       "light_change": {
         "caption": "The video maintains consistent thermal imaging throughout. There are no changes in lighting conditions as the video is recorded using infrared sensors that detect heat, not visible light.",
@@ -3686,6 +3681,11 @@
         "caption": "The subject uses their hand to place a spray bottle into the sink. This action likely signifies cleaning up, clearing the counter, or prepping for sink usage. The consequence is a cleaner counter surface.",
         "question": "1. What object am I interacting with? 2. What is the goal of the action? 3. Where do I place the object? 4. Is the action completed? 5. What is the consequence for the counter? 6. Why would I do this? 7. Did I use both hands? 8. Was the spray bottle empty?",
         "answer": "1. A spray bottle. 2. To clear the counter or use the sink. 3. In the sink. 4. Yes. 5. It is now clear of the spray bottle. 6. To organize the kitchen. 7. No. 8. It is not possible to tell."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in infrared, showing thermal emission patterns rather than visible light. No artificial light sources or natural sunlight are visible, only the thermal signatures of objects based on their heat retention and ambient temperatures.",
+        "question": "What is the primary source of 'illumination' in this infrared video?",
+        "answer": "Thermal radiation emitted by the objects and surfaces themselves."
       }
     }
   },
@@ -3712,11 +3712,6 @@
         "caption": "The scene sequence shows a static view of a kitchen sink area. The sequence starts with the faucet being manipulated, involves an interaction with a bottle, and concludes with a camera turn towards the living room area.",
         "question": "What is the sequence of the environment I am in before the video ends?",
         "answer": "The video starts in the kitchen at the sink and ends with a view of the living room area."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in an IR spectrum, showing thermal variations. No traditional light sources like lamps are active in the view, though the scene brightness is consistent with ambient indoor temperatures.",
-        "question": "What type of light source is visible in the kitchen?",
-        "answer": "There are no visible active light sources; the scene is represented by thermal signatures."
       },
       "light_change": {
         "caption": "The lighting/thermal representation remains consistent throughout the video until the camera movement changes the view.",
@@ -3752,6 +3747,11 @@
         "caption": "The subject is interacting with the kitchen faucet, likely adjusting or cleaning it, and then handles a bottle of cleaning agent to potentially wash items in the sink.",
         "question": "What action is the subject performing with the kitchen faucet?",
         "answer": "The subject is reaching toward and adjusting the kitchen faucet."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in an IR spectrum, showing thermal variations. No traditional light sources like lamps are active in the view, though the scene brightness is consistent with ambient indoor temperatures.",
+        "question": "What type of light source is visible in the kitchen?",
+        "answer": "There are no visible active light sources; the scene is represented by thermal signatures."
       }
     }
   },
@@ -3778,11 +3778,6 @@
         "caption": "The video begins with the user cleaning or handling a spray bottle over a kitchen sink. The scene transitions as the user moves from the kitchen area towards another room containing a dark leather couch and potted plants.",
         "question": "What room do I transition into after leaving the kitchen area?",
         "answer": "After leaving the kitchen, you move into a living room or seating area."
-      },
-      "light_recongnition": {
-        "caption": "The video is recorded in an infrared spectrum where thermal contrast is the primary visual cue. There are no traditional artificial light sources visible, only thermal signatures of household objects.",
-        "question": "What is the primary source of visual information in these frames?",
-        "answer": "The primary source of visual information is thermal radiation."
       },
       "light_change": {
         "caption": "The video maintains a consistent infrared thermal view throughout, with no changes in ambient lighting conditions.",
@@ -3818,6 +3813,11 @@
         "caption": "The user is holding a spray bottle, first holding it near the kitchen sink, then carrying it to the living room to spray a houseplant.",
         "question": "What is my primary action with the spray bottle in the living room?",
         "answer": "Your primary action is spraying the houseplant with the spray bottle."
+      },
+      "light_recognition": {
+        "caption": "The video is recorded in an infrared spectrum where thermal contrast is the primary visual cue. There are no traditional artificial light sources visible, only thermal signatures of household objects.",
+        "question": "What is the primary source of visual information in these frames?",
+        "answer": "The primary source of visual information is thermal radiation."
       }
     }
   },
@@ -3844,11 +3844,6 @@
         "caption": "The video starts with an overhead view of the plants and the spray bottle. The camera maintains a consistent position above the pots while the hand moves the spray bottle to mist the plant in the circular pot.",
         "question": "1. What is the initial view of the scene? 2. Does the camera move to a different room? 3. What is the first object I interact with? 4. Does the scene change after the watering ends? 5. What is the sequence of the hand's movement? 6. Are there any other plants passed during the video? 7. Does the scene transition from indoors to outdoors? 8. What is the final action performed in the sequence? 9. Is there a change in the view of the planters? 10. Did I visit more than one area?",
         "answer": "1. An overhead view of the planters and a circular pot. 2. No, the camera remains in the same spot. 3. The hand-held spray bottle. 4. No, the video ends with the same scene. 5. The hand moves the spray bottle to the circular pot and performs a spraying motion. 6. No, only the plants in the planters and the circular pot are visible. 7. No, the entire sequence is indoors. 8. The spraying action concludes. 9. No, the camera angle stays static. 10. No, I stayed in one location."
-      },
-      "light_recongnition": {
-        "caption": "The scene is captured in an IR spectrum, where heat signatures represent the objects. There are no active light sources like bulbs; the scene's brightness is based on the thermal emission of the objects.",
-        "question": "Is there any visible light source like a lamp in this thermal IR scene?",
-        "answer": "No, there are no artificial light sources visible in this thermal IR capture."
       },
       "light_change": {
         "caption": "The light level (thermal intensity) remains stable throughout the video. There are no sudden changes in the environment's thermal appearance.",
@@ -3884,6 +3879,11 @@
         "caption": "The subject is performing a watering action by misting a plant in a circular pot using a spray bottle. The purpose is to hydrate the plant.",
         "question": "1. What is the primary action being performed? 2. What object is being interacted with? 3. What is the likely purpose of the action? 4. Is the action completed in the video? 5. What is the subject holding? 6. How is the action being executed? 7. What consequence does this action have for the plant? 8. Is the subject using both hands?",
         "answer": "1. Misting/watering a plant. 2. A spray bottle. 3. To hydrate or maintain the plant. 4. Yes, the watering is completed. 5. A spray bottle. 6. By squeezing the trigger of the spray bottle. 7. It provides moisture to the plant. 8. No, only one hand is visible."
+      },
+      "light_recognition": {
+        "caption": "The scene is captured in an IR spectrum, where heat signatures represent the objects. There are no active light sources like bulbs; the scene's brightness is based on the thermal emission of the objects.",
+        "question": "Is there any visible light source like a lamp in this thermal IR scene?",
+        "answer": "No, there are no artificial light sources visible in this thermal IR capture."
       }
     }
   },
@@ -3910,11 +3910,6 @@
         "caption": "The video shows a stationary scene of a windowsill with four plant pots. The camera focuses on the plants, moving slightly to show a handheld spray bottle being used to mist the foliage.",
         "question": "What is the primary environment shown in the video? What objects are arranged on the windowsill? What does the spray bottle interact with first? What is the sequence of the spray bottle's movement over the plants? Is there a progression from the left side of the windowsill to the right? What are the main types of plants seen? Does the camera pan across the pots in a specific order? What does the scene look like after the misting action is complete? Are there any other surfaces visible besides the windowsill? Does the camera movement suggest a close-up inspection of the plants?",
         "answer": "The primary environment is an indoor windowsill. Four plant pots are arranged on the windowsill. The spray bottle first interacts with the central plant foliage. The spray bottle moves from right to left across the foliage. Yes, the spray action follows a path across the central and left-hand plants. The plants appear to be a mix of leafy greens and potentially herbs or small garden starts. The camera pans slowly across the pots from left to right. The scene remains mostly the same, with the plants slightly damp from the mist. Yes, the dark surface underneath the windowsill is also visible. Yes, the close-up angle and the slow panning suggest a detailed inspection of the plant's health."
-      },
-      "light_recongnition": {
-        "caption": "The scene is lit by ambient light through a window. The thermal IR imaging reveals no artificial light sources, but there is a distinct thermal contrast between the plants, the soil, and the surrounding window area.",
-        "question": "Are there any artificial light sources visible in the thermal video?",
-        "answer": "No."
       },
       "light_change": {
         "caption": "The video maintains consistent ambient lighting throughout, with no significant changes in illumination as it focuses on the plant misting activity.",
@@ -3950,6 +3945,11 @@
         "caption": "The subject is using a manual spray bottle to mist the leaves of several plants arranged on a windowsill, likely to increase humidity or clean the foliage.",
         "question": "What is the subject's primary action in this video? What object is being used to perform this action? What is the potential purpose of this action? Are there any consequences to this action? Is the subject interacting with multiple plants? How is the hand positioned? Does the subject pause during the action? What is being misted specifically?",
         "answer": "The subject is misting plant leaves with a spray bottle. A manual trigger-operated spray bottle is used. The purpose is to provide humidity or clean dust off the leaves. The foliage becomes damp as a result of the misting. Yes, the subject moves the spray bottle across several pots to mist multiple plants. The hand is holding the trigger firmly and sweeping across the foliage. No, the subject maintains a consistent spray motion throughout the sequence. The foliage of the plants in the pots is the primary target."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by ambient light through a window. The thermal IR imaging reveals no artificial light sources, but there is a distinct thermal contrast between the plants, the soil, and the surrounding window area.",
+        "question": "Are there any artificial light sources visible in the thermal video?",
+        "answer": "No."
       }
     }
   },
@@ -3986,11 +3986,6 @@
         "question": "What is the sequence of areas I pass through in the video?",
         "answer": "The camera starts in the kitchen/dining area, moves past the couch by the window, approaches the bookshelf, and then opens the refrigerator."
       },
-      "light_recongnition": {
-        "caption": "The scene is lit by natural light coming through the large window behind the couch, creating strong thermal contrast on the furniture, and an internal light source inside the refrigerator.",
-        "question": "What serves as the primary external light source in the room?",
-        "answer": "The window behind the couch."
-      },
       "light_change": {
         "caption": "The light remains relatively stable while moving through the room, but becomes significantly brighter when the refrigerator door is opened, revealing the internal light.",
         "question": "Does the lighting in the video change significantly at any point?",
@@ -4025,6 +4020,11 @@
         "caption": "The subject approaches the refrigerator, opens the door, and retrieves a bag of produce, likely to check its contents or prepare food.",
         "question": "What is the purpose of the action performed at the end of the video?",
         "answer": "The subject is retrieving a bag from the refrigerator, likely to prepare food."
+      },
+      "light_recognition": {
+        "caption": "The scene is lit by natural light coming through the large window behind the couch, creating strong thermal contrast on the furniture, and an internal light source inside the refrigerator.",
+        "question": "What serves as the primary external light source in the room?",
+        "answer": "The window behind the couch."
       }
     }
   }

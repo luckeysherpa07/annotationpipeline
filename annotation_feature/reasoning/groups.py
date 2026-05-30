@@ -71,7 +71,6 @@ SECTION_GROUPS = {
         "depth_non_common",
         "light_change",
         "light_recognition",
-        "light_recongnition",
     ],
 }
 

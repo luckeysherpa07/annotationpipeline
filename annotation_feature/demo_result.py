@@ -49,7 +49,7 @@ Color & Texture: Dominant dark greys and blacks. Green mailboxes most significan
         "question": """What is the sequence of major areas passed through in this video?""",
         "answer": """Bedroom, hallway, outdoor walkway, and mailbox area"""
     },
-    "light_recongnition": {
+    "light_recognition": {
         "caption": """Light Source Analysis:
 1. Room lighting: Combination of overhead ceiling light (dim) and warm desk lamp providing localized illumination
 2. Transition zone: Dramatic shift to very low ambient light in the hallway

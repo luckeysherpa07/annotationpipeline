@@ -44,11 +44,11 @@ SECTION_PREFS: dict[str, dict[str, list[str]]] = {
         "ir": ["object_recognition", "scene_sequence", "navigation", "light_change", "dynamic_recognition"],
     },
     "decisive": {
-        "rgb": ["text_recognition", "object_recognition", "light_change", "light_recongnition", "action"],
+        "rgb": ["text_recognition", "object_recognition", "light_change", "light_recognition", "action"],
         "audio": ["audio_sound_source_identification", "audio_event_detection", "audio_event_occurrence_detection", "audio_visual_correspondence"],
         "event": ["event_dynamic_recognition", "event_action", "event_navigation", "event_scene_sequence"],
         "depth": ["depth_spatial_reasoning", "depth_navigation", "depth_dynamic_recognition", "depth_scene_sequence"],
-        "ir": ["light_change", "light_recongnition", "object_recognition", "dynamic_recognition", "scene_sequence"],
+        "ir": ["light_change", "light_recognition", "object_recognition", "dynamic_recognition", "scene_sequence"],
     },
 }
 

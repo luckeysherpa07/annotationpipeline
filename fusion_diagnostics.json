@@ -3878,14 +3878,14 @@
           },
           "semantic_support_match": {
             "source_modality": "rgb",
-            "category": "light_recongnition",
+            "category": "light_recognition",
             "section": "scene_and_context",
             "primary_section": "scene_and_context",
             "sections": [
               "scene_and_context"
             ],
             "source_key": "dataset/cut_carrot_split/cut_carrot_rgb",
-            "annotation_key": "light_recongnition",
+            "annotation_key": "light_recognition",
             "qa_index": null,
             "question": "From which direction is the primary light source hitting the cutting board?",
             "answer": "From above (overhead).",
@@ -3977,7 +3977,7 @@
             "best_direct_support_modality": "rgb",
             "best_complementary_support_modality": "event",
             "best_match_modality": "rgb",
-            "best_match_category": "light_recongnition",
+            "best_match_category": "light_recognition",
             "supporting_modality_count": 1,
             "complementary_supporting_modality_count": 1,
             "conflicting_modality_count": 0,
@@ -4313,7 +4313,7 @@
           "caption": "The kitchen workspace is illuminated by an overhead room light that provides steady, even brightness across the metallic counter, the white cutting board, and the red wall, creating distinct shadows beneath my hands and the tools.",
           "question": "From which direction is the primary light source hitting the cutting board?",
           "answer": "From above (overhead).",
-          "category": "light_recongnition",
+          "category": "light_recognition",
           "supporting_modalities": [
             "ir"
           ],
@@ -4325,7 +4325,7 @@
           ],
           "source_modality": "rgb",
           "source_key": "dataset/cut_carrot_split/cut_carrot_rgb",
-          "annotation_key": "light_recongnition",
+          "annotation_key": "light_recognition",
           "qa_index": null,
           "support_score": 0.404,
           "lexical_support_score": 0.2,
@@ -4337,14 +4337,14 @@
           },
           "lexical_support_match": {
             "source_modality": "ir",
-            "category": "light_recongnition",
+            "category": "light_recognition",
             "section": "scene_and_context",
             "primary_section": "scene_and_context",
             "sections": [
               "scene_and_context"
             ],
             "source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
-            "annotation_key": "light_recongnition",
+            "annotation_key": "light_recognition",
             "qa_index": null,
             "question": "Which object besides the overhead light contributes to the illumination of the counter?",
             "answer": "The laptop screen.",
@@ -4377,7 +4377,7 @@
               "score": 0.404,
               "lexical_score": 0.2,
               "semantic_score": 0.571,
-              "match_category": "light_recongnition",
+              "match_category": "light_recognition",
               "match_modality": "ir",
               "match_source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
               "match_qa_index": null,
@@ -4692,7 +4692,7 @@
               "score": 0.291,
               "lexical_score": 0.062,
               "semantic_score": 0.478,
-              "match_category": "light_recongnition",
+              "match_category": "light_recognition",
               "match_modality": "ir",
               "match_source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
               "match_qa_index": null,
@@ -4825,14 +4825,14 @@
           },
           "semantic_support_match": {
             "source_modality": "ir",
-            "category": "light_recongnition",
+            "category": "light_recognition",
             "section": "scene_and_context",
             "primary_section": "scene_and_context",
             "sections": [
               "scene_and_context"
             ],
             "source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
-            "annotation_key": "light_recongnition",
+            "annotation_key": "light_recognition",
             "qa_index": null,
             "question": "Which object besides the overhead light contributes to the illumination of the counter?",
             "answer": "The laptop screen.",
@@ -4926,7 +4926,7 @@
             "best_direct_support_modality": "",
             "best_complementary_support_modality": "",
             "best_match_modality": "ir",
-            "best_match_category": "light_recongnition",
+            "best_match_category": "light_recognition",
             "supporting_modality_count": 0,
             "complementary_supporting_modality_count": 0,
             "conflicting_modality_count": 0,
@@ -5800,7 +5800,7 @@
               "score": 0.187,
               "lexical_score": 0.0,
               "semantic_score": 0.415,
-              "match_category": "light_recongnition",
+              "match_category": "light_recognition",
               "match_modality": "rgb",
               "match_source_key": "dataset/cut_carrot_split/cut_carrot_rgb",
               "match_qa_index": null,
@@ -6908,7 +6908,7 @@
       },
       {
         "modality": "rgb",
-        "section": "light_recongnition",
+        "section": "light_recognition",
         "fact_type": "lighting",
         "entity": "From above (overhead)",
         "attribute": "illumination",
@@ -6918,7 +6918,7 @@
         "source_answer": "From above (overhead).",
         "source_caption": "The kitchen workspace is illuminated by an overhead room light that provides steady, even brightness across the metallic counter, the white cutting board, and the red wall, creating distinct shadows beneath my hands and the tools.",
         "source_key": "dataset/cut_carrot_split/cut_carrot_rgb",
-        "annotation_key": "light_recongnition",
+        "annotation_key": "light_recognition",
         "support_score": 0.404,
         "modality_reliability": 1.0
       },
@@ -7724,7 +7724,7 @@
       },
       {
         "modality": "ir",
-        "section": "light_recongnition",
+        "section": "light_recognition",
         "fact_type": "lighting",
         "entity": "The laptop screen",
         "attribute": "illumination",
@@ -7734,7 +7734,7 @@
         "source_answer": "The laptop screen.",
         "source_caption": "The scene is primarily lit by an overhead light source, creating soft shadows behind the objects. The laptop screen also acts as a secondary light source, casting a faint glow on the left side of the cutting board. In the night frames, the overall brightness decreases significantly, emphasizing the thermal hotspots of the laptop screen and the human hands.",
         "source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
-        "annotation_key": "light_recongnition",
+        "annotation_key": "light_recognition",
         "support_score": 0.527,
         "modality_reliability": 1.0
       },
@@ -8591,7 +8591,7 @@
       "scene_overview": [
         {
           "modality": "ir",
-          "section": "light_recongnition",
+          "section": "light_recognition",
           "fact_type": "lighting",
           "entity": "The laptop screen",
           "attribute": "illumination",
@@ -8601,7 +8601,7 @@
           "source_answer": "The laptop screen.",
           "source_caption": "The scene is primarily lit by an overhead light source, creating soft shadows behind the objects. The laptop screen also acts as a secondary light source, casting a faint glow on the left side of the cutting board. In the night frames, the overall brightness decreases significantly, emphasizing the thermal hotspots of the laptop screen and the human hands.",
           "source_key": "dataset\\cut_carrot_split\\cut_carrot_ir",
-          "annotation_key": "light_recongnition",
+          "annotation_key": "light_recognition",
           "support_score": 0.527,
           "modality_reliability": 1.0
         },
