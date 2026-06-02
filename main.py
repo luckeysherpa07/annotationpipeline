@@ -10,6 +10,7 @@ import sys
 # Add parent directory to path so we can import annotation_feature
 sys.path.insert(0, str(Path(__file__).parent))
 
+from annotation_feature.cli.actions.aligned_rgb import build_aligned_rgb_actions
 from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
 from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
@@ -93,6 +94,10 @@ def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
 
 
 REGISTERED_MENU_ACTIONS = {
+    **build_aligned_rgb_actions(
+        output_file=ALIGNED_QA_OUTPUT_FILES["rgb"],
+        confirm=_confirm,
+    ),
     **build_aligned_ir_actions(
         output_file=ALIGNED_QA_OUTPUT_FILES["ir"],
         confirm=_confirm,
@@ -491,6 +496,7 @@ def main():
         print("\n--- ALIGNED RGB PIPELINE ---")
         print("37. Test aligned RGB batch pipeline on 1 segment pair (with real Gemini API calls)")
         print("38. Run aligned RGB batch pipeline on all segment pairs (production)")
+        print("38r. Repair aligned RGB missing sections")
         print("\n--- ALIGNED EVENT PIPELINE ---")
         print("39. Test aligned EVENT batch pipeline on 1 segment pair (with real Gemini API calls)")
         print("40. Run aligned EVENT batch pipeline on all segment pairs (production)")
@@ -1142,43 +1148,6 @@ def main():
                     f"- skipped {item.get('sample', 'unknown')} {item.get('side', '')} "
                     f"{item.get('segment', '')}: {item.get('reason')}"
                 )
-
-        elif choice == "37":
-            print("\n" + "-" * 60)
-            print("Running: aligned RGB batch pipeline on 1 segment pair (real Gemini API calls)")
-            print("WARNING: This will use Gemini API quota!")
-            print("Reads RGB videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['rgb']}.")
-            print("-" * 60)
-            if _confirm():
-                run(
-                    test_mode=True,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["rgb"]),
-                )
-            else:
-                print("Cancelled.")
-
-        elif choice == "38":
-            print("\n" + "-" * 60)
-            print("Running: aligned RGB batch pipeline on all segment pairs (production)")
-            print("WARNING: This will use Gemini API quota for each aligned segment pair!")
-            print("Reads RGB videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['rgb']}.")
-            print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
-            print("-" * 60)
-            if _confirm():
-                run(
-                    test_mode=False,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["rgb"]),
-                )
-            else:
-                print("Cancelled.")
 
         elif choice == "39":
             print("\n" + "-" * 60)

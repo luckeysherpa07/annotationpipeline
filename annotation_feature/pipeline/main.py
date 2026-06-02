@@ -16,7 +16,7 @@ from annotation_feature.video_preprocessor import extract_frames, preprocess_vid
 from annotation_feature.audio_preprocessor import preprocess_audio
 from .client import create_gemini_client
 from .utils import get_pair_key, infer_recording_side, is_modality_file, video_extensions, audio_extensions
-from .modalities.rgb import run_parallel_pipeline
+from .modalities.rgb import run_parallel_pipeline, run_rgb_missing_sections_pipeline
 from .modalities.event import run_event_parallel_pipeline
 from .modalities.depth import run_depth_missing_sections_pipeline, run_depth_parallel_pipeline
 from .modalities.ir import run_ir_parallel_pipeline
@@ -282,6 +282,8 @@ def run(
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
     output_file: Path | str = "rgb_qa_results.json",
+    max_concurrent: int = 3,
+    delay_between_pairs: int = 4,
 ):
     """
     Run the RGB annotation pipeline.
@@ -292,6 +294,8 @@ def run(
         skip_api: If True, skip Gemini API calls and use DEMO_RESULT instead
         dataset_folder: Dataset directory containing the source videos
         output_file: JSON path to write RGB QA results
+        max_concurrent: Maximum concurrent Gemini calls
+        delay_between_pairs: Delay between scheduling pair processing, in seconds
     """
     if test_mode:
         print("=" * 50)
@@ -342,7 +346,8 @@ def run(
         return results
 
     print(
-        f"Processing {len(available_pairs)} batch pairs with up to 3 concurrent tasks and 4-second spacing..."
+        f"Processing {len(available_pairs)} batch pairs with up to {max_concurrent} "
+        f"concurrent task(s) and {delay_between_pairs}-second spacing..."
     )
 
     client = None
@@ -368,8 +373,8 @@ def run(
         run_parallel_pipeline(
             client,
             available_pairs,
-            max_concurrent=3,
-            delay_between_pairs=4,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
             skip_api=skip_api,
             on_pair_complete=checkpoint_pair,
         )
@@ -403,6 +408,120 @@ def run(
     if test_mode:
         print("TEST MODE COMPLETE")
     print("=" * 50)
+    return results
+
+
+def run_rgb_missing_section_repair(
+    dataset_folder: Path | str = "aligned_dataset",
+    output_file: Path | str = "qa_pairs/aligned/rgb_qa_results_aligned.json",
+    skip_api: bool = False,
+    max_concurrent: int = 1,
+    delay_between_pairs: int = 70,
+) -> Dict:
+    """Repair partial RGB results by requesting only missing annotation sections."""
+    dataset_folder = Path(dataset_folder)
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
+
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find videos in: {dataset_folder}")
+        return results
+
+    print(f"Dataset directory listing for {dataset_folder}:")
+    print(os.listdir(dataset_folder))
+    print("Preprocessing RGB videos...")
+    paired_frames = preprocess_videos(dataset_folder, fps=1, video_type="rgb")
+    print(f"Found {len(paired_frames)} RGB video pairs\n")
+
+    expected_keys = ANNOTATION_PROMPT_KEYS["rgb"]
+    repair_jobs: Dict[str, Dict[str, Any]] = {}
+    complete_count = 0
+    missing_side_count = 0
+    unstarted_count = 0
+    skipped_count = 0
+
+    for pair_key, frames in paired_frames.items():
+        if not (frames.get("day") or frames.get("night")):
+            continue
+
+        existing_entry = results.get(pair_key)
+        if _entry_complete(existing_entry, expected_keys):
+            complete_count += 1
+            continue
+
+        if not frames.get("day") or not frames.get("night"):
+            results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "rgb", {})
+            results[pair_key].update(
+                {
+                    "status": SKIPPED_MISSING_SIDE_STATUS,
+                    "reason": "missing_day_or_night_frames",
+                    "day_frame_count": len(frames.get("day") or []),
+                    "night_frame_count": len(frames.get("night") or []),
+                }
+            )
+            _write_results(output_file, results)
+            missing_side_count += 1
+            continue
+
+        if (
+            not isinstance(existing_entry, dict)
+            or not isinstance(existing_entry.get("annotations"), dict)
+            or not _annotations_have_content(existing_entry.get("annotations", {}))
+        ):
+            unstarted_count += 1
+            continue
+
+        missing_sections = _missing_annotation_sections(existing_entry, expected_keys)
+        if not missing_sections:
+            skipped_count += 1
+            continue
+
+        repair_jobs[pair_key] = {
+            "day": frames.get("day") or [],
+            "night": frames.get("night") or [],
+            "missing_sections": missing_sections,
+        }
+
+    print(
+        "RGB missing-section repair scan: "
+        f"{complete_count} complete/skipped, "
+        f"{len(repair_jobs)} partial repair job(s), "
+        f"{missing_side_count} missing-side pair(s) marked skipped, "
+        f"{unstarted_count} unstarted pair(s) left for full run, "
+        f"{skipped_count} no-op."
+    )
+
+    if not repair_jobs:
+        print(f"No RGB missing sections to repair. Existing results kept at: {output_file}")
+        return results
+
+    if skip_api:
+        client = None
+    else:
+        client = create_gemini_client()
+
+    def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        existing_entry = results.get(pair_key, {})
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        merged_annotations = _merge_annotations(existing_annotations, annotation_results)
+        results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "rgb", merged_annotations)
+        _write_results(output_file, results)
+        print(f"Repair checkpoint saved for: {pair_key}")
+
+    asyncio.run(
+        run_rgb_missing_sections_pipeline(
+            client,
+            repair_jobs,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
+            skip_api=skip_api,
+            on_pair_complete=checkpoint_pair,
+        )
+    )
+
+    _write_results(output_file, results)
+    print(f"RGB missing-section repair results saved to: {output_file}")
     return results
 
 

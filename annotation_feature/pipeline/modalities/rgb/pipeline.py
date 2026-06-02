@@ -7,7 +7,7 @@ import asyncio
 import copy
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict
 from pathlib import Path
 import sys
 
@@ -109,7 +109,7 @@ def parse_json_response(text: str) -> dict:
     return json.loads(json_text)
 
 
-def normalize_annotation_results(raw_results: Any) -> dict:
+def normalize_annotation_results(raw_results: Any, annotation_types: list[str] | None = None) -> dict:
     """Normalize RGB annotation results to ensure consistency.
     
     Args:
@@ -120,7 +120,9 @@ def normalize_annotation_results(raw_results: Any) -> dict:
     """
     normalized: dict = {}
     fallback = {"caption": "", "question": "", "answer": ""}
-    for annotation_type in RGB_PROMPTS.keys():
+    expected_types = annotation_types or list(RGB_PROMPTS.keys())
+
+    for annotation_type in expected_types:
         item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
 
         if not isinstance(item, dict):
@@ -191,8 +193,30 @@ async def process_single_pair_batch(
     Returns:
         Annotation results dictionary
     """
+    return await process_rgb_pair_sections(
+        client,
+        pair_key,
+        night_frames,
+        day_frames,
+        list(RGB_PROMPTS.keys()),
+        skip_api=skip_api,
+    )
+
+
+async def process_rgb_pair_sections(
+    client,
+    pair_key: str,
+    night_frames: list[Path],
+    day_frames: list[Path],
+    annotation_types: list[str],
+    skip_api: bool = False,
+) -> dict | None:
+    """Process selected RGB annotation sections for a single video pair."""
     if skip_api:
-        return copy.deepcopy(DEMO_RESULT)
+        return {
+            annotation_type: copy.deepcopy(DEMO_RESULT[annotation_type])
+            for annotation_type in annotation_types
+        }
 
     if not night_frames or not day_frames:
         print(f"    WARNING: Missing night or day frames for pair {pair_key}; marking as skipped")
@@ -202,6 +226,8 @@ async def process_single_pair_batch(
             "day_frame_count": len(day_frames),
             "night_frame_count": len(night_frames),
         }
+    if not annotation_types:
+        return {}
 
     selected_night = night_frames
     selected_day = day_frames
@@ -215,13 +241,13 @@ async def process_single_pair_batch(
         return None
 
     image_parts = build_image_parts(night_encoded) + build_image_parts(day_encoded)
-    prompt = build_rgb_mega_prompt(list(RGB_PROMPTS.keys()), selected_night, selected_day)
+    prompt = build_rgb_mega_prompt(annotation_types, selected_night, selected_day)
     contents = image_parts + [prompt]
 
     try:
         response_text = await call_gemini_with_retry(client, contents, max_retries=3)
         parsed = parse_json_response(response_text)
-        return normalize_annotation_results(parsed)
+        return normalize_annotation_results(parsed, annotation_types)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
         print(f"    Skipping checkpoint for pair {pair_key}; it will remain pending for resume.")
@@ -265,6 +291,65 @@ async def run_parallel_pipeline(
     tasks = []
     for pair_key, frames in paired_frames.items():
         tasks.append(asyncio.create_task(worker(pair_key, frames)))
+        await asyncio.sleep(delay_between_pairs)
+
+    for completed_task in asyncio.as_completed(tasks):
+        pair_key, annotation_results = await completed_task
+        if annotation_results is None:
+            continue
+        results[pair_key] = annotation_results
+        if on_pair_complete is not None:
+            on_pair_complete(pair_key, annotation_results)
+
+    return results
+
+
+async def run_rgb_missing_sections_pipeline(
+    client,
+    repair_jobs: Dict[str, Dict[str, Any]],
+    max_concurrent: int = 1,
+    delay_between_pairs: int = 70,
+    skip_api: bool = False,
+    on_pair_complete=None,
+) -> Dict[str, dict]:
+    """Run RGB repair for selected missing annotation sections."""
+    results: Dict[str, dict] = {}
+    items = list(repair_jobs.items())
+
+    async def run_one(pair_key: str, job: Dict[str, Any]) -> dict | None:
+        print(
+            f"\nRepairing RGB pair: {pair_key} "
+            f"({len(job.get('missing_sections', []))} missing section(s))"
+        )
+        return await process_rgb_pair_sections(
+            client,
+            pair_key,
+            job.get("night", []) or [],
+            job.get("day", []) or [],
+            job.get("missing_sections", []) or [],
+            skip_api=skip_api,
+        )
+
+    if max_concurrent <= 1:
+        for index, (pair_key, job) in enumerate(items):
+            annotation_results = await run_one(pair_key, job)
+            if annotation_results is not None:
+                results[pair_key] = annotation_results
+                if on_pair_complete is not None:
+                    on_pair_complete(pair_key, annotation_results)
+            if index < len(items) - 1 and delay_between_pairs > 0:
+                await asyncio.sleep(delay_between_pairs)
+        return results
+
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def worker(pair_key: str, job: Dict[str, Any]) -> tuple[str, dict | None]:
+        async with semaphore:
+            return pair_key, await run_one(pair_key, job)
+
+    tasks = []
+    for pair_key, job in items:
+        tasks.append(asyncio.create_task(worker(pair_key, job)))
         await asyncio.sleep(delay_between_pairs)
 
     for completed_task in asyncio.as_completed(tasks):
