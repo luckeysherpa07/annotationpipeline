@@ -17,6 +17,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from prompts.rgb_prompts import RGB_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
+RGB_MODEL_NAME = "gemini-3-flash-preview"
+RGB_SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
+
 try:
     from google.genai import types
 except ImportError:
@@ -116,8 +119,8 @@ def normalize_annotation_results(raw_results: Any) -> dict:
         Normalized results dictionary with all annotation types
     """
     normalized: dict = {}
+    fallback = {"caption": "", "question": "", "answer": ""}
     for annotation_type in RGB_PROMPTS.keys():
-        fallback = DEMO_RESULT.get(annotation_type, {})
         item = raw_results.get(annotation_type) if isinstance(raw_results, dict) else None
 
         if not isinstance(item, dict):
@@ -159,7 +162,7 @@ async def call_gemini_with_retry(client, contents: list, max_retries: int = 3) -
         try:
             response = await asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-3-flash-preview",
+                model=RGB_MODEL_NAME,
                 contents=contents,
             )
             return response.text
@@ -175,7 +178,7 @@ async def process_single_pair_batch(
     night_frames: list[Path],
     day_frames: list[Path],
     skip_api: bool = False,
-) -> dict:
+) -> dict | None:
     """Process a single RGB video pair.
     
     Args:
@@ -192,8 +195,13 @@ async def process_single_pair_batch(
         return copy.deepcopy(DEMO_RESULT)
 
     if not night_frames or not day_frames:
-        print(f"    WARNING: Missing night or day frames for pair {pair_key}; falling back to demo results")
-        return copy.deepcopy(DEMO_RESULT)
+        print(f"    WARNING: Missing night or day frames for pair {pair_key}; marking as skipped")
+        return {
+            "status": RGB_SKIPPED_MISSING_SIDE_STATUS,
+            "reason": "missing_day_or_night_frames",
+            "day_frame_count": len(day_frames),
+            "night_frame_count": len(night_frames),
+        }
 
     selected_night = night_frames
     selected_day = day_frames
@@ -203,8 +211,8 @@ async def process_single_pair_batch(
     day_encoded = encode_frames_to_base64(selected_day)
 
     if not night_encoded or not day_encoded:
-        print(f"    WARNING: Could not encode frames for pair {pair_key}; falling back to demo results")
-        return copy.deepcopy(DEMO_RESULT)
+        print(f"    WARNING: Could not encode frames for pair {pair_key}; keeping it pending for resume")
+        return None
 
     image_parts = build_image_parts(night_encoded) + build_image_parts(day_encoded)
     prompt = build_rgb_mega_prompt(list(RGB_PROMPTS.keys()), selected_night, selected_day)
@@ -216,8 +224,8 @@ async def process_single_pair_batch(
         return normalize_annotation_results(parsed)
     except Exception as e:
         print(f"    ERROR: Gemini batch call failed for {pair_key}: {e}")
-        print(f"    Falling back to DEMO_RESULT for pair {pair_key}")
-        return copy.deepcopy(DEMO_RESULT)
+        print(f"    Skipping checkpoint for pair {pair_key}; it will remain pending for resume.")
+        return None
 
 
 async def run_parallel_pipeline(
@@ -243,7 +251,7 @@ async def run_parallel_pipeline(
     semaphore = asyncio.Semaphore(max_concurrent)
     results: Dict[str, dict] = {}
 
-    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict]:
+    async def worker(pair_key: str, frames: Dict[str, list]) -> tuple[str, dict | None]:
         async with semaphore:
             print(f"\nProcessing batch pair: {pair_key}")
             return pair_key, await process_single_pair_batch(
@@ -261,6 +269,8 @@ async def run_parallel_pipeline(
 
     for completed_task in asyncio.as_completed(tasks):
         pair_key, annotation_results = await completed_task
+        if annotation_results is None:
+            continue
         results[pair_key] = annotation_results
         if on_pair_complete is not None:
             on_pair_complete(pair_key, annotation_results)

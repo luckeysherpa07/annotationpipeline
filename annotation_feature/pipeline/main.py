@@ -350,6 +350,13 @@ def run(
         client = create_gemini_client()
 
     def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
+        if annotation_results.get("status") == SKIPPED_MISSING_SIDE_STATUS:
+            results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "rgb", {})
+            results[pair_key].update(annotation_results)
+            _write_results(output_file, results)
+            print(f"Checkpoint saved for skipped pair: {pair_key}")
+            return
+
         existing_entry = results.get(pair_key, {})
         existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
         merged_annotations = _merge_annotations(existing_annotations, annotation_results)
@@ -378,8 +385,12 @@ def run(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No batch output for pair {pair_key}. Falling back to DEMO_RESULT.")
-            file_results = copy.deepcopy(DEMO_RESULT)
+            print(f"WARNING: No batch output for pair {pair_key}. Keeping it pending for resume.")
+            continue
+
+        if _entry_complete(results.get(pair_key), expected_keys):
+            print(f"✓ Done: {pair_key}")
+            continue
 
         checkpoint_pair(pair_key, file_results)
         print(f"✓ Done: {pair_key}")

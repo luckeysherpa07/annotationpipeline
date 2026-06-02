@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
+from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
 from annotation_feature.pipeline import (
     run,
     run_audio,
@@ -99,6 +100,10 @@ REGISTERED_MENU_ACTIONS = {
     **build_aligned_marigold_actions(
         output_file=ALIGNED_QA_OUTPUT_FILES["marigold_depth"],
         confirm=_confirm,
+    ),
+    **build_aligned_qa_quality_actions(
+        confirm=_confirm,
+        output_dir="outputs",
     ),
 }
 
@@ -523,9 +528,11 @@ def main():
         print("\n--- MULTIMODAL QA BENCHMARK ---")
         print("61. Generate v2 implicit multimodal QA candidates")
         print("62. Verify/filter v2 implicit multimodal QA candidates")
+        print("\n--- ALIGNED QA QUALITY ---")
+        print("64. Evaluate aligned QA quality")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-63 or action id): ").strip()
+        choice = input("\nEnter choice (1-64 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
