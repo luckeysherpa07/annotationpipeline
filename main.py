@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
 from annotation_feature.cli.actions.aligned_rgb import build_aligned_rgb_actions
+from annotation_feature.cli.actions.aligned_event import build_aligned_event_actions
 from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
 from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
@@ -96,6 +97,10 @@ def _confirm(prompt: str = "Continue? (yes/no): ") -> bool:
 REGISTERED_MENU_ACTIONS = {
     **build_aligned_rgb_actions(
         output_file=ALIGNED_QA_OUTPUT_FILES["rgb"],
+        confirm=_confirm,
+    ),
+    **build_aligned_event_actions(
+        output_file=ALIGNED_QA_OUTPUT_FILES["event"],
         confirm=_confirm,
     ),
     **build_aligned_ir_actions(
@@ -500,6 +505,7 @@ def main():
         print("\n--- ALIGNED EVENT PIPELINE ---")
         print("39. Test aligned EVENT batch pipeline on 1 segment pair (with real Gemini API calls)")
         print("40. Run aligned EVENT batch pipeline on all segment pairs (production)")
+        print("40r. Repair aligned EVENT missing sections")
         print("\n--- ALIGNED IR PIPELINE ---")
         print("41. Test aligned IR batch pipeline on 1 segment pair (with real Gemini API calls)")
         print("42. Run aligned IR batch pipeline on all segment pairs (production)")
@@ -1148,43 +1154,6 @@ def main():
                     f"- skipped {item.get('sample', 'unknown')} {item.get('side', '')} "
                     f"{item.get('segment', '')}: {item.get('reason')}"
                 )
-
-        elif choice == "39":
-            print("\n" + "-" * 60)
-            print("Running: aligned EVENT batch pipeline on 1 segment pair (real Gemini API calls)")
-            print("WARNING: This will use Gemini API quota!")
-            print("Reads EVENT videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache_event for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['event']}.")
-            print("-" * 60)
-            if _confirm():
-                run_event(
-                    test_mode=True,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["event"]),
-                )
-            else:
-                print("Cancelled.")
-
-        elif choice == "40":
-            print("\n" + "-" * 60)
-            print("Running: aligned EVENT batch pipeline on all segment pairs (production)")
-            print("WARNING: This will use Gemini API quota for each aligned segment pair!")
-            print("Reads EVENT videos from aligned_dataset/.")
-            print("Uses aligned_dataset/.frames_cache_event for extracted frames.")
-            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['event']}.")
-            print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
-            print("-" * 60)
-            if _confirm():
-                run_event(
-                    test_mode=False,
-                    skip_api=False,
-                    dataset_folder="aligned_dataset",
-                    output_file=str(ALIGNED_QA_OUTPUT_FILES["event"]),
-                )
-            else:
-                print("Cancelled.")
 
         elif choice in REGISTERED_MENU_ACTIONS:
             REGISTERED_MENU_ACTIONS[choice].run()
