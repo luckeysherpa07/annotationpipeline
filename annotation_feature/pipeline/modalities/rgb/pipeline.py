@@ -17,7 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from prompts.rgb_prompts import RGB_PROMPTS
 from annotation_feature.demo_result import DEMO_RESULT
 
-RGB_MODEL_NAME = "gemini-3-flash-preview"
+RGB_MODEL_NAME = "gemini-3.1-flash-lite"
 RGB_SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
 
 try:
@@ -56,6 +56,9 @@ def build_rgb_mega_prompt(annotation_types: list[str], night_frames: list[Path],
     prompt_parts.extend([
         "}",
         "Do not include any markdown, explanation, or additional text. Output must be parseable JSON only.",
+        "Every requested annotation type must contain non-empty caption, question, and answer strings.",
+        "If a requested capability is absent, unclear, or not visible in the frames, still produce a negative QA that explicitly states the absence.",
+        "Do not return empty strings, null values, placeholder text, or omit any requested annotation type.",
         f"NIGHT frames ({len(night_frames)} images): {', '.join([path.name for path in night_frames])}",
         f"DAY frames ({len(day_frames)} images): {', '.join([path.name for path in day_frames])}",
         "",
@@ -77,7 +80,7 @@ def build_rgb_mega_prompt(annotation_types: list[str], night_frames: list[Path],
         ])
 
     prompt_parts.append(
-        "Produce exactly one JSON object with all annotation types and no additional commentary."
+        "Produce exactly one JSON object with all requested annotation types and no additional commentary."
     )
     return "\n".join(prompt_parts)
 

@@ -504,10 +504,18 @@ def run_rgb_missing_section_repair(
     def checkpoint_pair(pair_key: str, annotation_results: Dict) -> None:
         existing_entry = results.get(pair_key, {})
         existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        before_missing = set(_missing_annotation_sections(existing_entry, expected_keys))
         merged_annotations = _merge_annotations(existing_annotations, annotation_results)
         results[pair_key] = _result_entry_for_pair(dataset_folder, pair_key, "rgb", merged_annotations)
+        after_missing = set(_missing_annotation_sections(results[pair_key], expected_keys))
+        filled_sections = sorted(before_missing - after_missing)
+        still_missing = sorted(after_missing)
         _write_results(output_file, results)
         print(f"Repair checkpoint saved for: {pair_key}")
+        print(f"  filled sections: {filled_sections}")
+        print(f"  still missing sections: {still_missing}")
+        if before_missing and before_missing == after_missing:
+            print("  no progress: true")
 
     asyncio.run(
         run_rgb_missing_sections_pipeline(
