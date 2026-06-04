@@ -57,6 +57,12 @@ def build_depth_mega_prompt(annotation_types: list[str], day_frames: list[Path],
     prompt_parts.extend([
         "}",
         "Do not include any markdown, explanation, or additional text. Output must be parseable JSON only.",
+        "Every requested annotation type must contain non-empty caption, question, and answer strings.",
+        "Generate exactly one clean question and one clean answer per requested annotation type.",
+        "Do not copy, quote, paraphrase, or include any prompt instructions in the caption, question, or answer.",
+        "Do not generate numbered question lists or numbered answer lists.",
+        "If a requested depth-based capability is absent, unclear, or not visible in the frames, still produce a negative QA that explicitly states the absence.",
+        "Do not return empty strings, null values, placeholder text, or omit any requested annotation type.",
         f"DAY frames ({len(day_frames)} images): {', '.join([path.name for path in day_frames])}",
         f"NIGHT frames ({len(night_frames)} images): {', '.join([path.name for path in night_frames])}",
         "",
@@ -78,7 +84,7 @@ def build_depth_mega_prompt(annotation_types: list[str], day_frames: list[Path],
         ])
 
     prompt_parts.append(
-        "Produce exactly one JSON object with all annotation types and no additional commentary."
+        "Produce exactly one JSON object with all requested annotation types and no additional commentary."
     )
     return "\n".join(prompt_parts)
 
