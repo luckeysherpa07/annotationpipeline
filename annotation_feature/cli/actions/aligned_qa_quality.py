@@ -6,7 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
-from annotation_feature.qa_quality import evaluate_aligned_qa
+from annotation_feature.qa_quality import evaluate_aligned_qa, run_aligned_qa_llm_evaluation
 
 
 def _print_header(title: str) -> None:
@@ -34,13 +34,59 @@ def build_aligned_qa_quality_actions(
         else:
             print("Cancelled.")
 
-    action = MenuAction(
+    def run_llm_evaluation() -> None:
+        _print_header("Running: LLM-assisted aligned QA evaluation")
+        print("Reads outputs/aligned_qa_cleaned_items.json.")
+        print("Writes outputs/aligned_qa_llm_eval_results.json and outputs/aligned_qa_llm_eval_items.csv.")
+        print("This calls Gemini and supports resume/checkpoint.")
+        print("Default max items is 1000 for quota-controlled full evaluation; enter 0 to run all remaining items.")
+        print("-" * 60)
+        raw_limit = input("Max items to evaluate this run? (default 1000, 0 = all): ").strip()
+        if not raw_limit:
+            max_items = 1000
+        else:
+            try:
+                parsed_limit = int(raw_limit)
+            except ValueError:
+                print("Invalid max items value.")
+                return
+            max_items = None if parsed_limit == 0 else max(0, parsed_limit)
+
+        raw_batch_size = input("Batch size? (default 50): ").strip()
+        if not raw_batch_size:
+            batch_size = 50
+        else:
+            try:
+                batch_size = max(1, int(raw_batch_size))
+            except ValueError:
+                print("Invalid batch size value.")
+                return
+
+        if confirm("Continue? (yes/no): "):
+            outputs = run_aligned_qa_llm_evaluation(
+                batch_size=batch_size,
+                max_items=max_items,
+            )
+            for label, path in outputs.items():
+                print(f"{label}: {path}")
+        else:
+            print("Cancelled.")
+
+    quality_action = MenuAction(
         action_id="aligned.qa_quality.evaluate",
         title="Evaluate aligned QA quality",
         section="ALIGNED QA QUALITY",
         handler=run_evaluation,
     )
+    llm_action = MenuAction(
+        action_id="aligned.qa_quality.llm_eval",
+        title="Run LLM-assisted aligned QA evaluation",
+        section="ALIGNED QA QUALITY",
+        handler=run_llm_evaluation,
+    )
     return {
-        "64": action,
-        "aligned.qa_quality.evaluate": action,
+        "64": quality_action,
+        "65": llm_action,
+        "aligned.qa_quality.evaluate": quality_action,
+        "aligned.qa_quality.llm_eval": llm_action,
     }

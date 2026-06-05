@@ -542,9 +542,10 @@ def main():
         print("62. Verify/filter v2 implicit multimodal QA candidates")
         print("\n--- ALIGNED QA QUALITY ---")
         print("64. Evaluate aligned QA quality")
+        print("65. Run LLM-assisted aligned QA evaluation")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-64 or action id): ").strip()
+        choice = input("\nEnter choice (1-65 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
