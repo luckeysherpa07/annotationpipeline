@@ -15,6 +15,10 @@ from annotation_feature.cli.actions.aligned_event import build_aligned_event_act
 from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
 from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+from annotation_feature.cli.actions.aligned_choices import (
+    REGISTERED_MENU_CHOICE_ORDER,
+    REGISTERED_MENU_SECTION_ORDER,
+)
 from annotation_feature.pipeline import (
     run,
     run_audio,
@@ -116,6 +120,20 @@ REGISTERED_MENU_ACTIONS = {
         output_dir="outputs",
     ),
 }
+
+
+def _print_registered_menu_sections(section_names: tuple[str, ...] = REGISTERED_MENU_SECTION_ORDER) -> None:
+    """Print registry-backed menu actions in a stable order."""
+    wanted_sections = set(section_names)
+    printed_sections = set()
+    for choice in REGISTERED_MENU_CHOICE_ORDER:
+        action = REGISTERED_MENU_ACTIONS.get(choice)
+        if action is None or action.section not in wanted_sections:
+            continue
+        if action.section not in printed_sections:
+            print(f"\n--- {action.section} ---")
+            printed_sections.add(action.section)
+        print(f"{choice}. {action.title}")
 
 
 def _select_cache_folder(dataset_folder: Path | str = "dataset") -> str | None:
@@ -498,28 +516,19 @@ def main():
         print("34. Run combined RGB/EVENT/IR/DEPTH DTW + RGB/AUDIO alignment for all dataset day/night files")
         print("35. Export cut_carrot aligned dataset as 30s separated segments")
         print("36. Export all dataset aligned samples as 30s separated segments")
-        print("\n--- ALIGNED RGB PIPELINE ---")
-        print("37. Test aligned RGB batch pipeline on 1 segment pair (with real Gemini API calls)")
-        print("38. Run aligned RGB batch pipeline on all segment pairs (production)")
-        print("38r. Repair aligned RGB missing sections")
-        print("\n--- ALIGNED EVENT PIPELINE ---")
-        print("39. Test aligned EVENT batch pipeline on 1 segment pair (with real Gemini API calls)")
-        print("40. Run aligned EVENT batch pipeline on all segment pairs (production)")
-        print("40r. Repair aligned EVENT missing sections")
-        print("\n--- ALIGNED IR PIPELINE ---")
-        print("41. Test aligned IR batch pipeline on 1 segment pair (with real Gemini API calls)")
-        print("42. Run aligned IR batch pipeline on all segment pairs (production)")
-        print("42r. Repair aligned IR missing sections")
+        _print_registered_menu_sections(
+            (
+                "ALIGNED RGB PIPELINE",
+                "ALIGNED EVENT PIPELINE",
+                "ALIGNED IR PIPELINE",
+            )
+        )
         print("\n--- ALIGNED AUDIO PIPELINE ---")
         print("43. Export source-aligned RGB-with-audio 30s segment videos for all segments of 1 pair")
         print("44. Export source-aligned RGB-with-audio 30s segment videos for all pairs")
         print("45. Test aligned AUDIO pipeline on 1 segment pair with real Gemini API calls")
         print("46. Run aligned AUDIO pipeline on all segment pairs (production)")
-        print("\n--- ALIGNED MARIGOLD DEPTH ---")
-        print("47. Run aligned Marigold depth estimation + QA on all segment pairs")
-        print("47e. Run aligned Marigold depth estimation only")
-        print("47q. Run aligned Marigold depth QA only")
-        print("47r. Repair aligned Marigold depth missing sections")
+        _print_registered_menu_sections(("ALIGNED MARIGOLD DEPTH PIPELINE",))
         print("\n--- LATE FUSION ---")
         print("48. Run late fusion on existing modality JSON results")
         print("\n--- TASK SLICING ---")
@@ -540,9 +549,7 @@ def main():
         print("\n--- MULTIMODAL QA BENCHMARK ---")
         print("61. Generate v2 implicit multimodal QA candidates")
         print("62. Verify/filter v2 implicit multimodal QA candidates")
-        print("\n--- ALIGNED QA QUALITY ---")
-        print("64. Evaluate aligned QA quality")
-        print("65. Run LLM-assisted aligned QA evaluation")
+        _print_registered_menu_sections(("ALIGNED QA QUALITY",))
         print("\n63. Exit")
 
         choice = input("\nEnter choice (1-65 or action id): ").strip()

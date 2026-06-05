@@ -6,6 +6,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
+from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_RGB_REPAIR,
+    ALIGNED_RGB_RUN,
+    ALIGNED_RGB_TEST,
+)
 from annotation_feature.pipeline import run, run_rgb_missing_section_repair
 
 
@@ -78,24 +83,24 @@ def build_aligned_rgb_actions(
             print("Cancelled.")
 
     actions = {
-        "37": MenuAction(
+        ALIGNED_RGB_TEST: MenuAction(
             action_id="aligned.rgb.test",
             title="Test aligned RGB batch pipeline on 1 segment pair",
             section="ALIGNED RGB PIPELINE",
             handler=run_test,
         ),
-        "38": MenuAction(
+        ALIGNED_RGB_RUN: MenuAction(
             action_id="aligned.rgb.run",
             title="Run aligned RGB batch pipeline on all segment pairs",
             section="ALIGNED RGB PIPELINE",
             handler=run_production,
         ),
-        "38r": MenuAction(
+        ALIGNED_RGB_REPAIR: MenuAction(
             action_id="aligned.rgb.repair",
             title="Repair aligned RGB missing sections",
             section="ALIGNED RGB PIPELINE",
             handler=run_missing_section_repair,
         ),
     }
-    actions["aligned.rgb.repair"] = actions["38r"]
+    actions["aligned.rgb.repair"] = actions[ALIGNED_RGB_REPAIR]
     return actions

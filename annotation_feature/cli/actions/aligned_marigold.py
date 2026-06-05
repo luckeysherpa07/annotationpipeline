@@ -6,6 +6,12 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
+from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_MARIGOLD_ESTIMATE,
+    ALIGNED_MARIGOLD_QA,
+    ALIGNED_MARIGOLD_REPAIR,
+    ALIGNED_MARIGOLD_RUN,
+)
 from annotation_feature.pipeline import (
     run_aligned_marigold_depth_estimation,
     run_marigold_depth_missing_section_repair,
@@ -106,33 +112,33 @@ def build_aligned_marigold_actions(
             print("Cancelled.")
 
     actions = {
-        "47": MenuAction(
+        ALIGNED_MARIGOLD_RUN: MenuAction(
             action_id="aligned.marigold_depth.run",
             title="Run aligned Marigold depth estimation + QA",
             section="ALIGNED MARIGOLD DEPTH PIPELINE",
             handler=run_full,
         ),
-        "47e": MenuAction(
+        ALIGNED_MARIGOLD_ESTIMATE: MenuAction(
             action_id="aligned.marigold_depth.estimate",
             title="Run aligned Marigold depth estimation only",
             section="ALIGNED MARIGOLD DEPTH PIPELINE",
             handler=run_estimation,
         ),
-        "47q": MenuAction(
+        ALIGNED_MARIGOLD_QA: MenuAction(
             action_id="aligned.marigold_depth.qa",
             title="Run aligned Marigold depth QA only",
             section="ALIGNED MARIGOLD DEPTH PIPELINE",
             handler=run_qa_only,
         ),
-        "47r": MenuAction(
+        ALIGNED_MARIGOLD_REPAIR: MenuAction(
             action_id="aligned.marigold_depth.repair",
             title="Repair aligned Marigold depth missing sections",
             section="ALIGNED MARIGOLD DEPTH PIPELINE",
             handler=run_missing_section_repair,
         ),
     }
-    actions["aligned.marigold_depth.run"] = actions["47"]
-    actions["aligned.marigold_depth.estimate"] = actions["47e"]
-    actions["aligned.marigold_depth.qa"] = actions["47q"]
-    actions["aligned.marigold_depth.repair"] = actions["47r"]
+    actions["aligned.marigold_depth.run"] = actions[ALIGNED_MARIGOLD_RUN]
+    actions["aligned.marigold_depth.estimate"] = actions[ALIGNED_MARIGOLD_ESTIMATE]
+    actions["aligned.marigold_depth.qa"] = actions[ALIGNED_MARIGOLD_QA]
+    actions["aligned.marigold_depth.repair"] = actions[ALIGNED_MARIGOLD_REPAIR]
     return actions

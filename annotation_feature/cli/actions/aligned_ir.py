@@ -6,6 +6,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
+from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_IR_REPAIR,
+    ALIGNED_IR_RUN,
+    ALIGNED_IR_TEST,
+)
 from annotation_feature.pipeline import run_ir, run_ir_missing_section_repair
 
 
@@ -78,24 +83,24 @@ def build_aligned_ir_actions(
             print("Cancelled.")
 
     actions = {
-        "41": MenuAction(
+        ALIGNED_IR_TEST: MenuAction(
             action_id="aligned.ir.test",
             title="Test aligned IR batch pipeline on 1 segment pair",
             section="ALIGNED IR PIPELINE",
             handler=run_test,
         ),
-        "42": MenuAction(
+        ALIGNED_IR_RUN: MenuAction(
             action_id="aligned.ir.run",
             title="Run aligned IR batch pipeline on all segment pairs",
             section="ALIGNED IR PIPELINE",
             handler=run_production,
         ),
-        "42r": MenuAction(
+        ALIGNED_IR_REPAIR: MenuAction(
             action_id="aligned.ir.repair",
             title="Repair aligned IR missing sections",
             section="ALIGNED IR PIPELINE",
             handler=run_missing_section_repair,
         ),
     }
-    actions["aligned.ir.repair"] = actions["42r"]
+    actions["aligned.ir.repair"] = actions[ALIGNED_IR_REPAIR]
     return actions

@@ -6,6 +6,10 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
+from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_QA_QUALITY_EVALUATE,
+    ALIGNED_QA_QUALITY_LLM_EVAL,
+)
 from annotation_feature.qa_quality import evaluate_aligned_qa, run_aligned_qa_llm_evaluation
 
 
@@ -85,8 +89,8 @@ def build_aligned_qa_quality_actions(
         handler=run_llm_evaluation,
     )
     return {
-        "64": quality_action,
-        "65": llm_action,
+        ALIGNED_QA_QUALITY_EVALUATE: quality_action,
+        ALIGNED_QA_QUALITY_LLM_EVAL: llm_action,
         "aligned.qa_quality.evaluate": quality_action,
         "aligned.qa_quality.llm_eval": llm_action,
     }

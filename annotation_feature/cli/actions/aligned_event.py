@@ -6,6 +6,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
+from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_EVENT_REPAIR,
+    ALIGNED_EVENT_RUN,
+    ALIGNED_EVENT_TEST,
+)
 from annotation_feature.pipeline import run_event, run_event_missing_section_repair
 
 
@@ -78,24 +83,24 @@ def build_aligned_event_actions(
             print("Cancelled.")
 
     actions = {
-        "39": MenuAction(
+        ALIGNED_EVENT_TEST: MenuAction(
             action_id="aligned.event.test",
             title="Test aligned EVENT batch pipeline on 1 segment pair",
             section="ALIGNED EVENT PIPELINE",
             handler=run_test,
         ),
-        "40": MenuAction(
+        ALIGNED_EVENT_RUN: MenuAction(
             action_id="aligned.event.run",
             title="Run aligned EVENT batch pipeline on all segment pairs",
             section="ALIGNED EVENT PIPELINE",
             handler=run_production,
         ),
-        "40r": MenuAction(
+        ALIGNED_EVENT_REPAIR: MenuAction(
             action_id="aligned.event.repair",
             title="Repair aligned EVENT missing sections",
             section="ALIGNED EVENT PIPELINE",
             handler=run_missing_section_repair,
         ),
     }
-    actions["aligned.event.repair"] = actions["40r"]
+    actions["aligned.event.repair"] = actions[ALIGNED_EVENT_REPAIR]
     return actions
