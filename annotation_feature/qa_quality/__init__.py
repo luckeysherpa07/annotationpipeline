@@ -1,6 +1,12 @@
 """Quality checks for generated QA files."""
 
-__all__ = ["evaluate_aligned_qa", "run_aligned_qa_llm_evaluation"]
+__all__ = ["clean_aligned_qa_dataset", "evaluate_aligned_qa", "run_aligned_qa_llm_evaluation"]
+
+
+def clean_aligned_qa_dataset(*args, **kwargs):
+    from .cleaner import clean_aligned_qa_dataset as _clean
+
+    return _clean(*args, **kwargs)
 
 
 def evaluate_aligned_qa(*args, **kwargs):

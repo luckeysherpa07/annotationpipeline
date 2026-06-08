@@ -7,10 +7,15 @@ from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
 from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_QA_QUALITY_CLEAN,
     ALIGNED_QA_QUALITY_EVALUATE,
     ALIGNED_QA_QUALITY_LLM_EVAL,
 )
-from annotation_feature.qa_quality import evaluate_aligned_qa, run_aligned_qa_llm_evaluation
+from annotation_feature.qa_quality import (
+    clean_aligned_qa_dataset,
+    evaluate_aligned_qa,
+    run_aligned_qa_llm_evaluation,
+)
 
 
 def _print_header(title: str) -> None:
@@ -76,6 +81,27 @@ def build_aligned_qa_quality_actions(
         else:
             print("Cancelled.")
 
+    def run_cleaner() -> None:
+        input_path = Path(output_dir) / "aligned_qa_llm_eval_results.json"
+        output_path = Path(output_dir) / "aligned_qa_valid_items.json"
+        _print_header("Running: clean aligned QA dataset")
+        print(f"Reads {input_path}.")
+        print(f"Writes {output_path}.")
+        print("Keeps only pass/low-risk/caption-supported single QA items.")
+        print("This is rule-based and does not call Gemini.")
+        print("-" * 60)
+        if confirm("Continue? (yes/no): "):
+            result = clean_aligned_qa_dataset(input_path=input_path, output_path=output_path)
+            summary = result["summary"]
+            print(
+                "Cleaned aligned QA dataset: "
+                f"{summary['total_valid']} valid, {summary['total_removed']} removed, "
+                f"{summary['total_input']} input."
+            )
+            print(f"valid_json: {output_path}")
+        else:
+            print("Cancelled.")
+
     quality_action = MenuAction(
         action_id="aligned.qa_quality.evaluate",
         title="Evaluate aligned QA quality",
@@ -88,9 +114,17 @@ def build_aligned_qa_quality_actions(
         section="ALIGNED QA QUALITY",
         handler=run_llm_evaluation,
     )
+    clean_action = MenuAction(
+        action_id="aligned.qa_quality.clean",
+        title="Clean aligned QA dataset",
+        section="ALIGNED QA QUALITY",
+        handler=run_cleaner,
+    )
     return {
         ALIGNED_QA_QUALITY_EVALUATE: quality_action,
         ALIGNED_QA_QUALITY_LLM_EVAL: llm_action,
+        ALIGNED_QA_QUALITY_CLEAN: clean_action,
         "aligned.qa_quality.evaluate": quality_action,
         "aligned.qa_quality.llm_eval": llm_action,
+        "aligned.qa_quality.clean": clean_action,
     }

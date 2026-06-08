@@ -552,7 +552,7 @@ def main():
         _print_registered_menu_sections(("ALIGNED QA QUALITY",))
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-65 or action id): ").strip()
+        choice = input("\nEnter choice (1-66 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
