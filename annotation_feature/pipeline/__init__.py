@@ -2,6 +2,7 @@
 from .main import (
     run,
     run_audio,
+    run_audio_repair,
     run_depth,
     run_event,
     run_event_missing_section_repair,
@@ -59,6 +60,7 @@ def run_multimodal_qa_verifier(*args, **kwargs):
 __all__ = [
     "run",
     "run_audio",
+    "run_audio_repair",
     "run_event",
     "run_event_missing_section_repair",
     "run_depth",

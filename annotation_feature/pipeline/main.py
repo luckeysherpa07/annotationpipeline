@@ -22,6 +22,8 @@ from .modalities.depth import run_depth_missing_sections_pipeline, run_depth_par
 from .modalities.ir import run_ir_parallel_pipeline
 from .modalities.ir.pipeline import run_ir_missing_sections_pipeline
 from .modalities.audio import (
+    DEMO_TIMESTAMPED_CAPTION,
+    enrich_audio_annotations,
     format_audio_annotations,
     run_parallel_pipeline as run_audio_parallel_pipeline,
 )
@@ -41,6 +43,12 @@ ANNOTATION_PROMPT_KEYS = {
 
 AUDIO_RGB_SOURCE_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$")
 SKIPPED_MISSING_SIDE_STATUS = "skipped_missing_side"
+AUDIO_MAX_CONCURRENT = 1
+AUDIO_DELAY_BETWEEN_PAIRS = 15
+
+
+def _normalize_pair_key(pair_key: str | Path) -> str:
+    return str(pair_key).replace("\\", "/")
 
 
 def _load_existing_results(output_file: Path) -> Dict:
@@ -58,7 +66,7 @@ def _load_existing_results(output_file: Path) -> Dict:
         print(f"WARNING: Existing results file is not a JSON object: {output_file}")
         return {}
 
-    return {str(key).replace("\\", "/"): value for key, value in data.items()}
+    return {_normalize_pair_key(key): value for key, value in data.items()}
 
 
 def _annotation_item_has_content(item: Dict) -> bool:
@@ -199,16 +207,29 @@ def _audio_entry_complete(entry: Dict) -> bool:
     if not isinstance(annotations, dict):
         return False
 
-    for section_name in ("audio_hia", "audio_chronological_caption"):
-        section = annotations.get(section_name, {})
-        if not isinstance(section, dict) or not str(section.get("caption", "")).strip():
-            return False
+    chronological_section = annotations.get("audio_chronological_caption", {})
+    if not isinstance(chronological_section, dict) or not str(chronological_section.get("caption", "")).strip():
+        return False
+
+    chronological_caption = str(
+        (annotations.get("audio_chronological_caption", {}) or {}).get("caption", "")
+    ).strip()
+    if chronological_caption == DEMO_TIMESTAMPED_CAPTION.strip():
+        return False
 
     categories = annotations.get("categories", {})
     if not isinstance(categories, dict) or not categories:
         return False
 
-    return all(_annotation_item_complete(item) for item in categories.values())
+    for item in categories.values():
+        if not isinstance(item, dict):
+            return False
+        if not str(item.get("question", "")).strip():
+            return False
+        if not str(item.get("answer", "")).strip():
+            return False
+
+    return True
 
 
 def _audio_annotations_have_content(annotations: Dict) -> bool:
@@ -224,10 +245,22 @@ def _audio_annotations_have_content(annotations: Dict) -> bool:
     return False
 
 
+def _audio_quality_flags(entry: Dict) -> set[str]:
+    if not isinstance(entry, dict):
+        return set()
+    annotations = entry.get("annotations", {})
+    if not isinstance(annotations, dict):
+        return set()
+    flags = annotations.get("quality_flags", [])
+    if not isinstance(flags, list):
+        return set()
+    return {str(flag).strip() for flag in flags if str(flag).strip()}
+
+
 def _audio_source_pair_key(file: Path) -> str:
     match = AUDIO_RGB_SOURCE_STEM_RE.match(file.stem.lower())
     stem = match.group("sample") if match else file.stem.lower()
-    return str(file.parent / stem)
+    return _normalize_pair_key(file.parent / stem)
 
 
 def _discover_audio_rgb_videos(dataset_folder: Path) -> Dict[str, Dict[str, Path | None]]:
@@ -1481,7 +1514,10 @@ def run_audio(
     print(os.listdir(dataset_folder))
 
     print("Discovering AUDIO with-audio media...")
-    audio_pairs = preprocess_audio(dataset_folder)
+    audio_pairs = {
+        _normalize_pair_key(pair_key): audio_path
+        for pair_key, audio_path in preprocess_audio(dataset_folder).items()
+    }
     print(f"Found {len(audio_pairs)} with-audio media files\n")
 
     if len(audio_pairs) == 0:
@@ -1531,12 +1567,40 @@ def run_audio(
         print(f"Existing Audio QA results kept at: {output_file}")
         return results
 
+    _run_audio_jobs(
+        pending_pairs=pending_pairs,
+        results=results,
+        rgb_videos_dict=rgb_videos_dict,
+        dataset_folder=dataset_folder,
+        output_file=output_file,
+        skip_api=skip_api,
+    )
+
+    _write_results(output_file, results)
+
+    print(f"\n" + "=" * 50)
+    print(f"Audio QA results saved to: {output_file}")
+    if test_mode:
+        print("TEST MODE COMPLETE")
+    print("=" * 50)
+    return results
+
+
+def _run_audio_jobs(
+    pending_pairs: list[tuple[str, Path]],
+    results: Dict,
+    rgb_videos_dict: Dict[str, Dict[str, Path | None]],
+    dataset_folder: Path,
+    output_file: Path,
+    skip_api: bool = False,
+) -> None:
     client = None
     if not skip_api:
         client = create_gemini_client()
 
     print(
-        f"Processing {len(pending_pairs)} audio-visual pairs with up to 3 concurrent tasks and 4-second spacing..."
+        f"Processing {len(pending_pairs)} audio-visual pairs with up to {AUDIO_MAX_CONCURRENT} concurrent task(s) "
+        f"and {AUDIO_DELAY_BETWEEN_PAIRS}-second spacing..."
     )
 
     selected_audio_pairs = dict(pending_pairs)
@@ -1560,6 +1624,7 @@ def run_audio(
         selected_rgb_videos[pair_key] = rgb_videos
 
     def checkpoint_audio_pair(pair_key: str, file_results: Dict) -> None:
+        pair_key = _normalize_pair_key(pair_key)
         audio_path = selected_audio_pairs.get(pair_key)
         rgb_videos = selected_rgb_videos.get(pair_key, {})
         day_rgb_file = rgb_videos.get("day") if isinstance(rgb_videos, dict) else None
@@ -1569,7 +1634,10 @@ def run_audio(
             "audio_file": str(audio_path) if audio_path else None,
             "day_rgb_file": str(day_rgb_file) if day_rgb_file else None,
             "night_rgb_file": str(night_rgb_file) if night_rgb_file else None,
-            "annotations": format_audio_annotations(file_results),
+            "annotations": enrich_audio_annotations(
+                format_audio_annotations(file_results),
+                day_rgb_file=str(day_rgb_file) if day_rgb_file else None,
+            ),
         }
         _write_results(output_file, results)
         print(f"Checkpoint saved: {pair_key}")
@@ -1579,8 +1647,8 @@ def run_audio(
             client,
             selected_audio_pairs,
             selected_rgb_videos,
-            max_concurrent=3,
-            delay_between_pairs=4,
+            max_concurrent=AUDIO_MAX_CONCURRENT,
+            delay_between_pairs=AUDIO_DELAY_BETWEEN_PAIRS,
             skip_api=skip_api,
             on_pair_complete=checkpoint_audio_pair,
         )
@@ -1593,17 +1661,98 @@ def run_audio(
 
         file_results = batch_results.get(pair_key)
         if file_results is None:
-            print(f"WARNING: No cascade output for pair {pair_key}. Using empty cascade result.")
-            file_results = {"hia": "", "caption": "", "qa_pairs": []}
+            print(
+                f"WARNING: No usable audio cascade output for pair {pair_key}. "
+                "Skipping checkpoint; it will remain pending for resume."
+            )
+            continue
 
         checkpoint_audio_pair(pair_key, file_results)
         print(f"Done: {pair_key}")
 
-    _write_results(output_file, results)
 
-    print(f"\n" + "=" * 50)
-    print(f"Audio QA results saved to: {output_file}")
-    if test_mode:
-        print("TEST MODE COMPLETE")
-    print("=" * 50)
+def run_audio_repair(
+    skip_api: bool = False,
+    dataset_folder: Path | str = "dataset",
+    output_file: Path | str = "audio_qa_results.json",
+):
+    dataset_folder = Path(dataset_folder)
+    output_file = Path(output_file)
+    results = _load_existing_results(output_file)
+
+    if not dataset_folder.exists():
+        print("ERROR: Dataset folder not found!")
+        print(f"Expected to find media files in: {dataset_folder}")
+        return results
+
+    print("Discovering AUDIO with-audio media...")
+    audio_pairs = {
+        _normalize_pair_key(pair_key): audio_path
+        for pair_key, audio_path in preprocess_audio(dataset_folder).items()
+    }
+    print(f"Found {len(audio_pairs)} with-audio media files\n")
+
+    if len(audio_pairs) == 0:
+        print("ERROR: No with-audio media files found in dataset folder!")
+        print(f"Expected to find files ending in 'with_audio' in: {dataset_folder}")
+        return results
+
+    print("Discovering source RGB videos for HIA...")
+    rgb_videos_dict = _discover_audio_rgb_videos(dataset_folder)
+    print(f"Found {len(rgb_videos_dict)} RGB source video pairs\n")
+
+    complete_count = 0
+    repair_count = 0
+    missing_hia_source_count = 0
+    unstarted_count = 0
+    repair_jobs = []
+
+    for pair_key, audio_path in audio_pairs.items():
+        existing_entry = results.get(pair_key)
+        existing_annotations = existing_entry.get("annotations", {}) if isinstance(existing_entry, dict) else {}
+        quality_flags = _audio_quality_flags(existing_entry)
+
+        has_content = _audio_annotations_have_content(existing_annotations)
+        is_complete = _audio_entry_complete(existing_entry)
+        needs_caption_repair = "has_empty_qa_caption" in quality_flags
+        needs_hia_repair = (
+            "demo_hia_fallback" in quality_flags and "missing_hia_source" not in quality_flags
+        )
+
+        if not has_content:
+            unstarted_count += 1
+            continue
+
+        if not is_complete or needs_caption_repair or needs_hia_repair:
+            repair_jobs.append((pair_key, audio_path))
+            repair_count += 1
+            continue
+
+        if "missing_hia_source" in quality_flags:
+            missing_hia_source_count += 1
+
+        complete_count += 1
+
+    print(
+        "Audio repair scan: "
+        f"{complete_count} complete/skipped, {repair_count} repair job(s), "
+        f"{missing_hia_source_count} missing-HIA-source retained, "
+        f"{unstarted_count} unstarted pair(s) left for full run."
+    )
+
+    if not repair_jobs:
+        print(f"No AUDIO repair jobs to run. Existing results kept at: {output_file}")
+        return results
+
+    _run_audio_jobs(
+        pending_pairs=repair_jobs,
+        results=results,
+        rgb_videos_dict=rgb_videos_dict,
+        dataset_folder=dataset_folder,
+        output_file=output_file,
+        skip_api=skip_api,
+    )
+
+    _write_results(output_file, results)
+    print(f"AUDIO repair results saved to: {output_file}")
     return results

@@ -22,6 +22,7 @@ from annotation_feature.cli.actions.aligned_choices import (
 from annotation_feature.pipeline import (
     run,
     run_audio,
+    run_audio_repair,
     run_depth,
     run_event,
     run_ir,
@@ -528,6 +529,7 @@ def main():
         print("44. Export source-aligned RGB-with-audio 30s segment videos for all pairs")
         print("45. Test aligned AUDIO pipeline on 1 segment pair with real Gemini API calls")
         print("46. Run aligned AUDIO pipeline on all segment pairs (production)")
+        print("46r. Repair aligned AUDIO flagged/incomplete entries")
         _print_registered_menu_sections(("ALIGNED MARIGOLD DEPTH PIPELINE",))
         print("\n--- LATE FUSION ---")
         print("48. Run late fusion on existing modality JSON results")
@@ -1240,7 +1242,7 @@ def main():
             print("Reads generated *_rgb_with_audio.mp4 files from aligned_dataset/.")
             print("Ensures RGB/audio cross-correlation plots exist before QA.")
             print(f"Writes {ALIGNED_QA_OUTPUT_FILES['audio']}.")
-            print("Parallel execution: up to 3 pairs concurrently, 4-second spacing")
+            print("Execution: 1 pair at a time, 15-second spacing")
             print("-" * 60)
             if _confirm():
                 export_summary = run_and_export_aligned_rgb_with_audio_segments(
@@ -1255,6 +1257,24 @@ def main():
                 )
                 run_audio(
                     test_mode=False,
+                    skip_api=False,
+                    dataset_folder="aligned_dataset",
+                    output_file=str(ALIGNED_QA_OUTPUT_FILES["audio"]),
+                )
+            else:
+                print("Cancelled.")
+
+        elif choice == "46r":
+            print("\n" + "-" * 60)
+            print("Running: repair aligned AUDIO flagged/incomplete entries")
+            print("WARNING: This will use Gemini API quota for each repairable aligned segment pair!")
+            print("Targets incomplete entries plus repairable audio quality flags.")
+            print("Skips entries that only lack HIA source and preserves them with quality flags.")
+            print(f"Writes {ALIGNED_QA_OUTPUT_FILES['audio']}.")
+            print("Execution: 1 pair at a time, 15-second spacing")
+            print("-" * 60)
+            if _confirm():
+                run_audio_repair(
                     skip_api=False,
                     dataset_folder="aligned_dataset",
                     output_file=str(ALIGNED_QA_OUTPUT_FILES["audio"]),

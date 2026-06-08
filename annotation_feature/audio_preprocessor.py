@@ -7,16 +7,20 @@ WITH_AUDIO_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_(?:rgb_
 RGB_SOURCE_STEM_RE = re.compile(r"^(?P<sample>.+)_(?P<side>day|night\d*)_rgb$")
 
 
+def _normalize_pair_key(pair_key: str | Path) -> str:
+    return str(pair_key).replace("\\", "/")
+
+
 def _audio_pair_key(file: Path) -> str:
     match = WITH_AUDIO_STEM_RE.match(file.stem.lower())
     stem = match.group("sample") if match else file.stem.lower()
-    return str(file.parent / stem)
+    return _normalize_pair_key(file.parent / stem)
 
 
 def _rgb_source_pair_key(file: Path) -> str:
     match = RGB_SOURCE_STEM_RE.match(file.stem.lower())
     stem = match.group("sample") if match else file.stem.lower()
-    return str(file.parent / stem)
+    return _normalize_pair_key(file.parent / stem)
 
 
 def preprocess_audio(dataset_folder: Path) -> Dict[str, Path]:
