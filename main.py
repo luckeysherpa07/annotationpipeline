@@ -551,10 +551,10 @@ def main():
         print("\n--- MULTIMODAL QA BENCHMARK ---")
         print("61. Generate v2 implicit multimodal QA candidates")
         print("62. Verify/filter v2 implicit multimodal QA candidates")
-        _print_registered_menu_sections(("ALIGNED QA QUALITY",))
+        _print_registered_menu_sections(("ALIGNED QA QUALITY", "BENCHMARK EVALUATION"))
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-66 or action id): ").strip()
+        choice = input("\nEnter choice (1-67 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)

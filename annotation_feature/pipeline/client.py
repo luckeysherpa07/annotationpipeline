@@ -26,7 +26,7 @@ def load_environment() -> None:
         load_dotenv(dotenv_path=ENV_FILE, override=True)
 
 
-def create_gemini_client():
+def create_gemini_client(api_key: str | None = None):
     """
     Build a Gemini client after confirming the SDK and API key are available.
     """
@@ -37,8 +37,11 @@ def create_gemini_client():
             "The Google GenAI SDK is not installed. Install dependencies from requirements.txt first."
         )
 
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
+    if api_key is not None:
+        os.environ["GEMINI_API_KEY"] = api_key.strip()
+
+    resolved_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not resolved_api_key:
         raise RuntimeError(
             f"Missing GEMINI_API_KEY. Set it in your environment or add it to {ENV_FILE}."
         )

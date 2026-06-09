@@ -7,6 +7,7 @@ from pathlib import Path
 
 from annotation_feature.cli.menu import MenuAction
 from annotation_feature.cli.actions.aligned_choices import (
+    ALIGNED_QA_QUALITY_BENCHMARK,
     ALIGNED_QA_QUALITY_CLEAN,
     ALIGNED_QA_QUALITY_EVALUATE,
     ALIGNED_QA_QUALITY_LLM_EVAL,
@@ -14,6 +15,7 @@ from annotation_feature.cli.actions.aligned_choices import (
 from annotation_feature.qa_quality import (
     clean_aligned_qa_dataset,
     evaluate_aligned_qa,
+    run_aligned_qa_benchmark,
     run_aligned_qa_llm_evaluation,
 )
 
@@ -102,6 +104,70 @@ def build_aligned_qa_quality_actions(
         else:
             print("Cancelled.")
 
+    def run_benchmark() -> None:
+        input_path = Path(output_dir) / "aligned_qa_valid_items.json"
+        benchmark_output_dir = Path(output_dir) / "benchmarks"
+        _print_header("Running: aligned QA caption-only benchmark")
+        print(f"Reads {input_path}.")
+        print(f"Writes benchmark JSON/CSV files under {benchmark_output_dir}.")
+        print("Caption-only mode: tested models receive modality, section, caption, and question.")
+        print("Gemini is used as the answer judge.")
+        print("Providers available now: gemini. Reserved: chatgpt/openai, qwen, internvl.")
+        print("-" * 60)
+
+        provider = input("Model provider? (default gemini): ").strip().lower() or "gemini"
+        model_name = input("Model name? (default gemini-3.1-flash-lite): ").strip() or "gemini-3.1-flash-lite"
+
+        raw_limit = input("Max items to benchmark this run? (default 100, 0 = all): ").strip()
+        if not raw_limit:
+            max_items = 100
+        else:
+            try:
+                parsed_limit = int(raw_limit)
+            except ValueError:
+                print("Invalid max items value.")
+                return
+            max_items = None if parsed_limit == 0 else max(0, parsed_limit)
+
+        raw_batch_size = input("Batch size? (default 5): ").strip()
+        if not raw_batch_size:
+            batch_size = 5
+        else:
+            try:
+                batch_size = max(1, int(raw_batch_size))
+            except ValueError:
+                print("Invalid batch size value.")
+                return
+
+        raw_delay = input("Delay between batches? (default 30 seconds): ").strip()
+        if not raw_delay:
+            delay_between_batches = 30
+        else:
+            try:
+                delay_between_batches = max(0, int(raw_delay))
+            except ValueError:
+                print("Invalid delay value.")
+                return
+
+        if confirm("Continue? (yes/no): "):
+            try:
+                outputs = run_aligned_qa_benchmark(
+                    input_path=input_path,
+                    output_dir=benchmark_output_dir,
+                    provider=provider,
+                    model_name=model_name,
+                    max_items=max_items,
+                    batch_size=batch_size,
+                    delay_between_batches=delay_between_batches,
+                )
+            except NotImplementedError as exc:
+                print(str(exc))
+                return
+            for label, path in outputs.items():
+                print(f"{label}: {path}")
+        else:
+            print("Cancelled.")
+
     quality_action = MenuAction(
         action_id="aligned.qa_quality.evaluate",
         title="Evaluate aligned QA quality",
@@ -120,11 +186,19 @@ def build_aligned_qa_quality_actions(
         section="ALIGNED QA QUALITY",
         handler=run_cleaner,
     )
+    benchmark_action = MenuAction(
+        action_id="aligned.qa_quality.benchmark",
+        title="Run aligned QA benchmark",
+        section="BENCHMARK EVALUATION",
+        handler=run_benchmark,
+    )
     return {
         ALIGNED_QA_QUALITY_EVALUATE: quality_action,
         ALIGNED_QA_QUALITY_LLM_EVAL: llm_action,
         ALIGNED_QA_QUALITY_CLEAN: clean_action,
+        ALIGNED_QA_QUALITY_BENCHMARK: benchmark_action,
         "aligned.qa_quality.evaluate": quality_action,
         "aligned.qa_quality.llm_eval": llm_action,
         "aligned.qa_quality.clean": clean_action,
+        "aligned.qa_quality.benchmark": benchmark_action,
     }
