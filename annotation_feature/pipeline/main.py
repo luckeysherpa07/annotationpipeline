@@ -257,6 +257,25 @@ def _audio_quality_flags(entry: Dict) -> set[str]:
     return {str(flag).strip() for flag in flags if str(flag).strip()}
 
 
+def _audio_has_empty_caption_items(entry: Dict) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    annotations = entry.get("annotations", {})
+    if not isinstance(annotations, dict):
+        return False
+    categories = annotations.get("categories", {})
+    if not isinstance(categories, dict):
+        return False
+    for item in categories.values():
+        if not isinstance(item, dict):
+            continue
+        item_flags = item.get("quality_flags", [])
+        if isinstance(item_flags, list) and "empty_qa_caption" in item_flags:
+            if not str(item.get("caption", "")).strip():
+                return True
+    return False
+
+
 def _audio_source_pair_key(file: Path) -> str:
     match = AUDIO_RGB_SOURCE_STEM_RE.match(file.stem.lower())
     stem = match.group("sample") if match else file.stem.lower()
@@ -1714,7 +1733,7 @@ def run_audio_repair(
 
         has_content = _audio_annotations_have_content(existing_annotations)
         is_complete = _audio_entry_complete(existing_entry)
-        needs_caption_repair = "has_empty_qa_caption" in quality_flags
+        needs_caption_repair = _audio_has_empty_caption_items(existing_entry)
         needs_hia_repair = (
             "demo_hia_fallback" in quality_flags and "missing_hia_source" not in quality_flags
         )

@@ -239,9 +239,13 @@ def enrich_audio_annotations(annotation_results: dict, day_rgb_file: str | None 
 
     enriched = copy.deepcopy(annotation_results)
     quality_flags = list(enriched.get("quality_flags", [])) if isinstance(enriched.get("quality_flags"), list) else []
+    has_day_rgb_info = day_rgb_file is not None
+    has_day_rgb_source = bool(str(day_rgb_file or "").strip())
 
-    if not str(day_rgb_file or "").strip():
-        if "missing_hia_source" not in quality_flags:
+    if has_day_rgb_info:
+        if has_day_rgb_source:
+            quality_flags = [flag for flag in quality_flags if flag != "missing_hia_source"]
+        elif "missing_hia_source" not in quality_flags:
             quality_flags.append("missing_hia_source")
 
     hia_caption = str(((enriched.get("audio_hia") or {}).get("caption")) or "").strip()
