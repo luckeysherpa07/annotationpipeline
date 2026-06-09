@@ -13,7 +13,12 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Callable
 
-from annotation_feature.pipeline.client import create_gemini_client
+from annotation_feature.pipeline.client import create_gemini_client, load_environment
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
 
 
 DEFAULT_INPUT_PATH = Path("outputs/aligned_qa_valid_items.json")
@@ -21,7 +26,10 @@ DEFAULT_OUTPUT_DIR = Path("outputs/benchmarks")
 DEFAULT_PROVIDER = "gemini"
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
 DEFAULT_JUDGE_MODEL_NAME = "gemini-3.1-flash-lite"
-DEFAULT_API_KEY_LIST_PATH = Path("api_key_list/gemini_api_key_list")
+DEFAULT_OPENAI_MODEL_NAME = "gpt-5.4-mini"
+DEFAULT_GEMINI_API_KEY_LIST_PATH = Path("api_key_list/gemini_api_key_list")
+DEFAULT_OPENAI_API_KEY_LIST_PATH = Path("api_key_list/openai_api_key_list")
+DEFAULT_API_KEY_LIST_PATH = DEFAULT_GEMINI_API_KEY_LIST_PATH
 REQUIRED_QA_FIELDS = ("qa_id", "modality", "section", "pair_key", "question", "answer", "caption")
 VALID_SCORES = {"correct", "partial", "incorrect"}
 NUMERIC_SCORES = {"correct": 1.0, "partial": 0.5, "incorrect": 0.0}
@@ -33,6 +41,12 @@ QUOTA_ERROR_PATTERNS = (
     "free_tier_requests",
     "API_KEY_INVALID",
     "API key not valid",
+    "rate_limit_exceeded",
+    "insufficient_quota",
+    "invalid_api_key",
+    "Incorrect API key",
+    "401",
+    "403",
 )
 
 
@@ -96,6 +110,34 @@ class GeminiJudge(BenchmarkJudge):
         )
         parsed = _parse_json_object(str(getattr(response, "text", "")))
         return normalize_judgment(parsed)
+
+
+class OpenAICaptionAdapter(BenchmarkModelAdapter):
+    """OpenAI caption-only benchmark adapter using the Responses API."""
+
+    provider = "openai"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_OPENAI_MODEL_NAME,
+        client: Any | None = None,
+        api_key: str | None = None,
+    ):
+        self.model_name = model_name
+        if client is not None:
+            self.client = client
+        else:
+            if OpenAI is None:
+                raise ImportError("The OpenAI SDK is not installed. Install dependencies from requirements.txt first.")
+            load_environment()
+            self.client = OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
+
+    def answer(self, item: dict[str, Any]) -> str:
+        response = self.client.responses.create(
+            model=self.model_name,
+            input=build_model_prompt(item),
+        )
+        return _extract_openai_text(response).strip()
 
 
 def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dict[str, Any]]:
@@ -174,6 +216,20 @@ def _parse_json_object(text: str) -> dict[str, Any]:
     return parsed
 
 
+def _extract_openai_text(response: Any) -> str:
+    output_text = getattr(response, "output_text", None)
+    if output_text is not None:
+        return str(output_text)
+
+    chunks: list[str] = []
+    for item in getattr(response, "output", []) or []:
+        for content in getattr(item, "content", []) or []:
+            text = getattr(content, "text", None)
+            if text is not None:
+                chunks.append(str(text))
+    return "".join(chunks)
+
+
 def normalize_judgment(raw: dict[str, Any]) -> dict[str, Any]:
     score = str(raw.get("score", "incorrect")).strip().lower()
     if score not in VALID_SCORES:
@@ -190,8 +246,12 @@ def is_quota_error(exc: BaseException | str) -> bool:
     return any(pattern in text for pattern in QUOTA_ERROR_PATTERNS)
 
 
-def load_api_keys(api_key_list_path: Path | str = DEFAULT_API_KEY_LIST_PATH) -> list[str]:
-    """Load Gemini API keys from a local ignored file without printing secrets."""
+def load_api_keys(
+    api_key_list_path: Path | str = DEFAULT_API_KEY_LIST_PATH,
+    env_var_name: str = "GEMINI_API_KEY",
+    key_prefixes: tuple[str, ...] = ("AIza",),
+) -> list[str]:
+    """Load provider API keys from a local ignored file without printing secrets."""
     api_key_list_path = Path(api_key_list_path)
     if not api_key_list_path.exists():
         return []
@@ -203,12 +263,12 @@ def load_api_keys(api_key_list_path: Path | str = DEFAULT_API_KEY_LIST_PATH) -> 
             line = raw_line.strip()
             if not line or line.startswith("#"):
                 continue
-            google_key_parts = [part for part in line.split() if part.startswith("AIza")]
-            if google_key_parts:
-                line = google_key_parts[-1]
+            key_parts = [part for part in line.split() if any(part.startswith(prefix) for prefix in key_prefixes)]
+            if key_parts:
+                line = key_parts[-1]
             elif "=" in line:
                 name, value = line.split("=", 1)
-                if name.strip() != "GEMINI_API_KEY":
+                if name.strip() != env_var_name:
                     continue
                 line = value.strip()
             line = line.strip().strip("\"'")
@@ -339,7 +399,9 @@ def create_benchmark_adapter(
     provider = str(provider or DEFAULT_PROVIDER).strip().lower()
     if provider == "gemini":
         return GeminiCaptionAdapter(model_name=model_name, api_key=api_key)
-    if provider in {"chatgpt", "openai", "qwen", "internvl"}:
+    if provider in {"chatgpt", "openai"}:
+        return OpenAICaptionAdapter(model_name=model_name, api_key=api_key)
+    if provider in {"qwen", "internvl"}:
         raise NotImplementedError(f"Benchmark adapter for provider '{provider}' is not implemented yet.")
     raise ValueError(f"Unknown benchmark provider: {provider}")
 
@@ -397,6 +459,9 @@ def _benchmark_metadata(
     key_rotation_enabled: bool = False,
     keys_available: int = 0,
     exhausted_key_count: int = 0,
+    judge_key_rotation_enabled: bool = False,
+    judge_keys_available: int = 0,
+    exhausted_judge_key_count: int = 0,
 ) -> dict[str, Any]:
     completed_count = sum(1 for result in results_by_id.values() if _is_completed_result(result))
     pending_count = max(0, total_valid_items - completed_count)
@@ -413,6 +478,9 @@ def _benchmark_metadata(
         "key_rotation_enabled": key_rotation_enabled,
         "keys_available": keys_available,
         "exhausted_key_count": exhausted_key_count,
+        "judge_key_rotation_enabled": judge_key_rotation_enabled,
+        "judge_keys_available": judge_keys_available,
+        "exhausted_judge_key_count": exhausted_judge_key_count,
     }
     if batch_size is not None:
         metadata["batch_size"] = batch_size
@@ -476,6 +544,8 @@ def run_aligned_qa_benchmark(
     delay_between_batches: int = 30,
     resume: bool = True,
     api_key_list_path: Path | str = DEFAULT_API_KEY_LIST_PATH,
+    openai_api_key_list_path: Path | str = DEFAULT_OPENAI_API_KEY_LIST_PATH,
+    judge_api_key_list_path: Path | str = DEFAULT_GEMINI_API_KEY_LIST_PATH,
     enable_key_rotation: bool = True,
     adapter: BenchmarkModelAdapter | None = None,
     judge: BenchmarkJudge | None = None,
@@ -488,26 +558,59 @@ def run_aligned_qa_benchmark(
     output_json, output_csv = _default_output_paths(output_dir, model_name)
     provider = str(provider or DEFAULT_PROVIDER).strip().lower()
     batch_size = max(1, int(batch_size))
-    api_keys = load_api_keys(api_key_list_path) if provider == "gemini" and enable_key_rotation else []
+    if provider == "gemini":
+        answer_key_label = "Gemini"
+        answer_env_var = "GEMINI_API_KEY"
+        answer_key_path = api_key_list_path
+        answer_key_prefixes = ("AIza",)
+    elif provider in {"openai", "chatgpt"}:
+        answer_key_label = "OpenAI"
+        answer_env_var = "OPENAI_API_KEY"
+        answer_key_path = openai_api_key_list_path
+        answer_key_prefixes = ("sk-",)
+    else:
+        answer_key_label = provider
+        answer_env_var = ""
+        answer_key_path = api_key_list_path
+        answer_key_prefixes = ()
+
+    api_keys = (
+        load_api_keys(answer_key_path, env_var_name=answer_env_var, key_prefixes=answer_key_prefixes)
+        if enable_key_rotation and answer_env_var
+        else []
+    )
+    judge_api_keys = (
+        load_api_keys(judge_api_key_list_path, env_var_name="GEMINI_API_KEY", key_prefixes=("AIza",))
+        if enable_key_rotation
+        else []
+    )
     key_rotation_enabled = bool(api_keys)
+    judge_key_rotation_enabled = bool(judge_api_keys)
     active_key_index = 0
+    active_judge_key_index = 0
     exhausted_key_count = 0
+    exhausted_judge_key_count = 0
 
     def current_api_key() -> str | None:
         if not key_rotation_enabled:
             return None
         return api_keys[active_key_index]
 
+    def current_judge_api_key() -> str | None:
+        if not judge_key_rotation_enabled:
+            return None
+        return judge_api_keys[active_judge_key_index]
+
     def build_adapter() -> BenchmarkModelAdapter:
         key = current_api_key()
         if key is not None:
-            os.environ["GEMINI_API_KEY"] = key
+            os.environ[answer_env_var] = key
         if adapter_factory is not None:
             return adapter_factory(key)
         return create_benchmark_adapter(provider, model_name, api_key=key)
 
     def build_judge() -> BenchmarkJudge:
-        key = current_api_key()
+        key = current_judge_api_key()
         if key is not None:
             os.environ["GEMINI_API_KEY"] = key
         if judge_factory is not None:
@@ -528,6 +631,9 @@ def run_aligned_qa_benchmark(
             key_rotation_enabled=key_rotation_enabled,
             keys_available=len(api_keys),
             exhausted_key_count=exhausted_key_count,
+            judge_key_rotation_enabled=judge_key_rotation_enabled,
+            judge_keys_available=len(judge_api_keys),
+            exhausted_judge_key_count=exhausted_judge_key_count,
         )
 
     items = load_valid_qa_items(input_path)
@@ -551,27 +657,51 @@ def run_aligned_qa_benchmark(
         return {"benchmark_json": output_json, "benchmark_csv": output_csv}
 
     if key_rotation_enabled:
-        print(f"Gemini key rotation enabled: {len(api_keys)} key(s) loaded from {Path(api_key_list_path)}.")
-        print(f"Using Gemini API {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+        print(f"{answer_key_label} key rotation enabled: {len(api_keys)} key(s) loaded from {Path(answer_key_path)}.")
+        print(f"Using {answer_key_label} API {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+    if judge_key_rotation_enabled:
+        print(f"Gemini judge key rotation enabled: {len(judge_api_keys)} key(s) loaded from {Path(judge_api_key_list_path)}.")
+        print(
+            "Using Gemini judge API "
+            f"{_masked_key_label(judge_api_keys[active_judge_key_index], active_judge_key_index + 1, len(judge_api_keys))}."
+        )
 
     adapter = adapter or build_adapter()
     judge = judge or build_judge()
 
-    def rotate_key_after_quota() -> bool:
-        nonlocal active_key_index, exhausted_key_count, adapter, judge
+    def rotate_answer_key_after_quota() -> bool:
+        nonlocal active_key_index, exhausted_key_count, adapter
         if not key_rotation_enabled or active_key_index + 1 >= len(api_keys):
             exhausted_key_count = len(api_keys) if key_rotation_enabled else exhausted_key_count
             return False
         active_key_index += 1
         exhausted_key_count = active_key_index
         print(
-            f"Gemini quota/rate limit reached for key {exhausted_key_count}/{len(api_keys)}. "
+            f"{answer_key_label} quota/rate/key limit reached for key {exhausted_key_count}/{len(api_keys)}. "
             f"Switching to key {active_key_index + 1}/{len(api_keys)} and retrying current item."
         )
         _save_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="rotating_after_quota"))
         adapter = build_adapter()
+        print(f"{answer_key_label} API key changed to {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+        return True
+
+    def rotate_judge_key_after_quota() -> bool:
+        nonlocal active_judge_key_index, exhausted_judge_key_count, judge
+        if not judge_key_rotation_enabled or active_judge_key_index + 1 >= len(judge_api_keys):
+            exhausted_judge_key_count = len(judge_api_keys) if judge_key_rotation_enabled else exhausted_judge_key_count
+            return False
+        active_judge_key_index += 1
+        exhausted_judge_key_count = active_judge_key_index
+        print(
+            f"Gemini judge quota/rate/key limit reached for key {exhausted_judge_key_count}/{len(judge_api_keys)}. "
+            f"Switching to key {active_judge_key_index + 1}/{len(judge_api_keys)} and retrying judgment."
+        )
+        _save_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="rotating_judge_after_quota"))
         judge = build_judge()
-        print(f"Gemini API key changed to {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+        print(
+            "Gemini judge API key changed to "
+            f"{_masked_key_label(judge_api_keys[active_judge_key_index], active_judge_key_index + 1, len(judge_api_keys))}."
+        )
         return True
 
     try:
@@ -579,17 +709,22 @@ def run_aligned_qa_benchmark(
             batch = pending[start:start + batch_size]
             print(f"Running benchmark batch {start // batch_size + 1}: {len(batch)} item(s)")
             for item in batch:
+                model_answer = ""
+                judgment = {
+                    "score": "failed",
+                    "numeric_score": None,
+                    "reason": "Benchmark call failed: empty model answer",
+                }
                 while True:
                     try:
                         model_answer = adapter.answer(item)
-                        judgment = judge.judge(item, model_answer)
                         break
                     except Exception as exc:
                         if is_quota_error(exc):
-                            if rotate_key_after_quota():
+                            if rotate_answer_key_after_quota():
                                 continue
-                            print("\nGemini quota/rate limit reached and no more keys are available.")
-                            print("Progress saved. Run option 67 again later to resume.")
+                            print(f"\n{answer_key_label} quota/rate/key limit reached and no more keys are available.")
+                            print("Progress saved. Run this benchmark option again later to resume.")
                             _save_outputs(
                                 output_json,
                                 output_csv,
@@ -604,6 +739,31 @@ def run_aligned_qa_benchmark(
                             "reason": f"Benchmark call failed: {exc}",
                         }
                         break
+
+                if model_answer:
+                    while True:
+                        try:
+                            judgment = judge.judge(item, model_answer)
+                            break
+                        except Exception as exc:
+                            if is_quota_error(exc):
+                                if rotate_judge_key_after_quota():
+                                    continue
+                                print("\nGemini judge quota/rate/key limit reached and no more judge keys are available.")
+                                print("Progress saved. Run this benchmark option again later to resume.")
+                                _save_outputs(
+                                    output_json,
+                                    output_csv,
+                                    results_by_id,
+                                    make_metadata(stopped_reason="judge_quota_or_rate_limit"),
+                                )
+                                return {"benchmark_json": output_json, "benchmark_csv": output_csv}
+                            judgment = {
+                                "score": "failed",
+                                "numeric_score": None,
+                                "reason": f"Benchmark call failed: {exc}",
+                            }
+                            break
                 results_by_id[item["qa_id"]] = _result_row(
                     item,
                     provider=provider,
@@ -635,6 +795,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, default=5)
     parser.add_argument("--delay-between-batches", type=int, default=30)
     parser.add_argument("--api-key-list", default=str(DEFAULT_API_KEY_LIST_PATH))
+    parser.add_argument("--openai-api-key-list", default=str(DEFAULT_OPENAI_API_KEY_LIST_PATH))
+    parser.add_argument("--judge-api-key-list", default=str(DEFAULT_GEMINI_API_KEY_LIST_PATH))
     parser.add_argument("--disable-key-rotation", action="store_true")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--repair-failures", action="store_true", help="Repair legacy failed-call rows in the output file.")
@@ -661,6 +823,8 @@ def main() -> None:
         batch_size=args.batch_size,
         delay_between_batches=args.delay_between_batches,
         api_key_list_path=args.api_key_list,
+        openai_api_key_list_path=args.openai_api_key_list,
+        judge_api_key_list_path=args.judge_api_key_list,
         enable_key_rotation=not args.disable_key_rotation,
         resume=not args.no_resume,
     )

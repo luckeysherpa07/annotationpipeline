@@ -6,6 +6,7 @@ from pathlib import Path
 from annotation_feature.qa_quality.benchmark import (
     BenchmarkJudge,
     BenchmarkModelAdapter,
+    OpenAICaptionAdapter,
     load_api_keys,
     run_aligned_qa_benchmark,
 )
@@ -66,6 +67,18 @@ class InterruptingAdapter(BenchmarkModelAdapter):
         if self.calls == 2:
             raise KeyboardInterrupt()
         return "answer before interrupt"
+
+
+class CountingAdapter(BenchmarkModelAdapter):
+    provider = "openai"
+    model_name = "test-model"
+
+    def __init__(self):
+        self.calls = 0
+
+    def answer(self, item):
+        self.calls += 1
+        return "counted answer"
 
 
 class BenchmarkKeyRotationTests(unittest.TestCase):
@@ -201,6 +214,157 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             payload = json.loads((output_dir / "aligned_qa_benchmark_test-model.json").read_text(encoding="utf-8"))
             self.assertEqual(list(payload["results"]), ["qa-0"])
             self.assertEqual(payload["metadata"]["stopped_reason"], "user_cancelled")
+
+    def test_load_openai_api_keys_supports_labeled_lines_and_dedupes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "openai_api_key_list"
+            path.write_text(
+                "\n".join(
+                    [
+                        "# comment",
+                        "sk-plain-key",
+                        "OPENAI_API_KEY='sk-env-key'",
+                        "personal key number 1 = sk-labeled-key",
+                        "OTHER=value",
+                        "sk-plain-key",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                load_api_keys(path, env_var_name="OPENAI_API_KEY", key_prefixes=("sk-",)),
+                ["sk-plain-key", "sk-env-key", "sk-labeled-key"],
+            )
+
+    def test_openai_adapter_extracts_text_from_fake_responses_client(self):
+        class FakeResponses:
+            def __init__(self):
+                self.calls = []
+
+            def create(self, model, input):
+                self.calls.append({"model": model, "input": input})
+                return type("Response", (), {"output_text": "fake openai answer"})()
+
+        class FakeClient:
+            def __init__(self):
+                self.responses = FakeResponses()
+
+        client = FakeClient()
+        adapter = OpenAICaptionAdapter(model_name="gpt-test", client=client)
+        answer = adapter.answer(
+            {
+                "modality": "rgb",
+                "section": "test",
+                "caption": "A caption.",
+                "question": "A question?",
+            }
+        )
+
+        self.assertEqual(answer, "fake openai answer")
+        self.assertEqual(client.responses.calls[0]["model"], "gpt-test")
+        self.assertIn("A caption.", client.responses.calls[0]["input"])
+
+    def test_openai_quota_error_rotates_key_and_retries_same_item(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            openai_key_path = root / "openai_api_key_list"
+            output_dir = root / "benchmarks"
+            write_valid_items(input_path)
+            openai_key_path.write_text("sk-key-one\nsk-key-two\n", encoding="utf-8")
+            used_keys = []
+
+            class OpenAIKeyedAdapter(BenchmarkModelAdapter):
+                provider = "openai"
+                model_name = "test-model"
+
+                def __init__(self, key):
+                    self.key = key
+
+                def answer(self, item):
+                    if self.key == "sk-key-one":
+                        raise RuntimeError("rate_limit_exceeded")
+                    return f"answer from {self.key}"
+
+            def adapter_factory(key):
+                used_keys.append(key)
+                return OpenAIKeyedAdapter(key)
+
+            run_aligned_qa_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                provider="openai",
+                model_name="gpt-5.4-mini",
+                max_items=1,
+                batch_size=1,
+                delay_between_batches=0,
+                openai_api_key_list_path=openai_key_path,
+                judge_factory=lambda key: StaticJudge(),
+                adapter_factory=adapter_factory,
+            )
+
+            payload = json.loads((output_dir / "aligned_qa_benchmark_gpt-5.4-mini.json").read_text(encoding="utf-8"))
+            self.assertEqual(used_keys, ["sk-key-one", "sk-key-two"])
+            self.assertEqual(payload["results"]["qa-0"]["model_answer"], "answer from sk-key-two")
+            self.assertEqual(payload["metadata"]["provider"], "openai")
+            self.assertEqual(payload["metadata"]["keys_available"], 2)
+
+    def test_gemini_judge_rotation_does_not_regenerate_openai_answer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            openai_key_path = root / "openai_api_key_list"
+            judge_key_path = root / "gemini_api_key_list"
+            output_dir = root / "benchmarks"
+            write_valid_items(input_path)
+            openai_key_path.write_text("sk-openai-one\n", encoding="utf-8")
+            judge_key_path.write_text("AIza-judge-one\nAIza-judge-two\n", encoding="utf-8")
+            adapter = CountingAdapter()
+            judge_keys = []
+
+            class RotatingJudge(BenchmarkJudge):
+                def __init__(self, key):
+                    self.key = key
+
+                def judge(self, item, model_answer):
+                    if self.key == "AIza-judge-one":
+                        raise RuntimeError("429 RESOURCE_EXHAUSTED")
+                    return {"score": "correct", "numeric_score": 1.0, "reason": "matches"}
+
+            def judge_factory(key):
+                judge_keys.append(key)
+                return RotatingJudge(key)
+
+            run_aligned_qa_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                provider="openai",
+                model_name="gpt-5.4-mini",
+                max_items=1,
+                batch_size=1,
+                delay_between_batches=0,
+                openai_api_key_list_path=openai_key_path,
+                judge_api_key_list_path=judge_key_path,
+                adapter=adapter,
+                judge_factory=judge_factory,
+            )
+
+            payload = json.loads((output_dir / "aligned_qa_benchmark_gpt-5.4-mini.json").read_text(encoding="utf-8"))
+            self.assertEqual(adapter.calls, 1)
+            self.assertEqual(judge_keys, ["AIza-judge-one", "AIza-judge-two"])
+            self.assertEqual(payload["results"]["qa-0"]["score"], "correct")
+            self.assertEqual(payload["metadata"]["exhausted_judge_key_count"], 1)
+
+    def test_option_68_is_registered(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_QUALITY_GPT_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_QUALITY_GPT_BENCHMARK, "68")
+        self.assertIn("68", actions)
+        self.assertEqual(actions["68"].action_id, "aligned.qa_quality.gpt_benchmark")
 
 
 if __name__ == "__main__":
