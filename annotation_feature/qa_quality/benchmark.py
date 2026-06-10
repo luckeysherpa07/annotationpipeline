@@ -7,6 +7,7 @@ import csv
 import json
 import os
 import re
+import subprocess
 import time
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
@@ -15,10 +16,30 @@ from typing import Any, Callable
 
 from annotation_feature.pipeline.client import create_gemini_client, load_environment
 
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 try:
     from openai import OpenAI
 except ImportError:
     OpenAI = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
+
+try:
+    from vllm import LLM, SamplingParams
+except ImportError:
+    LLM = None
+    SamplingParams = None
+
+try:
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+except ImportError:
+    AutoModelForCausalLM = None
+    AutoTokenizer = None
+    BitsAndBytesConfig = None
 
 
 DEFAULT_INPUT_PATH = Path("outputs/aligned_qa_valid_items.json")
@@ -27,6 +48,16 @@ DEFAULT_PROVIDER = "gemini"
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
 DEFAULT_JUDGE_MODEL_NAME = "gemini-3.1-flash-lite"
 DEFAULT_OPENAI_MODEL_NAME = "gpt-5.4-mini"
+DEFAULT_QWEN_MODEL_NAME = "Qwen/Qwen3-8B"
+DEFAULT_QWEN_ENGINE = "transformers_4bit"
+DEFAULT_QWEN_MAX_TOKENS = 128
+DEFAULT_QWEN_MAX_MODEL_LEN = 1024
+DEFAULT_QWEN_GPU_MEMORY_UTILIZATION = 0.7
+DEFAULT_QWEN_ENFORCE_EAGER = True
+DEFAULT_QWEN_DTYPE = "half"
+DEFAULT_QWEN_MAX_NUM_SEQS = 1
+DEFAULT_QWEN_MAX_CAPTION_CHARS = 3000
+DEFAULT_QWEN_MAX_QUESTION_CHARS = 600
 DEFAULT_GEMINI_API_KEY_LIST_PATH = Path("api_key_list/gemini_api_key_list")
 DEFAULT_OPENAI_API_KEY_LIST_PATH = Path("api_key_list/openai_api_key_list")
 DEFAULT_API_KEY_LIST_PATH = DEFAULT_GEMINI_API_KEY_LIST_PATH
@@ -140,6 +171,179 @@ class OpenAICaptionAdapter(BenchmarkModelAdapter):
         return _extract_openai_text(response).strip()
 
 
+class QwenLocalCaptionAdapter(BenchmarkModelAdapter):
+    """Local Qwen caption-only benchmark adapter."""
+
+    provider = "qwen"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_QWEN_MODEL_NAME,
+        engine: str = DEFAULT_QWEN_ENGINE,
+        llm: Any | None = None,
+        sampling_params: Any | None = None,
+        model: Any | None = None,
+        tokenizer: Any | None = None,
+        require_cuda: bool = True,
+        max_tokens: int = DEFAULT_QWEN_MAX_TOKENS,
+        max_model_len: int = DEFAULT_QWEN_MAX_MODEL_LEN,
+        gpu_memory_utilization: float = DEFAULT_QWEN_GPU_MEMORY_UTILIZATION,
+        enforce_eager: bool = DEFAULT_QWEN_ENFORCE_EAGER,
+        dtype: str = DEFAULT_QWEN_DTYPE,
+        max_num_seqs: int = DEFAULT_QWEN_MAX_NUM_SEQS,
+        cleanup_stale_workers: bool = True,
+    ):
+        self.model_name = model_name
+        self.engine = engine
+        self.max_tokens = max(1, int(max_tokens))
+        self.max_model_len = max(512, int(max_model_len))
+        self.gpu_memory_utilization = min(0.99, max(0.1, float(gpu_memory_utilization)))
+        self.enforce_eager = bool(enforce_eager)
+        self.dtype = str(dtype or DEFAULT_QWEN_DTYPE)
+        self.max_num_seqs = max(1, int(max_num_seqs))
+
+        if self.engine not in {"transformers_4bit", "vllm"}:
+            raise NotImplementedError(
+                "Only transformers_4bit and vllm are implemented for local Qwen benchmark generation."
+            )
+
+        if self.engine == "vllm" and llm is not None:
+            self.llm = llm
+            self.sampling_params = sampling_params
+            return
+        if self.engine == "transformers_4bit" and model is not None and tokenizer is not None:
+            self.model = model
+            self.tokenizer = tokenizer
+            return
+
+        self._validate_runtime(engine=self.engine, require_cuda=require_cuda)
+        if cleanup_stale_workers:
+            cleanup_stale_qwen_workers()
+        if self.engine == "vllm":
+            self._load_vllm()
+        else:
+            self._load_transformers_4bit()
+
+    def _load_vllm(self) -> None:
+        self.sampling_params = SamplingParams(temperature=0.0, max_tokens=self.max_tokens)
+        try:
+            self.llm = LLM(
+                model=self.model_name,
+                trust_remote_code=True,
+                max_model_len=self.max_model_len,
+                gpu_memory_utilization=self.gpu_memory_utilization,
+                enforce_eager=self.enforce_eager,
+                dtype=self.dtype,
+                max_num_seqs=self.max_num_seqs,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                f"Failed to load local Qwen model '{self.model_name}'. "
+                "Check Hugging Face access and GPU memory. On a 16GB GPU, close other GPU processes "
+                "and keep the benchmark context length small."
+            ) from exc
+
+    def _load_transformers_4bit(self) -> None:
+        try:
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                quantization_config=quantization_config,
+                device_map="auto",
+            )
+            if hasattr(self.model, "eval"):
+                self.model.eval()
+        except Exception as exc:
+            raise RuntimeError(
+                f"Failed to load local Qwen model '{self.model_name}' in 4-bit mode. "
+                "Check that bitsandbytes is installed, CUDA is available, and enough GPU memory is free."
+            ) from exc
+
+    @staticmethod
+    def _validate_runtime(engine: str = DEFAULT_QWEN_ENGINE, require_cuda: bool = True) -> None:
+        if torch is None:
+            raise RuntimeError("PyTorch is not installed. Install project requirements before running local Qwen.")
+        if require_cuda and not torch.cuda.is_available():
+            raise RuntimeError(
+                "CUDA is not available. Local Qwen 8B benchmark requires GPU execution; "
+                "fix NVIDIA driver/CUDA visibility first."
+            )
+        if engine == "vllm" and (LLM is None or SamplingParams is None):
+            raise RuntimeError("vLLM is not installed. Install vllm before running local Qwen.")
+        if engine == "transformers_4bit" and (
+            AutoModelForCausalLM is None or AutoTokenizer is None or BitsAndBytesConfig is None
+        ):
+            raise RuntimeError(
+                "Transformers 4-bit Qwen requires transformers and bitsandbytes. "
+                "Install project requirements before running local Qwen."
+            )
+
+    @staticmethod
+    def runtime_summary() -> str:
+        cuda_available = bool(torch is not None and torch.cuda.is_available())
+        gpu_name = "none"
+        if cuda_available:
+            try:
+                gpu_name = str(torch.cuda.get_device_name(0))
+            except Exception:
+                gpu_name = "visible"
+        vllm_available = LLM is not None and SamplingParams is not None
+        transformers_4bit_available = (
+            AutoModelForCausalLM is not None and AutoTokenizer is not None and BitsAndBytesConfig is not None
+        )
+        return (
+            f"engine={DEFAULT_QWEN_ENGINE}, cuda_available={cuda_available}, gpu={gpu_name}, "
+            f"transformers_4bit_available={transformers_4bit_available}, vllm_available={vllm_available}, "
+            f"max_model_len={DEFAULT_QWEN_MAX_MODEL_LEN}, gpu_memory_utilization={DEFAULT_QWEN_GPU_MEMORY_UTILIZATION}, "
+            f"max_tokens={DEFAULT_QWEN_MAX_TOKENS}, dtype={DEFAULT_QWEN_DTYPE}, "
+            f"max_num_seqs={DEFAULT_QWEN_MAX_NUM_SEQS}, enforce_eager={DEFAULT_QWEN_ENFORCE_EAGER}, "
+            f"cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
+        )
+
+    def answer(self, item: dict[str, Any]) -> str:
+        if self.engine == "transformers_4bit":
+            return self._answer_transformers_4bit(item)
+        return self._answer_vllm(item)
+
+    def _answer_vllm(self, item: dict[str, Any]) -> str:
+        outputs = self.llm.generate([build_model_prompt(item, for_qwen=True)], self.sampling_params)
+        if not outputs:
+            return ""
+        first_output = outputs[0]
+        completions = getattr(first_output, "outputs", []) or []
+        if not completions:
+            return ""
+        return str(getattr(completions[0], "text", "")).strip()
+
+    def _answer_transformers_4bit(self, item: dict[str, Any]) -> str:
+        prompt = build_model_prompt(item, for_qwen=True)
+        encoded = self.tokenizer(
+            prompt,
+            return_tensors="pt",
+            truncation=True,
+            max_length=self.max_model_len,
+        )
+        model_device = _model_input_device(self.model)
+        if model_device is not None:
+            encoded = _move_tokenizer_output_to_device(encoded, model_device)
+        input_length = _tokenizer_input_length(encoded)
+        with torch.no_grad():
+            generated = self.model.generate(
+                **encoded,
+                max_new_tokens=self.max_tokens,
+                do_sample=False,
+            )
+        sequence = _first_generated_sequence(generated)
+        new_tokens = sequence[input_length:] if input_length else sequence
+        return str(self.tokenizer.decode(new_tokens, skip_special_tokens=True)).strip()
+
+
 def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dict[str, Any]]:
     input_path = Path(input_path)
     with open(input_path, "r", encoding="utf-8") as handle:
@@ -157,7 +361,73 @@ def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dic
     return items
 
 
-def build_model_prompt(item: dict[str, Any]) -> str:
+def cleanup_stale_qwen_workers() -> None:
+    """Clear stale vLLM worker processes without killing the current Python benchmark."""
+    for pattern in ("EngineCore", "vllm"):
+        subprocess.run(
+            ["pkill", "-9", "-f", pattern],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+
+def _limit_text(text: Any, max_chars: int | None) -> str:
+    cleaned = str(text or "").strip()
+    if max_chars is None or len(cleaned) <= max_chars:
+        return cleaned
+    return cleaned[:max_chars].rstrip()
+
+
+def _move_tokenizer_output_to_device(encoded: Any, device: Any) -> Any:
+    if hasattr(encoded, "to"):
+        return encoded.to(device)
+    if isinstance(encoded, dict):
+        return {
+            key: value.to(device) if hasattr(value, "to") else value
+            for key, value in encoded.items()
+        }
+    return encoded
+
+
+def _tokenizer_input_length(encoded: Any) -> int:
+    input_ids = encoded.get("input_ids") if isinstance(encoded, dict) else getattr(encoded, "input_ids", None)
+    shape = getattr(input_ids, "shape", None)
+    if shape:
+        return int(shape[-1])
+    if isinstance(input_ids, list):
+        first = input_ids[0] if input_ids and isinstance(input_ids[0], list) else input_ids
+        return len(first)
+    return 0
+
+
+def _first_generated_sequence(generated: Any) -> Any:
+    if hasattr(generated, "shape") and len(getattr(generated, "shape", ())) > 1:
+        return generated[0]
+    if isinstance(generated, list) and generated and isinstance(generated[0], list):
+        return generated[0]
+    return generated
+
+
+def _model_input_device(model: Any) -> Any | None:
+    device = getattr(model, "device", None)
+    if device is not None:
+        return device
+    try:
+        return next(model.parameters()).device
+    except Exception:
+        return None
+
+
+def build_model_prompt(item: dict[str, Any], for_qwen: bool = False) -> str:
+    caption = _limit_text(
+        item.get("caption", ""),
+        DEFAULT_QWEN_MAX_CAPTION_CHARS if for_qwen else None,
+    )
+    question = _limit_text(
+        item.get("question", ""),
+        DEFAULT_QWEN_MAX_QUESTION_CHARS if for_qwen else None,
+    )
     return "\n".join(
         [
             "You are answering a caption-only video QA benchmark item.",
@@ -168,10 +438,10 @@ def build_model_prompt(item: dict[str, Any]) -> str:
             f"Section: {item.get('section', '')}",
             "",
             "Caption:",
-            str(item.get("caption", "")).strip(),
+            caption,
             "",
             "Question:",
-            str(item.get("question", "")).strip(),
+            question,
         ]
     )
 
@@ -401,7 +671,9 @@ def create_benchmark_adapter(
         return GeminiCaptionAdapter(model_name=model_name, api_key=api_key)
     if provider in {"chatgpt", "openai"}:
         return OpenAICaptionAdapter(model_name=model_name, api_key=api_key)
-    if provider in {"qwen", "internvl"}:
+    if provider == "qwen":
+        return QwenLocalCaptionAdapter(model_name=model_name)
+    if provider in {"internvl"}:
         raise NotImplementedError(f"Benchmark adapter for provider '{provider}' is not implemented yet.")
     raise ValueError(f"Unknown benchmark provider: {provider}")
 
@@ -568,6 +840,15 @@ def run_aligned_qa_benchmark(
         answer_env_var = "OPENAI_API_KEY"
         answer_key_path = openai_api_key_list_path
         answer_key_prefixes = ("sk-",)
+    elif provider == "qwen":
+        answer_key_label = "Qwen local"
+        answer_env_var = ""
+        answer_key_path = api_key_list_path
+        answer_key_prefixes = ()
+        if batch_size != 1:
+            print("Local Qwen benchmark forces batch size to 1 to reduce GPU memory pressure.")
+            batch_size = 1
+        print(f"Local Qwen runtime: {QwenLocalCaptionAdapter.runtime_summary()}")
     else:
         answer_key_label = provider
         answer_env_var = ""

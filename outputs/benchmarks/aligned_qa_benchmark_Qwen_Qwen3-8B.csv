@@ -1,0 +1,266 @@
+qa_id,modality,section,pair_key,question,gold_answer,model_answer,score,numeric_score,reason
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__object_recognition__01,rgb,object_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What is the pattern on the white teacup located to the left of the tea tray?,A blue raindrop pattern.,"The answer should be one of the following: (A) blue raindrop (B) red flower (C) green leaf (D) yellow star.
+Answer:
+A
+
+The pattern on the white teacup is blue raindrop. Answer: A. 
+
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A
+Answer:
+A",correct,1.0,The model correctly identifies the blue raindrop pattern despite the repetitive and messy formatting.
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__spatial_reasoning__01,rgb,spatial_reasoning,aligned_dataset/brew_tea_split/Seg1/rgb,Where is the glass jar located relative to the patterned teacup?,It is located behind the teacup.,"(Options: A. behind it, B. in front of it, C. to the right of it, D. to the left of it, E. on top of it)
+Answer:
+
+D. to the left of it. 
+
+The glass jar is located behind the teacup and to the left of the tea tray. The patterned teacup is to the left of the black tea tray. Therefore, the glass jar is to the left of the patterned teacup. 
+
+Answer: D. to the left of it. 
+
+The glass jar is located behind the teacup and to the left of",incorrect,0.0,"The model incorrectly identifies the relationship. The caption states the glass jar is behind the teacup, but the model concludes it is to the left of it."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__01,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What word is visible on one of the containers in the red basket?,KEEP.,"To answer this question, we need to identify the word visible on one of the containers in the red basket based on the given caption.
+
+The caption mentions that in the red basket, one white container has the word 'KEEP' in frame 000180, and another container nearby has the word 'LOVE' in frame 000210. Therefore, the words visible on the containers in the red basket are 'KEEP' and 'LOVE'.
+
+The question asks for one of the words visible on one of the containers in the red basket. Since both 'KEEP' and 'LOVE' are visible",correct,1.0,"The model correctly identified the words 'KEEP' and 'LOVE' from the caption, which answers the question accurately."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__02,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What is the temperature shown on the digital display in frame 000600?,96.,"To answer this question, we need to find the temperature value associated with frame 000600 from the given caption. The caption lists several temperature readings for different frames. Let's examine each entry:
+
+- Frame 000180: '100'
+- Frame 000600: '96'
+- Frame 000690: '95'
+- Frame 000750: '97'
+- Frame 000840: '98'
+- Frame 000870: '99'",correct,1.0,The model correctly identified the temperature for frame 000600 based on the provided caption.
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__03,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What word is visible on another container near the first one in the red basket?,LOVE.,"The answer should be in all caps.
+Answer:
+LOVE
+The word ""LOVE"" is visible on another container near the first one in the red basket. The answer should be in all caps. Answer: LOVE. The word ""LOVE"" is visible on another container near the first one in the red basket. The answer should be in all caps. Answer: LOVE. The word ""LOVE"" is visible on another container near the first one in the red basket. The answer should be in all caps. Answer: LOVE. The word ""LOVE"" is visible on another container near the first one in the red basket",correct,1.0,"The model identifies the correct word 'LOVE', although it repeats the answer multiple times unnecessarily."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__04,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What language are the characters on the tea tray in?,Chinese.,"The characters are etched in gold.
+
+Answer:
+Chinese
+The characters on the tea tray are etched in gold and are Chinese, as indicated by the mention of Chinese characters in the caption. The text recognition task involves identifying the language of the etched characters, which is explicitly stated as Chinese in the provided caption. The answer is derived directly from the given information without requiring external knowledge or assumptions about the image content. The answer is concise and directly addresses the question based on the caption. The answer is correct and aligns with the information provided. The answer is based solely on the caption and does not involve any external knowledge or assumptions.",correct,1.0,"The model correctly identifies the language as Chinese, which is explicitly stated in the caption."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__05,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What is the temperature reading in frame 000690?,95.,"The answer should be a number.
+Answer:
+
+95
+Answer:
+
+95
+
+The temperature reading in frame 000690 is 95. The answer is 95.  
+Answer:
+
+95
+
+The temperature reading in frame 000690 is 95.  
+Answer:
+
+95
+
+Answer: 95  
+Answer:
+
+95
+
+Answer: 95  
+Answer:
+
+95
+
+Answer: 95  
+Answer:
+
+95
+
+Answer: 95  
+Answer:
+
+95
+
+Answer: 95  
+Answer:
+
+95
+
+Answer:",correct,1.0,"The model correctly identified the temperature as 95, despite the repetitive and messy formatting."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__06,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What temperature is displayed in frame 000840?,98.,"The answer should be a number.
+Answer:
+
+98
+Answer:
+
+98
+
+The temperature displayed in frame 000840 is 98. The answer is 98.  
+Answer:
+
+98
+
+The temperature displayed in frame 000840 is 98.  
+Answer:
+
+98
+
+Answer: 98  
+Answer:
+
+98
+
+Answer: 98  
+Answer:
+
+98
+
+Answer: 98  
+Answer:
+
+98
+
+Answer: 98  
+Answer:
+
+98
+
+Answer: 98  
+Answer:
+
+98
+
+Answer:",correct,1.0,"The model correctly identifies the temperature as 98, although the output is unnecessarily repetitive."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__07,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What is the final temperature shown in the video?,99.,"The answer should be a number.
+Answer:
+
+99
+The final temperature shown in the video is 99. The caption mentions that in frame 000870, the temperature reading is '99', which is the last mentioned temperature. The answer is 99. 
+
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:
+99
+Answer:",correct,1.0,"The model correctly identifies the final temperature as 99, although the output format is repetitive and cluttered."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__text_recognition__08,rgb,text_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,What color are the characters on the tea tray?,Gold.,"The answer is: gold.
+Okay, let's see. The user is asking about the color of the characters on the tea tray. The caption mentions that there are Chinese characters etched in gold on the black tea tray. So the answer should be gold. I need to make sure I'm not missing any other details. The rest of the caption talks about the temperature readings and the containers with 'KEEP' and 'LOVE', but those aren't relevant here. The key part is the Chinese characters etched in gold. So the answer is definitely gold.
+Okay, I think that's all. The answer is gold.
+Okay,",correct,1.0,"The model correctly identifies that the characters on the tea tray are gold, which is supported by the caption."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__scene_sequence__01,rgb,scene_sequence,aligned_dataset/brew_tea_split/Seg1/rgb,What is the first thing I see after the darkness?,A tea table setup.,"The video starts with a completely dark screen for the first 150 frames. Then, the scene brightens to reveal a tea table setup. The sequence begins with a static shot of the tea tray and surrounding objects. Around frame 000420, a hand enters the frame from the right to manipulate the silver kettle. The camera remains mostly stationary, focused on the tea preparation area, showing the cup, sugarcane, and the basket in the background throughout the rest of the video.
+
+Answer:
+A tea table setup
+Okay, let's tackle this question. The user is asking, ""What is the first",correct,1.0,"The model correctly identifies that a tea table setup is revealed after the darkness, even though it included unnecessary conversational filler."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__scene_sequence__05,rgb,scene_sequence,aligned_dataset/brew_tea_split/Seg1/rgb,What did the hand interact with first?,The silver kettle.,The hand interacts with the silver kettle first. The hand enters the frame from the right around frame 000420 to manipulate the silver kettle. The answer is the silver kettle. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first. The hand interacts with the silver kettle first,correct,1.0,"The model correctly identifies the silver kettle, although the answer is unnecessarily repetitive."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__scene_sequence__06,rgb,scene_sequence,aligned_dataset/brew_tea_split/Seg1/rgb,What is the final scene shown in the video?,The tea table with all objects.,"The video ends with the camera focused on the tea preparation area, showing the cup, sugarcane, and the basket in the background.
+
+Answer:
+The final scene shows the tea preparation area with a cup, sugarcane, and a basket in the background. The camera remains focused on this setup throughout the video. The video ends with this view. The camera is stationary, capturing the tea tray and surrounding objects. The hand that entered the frame earlier is no longer visible. The kettle is present but not in focus. The scene is lit and shows the tea setup. The final frame is a static shot of the tea tray and objects",correct,1.0,"The model accurately describes the final scene as the tea preparation area with the specified objects, consistent with the caption."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__scene_sequence__07,rgb,scene_sequence,aligned_dataset/brew_tea_split/Seg1/rgb,Did the camera move between different rooms?,No.,"Answer:
+No. The camera remained stationary, focused on the tea preparation area throughout the video. The scene brightens to reveal the setup, and the camera does not show any movement between different rooms. The hand enters from the right, but the camera stays fixed on the tea tray and surrounding objects. The background includes a basket, but no room transitions are visible. The entire sequence is confined to the tea preparation area without any camera movement to other rooms. The camera's focus does not shift to different locations, confirming it did not move between rooms. The video's static shots and lack of environmental changes support this conclusion. The camera's",correct,1.0,"The model correctly identified that the camera remained stationary and did not move between rooms, which is supported by the caption."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__scene_sequence__10,rgb,scene_sequence,aligned_dataset/brew_tea_split/Seg1/rgb,What is the color of the basket in the background?,Red.,"The basket is in the background of the tea preparation area.
+
+Answer:
+The basket is in the background of the tea preparation area. The color of the basket is not specified in the caption. The basket's color cannot be determined from the given information. The basket's color is not mentioned in the caption. The basket's color is not described in the caption. The basket's color is not provided in the caption. The basket's color is not indicated in the caption. The basket's color is not specified in the caption. The basket's color is not mentioned in the caption. The basket's color is not described in the caption. The",incorrect,0.0,"The model failed to identify the color and instead repeatedly stated it was not in the caption, despite the gold answer providing it."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__light_recognition__01,rgb,light_recognition,aligned_dataset/brew_tea_split/Seg1/rgb,Where are the strongest light reflections visible in the scene?,On the metallic kettle and the pot lid.,"The strongest light reflections are visible on the polished wooden table and the black glass surface of the tea tray. The light source is overhead, creating highlights on metallic surfaces like the silver kettle and pot lid. The reflections of windows or lights are seen on these surfaces. The light is cool white. The primary light source is the overhead room light. The scene includes a silver kettle, a large pot lid, a polished wooden table, and a black glass tea tray. The reflections are due to the overhead light's highlights on metallic surfaces and the cool white light's reflection on the polished surfaces.
+
+Answer:
+The strongest light reflections are visible on the polished",partial,0.5,The model identifies the correct surfaces mentioned in the caption but provides a confusing and contradictory answer by listing the wrong surfaces first and failing to complete its sentence.
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__light_change__01,rgb,light_change,aligned_dataset/brew_tea_split/Seg1/rgb,Did the lights turn on or off at the beginning?,Turn on.,"The answer is:
+
+The answer is: on. 
+
+The video transitions from total darkness to a well-lit indoor environment, indicating the lights turned on at the beginning. The light levels remain consistent once the lights are turned on, with no significant changes in intensity or direction. The metallic objects maintain their bright reflections throughout the well-lit portion of the sequence. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on. 
+
+The answer is: on.",correct,1.0,"The model correctly identified that the lights turned on, despite the repetitive and verbose output format."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__light_change__02,rgb,light_change,aligned_dataset/brew_tea_split/Seg1/rgb,Is the light getting brighter or darker after the initial transition?,"No, it remains consistent.","Answer:
+brighter
+The light gets brighter after the initial transition from total darkness to a well-lit indoor environment. The light levels remain consistent once the lights are turned on, with no significant changes in intensity or direction. The metallic objects maintain their bright reflections throughout the well-lit portion of the sequence. 
+
+Answer:
+brighter
+The light gets brighter after the initial transition from total darkness to a well-lit indoor environment. The light levels remain consistent once the lights are turned on, with no significant changes in intensity or direction. The metallic objects maintain their bright reflections throughout the well-lit portion of the sequence. 
+
+Answer",incorrect,0.0,"The model incorrectly identifies the light as getting brighter after the transition, contradicting both the caption and the gold answer which state the light remains consistent."
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__light_change__03,rgb,light_change,aligned_dataset/brew_tea_split/Seg1/rgb,Is the light source moving?,No.,"Based on the caption, the light source is not moving. The caption states that once the lights are turned on, the light levels remain consistent with no significant changes in intensity or direction. This indicates that the light source is stationary. Therefore, the answer is no. 
+
+Answer:
+No.
+Answer:
+No. The light levels remain consistent with no changes in intensity or direction, indicating a stationary light source. 
+
+Answer:
+No. The light levels remain consistent with no changes in intensity or direction, indicating a stationary light source. 
+
+Answer:
+No. The light levels remain consistent with no changes in intensity or direction, indicating a stationary light source",correct,1.0,The model correctly identifies that the light source is not moving based on the caption's description of consistent light levels.
+rgb__aligned_dataset_brew_tea_split_seg1_rgb__light_change__04,rgb,light_change,aligned_dataset/brew_tea_split/Seg1/rgb,Does the light color change?,No.,"Based on the caption, the answer is:
+No. The caption states that the light levels remain consistent once the lights are turned on, with no significant changes in intensity or direction. It does not mention any change in light color. Therefore, the answer is No. The light color does not change. The answer is No. The light color does not change. The answer is No. The light color does not change. The answer is No. The light color does not change. The answer is No. The light color does not change. The answer is No. The light color does not change. The answer is No. The light color",correct,1.0,"The model correctly identified the answer as 'No' based on the caption, despite the repetitive and redundant text at the end."
