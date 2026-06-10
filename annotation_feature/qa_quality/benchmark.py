@@ -494,6 +494,14 @@ class QwenVLFrameAnswerAdapter:
         else:
             image_inputs, video_inputs = vision_result
             video_kwargs = {}
+        if not video_inputs:
+            video_kwargs = {}
+        else:
+            video_kwargs = {
+                key: value
+                for key, value in (video_kwargs or {}).items()
+                if not isinstance(value, list) or value
+            }
         inputs = self.processor(
             text=[text],
             images=image_inputs,

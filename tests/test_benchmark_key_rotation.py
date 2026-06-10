@@ -755,11 +755,14 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertEqual(messages[0]["content"][0]["type"], "image")
 
     def test_qwen_vl_adapter_extracts_generated_answer_from_fake_model(self):
+        processor_calls = []
+
         class FakeProcessor:
             def apply_chat_template(self, messages, tokenize=False, add_generation_prompt=True):
                 return "chat prompt"
 
             def __call__(self, **kwargs):
+                processor_calls.append(kwargs)
                 return {"input_ids": [[1, 2, 3]]}
 
             def batch_decode(self, generated, skip_special_tokens=True, clean_up_tokenization_spaces=False):
@@ -772,7 +775,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 return [[1, 2, 3, 4, 5]]
 
         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
-            mock_process.return_value = (["image"], [])
+            mock_process.return_value = (["image"], [], {"fps": []})
             adapter = QwenVLFrameAnswerAdapter(
                 model_name="Qwen/Qwen3-VL-4B-Instruct",
                 model=FakeModel(),
@@ -790,6 +793,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             )
 
         self.assertEqual(answer, "qwen vl decoded answer")
+        self.assertNotIn("fps", processor_calls[0])
 
     def test_qwen_vl_cuda_unavailable_guard_raises_before_loading_model(self):
         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
