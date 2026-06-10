@@ -764,7 +764,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
             mock_process.return_value = (["image"], [])
             adapter = QwenVLFrameAnswerAdapter(
-                model_name="Qwen/Qwen3-VL-8B-Instruct",
+                model_name="Qwen/Qwen3-VL-4B-Instruct",
                 model=FakeModel(),
                 processor=FakeProcessor(),
             )
@@ -787,7 +787,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
 
             with self.assertRaisesRegex(RuntimeError, "CUDA is not available"):
                 QwenVLFrameAnswerAdapter._validate_runtime(
-                    model_name="Qwen/Qwen3-VL-8B-Instruct",
+                    model_name="Qwen/Qwen3-VL-4B-Instruct",
                     require_cuda=True,
                 )
 
@@ -818,7 +818,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 adapter=StaticQwenVLFrameAdapter(),
             )
 
-            output_json = output_dir / "aligned_qa_frame_answers_Qwen_Qwen3-VL-8B-Instruct.json"
+            output_json = output_dir / "aligned_qa_frame_answers_Qwen_Qwen3-VL-4B-Instruct.json"
             payload = json.loads(output_json.read_text(encoding="utf-8"))
             self.assertEqual(len(payload["results"]), 2)
             self.assertEqual(payload["metadata"]["provider"], "qwen_vl")

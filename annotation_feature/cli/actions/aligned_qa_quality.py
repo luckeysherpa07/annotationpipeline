@@ -376,7 +376,7 @@ def build_aligned_qa_quality_actions(
         print("Local Qwen-VL uses Transformers + bitsandbytes 4-bit NF4 and requires CUDA.")
         print("-" * 60)
 
-        model_name = input("Qwen-VL model name? (default Qwen/Qwen3-VL-8B-Instruct): ").strip() or "Qwen/Qwen3-VL-8B-Instruct"
+        model_name = input("Qwen-VL model name? (default Qwen/Qwen3-VL-4B-Instruct): ").strip() or "Qwen/Qwen3-VL-4B-Instruct"
 
         raw_limit = input("Max items to answer this run? (default 20, 0 = all): ").strip()
         if not raw_limit:
