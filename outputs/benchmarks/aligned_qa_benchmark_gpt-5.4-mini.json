@@ -1499,44 +1499,254 @@
       "score": "correct",
       "numeric_score": 1.0,
       "reason": "The model correctly answered 'No', which aligns with the caption stating that the navigation is static and the viewpoint does not change."
+    },
+    "depth__check_mailbox_split_seg3_check_mailbox__depth_spatial_reasoning__01": {
+      "qa_id": "depth__check_mailbox_split_seg3_check_mailbox__depth_spatial_reasoning__01",
+      "modality": "depth",
+      "section": "depth_spatial_reasoning",
+      "pair_key": "check_mailbox_split/Seg3/check_mailbox",
+      "question": "Is the staircase located closer to me than the balcony railing?",
+      "caption": "The scene layout consists of a narrow corridor with walls on either side. A balcony railing is located on the right. Stairs are positioned towards the end of the corridor, appearing further away. There are vehicles parked at the end of the walkway. The ceiling is closer to the viewer than the floor, and the walls are adjacent to the walkway.",
+      "gold_answer": "No, it is farther.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "No",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly identifies that the staircase is not closer, consistent with the caption stating it is further away than the railing."
+    },
+    "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__scene_sequence__01": {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__scene_sequence__01",
+      "modality": "rgb",
+      "section": "scene_sequence",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "question": "What is the sequence of main furniture items I pass while walking down the hallway?",
+      "caption": "The sequence starts in a dark workspace with a lit tablet, then transitions into a hallway. I first pass a shoe rack and mat on the right, followed by a wooden dresser with cleaning supplies on the left. The camera then moves past a set of white doors, ending at a dark door labeled with room numbers.",
+      "gold_answer": "I first pass a shoe rack on the right and then a wooden dresser on the left.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "shoe rack, wooden dresser, white doors, dark door",
+      "score": "partial",
+      "numeric_score": 0.5,
+      "reason": "The model included additional items (white doors, dark door) that are architectural features rather than furniture, failing to distinguish between the two categories requested."
+    },
+    "ir__aligned_dataset_brew_tea_split_seg1_ir__light_recognition__01": {
+      "qa_id": "ir__aligned_dataset_brew_tea_split_seg1_ir__light_recognition__01",
+      "modality": "ir",
+      "section": "light_recognition",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/ir",
+      "question": "What is the most distinct thermal light source on the table?",
+      "caption": "The main light sources are a low ambient overhead light and the emissive digital display on the induction heating tray. the display emits a sharp, high-contrast thermal signature. There are reflections of the room lighting on the metallic surface of the electric kettle and the glass jar.",
+      "gold_answer": "The digital temperature display.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "the emissive digital display on the induction heating tray",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model answer accurately identifies the digital display mentioned in the caption as the most distinct thermal light source."
+    },
+    "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__01": {
+      "qa_id": "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__01",
+      "modality": "event",
+      "section": "event_dynamic_recognition",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/event",
+      "question": "When do the hands appear?",
+      "caption": "The hands enter the scene at the start and remain active throughout the duration of the video. They perform repetitive, rhythmic motions of clearing and placing items on the tray.",
+      "gold_answer": "Start of video.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "At the start of the video.",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model answer is semantically equivalent to the gold answer and directly supported by the caption."
+    },
+    "depth__check_mailbox_split_seg3_check_mailbox__depth_scene_sequence__01": {
+      "qa_id": "depth__check_mailbox_split_seg3_check_mailbox__depth_scene_sequence__01",
+      "modality": "depth",
+      "section": "depth_scene_sequence",
+      "pair_key": "check_mailbox_split/Seg3/check_mailbox",
+      "question": "What structure do I pass immediately before entering the open area where cars are parked?",
+      "caption": "The camera moves forward through a corridor, transitions past a balcony and stairwell on the right, and continues toward an open area where vehicles are parked, showing a progression from a closed interior-like walkway to an outdoor parking space.",
+      "gold_answer": "The stairwell and balcony.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "a balcony and stairwell",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly identifies the structures mentioned in the caption as being passed before entering the open area."
+    },
+    "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_recognition__01": {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_recognition__01",
+      "modality": "rgb",
+      "section": "light_recognition",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "question": "What is providing the most significant light source at the very beginning of the video?",
+      "caption": "The initial light source is the glow from a digital screen in a pitch-black room. As the camera moves into the hallway, very faint ambient light is visible, possibly from under door cracks. There is no direct overhead lighting in the hallway during these frames.",
+      "gold_answer": "The most significant light source is a glowing screen or tablet on a desk.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "a digital screen",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly identifies the digital screen as the primary light source, which matches the gold answer."
+    },
+    "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__01": {
+      "qa_id": "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__01",
+      "modality": "ir",
+      "section": "light_change",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/ir",
+      "question": "Did any overhead lights turn off?",
+      "caption": "The overall illumination remains consistent throughout the video. There are no lights being turned on or off. The most notable change is the shifting light from the digital display as the numbers change from 96 to 100, slightly altering the local thermal reflection on nearby surfaces. The camera moves, changing the perspective of the reflections on the kettle.",
+      "gold_answer": "No.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "No",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model answer correctly states 'No', which aligns with both the gold answer and the caption stating no lights were turned on or off."
+    },
+    "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__02": {
+      "qa_id": "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__02",
+      "modality": "event",
+      "section": "event_dynamic_recognition",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/event",
+      "question": "Are the hands moving constantly?",
+      "caption": "The hands enter the scene at the start and remain active throughout the duration of the video. They perform repetitive, rhythmic motions of clearing and placing items on the tray.",
+      "gold_answer": "Yes.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "Yes",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly confirms the hands are moving constantly, which is supported by the caption stating they remain active throughout the duration."
+    },
+    "depth__check_mailbox_split_seg3_check_mailbox__depth_counting__01": {
+      "qa_id": "depth__check_mailbox_split_seg3_check_mailbox__depth_counting__01",
+      "modality": "depth",
+      "section": "depth_counting",
+      "pair_key": "check_mailbox_split/Seg3/check_mailbox",
+      "question": "How many cars are visible in the parking area at the end of the sequence?",
+      "caption": "The scene contains 2 walls, 1 ceiling, 1 balcony railing, 1 set of stairs, and at least 2 distinct cars visible in the parking area, all identifiable by their 3D geometry.",
+      "gold_answer": "Two.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "2",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model answer correctly identifies the number of cars as 2, matching the gold answer."
+    },
+    "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_change__01": {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_change__01",
+      "modality": "rgb",
+      "section": "light_change",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "question": "Does the environment get significantly darker after leaving the first room?",
+      "caption": "The video begins with high contrast between a bright screen and a dark room. Upon moving into the hallway, the scene becomes almost entirely dark. Later, as the camera nears the window and doors, slight changes in ambient brightness occur due to external light sources.",
+      "gold_answer": "Yes, the scene becomes much darker as I move away from the glowing screen and into the hallway.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "Yes",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly confirms the answer based on the caption, which states the scene becomes almost entirely dark upon moving into the hallway."
+    },
+    "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__02": {
+      "qa_id": "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__02",
+      "modality": "ir",
+      "section": "light_change",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/ir",
+      "question": "Is the room getting significantly brighter?",
+      "caption": "The overall illumination remains consistent throughout the video. There are no lights being turned on or off. The most notable change is the shifting light from the digital display as the numbers change from 96 to 100, slightly altering the local thermal reflection on nearby surfaces. The camera moves, changing the perspective of the reflections on the kettle.",
+      "gold_answer": "No.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "No",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly answered 'No', which aligns with the caption stating that overall illumination remains consistent."
+    },
+    "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__03": {
+      "qa_id": "event__aligned_dataset_brew_tea_split_seg1_event__event_dynamic_recognition__03",
+      "modality": "event",
+      "section": "event_dynamic_recognition",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/event",
+      "question": "Do the hands leave the frame?",
+      "caption": "The hands enter the scene at the start and remain active throughout the duration of the video. They perform repetitive, rhythmic motions of clearing and placing items on the tray.",
+      "gold_answer": "No.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "No",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly answered 'No', which aligns with the caption stating the hands remain active throughout the duration of the video."
+    },
+    "depth__check_mailbox_split_seg3_check_mailbox__depth_dynamic_counting__01": {
+      "qa_id": "depth__check_mailbox_split_seg3_check_mailbox__depth_dynamic_counting__01",
+      "modality": "depth",
+      "section": "depth_dynamic_counting",
+      "pair_key": "check_mailbox_split/Seg3/check_mailbox",
+      "question": "How many people walk past me during the sequence?",
+      "caption": "There are no moving entities other than the camera movement as it proceeds forward through the static environment.",
+      "gold_answer": "Zero.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "0",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly identified that there are zero people, consistent with the caption stating there are no moving entities."
+    },
+    "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__03": {
+      "qa_id": "ir__aligned_dataset_brew_tea_split_seg1_ir__light_change__03",
+      "modality": "ir",
+      "section": "light_change",
+      "pair_key": "aligned_dataset/brew_tea_split/Seg1/ir",
+      "question": "Does the light from the digital display change?",
+      "caption": "The overall illumination remains consistent throughout the video. There are no lights being turned on or off. The most notable change is the shifting light from the digital display as the numbers change from 96 to 100, slightly altering the local thermal reflection on nearby surfaces. The camera moves, changing the perspective of the reflections on the kettle.",
+      "gold_answer": "Yes, as digits change.",
+      "provider": "openai",
+      "model_name": "gpt-5.4-mini",
+      "model_answer": "Yes",
+      "score": "correct",
+      "numeric_score": 1.0,
+      "reason": "The model correctly confirms the light changes, consistent with the gold answer's explanation regarding the digits changing."
     }
   },
   "metrics": {
-    "total_attempted": 100,
-    "total_scored": 100,
+    "total_attempted": 114,
+    "total_scored": 114,
     "total_failed": 0,
-    "total_evaluated": 100,
+    "total_evaluated": 114,
     "score_counts": {
-      "correct": 95,
+      "correct": 108,
       "incorrect": 2,
-      "partial": 3
+      "partial": 4
     },
-    "accuracy": 0.95,
-    "partial_adjusted_accuracy": 0.965,
-    "correct": 95,
-    "partial": 3,
+    "accuracy": 0.947368,
+    "partial_adjusted_accuracy": 0.964912,
+    "correct": 108,
+    "partial": 4,
     "incorrect": 2,
     "failed": 0,
     "by_modality": {
       "depth": {
-        "total": 17,
-        "accuracy": 0.941176,
-        "partial_adjusted_accuracy": 0.970588
+        "total": 21,
+        "accuracy": 0.952381,
+        "partial_adjusted_accuracy": 0.97619
       },
       "event": {
-        "total": 13,
-        "accuracy": 1.0,
-        "partial_adjusted_accuracy": 1.0
-      },
-      "ir": {
         "total": 16,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
+      "ir": {
+        "total": 20,
+        "accuracy": 1.0,
+        "partial_adjusted_accuracy": 1.0
+      },
       "rgb": {
-        "total": 54,
-        "accuracy": 0.925926,
-        "partial_adjusted_accuracy": 0.944444
+        "total": 57,
+        "accuracy": 0.912281,
+        "partial_adjusted_accuracy": 0.938596
       }
     },
     "by_section": {
@@ -1556,12 +1766,12 @@
         "partial_adjusted_accuracy": 1.0
       },
       "depth_counting": {
-        "total": 1,
+        "total": 2,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
       "depth_dynamic_counting": {
-        "total": 1,
+        "total": 2,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
@@ -1586,12 +1796,12 @@
         "partial_adjusted_accuracy": 1.0
       },
       "depth_scene_sequence": {
-        "total": 2,
-        "accuracy": 0.5,
-        "partial_adjusted_accuracy": 0.75
+        "total": 3,
+        "accuracy": 0.666667,
+        "partial_adjusted_accuracy": 0.833333
       },
       "depth_spatial_reasoning": {
-        "total": 2,
+        "total": 3,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
@@ -1612,6 +1822,11 @@
       },
       "event_dynamic_counting": {
         "total": 5,
+        "accuracy": 1.0,
+        "partial_adjusted_accuracy": 1.0
+      },
+      "event_dynamic_recognition": {
+        "total": 3,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
@@ -1636,12 +1851,12 @@
         "partial_adjusted_accuracy": 1.0
       },
       "light_change": {
-        "total": 8,
+        "total": 12,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
       "light_recognition": {
-        "total": 1,
+        "total": 3,
         "accuracy": 1.0,
         "partial_adjusted_accuracy": 1.0
       },
@@ -1661,9 +1876,9 @@
         "partial_adjusted_accuracy": 1.0
       },
       "scene_sequence": {
-        "total": 13,
-        "accuracy": 0.923077,
-        "partial_adjusted_accuracy": 0.923077
+        "total": 14,
+        "accuracy": 0.857143,
+        "partial_adjusted_accuracy": 0.892857
       },
       "spatial_reasoning": {
         "total": 3,
@@ -1685,14 +1900,15 @@
     "judge_model_name": "gemini-3.1-flash-lite",
     "resume": true,
     "total_valid_items": 5465,
-    "evaluated_items": 100,
-    "pending_items": 5365,
+    "evaluated_items": 114,
+    "pending_items": 5351,
     "key_rotation_enabled": true,
     "keys_available": 4,
-    "exhausted_key_count": 3,
+    "exhausted_key_count": 1,
     "judge_key_rotation_enabled": true,
     "judge_keys_available": 6,
-    "exhausted_judge_key_count": 0,
-    "batch_size": 5
+    "exhausted_judge_key_count": 6,
+    "batch_size": 5,
+    "stopped_reason": "judge_quota_or_rate_limit"
   }
 }
