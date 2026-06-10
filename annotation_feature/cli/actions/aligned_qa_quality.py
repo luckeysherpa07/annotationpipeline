@@ -8,6 +8,7 @@ from pathlib import Path
 from annotation_feature.cli.menu import MenuAction
 from annotation_feature.cli.actions.aligned_choices import (
     ALIGNED_QA_FRAME_ANSWER_BENCHMARK,
+    ALIGNED_QA_QWEN_VL_FRAME_ANSWER_BENCHMARK,
     ALIGNED_QA_QUALITY_BENCHMARK,
     ALIGNED_QA_QUALITY_CLEAN,
     ALIGNED_QA_QUALITY_EVALUATE,
@@ -19,6 +20,7 @@ from annotation_feature.qa_quality import (
     clean_aligned_qa_dataset,
     evaluate_aligned_qa,
     run_gemini_frame_answer_benchmark,
+    run_qwen_vl_frame_answer_benchmark,
     run_aligned_qa_benchmark,
     run_aligned_qa_llm_evaluation,
 )
@@ -363,6 +365,80 @@ def build_aligned_qa_quality_actions(
         else:
             print("Cancelled.")
 
+    def run_qwen_vl_frame_answer_benchmark_action() -> None:
+        input_path = Path(output_dir) / "aligned_qa_valid_items.json"
+        benchmark_output_dir = Path(output_dir) / "benchmarks"
+        _print_header("Running: local Qwen-VL frame-input aligned QA answer benchmark")
+        print(f"Reads {input_path}.")
+        print("Reads cached frames from aligned_dataset/.frames_cache*.")
+        print(f"Writes answer-only JSON/CSV files under {benchmark_output_dir}.")
+        print("No judge runs in this option; correctness scoring can run later.")
+        print("Local Qwen-VL uses Transformers + bitsandbytes 4-bit NF4 and requires CUDA.")
+        print("-" * 60)
+
+        model_name = input("Qwen-VL model name? (default Qwen/Qwen3-VL-8B-Instruct): ").strip() or "Qwen/Qwen3-VL-8B-Instruct"
+
+        raw_limit = input("Max items to answer this run? (default 20, 0 = all): ").strip()
+        if not raw_limit:
+            max_items = 20
+        else:
+            try:
+                parsed_limit = int(raw_limit)
+            except ValueError:
+                print("Invalid max items value.")
+                return
+            max_items = None if parsed_limit == 0 else max(0, parsed_limit)
+
+        raw_max_frames = input("Max frames per item? (default 6, 0 = all): ").strip()
+        if not raw_max_frames:
+            max_frames_per_item = 6
+        else:
+            try:
+                parsed_frames = int(raw_max_frames)
+            except ValueError:
+                print("Invalid max frames value.")
+                return
+            max_frames_per_item = 0 if parsed_frames == 0 else max(1, parsed_frames)
+
+        raw_batch_size = input("Batch size? (default 1): ").strip()
+        if not raw_batch_size:
+            batch_size = 1
+        else:
+            try:
+                batch_size = max(1, int(raw_batch_size))
+            except ValueError:
+                print("Invalid batch size value.")
+                return
+
+        raw_delay = input("Delay between batches? (default 0 seconds): ").strip()
+        if not raw_delay:
+            delay_between_batches = 0
+        else:
+            try:
+                delay_between_batches = max(0, int(raw_delay))
+            except ValueError:
+                print("Invalid delay value.")
+                return
+
+        if confirm("Continue? (yes/no): "):
+            try:
+                outputs = run_qwen_vl_frame_answer_benchmark(
+                    input_path=input_path,
+                    output_dir=benchmark_output_dir,
+                    model_name=model_name,
+                    max_items=max_items,
+                    batch_size=batch_size,
+                    delay_between_batches=delay_between_batches,
+                    max_frames_per_item=max_frames_per_item,
+                )
+            except (ImportError, RuntimeError, NotImplementedError) as exc:
+                print(str(exc))
+                return
+            for label, path in outputs.items():
+                print(f"{label}: {path}")
+        else:
+            print("Cancelled.")
+
     quality_action = MenuAction(
         action_id="aligned.qa_quality.evaluate",
         title="Evaluate aligned QA quality",
@@ -405,6 +481,12 @@ def build_aligned_qa_quality_actions(
         section="FRAME INPUT ANSWER BENCHMARK",
         handler=run_frame_answer_benchmark,
     )
+    qwen_vl_frame_answer_benchmark_action = MenuAction(
+        action_id="aligned.qa_quality.qwen_vl_frame_answer_benchmark",
+        title="Run local Qwen-VL frame-input aligned QA answer benchmark",
+        section="FRAME INPUT ANSWER BENCHMARK",
+        handler=run_qwen_vl_frame_answer_benchmark_action,
+    )
     return {
         ALIGNED_QA_QUALITY_EVALUATE: quality_action,
         ALIGNED_QA_QUALITY_LLM_EVAL: llm_action,
@@ -413,6 +495,7 @@ def build_aligned_qa_quality_actions(
         ALIGNED_QA_QUALITY_GPT_BENCHMARK: gpt_benchmark_action,
         ALIGNED_QA_QUALITY_QWEN_BENCHMARK: qwen_benchmark_action,
         ALIGNED_QA_FRAME_ANSWER_BENCHMARK: frame_answer_benchmark_action,
+        ALIGNED_QA_QWEN_VL_FRAME_ANSWER_BENCHMARK: qwen_vl_frame_answer_benchmark_action,
         "aligned.qa_quality.evaluate": quality_action,
         "aligned.qa_quality.llm_eval": llm_action,
         "aligned.qa_quality.clean": clean_action,
@@ -420,4 +503,5 @@ def build_aligned_qa_quality_actions(
         "aligned.qa_quality.gpt_benchmark": gpt_benchmark_action,
         "aligned.qa_quality.qwen_benchmark": qwen_benchmark_action,
         "aligned.qa_quality.frame_answer_benchmark": frame_answer_benchmark_action,
+        "aligned.qa_quality.qwen_vl_frame_answer_benchmark": qwen_vl_frame_answer_benchmark_action,
     }

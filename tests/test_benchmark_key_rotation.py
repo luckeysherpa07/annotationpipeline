@@ -10,13 +10,16 @@ from annotation_feature.qa_quality.benchmark import (
     BenchmarkModelAdapter,
     OpenAICaptionAdapter,
     QwenLocalCaptionAdapter,
+    QwenVLFrameAnswerAdapter,
     build_frame_answer_prompt,
+    build_qwen_vl_frame_messages,
     build_model_prompt,
     cleanup_stale_qwen_workers,
     load_api_keys,
     resolve_frame_inputs_for_item,
     run_aligned_qa_benchmark,
     run_gemini_frame_answer_benchmark,
+    run_qwen_vl_frame_answer_benchmark,
     select_frames_for_question,
 )
 
@@ -103,6 +106,11 @@ class KeyedFrameAdapter:
         if self.key == "key-one":
             raise RuntimeError("429 RESOURCE_EXHAUSTED")
         return f"frame answer from {self.key}"
+
+
+class StaticQwenVLFrameAdapter:
+    def answer(self, item, frame_paths):
+        return f"qwen vl answer using {len(frame_paths)} frame(s)"
 
 
 class BenchmarkKeyRotationTests(unittest.TestCase):
@@ -716,6 +724,117 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertIn("70", actions)
         self.assertEqual(actions["70"].action_id, "aligned.qa_quality.frame_answer_benchmark")
         self.assertEqual(actions["70"].section, "FRAME INPUT ANSWER BENCHMARK")
+
+    def test_qwen_vl_messages_exclude_caption_and_gold_answer(self):
+        messages = build_qwen_vl_frame_messages(
+            {
+                "modality": "rgb",
+                "section": "test",
+                "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                "question": "What is shown?",
+                "caption": "SECRET CAPTION",
+                "answer": "SECRET ANSWER",
+            },
+            [Path("frame_000000.png")],
+        )
+
+        text_content = messages[0]["content"][-1]["text"]
+        self.assertIn("What is shown?", text_content)
+        self.assertNotIn("SECRET CAPTION", text_content)
+        self.assertNotIn("SECRET ANSWER", text_content)
+        self.assertEqual(messages[0]["content"][0]["type"], "image")
+
+    def test_qwen_vl_adapter_extracts_generated_answer_from_fake_model(self):
+        class FakeProcessor:
+            def apply_chat_template(self, messages, tokenize=False, add_generation_prompt=True):
+                return "chat prompt"
+
+            def __call__(self, **kwargs):
+                return {"input_ids": [[1, 2, 3]]}
+
+            def batch_decode(self, generated, skip_special_tokens=True, clean_up_tokenization_spaces=False):
+                return [" qwen vl decoded answer "]
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
+            mock_process.return_value = (["image"], [])
+            adapter = QwenVLFrameAnswerAdapter(
+                model_name="Qwen/Qwen3-VL-8B-Instruct",
+                model=FakeModel(),
+                processor=FakeProcessor(),
+            )
+
+            answer = adapter.answer(
+                {
+                    "modality": "rgb",
+                    "section": "test",
+                    "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                    "question": "What is shown?",
+                },
+                [Path("frame_000000.png")],
+            )
+
+        self.assertEqual(answer, "qwen vl decoded answer")
+
+    def test_qwen_vl_cuda_unavailable_guard_raises_before_loading_model(self):
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+            mock_torch.cuda.is_available.return_value = False
+
+            with self.assertRaisesRegex(RuntimeError, "CUDA is not available"):
+                QwenVLFrameAnswerAdapter._validate_runtime(
+                    model_name="Qwen/Qwen3-VL-8B-Instruct",
+                    require_cuda=True,
+                )
+
+    def test_qwen_vl_frame_answer_benchmark_output_and_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            frame_root = root / "aligned_dataset"
+            write_valid_items(input_path, count=2)
+            for index in range(2):
+                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
+                frame_path.parent.mkdir(parents=True, exist_ok=True)
+                frame_path.write_bytes(b"fake")
+
+            run_qwen_vl_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=1,
+                frame_cache_root=frame_root,
+                adapter=StaticQwenVLFrameAdapter(),
+            )
+            run_qwen_vl_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=2,
+                frame_cache_root=frame_root,
+                adapter=StaticQwenVLFrameAdapter(),
+            )
+
+            output_json = output_dir / "aligned_qa_frame_answers_Qwen_Qwen3-VL-8B-Instruct.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["results"]), 2)
+            self.assertEqual(payload["metadata"]["provider"], "qwen_vl")
+            self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertFalse(payload["metadata"]["judge_enabled"])
+
+    def test_option_71_is_registered(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_QWEN_VL_FRAME_ANSWER_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_QWEN_VL_FRAME_ANSWER_BENCHMARK, "71")
+        self.assertIn("71", actions)
+        self.assertEqual(actions["71"].action_id, "aligned.qa_quality.qwen_vl_frame_answer_benchmark")
+        self.assertEqual(actions["71"].section, "FRAME INPUT ANSWER BENCHMARK")
 
 
 if __name__ == "__main__":

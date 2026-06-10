@@ -36,11 +36,28 @@ except ImportError:
     SamplingParams = None
 
 try:
-    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from transformers import (
+        AutoModelForCausalLM,
+        AutoModelForImageTextToText,
+        AutoProcessor,
+        AutoTokenizer,
+        BitsAndBytesConfig,
+        Qwen2_5_VLForConditionalGeneration,
+        Qwen3VLForConditionalGeneration,
+    )
 except ImportError:
     AutoModelForCausalLM = None
+    AutoModelForImageTextToText = None
+    AutoProcessor = None
     AutoTokenizer = None
     BitsAndBytesConfig = None
+    Qwen2_5_VLForConditionalGeneration = None
+    Qwen3VLForConditionalGeneration = None
+
+try:
+    from qwen_vl_utils import process_vision_info
+except ImportError:
+    process_vision_info = None
 
 
 DEFAULT_INPUT_PATH = Path("outputs/aligned_qa_valid_items.json")
@@ -59,6 +76,8 @@ DEFAULT_QWEN_DTYPE = "half"
 DEFAULT_QWEN_MAX_NUM_SEQS = 1
 DEFAULT_QWEN_MAX_CAPTION_CHARS = 3000
 DEFAULT_QWEN_MAX_QUESTION_CHARS = 600
+DEFAULT_QWEN_VL_MODEL_NAME = "Qwen/Qwen3-VL-8B-Instruct"
+DEFAULT_QWEN_VL_MAX_TOKENS = 128
 DEFAULT_FRAME_CACHE_ROOT = Path("aligned_dataset")
 DEFAULT_FRAME_MAX_FRAMES_PER_ITEM = 6
 FRAME_ANSWER_BENCHMARK_TYPE = "frame_input_answer_generation"
@@ -378,6 +397,121 @@ class QwenLocalCaptionAdapter(BenchmarkModelAdapter):
         return str(self.tokenizer.decode(new_tokens, skip_special_tokens=True)).strip()
 
 
+class QwenVLFrameAnswerAdapter:
+    """Local Qwen-VL frame-input answer adapter."""
+
+    provider = "qwen_vl"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_QWEN_VL_MODEL_NAME,
+        model: Any | None = None,
+        processor: Any | None = None,
+        require_cuda: bool = True,
+        max_tokens: int = DEFAULT_QWEN_VL_MAX_TOKENS,
+        cleanup_stale_workers: bool = True,
+    ):
+        self.model_name = model_name
+        self.max_tokens = max(1, int(max_tokens))
+        if model is not None and processor is not None:
+            self.model = model
+            self.processor = processor
+            return
+
+        self._validate_runtime(model_name=self.model_name, require_cuda=require_cuda)
+        if cleanup_stale_workers:
+            cleanup_stale_qwen_workers()
+        self._load_model()
+
+    @staticmethod
+    def _validate_runtime(model_name: str = DEFAULT_QWEN_VL_MODEL_NAME, require_cuda: bool = True) -> None:
+        if torch is None:
+            raise RuntimeError("PyTorch is not installed. Install project requirements before running local Qwen-VL.")
+        if require_cuda and not torch.cuda.is_available():
+            raise RuntimeError(
+                "CUDA is not available. Local Qwen-VL frame benchmark requires GPU execution; "
+                "fix NVIDIA driver/CUDA visibility first."
+            )
+        if AutoProcessor is None or BitsAndBytesConfig is None:
+            raise RuntimeError("Qwen-VL requires transformers and bitsandbytes. Install project requirements first.")
+        if process_vision_info is None:
+            raise RuntimeError("Qwen-VL requires qwen-vl-utils. Install project requirements first.")
+        if _qwen_vl_model_class(model_name) is None:
+            raise RuntimeError("Installed Transformers does not expose a supported Qwen-VL model class.")
+
+    @staticmethod
+    def runtime_summary(model_name: str = DEFAULT_QWEN_VL_MODEL_NAME) -> str:
+        cuda_available = bool(torch is not None and torch.cuda.is_available())
+        gpu_name = "none"
+        if cuda_available:
+            try:
+                gpu_name = str(torch.cuda.get_device_name(0))
+            except Exception:
+                gpu_name = "visible"
+        return (
+            f"provider=qwen_vl, model={model_name}, cuda_available={cuda_available}, gpu={gpu_name}, "
+            f"transformers_vl_available={_qwen_vl_model_class(model_name) is not None}, "
+            f"auto_processor_available={AutoProcessor is not None}, "
+            f"qwen_vl_utils_available={process_vision_info is not None}, "
+            f"max_tokens={DEFAULT_QWEN_VL_MAX_TOKENS}, quantization=4bit_nf4, "
+            f"cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
+        )
+
+    def _load_model(self) -> None:
+        model_class = _qwen_vl_model_class(self.model_name)
+        if model_class is None:
+            raise RuntimeError(f"No supported Qwen-VL model class is available for '{self.model_name}'.")
+        try:
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
+            )
+            self.processor = AutoProcessor.from_pretrained(self.model_name, trust_remote_code=True)
+            self.model = model_class.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                quantization_config=quantization_config,
+                device_map="auto",
+            )
+            if hasattr(self.model, "eval"):
+                self.model.eval()
+        except Exception as exc:
+            raise RuntimeError(
+                f"Failed to load local Qwen-VL model '{self.model_name}' in 4-bit mode. "
+                "Check qwen-vl-utils, Transformers support, CUDA availability, and free GPU memory."
+            ) from exc
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        messages = build_qwen_vl_frame_messages(item, frame_paths)
+        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = self.processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        )
+        model_device = _model_input_device(self.model)
+        if model_device is not None:
+            inputs = _move_tokenizer_output_to_device(inputs, model_device)
+        with torch.no_grad():
+            generated = self.model.generate(
+                **inputs,
+                max_new_tokens=self.max_tokens,
+                do_sample=False,
+            )
+        input_ids = inputs.get("input_ids") if isinstance(inputs, dict) else getattr(inputs, "input_ids", None)
+        generated_trimmed = _trim_generated_batch(generated, input_ids)
+        decoded = self.processor.batch_decode(
+            generated_trimmed,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+        )
+        return str(decoded[0] if decoded else "").strip()
+
+
 def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dict[str, Any]]:
     input_path = Path(input_path)
     with open(input_path, "r", encoding="utf-8") as handle:
@@ -443,6 +577,20 @@ def _first_generated_sequence(generated: Any) -> Any:
     return generated
 
 
+def _trim_generated_batch(generated: Any, input_ids: Any) -> Any:
+    if input_ids is None:
+        return generated
+    try:
+        return [
+            out_ids[len(in_ids):]
+            for in_ids, out_ids in zip(input_ids, generated)
+        ]
+    except Exception:
+        input_length = _tokenizer_input_length({"input_ids": input_ids})
+        sequence = _first_generated_sequence(generated)
+        return [sequence[input_length:] if input_length else sequence]
+
+
 def _model_input_device(model: Any) -> Any | None:
     device = getattr(model, "device", None)
     if device is not None:
@@ -451,6 +599,17 @@ def _model_input_device(model: Any) -> Any | None:
         return next(model.parameters()).device
     except Exception:
         return None
+
+
+def _qwen_vl_model_class(model_name: str) -> Any | None:
+    lowered = str(model_name).lower()
+    if "qwen3-vl" in lowered and Qwen3VLForConditionalGeneration is not None:
+        return Qwen3VLForConditionalGeneration
+    if "qwen2.5-vl" in lowered and Qwen2_5_VLForConditionalGeneration is not None:
+        return Qwen2_5_VLForConditionalGeneration
+    if AutoModelForImageTextToText is not None:
+        return AutoModelForImageTextToText
+    return Qwen3VLForConditionalGeneration or Qwen2_5_VLForConditionalGeneration
 
 
 def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
@@ -619,6 +778,15 @@ def build_frame_answer_prompt(item: dict[str, Any], frame_paths: list[Path]) -> 
             str(item.get("question", "")).strip(),
         ]
     )
+
+
+def build_qwen_vl_frame_messages(item: dict[str, Any], frame_paths: list[Path]) -> list[dict[str, Any]]:
+    content: list[dict[str, str]] = [
+        {"type": "image", "image": path.resolve().as_posix()}
+        for path in frame_paths
+    ]
+    content.append({"type": "text", "text": build_frame_answer_prompt(item, frame_paths)})
+    return [{"role": "user", "content": content}]
 
 
 def build_judge_prompt(item: dict[str, Any], model_answer: str) -> str:
@@ -1226,6 +1394,133 @@ def run_gemini_frame_answer_benchmark(
                 time.sleep(delay_between_batches)
     except KeyboardInterrupt:
         print("\nFrame-answer benchmark cancelled by user. Progress saved.")
+        _save_frame_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="user_cancelled"),
+        )
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
+    return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+
+def run_qwen_vl_frame_answer_benchmark(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_QWEN_VL_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    adapter: QwenVLFrameAnswerAdapter | None = None,
+) -> dict[str, Path]:
+    """Generate local Qwen-VL answers from cached aligned-dataset frames without judging correctness."""
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    frame_cache_root = Path(frame_cache_root)
+    output_json, output_csv = _frame_answer_output_paths(output_dir, model_name)
+    batch_size = max(1, int(batch_size))
+    if batch_size != 1:
+        print("Local Qwen-VL frame benchmark forces batch size to 1 to reduce GPU memory pressure.")
+        batch_size = 1
+
+    print(f"Local Qwen-VL runtime: {QwenVLFrameAnswerAdapter.runtime_summary(model_name=model_name)}")
+
+    items = load_valid_qa_items(input_path)
+    results_by_id = _load_existing_results(output_json) if resume else {}
+    pending = [
+        item
+        for item in items
+        if not _is_completed_frame_answer(results_by_id.get(item["qa_id"], {}))
+    ]
+    if max_items is not None:
+        pending = pending[: max(0, int(max_items))]
+
+    skipped_no_frames = 0
+
+    def make_metadata(stopped_reason: str | None = None) -> dict[str, Any]:
+        answered_count = sum(1 for result in results_by_id.values() if _is_completed_frame_answer(result))
+        metadata = {
+            "benchmark_type": FRAME_ANSWER_BENCHMARK_TYPE,
+            "input_path": input_path.as_posix(),
+            "provider": "qwen_vl",
+            "model_name": model_name,
+            "judge_enabled": False,
+            "frame_cache_root": frame_cache_root.as_posix(),
+            "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "resume": resume,
+            "total_valid_items": len(items),
+            "answered_items": answered_count,
+            "pending_items": max(0, len(items) - answered_count),
+            "skipped_no_frames": skipped_no_frames,
+            "batch_size": batch_size,
+            "key_rotation_enabled": False,
+            "keys_available": 0,
+            "exhausted_key_count": 0,
+        }
+        if stopped_reason:
+            metadata["stopped_reason"] = stopped_reason
+        return metadata
+
+    print(
+        f"Qwen-VL frame-input answer benchmark resume scan: {len(results_by_id)} complete skipped, "
+        f"{len(pending)} pending selected, {len(items)} valid total, model={model_name}."
+    )
+
+    if not pending:
+        _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    frame_adapter = adapter or QwenVLFrameAnswerAdapter(model_name=model_name)
+
+    try:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            print(f"Running Qwen-VL frame-answer batch {start // batch_size + 1}: {len(batch)} item(s)")
+            for item in batch:
+                frame_paths = resolve_frame_inputs_for_item(
+                    item,
+                    frame_cache_root=frame_cache_root,
+                    max_frames_per_item=max_frames_per_item,
+                )
+                if not frame_paths:
+                    skipped_no_frames += 1
+                    print(f"Skipping {item['qa_id']}: no cached frames found.")
+                    continue
+
+                try:
+                    model_answer = frame_adapter.answer(item, frame_paths)
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="qwen_vl",
+                        model_name=model_name,
+                        model_answer=model_answer,
+                        frame_paths=frame_paths,
+                        status="answered" if model_answer else "failed",
+                        reason="" if model_answer else "Frame answer call failed: empty model answer",
+                    )
+                except Exception as exc:
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="qwen_vl",
+                        model_name=model_name,
+                        model_answer="",
+                        frame_paths=frame_paths,
+                        status="failed",
+                        reason=f"Frame answer call failed: {exc}",
+                    )
+
+                _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+                print(f"Checkpoint saved: {len(results_by_id)} frame answer item(s)")
+
+            if delay_between_batches > 0 and start + batch_size < len(pending):
+                time.sleep(delay_between_batches)
+    except KeyboardInterrupt:
+        print("\nQwen-VL frame-answer benchmark cancelled by user. Progress saved.")
         _save_frame_answer_outputs(
             output_json,
             output_csv,
