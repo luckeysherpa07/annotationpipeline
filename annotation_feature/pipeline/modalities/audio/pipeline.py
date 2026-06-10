@@ -255,6 +255,7 @@ def enrich_audio_annotations(annotation_results: dict, day_rgb_file: str | None 
 
     chronological_caption = str(((enriched.get("audio_chronological_caption") or {}).get("caption")) or "").strip()
     categories = enriched.get("categories", {})
+    has_empty_qa_caption = False
     if isinstance(categories, dict):
         for section_name, item in categories.items():
             if not isinstance(item, dict):
@@ -263,20 +264,29 @@ def enrich_audio_annotations(annotation_results: dict, day_rgb_file: str | None 
             has_qa = bool(str(item.get("question", "")).strip() and str(item.get("answer", "")).strip())
             empty_caption = not str(item.get("caption", "")).strip()
             if has_qa and empty_caption:
-                if "empty_qa_caption" not in item_flags:
-                    item_flags.append("empty_qa_caption")
-                if "has_empty_qa_caption" not in quality_flags:
-                    quality_flags.append("has_empty_qa_caption")
                 item["caption"] = _fallback_audio_category_caption(
                     item.get("caption", ""),
                     item.get("timestamp"),
                     chronological_caption,
                 )
+                empty_caption = not str(item.get("caption", "")).strip()
+            if has_qa and empty_caption:
+                if "empty_qa_caption" not in item_flags:
+                    item_flags.append("empty_qa_caption")
+                has_empty_qa_caption = True
+            else:
+                item_flags = [flag for flag in item_flags if flag != "empty_qa_caption"]
             if item_flags:
                 item["quality_flags"] = item_flags
             elif "quality_flags" in item:
                 item.pop("quality_flags", None)
             categories[section_name] = item
+
+    if has_empty_qa_caption:
+        if "has_empty_qa_caption" not in quality_flags:
+            quality_flags.append("has_empty_qa_caption")
+    else:
+        quality_flags = [flag for flag in quality_flags if flag != "has_empty_qa_caption"]
 
     enriched["categories"] = categories if isinstance(categories, dict) else {}
     if quality_flags:
@@ -320,20 +330,12 @@ def format_audio_annotations(raw_results: Any) -> dict:
             question = qa_pair.get("question", "")
             answer = qa_pair.get("answer", "")
             timestamp = qa_pair.get("timestamp")
-            item_quality_flags: list[str] = []
-            if str(question or "").strip() and str(answer or "").strip() and not str(context or "").strip():
-                item_quality_flags.append("empty_qa_caption")
-                if "has_empty_qa_caption" not in quality_flags:
-                    quality_flags.append("has_empty_qa_caption")
-
             categories[section_name] = {
                 "timestamp": timestamp,
                 "caption": _fallback_audio_category_caption(context, timestamp, chronological_caption),
                 "question": question if isinstance(question, str) else "",
                 "answer": answer if isinstance(answer, str) else "",
             }
-            if item_quality_flags:
-                categories[section_name]["quality_flags"] = item_quality_flags
 
     formatted["categories"] = categories
     if quality_flags:

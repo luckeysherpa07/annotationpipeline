@@ -24,6 +24,7 @@ DEFAULT_ALIGNED_QA_FILES = {
     "rgb": Path("qa_pairs/aligned/rgb_qa_results_aligned.json"),
     "ir": Path("qa_pairs/aligned/ir_qa_results_aligned.json"),
     "event": Path("qa_pairs/aligned/event_qa_results_aligned.json"),
+    "audio": Path("qa_pairs/aligned/audio_qa_results_aligned.json"),
     "depth": Path("qa_pairs/aligned/marigold_depth_qa_results_aligned.json"),
 }
 
@@ -96,11 +97,40 @@ def _item_complete(item: dict[str, Any]) -> bool:
     return isinstance(item, dict) and all(str(item.get(field, "")).strip() for field in ("caption", "question", "answer"))
 
 
-def _entry_complete(entry: dict[str, Any], expected_sections: tuple[str, ...]) -> bool:
+def _caption_complete(item: dict[str, Any]) -> bool:
+    return isinstance(item, dict) and bool(str(item.get("caption", "")).strip())
+
+
+def _audio_sections(entry: dict[str, Any]) -> tuple[str, ...]:
+    annotations = entry.get("annotations", {}) if isinstance(entry, dict) else {}
+    categories = annotations.get("categories", {}) if isinstance(annotations, dict) else {}
+    if not isinstance(categories, dict):
+        return ()
+    return tuple(section for section, qa in sorted(categories.items()) if isinstance(section, str) and isinstance(qa, dict))
+
+
+def _expected_sections_for_entry(modality: str, entry: dict[str, Any]) -> tuple[str, ...]:
+    if modality == "audio":
+        return _audio_sections(entry)
+    return EXPECTED_SECTIONS[modality]
+
+
+def _entry_complete(modality: str, entry: dict[str, Any], expected_sections: tuple[str, ...]) -> bool:
     if not isinstance(entry, dict) or entry.get("status") == "skipped_missing_side":
         return False
     annotations = entry.get("annotations", {})
-    return isinstance(annotations, dict) and all(_item_complete(annotations.get(section, {})) for section in expected_sections)
+    if not isinstance(annotations, dict):
+        return False
+    if modality == "audio":
+        categories = annotations.get("categories", {})
+        return (
+            bool(expected_sections)
+            and isinstance(categories, dict)
+            and _caption_complete(annotations.get("audio_hia", {}))
+            and _caption_complete(annotations.get("audio_chronological_caption", {}))
+            and all(_item_complete(categories.get(section, {})) for section in expected_sections)
+        )
+    return all(_item_complete(annotations.get(section, {})) for section in expected_sections)
 
 
 def _modality_mismatch(modality: str, question: str, answer: str) -> bool:
@@ -114,33 +144,56 @@ def _modality_mismatch(modality: str, question: str, answer: str) -> bool:
     return False
 
 
-def _classify_item(modality: str, section: str, qa: dict[str, Any], duplicate_question: bool) -> QualityItem:
+def _append_flag(flags: list[str], flag: str) -> None:
+    if flag not in flags:
+        flags.append(flag)
+
+
+def _classify_item(
+    modality: str,
+    section: str,
+    qa: dict[str, Any],
+    duplicate_question: bool,
+    entry_quality_flags: set[str] | None = None,
+) -> QualityItem:
     caption = str(qa.get("caption", "")).strip()
     question = str(qa.get("question", "")).strip()
     answer = str(qa.get("answer", "")).strip()
     status, questions, answers = split_status(question, answer)
     flags: list[str] = []
+    qa_quality_flags = {
+        str(flag).strip()
+        for flag in qa.get("quality_flags", [])
+        if str(flag).strip()
+    }
+    entry_quality_flags = entry_quality_flags or set()
 
     if not caption or not question or not answer:
-        flags.append("empty_field")
+        _append_flag(flags, "empty_field")
     if PROMPT_LEAK_RE.search(question):
-        flags.append("prompt_leak")
+        _append_flag(flags, "prompt_leak")
     if status != "single":
-        flags.append("multi_question" if questions else "numbered_answer_list")
+        _append_flag(flags, "multi_question" if questions else "numbered_answer_list")
         if status == "count_mismatch":
-            flags.append("question_answer_count_mismatch")
+            _append_flag(flags, "question_answer_count_mismatch")
     if duplicate_question:
-        flags.append("duplicate_question")
+        _append_flag(flags, "duplicate_question")
     if len(answer.split()) < 2 or SHORT_ANSWER_RE.match(answer):
-        flags.append("short_answer")
+        _append_flag(flags, "short_answer")
     if UNKNOWN_RE.search(question) or UNKNOWN_RE.search(answer) or UNKNOWN_RE.search(caption):
-        flags.append("unknown_unclear")
+        _append_flag(flags, "unknown_unclear")
     if _modality_mismatch(modality, question, answer):
-        flags.append("modality_mismatch")
+        _append_flag(flags, "modality_mismatch")
     if FRAME_RE.search(question):
-        flags.append("frame_reference")
+        _append_flag(flags, "frame_reference")
     if qa == DEMO_RESULT.get(section):
-        flags.append("demo_fallback")
+        _append_flag(flags, "demo_fallback")
+    if not caption and ("empty_qa_caption" in qa_quality_flags or "has_empty_qa_caption" in entry_quality_flags):
+        _append_flag(flags, "empty_qa_caption")
+    if "demo_hia_fallback" in entry_quality_flags:
+        _append_flag(flags, "demo_hia_fallback")
+    if "missing_hia_source" in entry_quality_flags:
+        _append_flag(flags, "missing_hia_source")
 
     hard_flags = {"empty_field", "prompt_leak", "demo_fallback"}
     transform_flags = {"multi_question", "numbered_answer_list", "question_answer_count_mismatch"}
@@ -178,14 +231,17 @@ def _classify_item(modality: str, section: str, qa: dict[str, Any], duplicate_qu
 
 
 def _iter_quality_items(modality: str, path: Path, data: dict[str, Any]) -> tuple[list[QualityItem], dict[str, Any]]:
-    expected_sections = EXPECTED_SECTIONS[modality]
     question_counts: Counter[str] = Counter()
     for entry in data.values():
         annotations = entry.get("annotations", {}) if isinstance(entry, dict) else {}
         if not isinstance(annotations, dict):
             continue
+        expected_sections = _expected_sections_for_entry(modality, entry)
+        qa_source = annotations.get("categories", {}) if modality == "audio" else annotations
+        if not isinstance(qa_source, dict):
+            continue
         for section in expected_sections:
-            qa = annotations.get(section)
+            qa = qa_source.get(section)
             if isinstance(qa, dict):
                 question_counts[str(qa.get("question", "")).strip()] += 1
 
@@ -198,7 +254,8 @@ def _iter_quality_items(modality: str, path: Path, data: dict[str, Any]) -> tupl
         if entry.get("status") == "skipped_missing_side":
             entry_counts["skipped_entries"] += 1
             continue
-        if _entry_complete(entry, expected_sections):
+        expected_sections = _expected_sections_for_entry(modality, entry)
+        if _entry_complete(modality, entry, expected_sections):
             entry_counts["complete_entries"] += 1
         else:
             entry_counts["partial_or_empty_entries"] += 1
@@ -206,8 +263,16 @@ def _iter_quality_items(modality: str, path: Path, data: dict[str, Any]) -> tupl
         annotations = entry.get("annotations", {})
         if not isinstance(annotations, dict):
             continue
+        qa_source = annotations.get("categories", {}) if modality == "audio" else annotations
+        if not isinstance(qa_source, dict):
+            continue
+        entry_quality_flags = {
+            str(flag).strip()
+            for flag in annotations.get("quality_flags", [])
+            if str(flag).strip()
+        }
         for section in expected_sections:
-            qa = annotations.get(section)
+            qa = qa_source.get(section)
             if not isinstance(qa, dict):
                 continue
             item = _classify_item(
@@ -215,6 +280,7 @@ def _iter_quality_items(modality: str, path: Path, data: dict[str, Any]) -> tupl
                 section,
                 qa,
                 duplicate_question=question_counts[str(qa.get("question", "")).strip()] > 1,
+                entry_quality_flags=entry_quality_flags,
             )
             item.source_file = path.as_posix()
             item.pair_key = str(pair_key)

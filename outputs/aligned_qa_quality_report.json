@@ -55,6 +55,21 @@
         "duplicate_question": 8
       }
     },
+    "audio": {
+      "complete_entries": 78,
+      "entries": 78,
+      "qa_items": 261,
+      "severity": {
+        "quality_warning": 107,
+        "pass": 154
+      },
+      "flags": {
+        "frame_reference": 77,
+        "demo_hia_fallback": 40,
+        "missing_hia_source": 40,
+        "duplicate_question": 5
+      }
+    },
     "depth": {
       "complete_entries": 58,
       "skipped_entries": 15,
@@ -74,20 +89,22 @@
     }
   },
   "totals": {
-    "qa_items": 2469,
+    "qa_items": 2730,
     "severity": {
-      "pass": 1109,
+      "pass": 1263,
       "needs_transform": 614,
-      "quality_warning": 746
+      "quality_warning": 853
     },
     "flags": {
       "multi_question": 605,
-      "frame_reference": 625,
+      "frame_reference": 702,
       "short_answer": 450,
-      "duplicate_question": 69,
+      "duplicate_question": 74,
       "unknown_unclear": 14,
       "numbered_answer_list": 9,
-      "question_answer_count_mismatch": 9
+      "question_answer_count_mismatch": 9,
+      "demo_hia_fallback": 40,
+      "missing_hia_source": 40
     },
     "by_section": {
       "rgb:object_recognition": 59,
@@ -123,6 +140,18 @@
       "event:event_dynamic_recognition": 59,
       "event:event_action": 59,
       "event:event_non_common": 59,
+      "audio:audio_qa_pair": 75,
+      "audio:audio_qa_pair_2": 75,
+      "audio:audio_qa_pair_3": 74,
+      "audio:audio_counting": 2,
+      "audio:audio_cross_modal_reasoning": 2,
+      "audio:audio_inferential_causality": 2,
+      "audio:audio_sound_characteristics": 3,
+      "audio:audio_sound_source_identification": 3,
+      "audio:audio_sound_source_identification_2": 1,
+      "audio:audio_temporal_attribute": 2,
+      "audio:audio_qa_pair_4": 21,
+      "audio:audio_sound_characteristics_2": 1,
       "depth:depth_object_recognition": 58,
       "depth:depth_spatial_reasoning": 58,
       "depth:depth_scene_sequence": 58,
@@ -133,15 +162,15 @@
       "depth:depth_action": 58,
       "depth:depth_non_common": 58
     },
-    "split_items": 7049,
-    "cleaned_items": 7040,
+    "split_items": 7310,
+    "cleaned_items": 7301,
     "cleaned_export": {
-      "total_cleaned_items": 7040,
+      "total_cleaned_items": 7301,
       "excluded": {
         "unresolved_count_mismatch": 9
       },
       "transforms": {
-        "none": 1855,
+        "none": 2116,
         "split_multi_question": 5185
       }
     }

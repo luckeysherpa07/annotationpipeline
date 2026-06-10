@@ -1502,6 +1502,8 @@ def run_audio(
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
     output_file: Path | str = "audio_qa_results.json",
+    max_concurrent: int = AUDIO_MAX_CONCURRENT,
+    delay_between_pairs: int = AUDIO_DELAY_BETWEEN_PAIRS,
 ):
     """
     Run the AUDIO annotation pipeline.
@@ -1512,6 +1514,8 @@ def run_audio(
         skip_api: If True, skip Gemini API calls and use demo results
         dataset_folder: Dataset directory containing source media files
         output_file: JSON file to write annotation results to
+        max_concurrent: Maximum number of audio pairs to process concurrently
+        delay_between_pairs: Delay between audio pair launches in seconds
     """
     if test_mode:
         print("=" * 50)
@@ -1593,6 +1597,8 @@ def run_audio(
         dataset_folder=dataset_folder,
         output_file=output_file,
         skip_api=skip_api,
+        max_concurrent=max(1, int(max_concurrent)),
+        delay_between_pairs=max(0, int(delay_between_pairs)),
     )
 
     _write_results(output_file, results)
@@ -1612,14 +1618,16 @@ def _run_audio_jobs(
     dataset_folder: Path,
     output_file: Path,
     skip_api: bool = False,
+    max_concurrent: int = AUDIO_MAX_CONCURRENT,
+    delay_between_pairs: int = AUDIO_DELAY_BETWEEN_PAIRS,
 ) -> None:
     client = None
     if not skip_api:
         client = create_gemini_client()
 
     print(
-        f"Processing {len(pending_pairs)} audio-visual pairs with up to {AUDIO_MAX_CONCURRENT} concurrent task(s) "
-        f"and {AUDIO_DELAY_BETWEEN_PAIRS}-second spacing..."
+        f"Processing {len(pending_pairs)} audio-visual pairs with up to {max_concurrent} concurrent task(s) "
+        f"and {delay_between_pairs}-second spacing..."
     )
 
     selected_audio_pairs = dict(pending_pairs)
@@ -1666,8 +1674,8 @@ def _run_audio_jobs(
             client,
             selected_audio_pairs,
             selected_rgb_videos,
-            max_concurrent=AUDIO_MAX_CONCURRENT,
-            delay_between_pairs=AUDIO_DELAY_BETWEEN_PAIRS,
+            max_concurrent=max_concurrent,
+            delay_between_pairs=delay_between_pairs,
             skip_api=skip_api,
             on_pair_complete=checkpoint_audio_pair,
         )
@@ -1694,6 +1702,8 @@ def run_audio_repair(
     skip_api: bool = False,
     dataset_folder: Path | str = "dataset",
     output_file: Path | str = "audio_qa_results.json",
+    max_concurrent: int = AUDIO_MAX_CONCURRENT,
+    delay_between_pairs: int = AUDIO_DELAY_BETWEEN_PAIRS,
 ):
     dataset_folder = Path(dataset_folder)
     output_file = Path(output_file)
@@ -1770,6 +1780,8 @@ def run_audio_repair(
         dataset_folder=dataset_folder,
         output_file=output_file,
         skip_api=skip_api,
+        max_concurrent=max(1, int(max_concurrent)),
+        delay_between_pairs=max(0, int(delay_between_pairs)),
     )
 
     _write_results(output_file, results)
