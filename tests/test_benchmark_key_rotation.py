@@ -10,10 +10,14 @@ from annotation_feature.qa_quality.benchmark import (
     BenchmarkModelAdapter,
     OpenAICaptionAdapter,
     QwenLocalCaptionAdapter,
+    build_frame_answer_prompt,
     build_model_prompt,
     cleanup_stale_qwen_workers,
     load_api_keys,
+    resolve_frame_inputs_for_item,
     run_aligned_qa_benchmark,
+    run_gemini_frame_answer_benchmark,
+    select_frames_for_question,
 )
 
 
@@ -84,6 +88,21 @@ class CountingAdapter(BenchmarkModelAdapter):
     def answer(self, item):
         self.calls += 1
         return "counted answer"
+
+
+class StaticFrameAdapter:
+    def answer(self, item, frame_paths):
+        return f"frame answer using {len(frame_paths)} frame(s)"
+
+
+class KeyedFrameAdapter:
+    def __init__(self, key):
+        self.key = key
+
+    def answer(self, item, frame_paths):
+        if self.key == "key-one":
+            raise RuntimeError("429 RESOURCE_EXHAUSTED")
+        return f"frame answer from {self.key}"
 
 
 class BenchmarkKeyRotationTests(unittest.TestCase):
@@ -552,6 +571,151 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertEqual(ALIGNED_QA_QUALITY_QWEN_BENCHMARK, "69")
         self.assertIn("69", actions)
         self.assertEqual(actions["69"].action_id, "aligned.qa_quality.qwen_benchmark")
+
+    def test_frame_cache_resolution_supports_all_modalities(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "aligned_dataset"
+            specs = {
+                "rgb": (".frames_cache", "scene_day_rgb", "frame_000000.png"),
+                "ir": (".frames_cache_ir", "scene_day_ir", "frame_000000.png"),
+                "event": (".frames_cache_event", "scene_event", "frame_000000.png"),
+            }
+            for modality, (cache_subdir, folder_name, frame_name) in specs.items():
+                frame_path = root / cache_subdir / "scene_split" / "Seg1" / folder_name / frame_name
+                frame_path.parent.mkdir(parents=True, exist_ok=True)
+                frame_path.write_bytes(b"fake")
+
+                frames = resolve_frame_inputs_for_item(
+                    {
+                        "modality": modality,
+                        "pair_key": f"aligned_dataset/scene_split/Seg1/{modality}",
+                        "question": "What is shown?",
+                    },
+                    frame_cache_root=root,
+                    max_frames_per_item=6,
+                )
+
+                self.assertEqual(frames, [frame_path])
+
+            depth_frame = root / ".frames_cache_marigold" / "scene_split" / "Seg1" / "scene" / "day" / "frame_000000_depth.png"
+            depth_frame.parent.mkdir(parents=True, exist_ok=True)
+            depth_frame.write_bytes(b"fake")
+
+            depth_frames = resolve_frame_inputs_for_item(
+                {
+                    "modality": "depth",
+                    "pair_key": "aligned_dataset/scene_split/Seg1/depth",
+                    "question": "What is shown?",
+                },
+                frame_cache_root=root,
+                max_frames_per_item=6,
+            )
+
+            self.assertEqual(depth_frames, [depth_frame])
+
+    def test_frame_sampling_uses_exact_references_and_even_fill(self):
+        frames = [Path(f"frame_{index:06d}.png") for index in range(0, 100, 10)]
+
+        selected = select_frames_for_question(frames, "What is visible in frame 000060?", max_frames_per_item=4)
+
+        self.assertEqual(selected[0], Path("frame_000060.png"))
+        self.assertEqual(len(selected), 4)
+
+    def test_frame_sampling_zero_uses_all_frames(self):
+        frames = [Path(f"frame_{index:06d}.png") for index in range(0, 50, 10)]
+
+        selected = select_frames_for_question(frames, "What is shown?", max_frames_per_item=0)
+
+        self.assertEqual(selected, frames)
+
+    def test_frame_answer_prompt_excludes_caption_and_gold_answer(self):
+        prompt = build_frame_answer_prompt(
+            {
+                "modality": "rgb",
+                "section": "test",
+                "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                "question": "What is shown?",
+                "caption": "SECRET CAPTION",
+                "answer": "SECRET ANSWER",
+            },
+            [Path("frame_000000.png")],
+        )
+
+        self.assertIn("What is shown?", prompt)
+        self.assertNotIn("SECRET CAPTION", prompt)
+        self.assertNotIn("SECRET ANSWER", prompt)
+
+    def test_frame_answer_benchmark_resume_skips_completed_answers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            frame_root = root / "aligned_dataset"
+            write_valid_items(input_path, count=2)
+            for index in range(2):
+                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
+                frame_path.parent.mkdir(parents=True, exist_ok=True)
+                frame_path.write_bytes(b"fake")
+
+            run_gemini_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=1,
+                frame_cache_root=frame_root,
+                adapter=StaticFrameAdapter(),
+                enable_key_rotation=False,
+            )
+            run_gemini_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=2,
+                frame_cache_root=frame_root,
+                adapter=StaticFrameAdapter(),
+                enable_key_rotation=False,
+            )
+
+            output_json = output_dir / "aligned_qa_frame_answers_gemini-3.1-flash-lite.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["results"]), 2)
+            self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertFalse(payload["metadata"]["judge_enabled"])
+
+    def test_frame_answer_key_rotation_retries_same_item(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            frame_root = root / "aligned_dataset"
+            key_file = root / "gemini_api_key_list"
+            write_valid_items(input_path)
+            key_file.write_text("key-one\nkey-two\n", encoding="utf-8")
+            frame_path = frame_root / ".frames_cache" / "pair-0" / "rgb" / "frame_000000.png"
+            frame_path.parent.mkdir(parents=True, exist_ok=True)
+            frame_path.write_bytes(b"fake")
+
+            run_gemini_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                frame_cache_root=frame_root,
+                api_key_list_path=key_file,
+                adapter_factory=lambda key: KeyedFrameAdapter(key),
+            )
+
+            output_json = output_dir / "aligned_qa_frame_answers_gemini-3.1-flash-lite.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(payload["results"]["qa-0"]["model_answer"], "frame answer from key-two")
+            self.assertEqual(payload["metadata"]["exhausted_key_count"], 1)
+
+    def test_option_70_is_registered(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_FRAME_ANSWER_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_FRAME_ANSWER_BENCHMARK, "70")
+        self.assertIn("70", actions)
+        self.assertEqual(actions["70"].action_id, "aligned.qa_quality.frame_answer_benchmark")
+        self.assertEqual(actions["70"].section, "FRAME INPUT ANSWER BENCHMARK")
 
 
 if __name__ == "__main__":

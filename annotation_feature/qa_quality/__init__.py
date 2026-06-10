@@ -3,6 +3,7 @@
 __all__ = [
     "clean_aligned_qa_dataset",
     "evaluate_aligned_qa",
+    "run_gemini_frame_answer_benchmark",
     "run_aligned_qa_benchmark",
     "run_aligned_qa_llm_evaluation",
 ]
@@ -22,6 +23,12 @@ def evaluate_aligned_qa(*args, **kwargs):
 
 def run_aligned_qa_benchmark(*args, **kwargs):
     from .benchmark import run_aligned_qa_benchmark as _run
+
+    return _run(*args, **kwargs)
+
+
+def run_gemini_frame_answer_benchmark(*args, **kwargs):
+    from .benchmark import run_gemini_frame_answer_benchmark as _run
 
     return _run(*args, **kwargs)
 

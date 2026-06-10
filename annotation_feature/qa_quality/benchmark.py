@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from annotation_feature.pipeline.client import create_gemini_client, load_environment
+from annotation_feature.pipeline.utils import build_image_parts, encode_frames_to_base64
 
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
@@ -58,6 +59,15 @@ DEFAULT_QWEN_DTYPE = "half"
 DEFAULT_QWEN_MAX_NUM_SEQS = 1
 DEFAULT_QWEN_MAX_CAPTION_CHARS = 3000
 DEFAULT_QWEN_MAX_QUESTION_CHARS = 600
+DEFAULT_FRAME_CACHE_ROOT = Path("aligned_dataset")
+DEFAULT_FRAME_MAX_FRAMES_PER_ITEM = 6
+FRAME_ANSWER_BENCHMARK_TYPE = "frame_input_answer_generation"
+FRAME_CACHE_SUBDIRS = {
+    "rgb": ".frames_cache",
+    "ir": ".frames_cache_ir",
+    "event": ".frames_cache_event",
+    "depth": ".frames_cache_marigold",
+}
 DEFAULT_GEMINI_API_KEY_LIST_PATH = Path("api_key_list/gemini_api_key_list")
 DEFAULT_OPENAI_API_KEY_LIST_PATH = Path("api_key_list/openai_api_key_list")
 DEFAULT_API_KEY_LIST_PATH = DEFAULT_GEMINI_API_KEY_LIST_PATH
@@ -118,6 +128,30 @@ class GeminiCaptionAdapter(BenchmarkModelAdapter):
         response = self.client.models.generate_content(
             model=self.model_name,
             contents=[build_model_prompt(item)],
+        )
+        return str(getattr(response, "text", "")).strip()
+
+
+class GeminiFrameAnswerAdapter:
+    """Gemini answer adapter that sees cached frames instead of captions."""
+
+    provider = "gemini"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL_NAME,
+        client: Any | None = None,
+        api_key: str | None = None,
+    ):
+        self.model_name = model_name
+        self.client = client or create_gemini_client(api_key=api_key)
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        encoded_frames = encode_frames_to_base64(frame_paths)
+        image_parts = build_image_parts(encoded_frames)
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=[*image_parts, build_frame_answer_prompt(item, frame_paths)],
         )
         return str(getattr(response, "text", "")).strip()
 
@@ -419,6 +453,128 @@ def _model_input_device(model: Any) -> Any | None:
         return None
 
 
+def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
+    safe_name = _safe_model_name(model_name)
+    return (
+        output_dir / f"aligned_qa_frame_answers_{safe_name}.json",
+        output_dir / f"aligned_qa_frame_answers_{safe_name}.csv",
+    )
+
+
+def _frame_number(frame_path: Path) -> int:
+    match = re.search(r"frame_(\d+)", frame_path.stem)
+    return int(match.group(1)) if match else -1
+
+
+def _frame_reference_numbers(text: str) -> list[int]:
+    numbers: list[int] = []
+    seen: set[int] = set()
+    for match in re.finditer(r"\bframe[_\s-]*(\d{3,6})\b", str(text), flags=re.I):
+        number = int(match.group(1))
+        if number not in seen:
+            numbers.append(number)
+            seen.add(number)
+    return numbers
+
+
+def _dedupe_paths(paths: list[Path]) -> list[Path]:
+    deduped: list[Path] = []
+    seen: set[str] = set()
+    for path in paths:
+        key = path.as_posix()
+        if key not in seen:
+            deduped.append(path)
+            seen.add(key)
+    return deduped
+
+
+def evenly_sample_frames(frames: list[Path], count: int) -> list[Path]:
+    frames = sorted(_dedupe_paths(frames), key=lambda path: (_frame_number(path), path.as_posix()))
+    if count <= 0 or len(frames) <= count:
+        return frames
+    if count == 1:
+        return [frames[0]]
+    indices = [round(index * (len(frames) - 1) / (count - 1)) for index in range(count)]
+    return _dedupe_paths([frames[index] for index in indices])
+
+
+def select_frames_for_question(
+    frames: list[Path],
+    question: str,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+) -> list[Path]:
+    frames = sorted(_dedupe_paths(frames), key=lambda path: (_frame_number(path), path.as_posix()))
+    if max_frames_per_item is None or max_frames_per_item == 0:
+        return frames
+    frame_limit = max(1, int(max_frames_per_item))
+    wanted_numbers = set(_frame_reference_numbers(question))
+    exact = [frame for frame in frames if _frame_number(frame) in wanted_numbers]
+    exact = exact[:frame_limit]
+    remaining_slots = frame_limit - len(exact)
+    if remaining_slots <= 0:
+        return exact
+    exact_keys = {frame.as_posix() for frame in exact}
+    remaining = [frame for frame in frames if frame.as_posix() not in exact_keys]
+    return _dedupe_paths([*exact, *evenly_sample_frames(remaining, remaining_slots)])
+
+
+def _pair_key_cache_segment(pair_key: str) -> Path:
+    parts = Path(str(pair_key)).parts
+    if parts and parts[0] == DEFAULT_FRAME_CACHE_ROOT.name:
+        parts = parts[1:]
+    if len(parts) > 1:
+        parts = parts[:-1]
+    return Path(*parts) if parts else Path()
+
+
+def _cache_frame_pattern(modality: str) -> str:
+    return "frame_*_depth.png" if modality == "depth" else "frame_*.png"
+
+
+def resolve_frame_cache_candidates(
+    item: dict[str, Any],
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+) -> list[Path]:
+    modality = str(item.get("modality", "")).strip().lower()
+    cache_subdir = FRAME_CACHE_SUBDIRS.get(modality)
+    if not cache_subdir:
+        return []
+    segment = _pair_key_cache_segment(str(item.get("pair_key", "")))
+    cache_segment = Path(frame_cache_root) / cache_subdir / segment
+    if not cache_segment.exists():
+        return []
+
+    pattern = _cache_frame_pattern(modality)
+    leaf = Path(str(item.get("pair_key", ""))).name.lower()
+    direct_dirs = [path for path in cache_segment.iterdir() if path.is_dir()]
+    if modality == "depth":
+        candidate_dirs = direct_dirs or [cache_segment]
+    else:
+        candidate_dirs = [
+            path
+            for path in direct_dirs
+            if path.name.lower() == leaf
+            or leaf in path.name.lower()
+            or modality in path.name.lower().split("_")
+        ]
+        if not candidate_dirs:
+            candidate_dirs = direct_dirs or [cache_segment]
+
+    frames: list[Path] = []
+    for candidate_dir in candidate_dirs:
+        frames.extend(sorted(candidate_dir.rglob(pattern)))
+    return sorted(_dedupe_paths(frames), key=lambda path: (_frame_number(path), path.as_posix()))
+
+
+def resolve_frame_inputs_for_item(
+    item: dict[str, Any],
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+) -> list[Path]:
+    candidates = resolve_frame_cache_candidates(item, frame_cache_root=frame_cache_root)
+    return select_frames_for_question(candidates, str(item.get("question", "")), max_frames_per_item)
+
+
 def build_model_prompt(item: dict[str, Any], for_qwen: bool = False) -> str:
     caption = _limit_text(
         item.get("caption", ""),
@@ -442,6 +598,25 @@ def build_model_prompt(item: dict[str, Any], for_qwen: bool = False) -> str:
             "",
             "Question:",
             question,
+        ]
+    )
+
+
+def build_frame_answer_prompt(item: dict[str, Any], frame_paths: list[Path]) -> str:
+    frame_names = [path.name for path in frame_paths]
+    return "\n".join(
+        [
+            "You are answering a video QA benchmark item using only the provided image frames.",
+            "Do not assume access to captions, audio, hidden metadata, or outside knowledge.",
+            "Return only a concise answer. Do not include explanation.",
+            "",
+            f"Modality: {item.get('modality', '')}",
+            f"Section: {item.get('section', '')}",
+            f"Pair key: {item.get('pair_key', '')}",
+            f"Provided frames: {', '.join(frame_names)}",
+            "",
+            "Question:",
+            str(item.get("question", "")).strip(),
         ]
     )
 
@@ -617,6 +792,52 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in fieldnames})
+
+
+def _write_frame_answer_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "qa_id",
+        "modality",
+        "section",
+        "pair_key",
+        "question",
+        "provider",
+        "model_name",
+        "model_answer",
+        "status",
+        "reason",
+        "frame_count",
+        "frame_paths",
+    ]
+    with open(path, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            csv_row = {field: row.get(field, "") for field in fieldnames}
+            if isinstance(csv_row.get("frame_paths"), list):
+                csv_row["frame_paths"] = json.dumps(csv_row["frame_paths"], ensure_ascii=False)
+            writer.writerow(csv_row)
+
+
+def _is_completed_frame_answer(result: dict[str, Any]) -> bool:
+    if str(result.get("reason", "")).startswith("Frame answer call failed:"):
+        return False
+    return result.get("status") == "answered" and bool(str(result.get("model_answer", "")).strip())
+
+
+def _save_frame_answer_outputs(
+    output_json: Path,
+    output_csv: Path,
+    results_by_id: dict[str, dict[str, Any]],
+    metadata: dict[str, Any],
+) -> None:
+    payload = {
+        "results": results_by_id,
+        "metadata": metadata,
+    }
+    _write_json(output_json, payload)
+    _write_frame_answer_csv(output_csv, list(results_by_id.values()))
 
 
 def compute_metrics(results: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -803,6 +1024,218 @@ def repair_benchmark_failures(
     _write_json(output_json, payload)
     _write_csv(output_csv, list(results.values()))
     return {"repaired_count": repaired_count, "output_json": output_json, "output_csv": output_csv}
+
+
+def _frame_answer_row(
+    item: dict[str, Any],
+    provider: str,
+    model_name: str,
+    model_answer: str,
+    frame_paths: list[Path],
+    status: str = "answered",
+    reason: str = "",
+) -> dict[str, Any]:
+    return {
+        "qa_id": item["qa_id"],
+        "modality": item["modality"],
+        "section": item["section"],
+        "pair_key": item["pair_key"],
+        "question": item["question"],
+        "provider": provider,
+        "model_name": model_name,
+        "model_answer": model_answer,
+        "status": status,
+        "reason": reason,
+        "frame_count": len(frame_paths),
+        "frame_paths": [path.as_posix() for path in frame_paths],
+        "judge_enabled": False,
+    }
+
+
+def run_gemini_frame_answer_benchmark(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    api_key_list_path: Path | str = DEFAULT_GEMINI_API_KEY_LIST_PATH,
+    enable_key_rotation: bool = True,
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    adapter: GeminiFrameAnswerAdapter | None = None,
+    adapter_factory: Callable[[str | None], GeminiFrameAnswerAdapter] | None = None,
+) -> dict[str, Path]:
+    """Generate Gemini answers from cached aligned-dataset frames without judging correctness."""
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    frame_cache_root = Path(frame_cache_root)
+    output_json, output_csv = _frame_answer_output_paths(output_dir, model_name)
+    batch_size = max(1, int(batch_size))
+
+    api_keys = (
+        load_api_keys(api_key_list_path, env_var_name="GEMINI_API_KEY", key_prefixes=("AIza",))
+        if enable_key_rotation
+        else []
+    )
+    key_rotation_enabled = bool(api_keys)
+    active_key_index = 0
+    exhausted_key_count = 0
+    skipped_no_frames = 0
+
+    def current_api_key() -> str | None:
+        if not key_rotation_enabled:
+            return None
+        return api_keys[active_key_index]
+
+    def build_adapter() -> GeminiFrameAnswerAdapter:
+        key = current_api_key()
+        if key is not None:
+            os.environ["GEMINI_API_KEY"] = key
+        if adapter_factory is not None:
+            return adapter_factory(key)
+        return GeminiFrameAnswerAdapter(model_name=model_name, api_key=key)
+
+    items = load_valid_qa_items(input_path)
+    results_by_id = _load_existing_results(output_json) if resume else {}
+    pending = [
+        item
+        for item in items
+        if not _is_completed_frame_answer(results_by_id.get(item["qa_id"], {}))
+    ]
+    if max_items is not None:
+        pending = pending[: max(0, int(max_items))]
+
+    def make_metadata(stopped_reason: str | None = None) -> dict[str, Any]:
+        answered_count = sum(1 for result in results_by_id.values() if _is_completed_frame_answer(result))
+        metadata = {
+            "benchmark_type": FRAME_ANSWER_BENCHMARK_TYPE,
+            "input_path": input_path.as_posix(),
+            "provider": "gemini",
+            "model_name": model_name,
+            "judge_enabled": False,
+            "frame_cache_root": frame_cache_root.as_posix(),
+            "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "resume": resume,
+            "total_valid_items": len(items),
+            "answered_items": answered_count,
+            "pending_items": max(0, len(items) - answered_count),
+            "skipped_no_frames": skipped_no_frames,
+            "batch_size": batch_size,
+            "key_rotation_enabled": key_rotation_enabled,
+            "keys_available": len(api_keys),
+            "exhausted_key_count": exhausted_key_count,
+        }
+        if stopped_reason:
+            metadata["stopped_reason"] = stopped_reason
+        return metadata
+
+    print(
+        f"Gemini frame-input answer benchmark resume scan: {len(results_by_id)} complete skipped, "
+        f"{len(pending)} pending selected, {len(items)} valid total, model={model_name}."
+    )
+
+    if not pending:
+        _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    if key_rotation_enabled:
+        print(f"Gemini key rotation enabled: {len(api_keys)} key(s) loaded from {Path(api_key_list_path)}.")
+        print(f"Using Gemini API {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+
+    frame_adapter = adapter or build_adapter()
+
+    def rotate_key_after_quota() -> bool:
+        nonlocal active_key_index, exhausted_key_count, frame_adapter
+        if not key_rotation_enabled or active_key_index + 1 >= len(api_keys):
+            exhausted_key_count = len(api_keys) if key_rotation_enabled else exhausted_key_count
+            return False
+        active_key_index += 1
+        exhausted_key_count = active_key_index
+        print(
+            f"Gemini quota/rate/key limit reached for key {exhausted_key_count}/{len(api_keys)}. "
+            f"Switching to key {active_key_index + 1}/{len(api_keys)} and retrying current item."
+        )
+        _save_frame_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="rotating_after_quota"),
+        )
+        frame_adapter = build_adapter()
+        print(f"Gemini API key changed to {_masked_key_label(api_keys[active_key_index], active_key_index + 1, len(api_keys))}.")
+        return True
+
+    try:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            print(f"Running frame-answer batch {start // batch_size + 1}: {len(batch)} item(s)")
+            for item in batch:
+                frame_paths = resolve_frame_inputs_for_item(
+                    item,
+                    frame_cache_root=frame_cache_root,
+                    max_frames_per_item=max_frames_per_item,
+                )
+                if not frame_paths:
+                    skipped_no_frames += 1
+                    print(f"Skipping {item['qa_id']}: no cached frames found.")
+                    continue
+
+                while True:
+                    try:
+                        model_answer = frame_adapter.answer(item, frame_paths)
+                        results_by_id[item["qa_id"]] = _frame_answer_row(
+                            item,
+                            provider="gemini",
+                            model_name=model_name,
+                            model_answer=model_answer,
+                            frame_paths=frame_paths,
+                            status="answered" if model_answer else "failed",
+                            reason="" if model_answer else "Frame answer call failed: empty model answer",
+                        )
+                        break
+                    except Exception as exc:
+                        if is_quota_error(exc):
+                            if rotate_key_after_quota():
+                                continue
+                            print("\nGemini quota/rate/key limit reached and no more keys are available.")
+                            print("Progress saved. Run option 70 again later to resume.")
+                            _save_frame_answer_outputs(
+                                output_json,
+                                output_csv,
+                                results_by_id,
+                                make_metadata(stopped_reason="quota_or_rate_limit"),
+                            )
+                            return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+                        results_by_id[item["qa_id"]] = _frame_answer_row(
+                            item,
+                            provider="gemini",
+                            model_name=model_name,
+                            model_answer="",
+                            frame_paths=frame_paths,
+                            status="failed",
+                            reason=f"Frame answer call failed: {exc}",
+                        )
+                        break
+
+                _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+                print(f"Checkpoint saved: {len(results_by_id)} frame answer item(s)")
+
+            if delay_between_batches > 0 and start + batch_size < len(pending):
+                time.sleep(delay_between_batches)
+    except KeyboardInterrupt:
+        print("\nFrame-answer benchmark cancelled by user. Progress saved.")
+        _save_frame_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="user_cancelled"),
+        )
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
+    return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
 
 
 def run_aligned_qa_benchmark(
