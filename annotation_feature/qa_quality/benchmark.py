@@ -484,14 +484,23 @@ class QwenVLFrameAnswerAdapter:
 
     def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
         messages = build_qwen_vl_frame_messages(item, frame_paths)
+        return self._answer_messages(messages)
+
+    def _answer_messages(self, messages: list[dict[str, Any]]) -> str:
         text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        image_inputs, video_inputs = process_vision_info(messages)
+        vision_result = process_vision_info(messages, return_video_kwargs=True)
+        if len(vision_result) == 3:
+            image_inputs, video_inputs, video_kwargs = vision_result
+        else:
+            image_inputs, video_inputs = vision_result
+            video_kwargs = {}
         inputs = self.processor(
             text=[text],
             images=image_inputs,
             videos=video_inputs,
             padding=True,
             return_tensors="pt",
+            **(video_kwargs or {}),
         )
         model_device = _model_input_device(self.model)
         if model_device is not None:
@@ -510,6 +519,38 @@ class QwenVLFrameAnswerAdapter:
             clean_up_tokenization_spaces=False,
         )
         return str(decoded[0] if decoded else "").strip()
+
+
+class QwenVLVideoAnswerAdapter(QwenVLFrameAnswerAdapter):
+    """Local Qwen-VL video-input answer adapter."""
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_QWEN_VL_MODEL_NAME,
+        model: Any | None = None,
+        processor: Any | None = None,
+        require_cuda: bool = True,
+        max_tokens: int = DEFAULT_QWEN_VL_MAX_TOKENS,
+        cleanup_stale_workers: bool = True,
+        video_fps: float = 1.0,
+    ):
+        self.video_fps = max(0.0, float(video_fps))
+        super().__init__(
+            model_name=model_name,
+            model=model,
+            processor=processor,
+            require_cuda=require_cuda,
+            max_tokens=max_tokens,
+            cleanup_stale_workers=cleanup_stale_workers,
+        )
+
+    def answer(self, item: dict[str, Any], video_path: Path) -> str:
+        messages = build_qwen_vl_video_messages(
+            item,
+            video_path,
+            video_fps=self.video_fps,
+        )
+        return self._answer_messages(messages)
 
 
 def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dict[str, Any]]:
@@ -617,6 +658,14 @@ def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path,
     return (
         output_dir / f"aligned_qa_frame_answers_{safe_name}.json",
         output_dir / f"aligned_qa_frame_answers_{safe_name}.csv",
+    )
+
+
+def _video_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
+    safe_name = _safe_model_name(model_name)
+    return (
+        output_dir / f"aligned_qa_video_answers_{safe_name}.json",
+        output_dir / f"aligned_qa_video_answers_{safe_name}.csv",
     )
 
 
@@ -734,6 +783,54 @@ def resolve_frame_inputs_for_item(
     return select_frames_for_question(candidates, str(item.get("question", "")), max_frames_per_item)
 
 
+def _segment_folder_from_pair_key(pair_key: str, dataset_root: Path | str = DEFAULT_FRAME_CACHE_ROOT) -> Path:
+    parts = Path(str(pair_key)).parts
+    dataset_root = Path(dataset_root)
+    if parts and parts[0] == dataset_root.name:
+        return dataset_root.joinpath(*parts[1:-1])
+    return dataset_root / Path(*parts[:-1]) if len(parts) > 1 else dataset_root
+
+
+def _is_video_file(path: Path) -> bool:
+    return path.suffix.lower() in {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
+
+
+def _is_matching_modality_video(path: Path, modality: str) -> bool:
+    tokens = path.stem.lower().split("_")
+    modality = str(modality).strip().lower()
+    if modality == "rgb" and "with_audio" in path.stem.lower():
+        return False
+    return modality in tokens
+
+
+def _video_preference_key(path: Path) -> tuple[int, str]:
+    stem = path.stem.lower()
+    side_rank = 2
+    if "day" in stem or "with_light" in stem:
+        side_rank = 0
+    elif "night" in stem or "no_light" in stem or "cloudy_no_light" in stem:
+        side_rank = 1
+    return (side_rank, path.as_posix())
+
+
+def resolve_video_input_for_item(
+    item: dict[str, Any],
+    dataset_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+) -> Path | None:
+    modality = str(item.get("modality", "")).strip().lower()
+    segment_folder = _segment_folder_from_pair_key(str(item.get("pair_key", "")), dataset_root=dataset_root)
+    if not segment_folder.exists():
+        return None
+    candidates = [
+        path
+        for path in segment_folder.iterdir()
+        if path.is_file() and _is_video_file(path) and _is_matching_modality_video(path, modality)
+    ]
+    if not candidates:
+        return None
+    return sorted(candidates, key=_video_preference_key)[0]
+
+
 def build_model_prompt(item: dict[str, Any], for_qwen: bool = False) -> str:
     caption = _limit_text(
         item.get("caption", ""),
@@ -780,6 +877,24 @@ def build_frame_answer_prompt(item: dict[str, Any], frame_paths: list[Path]) -> 
     )
 
 
+def build_video_answer_prompt(item: dict[str, Any], video_path: Path) -> str:
+    return "\n".join(
+        [
+            "You are answering a video QA benchmark item using only the provided video.",
+            "Do not assume access to captions, audio, hidden metadata, or outside knowledge.",
+            "Return only a concise answer. Do not include explanation.",
+            "",
+            f"Modality: {item.get('modality', '')}",
+            f"Section: {item.get('section', '')}",
+            f"Pair key: {item.get('pair_key', '')}",
+            f"Provided video: {video_path.name}",
+            "",
+            "Question:",
+            str(item.get("question", "")).strip(),
+        ]
+    )
+
+
 def build_qwen_vl_frame_messages(item: dict[str, Any], frame_paths: list[Path]) -> list[dict[str, Any]]:
     content: list[dict[str, str]] = [
         {"type": "image", "image": path.resolve().as_posix()}
@@ -787,6 +902,28 @@ def build_qwen_vl_frame_messages(item: dict[str, Any], frame_paths: list[Path]) 
     ]
     content.append({"type": "text", "text": build_frame_answer_prompt(item, frame_paths)})
     return [{"role": "user", "content": content}]
+
+
+def build_qwen_vl_video_messages(
+    item: dict[str, Any],
+    video_path: Path,
+    video_fps: float | None = 1.0,
+) -> list[dict[str, Any]]:
+    video_content: dict[str, Any] = {
+        "type": "video",
+        "video": video_path.resolve().as_posix(),
+    }
+    if video_fps is not None and video_fps > 0:
+        video_content["fps"] = float(video_fps)
+    return [
+        {
+            "role": "user",
+            "content": [
+                video_content,
+                {"type": "text", "text": build_video_answer_prompt(item, video_path)},
+            ],
+        }
+    ]
 
 
 def build_judge_prompt(item: dict[str, Any], model_answer: str) -> str:
@@ -988,6 +1125,29 @@ def _write_frame_answer_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow(csv_row)
 
 
+def _write_video_answer_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "qa_id",
+        "modality",
+        "section",
+        "pair_key",
+        "question",
+        "provider",
+        "model_name",
+        "model_answer",
+        "status",
+        "reason",
+        "video_path",
+        "video_fps",
+    ]
+    with open(path, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in fieldnames})
+
+
 def _is_completed_frame_answer(result: dict[str, Any]) -> bool:
     if str(result.get("reason", "")).startswith("Frame answer call failed:"):
         return False
@@ -1006,6 +1166,20 @@ def _save_frame_answer_outputs(
     }
     _write_json(output_json, payload)
     _write_frame_answer_csv(output_csv, list(results_by_id.values()))
+
+
+def _save_video_answer_outputs(
+    output_json: Path,
+    output_csv: Path,
+    results_by_id: dict[str, dict[str, Any]],
+    metadata: dict[str, Any],
+) -> None:
+    payload = {
+        "results": results_by_id,
+        "metadata": metadata,
+    }
+    _write_json(output_json, payload)
+    _write_video_answer_csv(output_csv, list(results_by_id.values()))
 
 
 def compute_metrics(results: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -1216,6 +1390,33 @@ def _frame_answer_row(
         "reason": reason,
         "frame_count": len(frame_paths),
         "frame_paths": [path.as_posix() for path in frame_paths],
+        "judge_enabled": False,
+    }
+
+
+def _video_answer_row(
+    item: dict[str, Any],
+    provider: str,
+    model_name: str,
+    model_answer: str,
+    video_path: Path,
+    video_fps: float,
+    status: str = "answered",
+    reason: str = "",
+) -> dict[str, Any]:
+    return {
+        "qa_id": item["qa_id"],
+        "modality": item["modality"],
+        "section": item["section"],
+        "pair_key": item["pair_key"],
+        "question": item["question"],
+        "provider": provider,
+        "model_name": model_name,
+        "model_answer": model_answer,
+        "status": status,
+        "reason": reason,
+        "video_path": video_path.as_posix(),
+        "video_fps": video_fps,
         "judge_enabled": False,
     }
 
@@ -1531,6 +1732,135 @@ def run_qwen_vl_frame_answer_benchmark(
 
     _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
     return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+
+def run_qwen_vl_video_answer_benchmark(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_QWEN_VL_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    dataset_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    video_fps: float = 1.0,
+    adapter: QwenVLVideoAnswerAdapter | None = None,
+) -> dict[str, Path]:
+    """Generate local Qwen-VL answers from aligned-dataset video files without judging correctness."""
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    dataset_root = Path(dataset_root)
+    output_json, output_csv = _video_answer_output_paths(output_dir, model_name)
+    batch_size = max(1, int(batch_size))
+    if batch_size != 1:
+        print("Local Qwen-VL video benchmark forces batch size to 1 to reduce GPU memory pressure.")
+        batch_size = 1
+    video_fps = max(0.0, float(video_fps))
+
+    print(f"Local Qwen-VL runtime: {QwenVLFrameAnswerAdapter.runtime_summary(model_name=model_name)}")
+
+    items = load_valid_qa_items(input_path)
+    results_by_id = _load_existing_results(output_json) if resume else {}
+    pending = [
+        item
+        for item in items
+        if not _is_completed_frame_answer(results_by_id.get(item["qa_id"], {}))
+    ]
+    if max_items is not None:
+        pending = pending[: max(0, int(max_items))]
+
+    skipped_no_video = 0
+
+    def make_metadata(stopped_reason: str | None = None) -> dict[str, Any]:
+        answered_count = sum(1 for result in results_by_id.values() if _is_completed_frame_answer(result))
+        metadata = {
+            "benchmark_type": "video_input_answer_generation",
+            "input_path": input_path.as_posix(),
+            "provider": "qwen_vl",
+            "model_name": model_name,
+            "judge_enabled": False,
+            "dataset_root": dataset_root.as_posix(),
+            "video_fps": video_fps,
+            "resume": resume,
+            "total_valid_items": len(items),
+            "answered_items": answered_count,
+            "pending_items": max(0, len(items) - answered_count),
+            "skipped_no_video": skipped_no_video,
+            "batch_size": batch_size,
+            "key_rotation_enabled": False,
+            "keys_available": 0,
+            "exhausted_key_count": 0,
+        }
+        if stopped_reason:
+            metadata["stopped_reason"] = stopped_reason
+        return metadata
+
+    print(
+        f"Qwen-VL video-input answer benchmark resume scan: {len(results_by_id)} complete skipped, "
+        f"{len(pending)} pending selected, {len(items)} valid total, model={model_name}."
+    )
+
+    if not pending:
+        _save_video_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+        return {"video_answers_json": output_json, "video_answers_csv": output_csv}
+
+    video_adapter = adapter or QwenVLVideoAnswerAdapter(
+        model_name=model_name,
+        video_fps=video_fps,
+    )
+
+    try:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            print(f"Running Qwen-VL video-answer batch {start // batch_size + 1}: {len(batch)} item(s)")
+            for item in batch:
+                video_path = resolve_video_input_for_item(item, dataset_root=dataset_root)
+                if video_path is None:
+                    skipped_no_video += 1
+                    print(f"Skipping {item['qa_id']}: no aligned video found.")
+                    continue
+
+                try:
+                    model_answer = video_adapter.answer(item, video_path)
+                    results_by_id[item["qa_id"]] = _video_answer_row(
+                        item,
+                        provider="qwen_vl",
+                        model_name=model_name,
+                        model_answer=model_answer,
+                        video_path=video_path,
+                        video_fps=video_fps,
+                        status="answered" if model_answer else "failed",
+                        reason="" if model_answer else "Video answer call failed: empty model answer",
+                    )
+                except Exception as exc:
+                    results_by_id[item["qa_id"]] = _video_answer_row(
+                        item,
+                        provider="qwen_vl",
+                        model_name=model_name,
+                        model_answer="",
+                        video_path=video_path,
+                        video_fps=video_fps,
+                        status="failed",
+                        reason=f"Video answer call failed: {exc}",
+                    )
+
+                _save_video_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+                print(f"Checkpoint saved: {len(results_by_id)} video answer item(s)")
+
+            if delay_between_batches > 0 and start + batch_size < len(pending):
+                time.sleep(delay_between_batches)
+    except KeyboardInterrupt:
+        print("\nQwen-VL video-answer benchmark cancelled by user. Progress saved.")
+        _save_video_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="user_cancelled"),
+        )
+        return {"video_answers_json": output_json, "video_answers_csv": output_csv}
+
+    _save_video_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
+    return {"video_answers_json": output_json, "video_answers_csv": output_csv}
 
 
 def run_aligned_qa_benchmark(

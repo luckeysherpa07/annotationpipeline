@@ -5,6 +5,7 @@ __all__ = [
     "evaluate_aligned_qa",
     "run_gemini_frame_answer_benchmark",
     "run_qwen_vl_frame_answer_benchmark",
+    "run_qwen_vl_video_answer_benchmark",
     "run_aligned_qa_benchmark",
     "run_aligned_qa_llm_evaluation",
 ]
@@ -36,6 +37,12 @@ def run_gemini_frame_answer_benchmark(*args, **kwargs):
 
 def run_qwen_vl_frame_answer_benchmark(*args, **kwargs):
     from .benchmark import run_qwen_vl_frame_answer_benchmark as _run
+
+    return _run(*args, **kwargs)
+
+
+def run_qwen_vl_video_answer_benchmark(*args, **kwargs):
+    from .benchmark import run_qwen_vl_video_answer_benchmark as _run
 
     return _run(*args, **kwargs)
 

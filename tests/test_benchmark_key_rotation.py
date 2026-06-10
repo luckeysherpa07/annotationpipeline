@@ -11,15 +11,20 @@ from annotation_feature.qa_quality.benchmark import (
     OpenAICaptionAdapter,
     QwenLocalCaptionAdapter,
     QwenVLFrameAnswerAdapter,
+    QwenVLVideoAnswerAdapter,
     build_frame_answer_prompt,
     build_qwen_vl_frame_messages,
+    build_qwen_vl_video_messages,
+    build_video_answer_prompt,
     build_model_prompt,
     cleanup_stale_qwen_workers,
     load_api_keys,
     resolve_frame_inputs_for_item,
+    resolve_video_input_for_item,
     run_aligned_qa_benchmark,
     run_gemini_frame_answer_benchmark,
     run_qwen_vl_frame_answer_benchmark,
+    run_qwen_vl_video_answer_benchmark,
     select_frames_for_question,
 )
 
@@ -111,6 +116,11 @@ class KeyedFrameAdapter:
 class StaticQwenVLFrameAdapter:
     def answer(self, item, frame_paths):
         return f"qwen vl answer using {len(frame_paths)} frame(s)"
+
+
+class StaticQwenVLVideoAdapter:
+    def answer(self, item, video_path):
+        return f"qwen vl video answer from {video_path.name}"
 
 
 class BenchmarkKeyRotationTests(unittest.TestCase):
@@ -835,6 +845,170 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertIn("71", actions)
         self.assertEqual(actions["71"].action_id, "aligned.qa_quality.qwen_vl_frame_answer_benchmark")
         self.assertEqual(actions["71"].section, "FRAME INPUT ANSWER BENCHMARK")
+
+    def test_video_resolution_supports_modalities_and_excludes_rgb_with_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "aligned_dataset"
+            segment = root / "scene_split" / "Seg1"
+            segment.mkdir(parents=True)
+            files = [
+                "scene_day_rgb_with_audio.mp4",
+                "scene_night_rgb.mp4",
+                "scene_day_rgb.mp4",
+                "scene_day_ir.mp4",
+                "scene_day_event.mp4",
+                "scene_day_depth.mp4",
+            ]
+            for name in files:
+                (segment / name).write_bytes(b"fake")
+
+            self.assertEqual(
+                resolve_video_input_for_item(
+                    {"modality": "rgb", "pair_key": "aligned_dataset/scene_split/Seg1/rgb"},
+                    dataset_root=root,
+                ),
+                segment / "scene_day_rgb.mp4",
+            )
+            self.assertEqual(
+                resolve_video_input_for_item(
+                    {"modality": "ir", "pair_key": "aligned_dataset/scene_split/Seg1/ir"},
+                    dataset_root=root,
+                ),
+                segment / "scene_day_ir.mp4",
+            )
+            self.assertEqual(
+                resolve_video_input_for_item(
+                    {"modality": "event", "pair_key": "aligned_dataset/scene_split/Seg1/event"},
+                    dataset_root=root,
+                ),
+                segment / "scene_day_event.mp4",
+            )
+            self.assertEqual(
+                resolve_video_input_for_item(
+                    {"modality": "depth", "pair_key": "aligned_dataset/scene_split/Seg1/depth"},
+                    dataset_root=root,
+                ),
+                segment / "scene_day_depth.mp4",
+            )
+
+    def test_qwen_vl_video_message_excludes_caption_and_gold_answer(self):
+        message = build_qwen_vl_video_messages(
+            {
+                "modality": "rgb",
+                "section": "test",
+                "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                "question": "What is shown?",
+                "caption": "SECRET CAPTION",
+                "answer": "SECRET ANSWER",
+            },
+            Path("scene_day_rgb.mp4"),
+            video_fps=1.0,
+        )
+
+        text_content = message[0]["content"][-1]["text"]
+        self.assertEqual(message[0]["content"][0]["type"], "video")
+        self.assertEqual(message[0]["content"][0]["fps"], 1.0)
+        self.assertNotIn("nframes", message[0]["content"][0])
+        self.assertIn("What is shown?", text_content)
+        self.assertNotIn("SECRET CAPTION", text_content)
+        self.assertNotIn("SECRET ANSWER", text_content)
+
+    def test_qwen_vl_video_adapter_extracts_generated_answer_from_fake_model(self):
+        class FakeProcessor:
+            def apply_chat_template(self, messages, tokenize=False, add_generation_prompt=True):
+                return "chat prompt"
+
+            def __call__(self, **kwargs):
+                return {"input_ids": [[1, 2, 3]]}
+
+            def batch_decode(self, generated, skip_special_tokens=True, clean_up_tokenization_spaces=False):
+                return [" qwen vl video decoded answer "]
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
+            mock_process.return_value = ([], ["video"], {"fps": 1.0})
+            adapter = QwenVLVideoAnswerAdapter(
+                model_name="Qwen/Qwen3-VL-4B-Instruct",
+                model=FakeModel(),
+                processor=FakeProcessor(),
+            )
+
+            answer = adapter.answer(
+                {
+                    "modality": "rgb",
+                    "section": "test",
+                    "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                    "question": "What is shown?",
+                },
+                Path("scene_day_rgb.mp4"),
+            )
+
+        self.assertEqual(answer, "qwen vl video decoded answer")
+
+    def test_qwen_vl_video_answer_benchmark_output_and_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            dataset_root = root / "aligned_dataset"
+            items = []
+            for index in range(2):
+                items.append(
+                    {
+                        "qa_id": f"qa-{index}",
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": f"aligned_dataset/scene_split/Seg{index + 1}/rgb",
+                        "question": "What is shown?",
+                        "answer": "a test action",
+                        "caption": "A person performs a test action.",
+                    }
+                )
+                segment = dataset_root / "scene_split" / f"Seg{index + 1}"
+                segment.mkdir(parents=True, exist_ok=True)
+                (segment / "scene_day_rgb.mp4").write_bytes(b"fake")
+            input_path.write_text(json.dumps({"valid_qa": items}), encoding="utf-8")
+
+            run_qwen_vl_video_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=1,
+                dataset_root=dataset_root,
+                adapter=StaticQwenVLVideoAdapter(),
+            )
+            run_qwen_vl_video_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=2,
+                dataset_root=dataset_root,
+                adapter=StaticQwenVLVideoAdapter(),
+            )
+
+            output_json = output_dir / "aligned_qa_video_answers_Qwen_Qwen3-VL-4B-Instruct.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["results"]), 2)
+            self.assertEqual(payload["metadata"]["provider"], "qwen_vl")
+            self.assertEqual(payload["metadata"]["benchmark_type"], "video_input_answer_generation")
+            self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertFalse(payload["metadata"]["judge_enabled"])
+            self.assertNotIn("max_video_frames", payload["metadata"])
+            self.assertNotIn("max_video_frames", next(iter(payload["results"].values())))
+
+    def test_option_72_is_registered(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_QWEN_VL_VIDEO_ANSWER_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_QWEN_VL_VIDEO_ANSWER_BENCHMARK, "72")
+        self.assertIn("72", actions)
+        self.assertEqual(actions["72"].action_id, "aligned.qa_quality.qwen_vl_video_answer_benchmark")
+        self.assertEqual(actions["72"].section, "FRAME INPUT ANSWER BENCHMARK")
 
 
 if __name__ == "__main__":
