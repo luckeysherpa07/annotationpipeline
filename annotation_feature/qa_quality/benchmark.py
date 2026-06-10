@@ -20,9 +20,19 @@ from annotation_feature.pipeline.utils import build_image_parts, encode_frames_t
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+try:
     from openai import OpenAI
 except ImportError:
     OpenAI = None
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 try:
     import torch
@@ -553,10 +563,13 @@ class QwenVLVideoAnswerAdapter(QwenVLFrameAnswerAdapter):
         )
 
     def answer(self, item: dict[str, Any], video_path: Path) -> str:
+        video_frames, raw_fps = _sample_video_frames_with_opencv(video_path, self.video_fps)
         messages = build_qwen_vl_video_messages(
             item,
             video_path,
             video_fps=self.video_fps,
+            video_frames=video_frames,
+            raw_fps=raw_fps,
         )
         return self._answer_messages(messages)
 
@@ -885,6 +898,43 @@ def build_frame_answer_prompt(item: dict[str, Any], frame_paths: list[Path]) -> 
     )
 
 
+def _sample_video_frames_with_opencv(video_path: Path, sample_fps: float) -> tuple[list[Any], float]:
+    if cv2 is None:
+        raise RuntimeError("OpenCV is required for option 72 video decoding. Install opencv-python-headless.")
+    if Image is None:
+        raise RuntimeError("Pillow is required for option 72 video decoding. Install pillow.")
+
+    capture = cv2.VideoCapture(video_path.as_posix())
+    if not capture.isOpened():
+        raise RuntimeError(f"Could not open video file: {video_path}")
+
+    raw_fps = float(capture.get(cv2.CAP_PROP_FPS) or 0.0)
+    if raw_fps <= 0:
+        raw_fps = 30.0
+    if sample_fps and sample_fps > 0:
+        frame_interval = max(1, int(round(raw_fps / float(sample_fps))))
+    else:
+        frame_interval = 1
+
+    frames: list[Any] = []
+    frame_index = 0
+    try:
+        while True:
+            ok, frame_bgr = capture.read()
+            if not ok:
+                break
+            if frame_index % frame_interval == 0:
+                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+                frames.append(Image.fromarray(frame_rgb))
+            frame_index += 1
+    finally:
+        capture.release()
+
+    if not frames:
+        raise RuntimeError(f"No frames decoded from video file: {video_path}")
+    return frames, raw_fps
+
+
 def build_video_answer_prompt(item: dict[str, Any], video_path: Path) -> str:
     return "\n".join(
         [
@@ -916,13 +966,17 @@ def build_qwen_vl_video_messages(
     item: dict[str, Any],
     video_path: Path,
     video_fps: float | None = 1.0,
+    video_frames: list[Any] | None = None,
+    raw_fps: float | None = None,
 ) -> list[dict[str, Any]]:
     video_content: dict[str, Any] = {
         "type": "video",
-        "video": video_path.resolve().as_posix(),
+        "video": video_frames if video_frames is not None else video_path.resolve().as_posix(),
     }
     if video_fps is not None and video_fps > 0:
-        video_content["fps"] = float(video_fps)
+        video_content["sample_fps"] = float(video_fps)
+    if raw_fps is not None and raw_fps > 0:
+        video_content["raw_fps"] = float(raw_fps)
     return [
         {
             "role": "user",
@@ -1157,7 +1211,8 @@ def _write_video_answer_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def _is_completed_frame_answer(result: dict[str, Any]) -> bool:
-    if str(result.get("reason", "")).startswith("Frame answer call failed:"):
+    reason = str(result.get("reason", ""))
+    if reason.startswith("Frame answer call failed:") or reason.startswith("Video answer call failed:"):
         return False
     return result.get("status") == "answered" and bool(str(result.get("model_answer", "")).strip())
 

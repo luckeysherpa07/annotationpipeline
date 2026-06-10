@@ -907,17 +907,23 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             },
             Path("scene_day_rgb.mp4"),
             video_fps=1.0,
+            video_frames=["frame"],
+            raw_fps=30.0,
         )
 
         text_content = message[0]["content"][-1]["text"]
         self.assertEqual(message[0]["content"][0]["type"], "video")
-        self.assertEqual(message[0]["content"][0]["fps"], 1.0)
+        self.assertEqual(message[0]["content"][0]["video"], ["frame"])
+        self.assertEqual(message[0]["content"][0]["sample_fps"], 1.0)
+        self.assertEqual(message[0]["content"][0]["raw_fps"], 30.0)
         self.assertNotIn("nframes", message[0]["content"][0])
         self.assertIn("What is shown?", text_content)
         self.assertNotIn("SECRET CAPTION", text_content)
         self.assertNotIn("SECRET ANSWER", text_content)
 
     def test_qwen_vl_video_adapter_extracts_generated_answer_from_fake_model(self):
+        process_messages = []
+
         class FakeProcessor:
             def apply_chat_template(self, messages, tokenize=False, add_generation_prompt=True):
                 return "chat prompt"
@@ -934,25 +940,33 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             def generate(self, **kwargs):
                 return [[1, 2, 3, 4, 5]]
 
-        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
-            mock_process.return_value = ([], ["video"], {"fps": 1.0})
-            adapter = QwenVLVideoAnswerAdapter(
-                model_name="Qwen/Qwen3-VL-4B-Instruct",
-                model=FakeModel(),
-                processor=FakeProcessor(),
-            )
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark._sample_video_frames_with_opencv") as mock_sample:
+            mock_sample.return_value = (["decoded-frame"], 30.0)
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.process_vision_info") as mock_process:
+                def fake_process(messages, return_video_kwargs=True):
+                    process_messages.append(messages)
+                    return ([], ["video"], {"fps": 1.0})
 
-            answer = adapter.answer(
-                {
-                    "modality": "rgb",
-                    "section": "test",
-                    "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
-                    "question": "What is shown?",
-                },
-                Path("scene_day_rgb.mp4"),
-            )
+                mock_process.side_effect = fake_process
+                adapter = QwenVLVideoAnswerAdapter(
+                    model_name="Qwen/Qwen3-VL-4B-Instruct",
+                    model=FakeModel(),
+                    processor=FakeProcessor(),
+                )
+
+                answer = adapter.answer(
+                    {
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                        "question": "What is shown?",
+                    },
+                    Path("scene_day_rgb.mp4"),
+                )
 
         self.assertEqual(answer, "qwen vl video decoded answer")
+        self.assertEqual(process_messages[0][0]["content"][0]["video"], ["decoded-frame"])
+        mock_sample.assert_called_once_with(Path("scene_day_rgb.mp4"), 1.0)
 
     def test_qwen_vl_video_answer_benchmark_output_and_resume(self):
         with tempfile.TemporaryDirectory() as tmp:
