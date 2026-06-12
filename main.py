@@ -560,7 +560,6 @@ def main():
             "ALIGNED QA QUALITY",
             "BENCHMARK EVALUATION",
             "FRAME INPUT ANSWER BENCHMARK",
-            "SEGMENTED QA QUALITY",
         ))
         print("\n63. Exit")
 
