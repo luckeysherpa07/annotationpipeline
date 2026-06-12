@@ -47,20 +47,26 @@ except ImportError:
 
 try:
     from transformers import (
+        AutoConfig,
+        AutoModel,
         AutoModelForCausalLM,
         AutoModelForImageTextToText,
         AutoProcessor,
         AutoTokenizer,
         BitsAndBytesConfig,
+        PreTrainedModel,
         Qwen2_5_VLForConditionalGeneration,
         Qwen3VLForConditionalGeneration,
     )
 except ImportError:
+    AutoConfig = None
+    AutoModel = None
     AutoModelForCausalLM = None
     AutoModelForImageTextToText = None
     AutoProcessor = None
     AutoTokenizer = None
     BitsAndBytesConfig = None
+    PreTrainedModel = None
     Qwen2_5_VLForConditionalGeneration = None
     Qwen3VLForConditionalGeneration = None
 
@@ -88,6 +94,34 @@ DEFAULT_QWEN_MAX_CAPTION_CHARS = 3000
 DEFAULT_QWEN_MAX_QUESTION_CHARS = 600
 DEFAULT_QWEN_VL_MODEL_NAME = "Qwen/Qwen3-VL-4B-Instruct"
 DEFAULT_QWEN_VL_MAX_TOKENS = 128
+DEFAULT_INTERNVL_MODEL_NAME = "OpenGVLab/InternVL2_5-4B"
+DEFAULT_INTERNVL_REVISION = ""
+DEFAULT_INTERNVL_MAX_TOKENS = 128
+DEFAULT_INTERNVL_IMAGE_SIZE = 448
+DEFAULT_INTERNVL_MAX_NUM_TILES = 12
+DEFAULT_INTERNVL_TOKENIZER_BASE_MODEL = "Qwen/Qwen2.5-3B-Instruct"
+DEFAULT_INTERNVL_ADDITIONAL_SPECIAL_TOKENS = (
+    "<|object_ref_start|>",
+    "<|object_ref_end|>",
+    "<|box_start|>",
+    "<|box_end|>",
+    "<|quad_start|>",
+    "<|quad_end|>",
+    "<|vision_start|>",
+    "<|vision_end|>",
+    "<|vision_pad|>",
+    "<|image_pad|>",
+    "<|video_pad|>",
+    "<img>",
+    "</img>",
+    "<IMG_CONTEXT>",
+    "<quad>",
+    "</quad>",
+    "<ref>",
+    "</ref>",
+    "<box>",
+    "</box>",
+)
 DEFAULT_FRAME_CACHE_ROOT = Path("aligned_dataset")
 DEFAULT_FRAME_MAX_FRAMES_PER_ITEM = 6
 FRAME_ANSWER_BENCHMARK_TYPE = "frame_input_answer_generation"
@@ -574,6 +608,160 @@ class QwenVLVideoAnswerAdapter(QwenVLFrameAnswerAdapter):
         return self._answer_messages(messages)
 
 
+class InternVLFrameAnswerAdapter:
+    """Local InternVL 4B frame-input answer adapter."""
+
+    provider = "internvl"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_INTERNVL_MODEL_NAME,
+        model: Any | None = None,
+        tokenizer: Any | None = None,
+        require_cuda: bool = True,
+        max_tokens: int = DEFAULT_INTERNVL_MAX_TOKENS,
+        image_size: int = DEFAULT_INTERNVL_IMAGE_SIZE,
+        max_num_tiles: int = DEFAULT_INTERNVL_MAX_NUM_TILES,
+        revision: str | None = DEFAULT_INTERNVL_REVISION,
+    ):
+        self.model_name = model_name
+        self.revision = str(revision or "").strip() or None
+        self.max_tokens = max(1, int(max_tokens))
+        self.image_size = max(1, int(image_size))
+        self.max_num_tiles = max(1, int(max_num_tiles))
+        if model is not None and tokenizer is not None:
+            self.model = model
+            self.tokenizer = tokenizer
+            return
+
+        self._validate_runtime(require_cuda=require_cuda)
+        self._load_model()
+
+    @staticmethod
+    def _validate_runtime(require_cuda: bool = True) -> None:
+        if torch is None:
+            raise RuntimeError("PyTorch is not installed. Install project requirements before running local InternVL 4B.")
+        if require_cuda and not torch.cuda.is_available():
+            raise RuntimeError(
+                "CUDA is not available. Local InternVL 4B frame benchmark requires GPU execution; "
+                "fix NVIDIA driver/CUDA visibility first."
+            )
+        if Image is None:
+            raise RuntimeError("InternVL 4B requires Pillow. Install project requirements first.")
+        if AutoConfig is None or AutoModel is None or AutoTokenizer is None or BitsAndBytesConfig is None:
+            raise RuntimeError("InternVL 4B requires transformers and bitsandbytes. Install project requirements first.")
+
+    @staticmethod
+    def runtime_summary(
+        model_name: str = DEFAULT_INTERNVL_MODEL_NAME,
+        revision: str | None = DEFAULT_INTERNVL_REVISION,
+    ) -> str:
+        cuda_available = bool(torch is not None and torch.cuda.is_available())
+        gpu_name = "none"
+        if cuda_available:
+            try:
+                gpu_name = str(torch.cuda.get_device_name(0))
+            except Exception:
+                gpu_name = "visible"
+        return (
+            f"provider=internvl, model={model_name}, cuda_available={cuda_available}, gpu={gpu_name}, "
+            f"revision={str(revision or '').strip() or '<default>'}, "
+            f"auto_model_available={AutoModel is not None}, auto_tokenizer_available={AutoTokenizer is not None}, "
+            f"pillow_available={Image is not None}, max_tokens={DEFAULT_INTERNVL_MAX_TOKENS}, "
+            f"quantization=8bit, image_size={DEFAULT_INTERNVL_IMAGE_SIZE}, "
+            f"max_num_tiles={DEFAULT_INTERNVL_MAX_NUM_TILES}, "
+            f"cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
+        )
+
+    def _load_tokenizer(self) -> Any:
+        revision_kwargs = {"revision": self.revision} if self.revision else {}
+        try:
+            return AutoTokenizer.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                use_fast=False,
+                **revision_kwargs,
+            )
+        except Exception as exc:
+            message = str(exc).lower()
+            if "backend tokenizer" not in message and "sentencepiece" not in message and "tiktoken" not in message:
+                raise
+
+            config = AutoConfig.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                **revision_kwargs,
+            )
+            llm_config = getattr(config, "llm_config", None)
+            tokenizer_model = getattr(llm_config, "_name_or_path", None) or DEFAULT_INTERNVL_TOKENIZER_BASE_MODEL
+            tokenizer = AutoTokenizer.from_pretrained(
+                tokenizer_model,
+                trust_remote_code=True,
+                use_fast=False,
+            )
+            tokenizer.add_special_tokens(
+                {"additional_special_tokens": list(DEFAULT_INTERNVL_ADDITIONAL_SPECIAL_TOKENS)}
+            )
+            return tokenizer
+
+    def _load_model(self) -> None:
+        revision_kwargs = {"revision": self.revision} if self.revision else {}
+        try:
+            self.tokenizer = self._load_tokenizer()
+            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+            _ensure_transformers_tied_weights_compatibility()
+            self.model = AutoModel.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
+                torch_dtype=torch.bfloat16,
+                low_cpu_mem_usage=True,
+                quantization_config=quantization_config,
+                device_map="auto",
+                **revision_kwargs,
+            )
+            if "all_tied_weights_keys" not in vars(self.model):
+                self.model.all_tied_weights_keys = {}
+            if hasattr(self.model, "eval"):
+                self.model.eval()
+        except Exception as exc:
+            cause = f"{type(exc).__name__}: {exc}"
+            tokenizer_hint = ""
+            if "sentencepiece" in str(exc).lower() or "tiktoken" in str(exc).lower():
+                tokenizer_hint = (
+                    " This model tokenizer requires SentencePiece/tiktoken support; install project requirements "
+                    "again or run `pip install sentencepiece tiktoken` in the active environment."
+                )
+            raise RuntimeError(
+                f"Failed to load local InternVL 4B model '{self.model_name}' in 8-bit mode. "
+                "Check Transformers trust_remote_code support, CUDA availability, bitsandbytes, and free GPU memory. "
+                f"Original error: {cause}.{tokenizer_hint}"
+            ) from exc
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        pixel_values, num_patches_list = load_internvl_pixel_values(
+            frame_paths,
+            image_size=self.image_size,
+            max_num_tiles=self.max_num_tiles,
+        )
+        model_device = _model_input_device(self.model)
+        if model_device is not None and hasattr(pixel_values, "to"):
+            pixel_values = pixel_values.to(model_device)
+        prompt = build_internvl_frame_prompt(item, frame_paths)
+        generation_config = {"max_new_tokens": self.max_tokens, "do_sample": False}
+        answer = self.model.chat(
+            self.tokenizer,
+            pixel_values,
+            prompt,
+            generation_config,
+            num_patches_list=num_patches_list,
+            history=None,
+            return_history=False,
+        )
+        if isinstance(answer, tuple):
+            answer = answer[0]
+        return str(answer).strip()
+
+
 def load_valid_qa_items(input_path: Path | str = DEFAULT_INPUT_PATH) -> list[dict[str, Any]]:
     input_path = Path(input_path)
     with open(input_path, "r", encoding="utf-8") as handle:
@@ -672,6 +860,11 @@ def _qwen_vl_model_class(model_name: str) -> Any | None:
     if AutoModelForImageTextToText is not None:
         return AutoModelForImageTextToText
     return Qwen3VLForConditionalGeneration or Qwen2_5_VLForConditionalGeneration
+
+
+def _ensure_transformers_tied_weights_compatibility() -> None:
+    if PreTrainedModel is not None and not hasattr(PreTrainedModel, "all_tied_weights_keys"):
+        PreTrainedModel.all_tied_weights_keys = {}
 
 
 def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
@@ -960,6 +1153,96 @@ def build_qwen_vl_frame_messages(item: dict[str, Any], frame_paths: list[Path]) 
     ]
     content.append({"type": "text", "text": build_frame_answer_prompt(item, frame_paths)})
     return [{"role": "user", "content": content}]
+
+
+def build_internvl_frame_prompt(item: dict[str, Any], frame_paths: list[Path]) -> str:
+    frame_markers = [f"Frame-{index}: <image>" for index, _ in enumerate(frame_paths, start=1)]
+    return "\n".join([*frame_markers, build_frame_answer_prompt(item, frame_paths)])
+
+
+def _internvl_target_ratios(max_num_tiles: int) -> list[tuple[int, int]]:
+    ratios: set[tuple[int, int]] = set()
+    for blocks in range(1, max_num_tiles + 1):
+        for width_blocks in range(1, blocks + 1):
+            for height_blocks in range(1, blocks + 1):
+                if width_blocks * height_blocks <= max_num_tiles:
+                    ratios.add((width_blocks, height_blocks))
+    return sorted(ratios, key=lambda ratio: ratio[0] * ratio[1])
+
+
+def _internvl_best_grid(width: int, height: int, max_num_tiles: int) -> tuple[int, int]:
+    aspect_ratio = width / height
+    best_ratio = (1, 1)
+    best_diff = float("inf")
+    image_area = width * height
+    for ratio in _internvl_target_ratios(max_num_tiles):
+        target_aspect_ratio = ratio[0] / ratio[1]
+        diff = abs(aspect_ratio - target_aspect_ratio)
+        if diff < best_diff:
+            best_ratio = ratio
+            best_diff = diff
+        elif diff == best_diff:
+            if image_area > 0.5 * DEFAULT_INTERNVL_IMAGE_SIZE * DEFAULT_INTERNVL_IMAGE_SIZE * ratio[0] * ratio[1]:
+                best_ratio = ratio
+    return best_ratio
+
+
+def _internvl_image_to_tensor(image: Any, image_size: int) -> Any:
+    if torch is None:
+        raise RuntimeError("PyTorch is not installed. Install project requirements before running local InternVL 4B.")
+    if Image is None:
+        raise RuntimeError("InternVL 4B requires Pillow. Install project requirements first.")
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    resized = image.resize((image_size, image_size), Image.BICUBIC)
+    data = torch.ByteTensor(torch.ByteStorage.from_buffer(resized.tobytes()))
+    tensor = data.view(image_size, image_size, 3).permute(2, 0, 1).float().div(255.0)
+    mean = torch.tensor((0.485, 0.456, 0.406), dtype=tensor.dtype).view(3, 1, 1)
+    std = torch.tensor((0.229, 0.224, 0.225), dtype=tensor.dtype).view(3, 1, 1)
+    return (tensor - mean) / std
+
+
+def load_internvl_image_tiles(
+    image_path: Path,
+    image_size: int = DEFAULT_INTERNVL_IMAGE_SIZE,
+    max_num_tiles: int = DEFAULT_INTERNVL_MAX_NUM_TILES,
+) -> Any:
+    if Image is None:
+        raise RuntimeError("InternVL 4B requires Pillow. Install project requirements first.")
+    image = Image.open(image_path).convert("RGB")
+    width, height = image.size
+    grid_width, grid_height = _internvl_best_grid(width, height, max_num_tiles)
+    target_width = grid_width * image_size
+    target_height = grid_height * image_size
+    resized = image.resize((target_width, target_height), Image.BICUBIC)
+    tiles = []
+    for row in range(grid_height):
+        for col in range(grid_width):
+            box = (
+                col * image_size,
+                row * image_size,
+                (col + 1) * image_size,
+                (row + 1) * image_size,
+            )
+            tiles.append(_internvl_image_to_tensor(resized.crop(box), image_size))
+    if len(tiles) > 1 and len(tiles) < max_num_tiles:
+        tiles.append(_internvl_image_to_tensor(image, image_size))
+    return torch.stack(tiles)
+
+
+def load_internvl_pixel_values(
+    frame_paths: list[Path],
+    image_size: int = DEFAULT_INTERNVL_IMAGE_SIZE,
+    max_num_tiles: int = DEFAULT_INTERNVL_MAX_NUM_TILES,
+) -> tuple[Any, list[int]]:
+    if torch is None:
+        raise RuntimeError("PyTorch is not installed. Install project requirements before running local InternVL 4B.")
+    batches = [
+        load_internvl_image_tiles(path, image_size=image_size, max_num_tiles=max_num_tiles)
+        for path in frame_paths
+    ]
+    num_patches_list = [int(batch.shape[0]) for batch in batches]
+    return torch.cat(batches, dim=0).to(torch.bfloat16), num_patches_list
 
 
 def build_qwen_vl_video_messages(
@@ -1785,6 +2068,137 @@ def run_qwen_vl_frame_answer_benchmark(
                 time.sleep(delay_between_batches)
     except KeyboardInterrupt:
         print("\nQwen-VL frame-answer benchmark cancelled by user. Progress saved.")
+        _save_frame_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="user_cancelled"),
+        )
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
+    return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+
+def run_internvl_frame_answer_benchmark(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_INTERNVL_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    revision: str | None = DEFAULT_INTERNVL_REVISION,
+    adapter: InternVLFrameAnswerAdapter | None = None,
+) -> dict[str, Path]:
+    """Generate local InternVL 4B answers from cached aligned-dataset frames without judging correctness."""
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    frame_cache_root = Path(frame_cache_root)
+    output_json, output_csv = _frame_answer_output_paths(output_dir, model_name)
+    batch_size = max(1, int(batch_size))
+    if batch_size != 1:
+        print("Local InternVL 4B frame benchmark forces batch size to 1 to reduce GPU memory pressure.")
+        batch_size = 1
+
+    revision = str(revision or "").strip() or None
+
+    print(f"Local InternVL 4B runtime: {InternVLFrameAnswerAdapter.runtime_summary(model_name=model_name, revision=revision)}")
+
+    items = load_valid_qa_items(input_path)
+    results_by_id = _load_existing_results(output_json) if resume else {}
+    pending = [
+        item
+        for item in items
+        if not _is_completed_frame_answer(results_by_id.get(item["qa_id"], {}))
+    ]
+    if max_items is not None:
+        pending = pending[: max(0, int(max_items))]
+
+    skipped_no_frames = 0
+
+    def make_metadata(stopped_reason: str | None = None) -> dict[str, Any]:
+        answered_count = sum(1 for result in results_by_id.values() if _is_completed_frame_answer(result))
+        metadata = {
+            "benchmark_type": FRAME_ANSWER_BENCHMARK_TYPE,
+            "input_path": input_path.as_posix(),
+            "provider": "internvl",
+            "model_name": model_name,
+            "revision": revision or "",
+            "judge_enabled": False,
+            "frame_cache_root": frame_cache_root.as_posix(),
+            "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "resume": resume,
+            "total_valid_items": len(items),
+            "answered_items": answered_count,
+            "pending_items": max(0, len(items) - answered_count),
+            "skipped_no_frames": skipped_no_frames,
+            "batch_size": batch_size,
+            "key_rotation_enabled": False,
+            "keys_available": 0,
+            "exhausted_key_count": 0,
+        }
+        if stopped_reason:
+            metadata["stopped_reason"] = stopped_reason
+        return metadata
+
+    print(
+        f"InternVL 4B frame-input answer benchmark resume scan: {len(results_by_id)} complete skipped, "
+        f"{len(pending)} pending selected, {len(items)} valid total, model={model_name}."
+    )
+
+    if not pending:
+        _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    frame_adapter = adapter or InternVLFrameAnswerAdapter(model_name=model_name, revision=revision)
+
+    try:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            print(f"Running InternVL 4B frame-answer batch {start // batch_size + 1}: {len(batch)} item(s)")
+            for item in batch:
+                frame_paths = resolve_frame_inputs_for_item(
+                    item,
+                    frame_cache_root=frame_cache_root,
+                    max_frames_per_item=max_frames_per_item,
+                )
+                if not frame_paths:
+                    skipped_no_frames += 1
+                    print(f"Skipping {item['qa_id']}: no cached frames found.")
+                    continue
+
+                try:
+                    model_answer = frame_adapter.answer(item, frame_paths)
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="internvl",
+                        model_name=model_name,
+                        model_answer=model_answer,
+                        frame_paths=frame_paths,
+                        status="answered" if model_answer else "failed",
+                        reason="" if model_answer else "Frame answer call failed: empty model answer",
+                    )
+                except Exception as exc:
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="internvl",
+                        model_name=model_name,
+                        model_answer="",
+                        frame_paths=frame_paths,
+                        status="failed",
+                        reason=f"Frame answer call failed: {exc}",
+                    )
+
+                _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+                print(f"Checkpoint saved: {len(results_by_id)} frame answer item(s)")
+
+            if delay_between_batches > 0 and start + batch_size < len(pending):
+                time.sleep(delay_between_batches)
+    except KeyboardInterrupt:
+        print("\nInternVL 4B frame-answer benchmark cancelled by user. Progress saved.")
         _save_frame_answer_outputs(
             output_json,
             output_csv,

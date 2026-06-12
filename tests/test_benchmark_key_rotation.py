@@ -8,11 +8,13 @@ import annotation_feature.qa_quality.benchmark as benchmark_module
 from annotation_feature.qa_quality.benchmark import (
     BenchmarkJudge,
     BenchmarkModelAdapter,
+    InternVLFrameAnswerAdapter,
     OpenAICaptionAdapter,
     QwenLocalCaptionAdapter,
     QwenVLFrameAnswerAdapter,
     QwenVLVideoAnswerAdapter,
     build_frame_answer_prompt,
+    build_internvl_frame_prompt,
     build_qwen_vl_frame_messages,
     build_qwen_vl_video_messages,
     build_video_answer_prompt,
@@ -23,6 +25,7 @@ from annotation_feature.qa_quality.benchmark import (
     resolve_video_input_for_item,
     run_aligned_qa_benchmark,
     run_gemini_frame_answer_benchmark,
+    run_internvl_frame_answer_benchmark,
     run_qwen_vl_frame_answer_benchmark,
     run_qwen_vl_video_answer_benchmark,
     select_frames_for_question,
@@ -116,6 +119,11 @@ class KeyedFrameAdapter:
 class StaticQwenVLFrameAdapter:
     def answer(self, item, frame_paths):
         return f"qwen vl answer using {len(frame_paths)} frame(s)"
+
+
+class StaticInternVLFrameAdapter:
+    def answer(self, item, frame_paths):
+        return f"internvl answer using {len(frame_paths)} frame(s)"
 
 
 class StaticQwenVLVideoAdapter:
@@ -849,6 +857,151 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertIn("71", actions)
         self.assertEqual(actions["71"].action_id, "aligned.qa_quality.qwen_vl_frame_answer_benchmark")
         self.assertEqual(actions["71"].section, "FRAME INPUT ANSWER BENCHMARK")
+
+    def test_internvl_frame_prompt_excludes_caption_and_gold_answer(self):
+        prompt = build_internvl_frame_prompt(
+            {
+                "modality": "rgb",
+                "section": "test",
+                "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                "question": "What is shown?",
+                "caption": "SECRET CAPTION",
+                "answer": "SECRET ANSWER",
+            },
+            [Path("frame_000000.png")],
+        )
+
+        self.assertIn("Frame-1: <image>", prompt)
+        self.assertIn("What is shown?", prompt)
+        self.assertNotIn("SECRET CAPTION", prompt)
+        self.assertNotIn("SECRET ANSWER", prompt)
+
+    def test_internvl_adapter_extracts_generated_answer_from_fake_model(self):
+        chat_calls = []
+
+        class FakePixelValues:
+            def to(self, device):
+                return self
+
+        class FakeModel:
+            device = None
+
+            def chat(self, tokenizer, pixel_values, prompt, generation_config, **kwargs):
+                chat_calls.append(
+                    {
+                        "tokenizer": tokenizer,
+                        "pixel_values": pixel_values,
+                        "prompt": prompt,
+                        "generation_config": generation_config,
+                        "kwargs": kwargs,
+                    }
+                )
+                return " internvl decoded answer "
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.load_internvl_pixel_values") as mock_pixels:
+            mock_pixels.return_value = (FakePixelValues(), [1])
+            adapter = InternVLFrameAnswerAdapter(
+                model_name="OpenGVLab/InternVL2_5-4B",
+                model=FakeModel(),
+                tokenizer=object(),
+            )
+
+            answer = adapter.answer(
+                {
+                    "modality": "rgb",
+                    "section": "test",
+                    "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                    "question": "What is shown?",
+                },
+                [Path("frame_000000.png")],
+            )
+
+        self.assertEqual(answer, "internvl decoded answer")
+        self.assertEqual(chat_calls[0]["generation_config"]["do_sample"], False)
+        self.assertEqual(chat_calls[0]["kwargs"]["num_patches_list"], [1])
+
+    def test_internvl_cuda_unavailable_guard_raises_before_loading_model(self):
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+            mock_torch.cuda.is_available.return_value = False
+
+            with self.assertRaisesRegex(RuntimeError, "CUDA is not available"):
+                InternVLFrameAnswerAdapter._validate_runtime(require_cuda=True)
+
+    def test_internvl_load_error_includes_original_exception_and_revision(self):
+        class DummyPreTrainedModel:
+            pass
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoTokenizer") as mock_tokenizer:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModel") as mock_model:
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
+                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
+                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                            mock_torch.cuda.is_available.return_value = True
+                            mock_torch.bfloat16 = "bfloat16"
+                            mock_model.from_pretrained.side_effect = ValueError("bitsandbytes exploded")
+
+                            with self.assertRaisesRegex(RuntimeError, "Original error: ValueError: bitsandbytes exploded"):
+                                InternVLFrameAnswerAdapter(
+                                    model_name="OpenGVLab/InternVL2_5-4B",
+                                    revision="abc123",
+                                )
+
+        mock_tokenizer.from_pretrained.assert_called_once()
+        mock_bnb.assert_called_once_with(load_in_8bit=True)
+        self.assertEqual(DummyPreTrainedModel.all_tied_weights_keys, {})
+        self.assertEqual(mock_tokenizer.from_pretrained.call_args.kwargs["revision"], "abc123")
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["revision"], "abc123")
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["quantization_config"], mock_bnb.return_value)
+        self.assertNotIn("load_in_8bit", mock_model.from_pretrained.call_args.kwargs)
+
+    def test_internvl_frame_answer_benchmark_output_and_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            frame_root = root / "aligned_dataset"
+            write_valid_items(input_path, count=2)
+            for index in range(2):
+                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
+                frame_path.parent.mkdir(parents=True, exist_ok=True)
+                frame_path.write_bytes(b"fake")
+
+            run_internvl_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=1,
+                frame_cache_root=frame_root,
+                revision="abc123",
+                adapter=StaticInternVLFrameAdapter(),
+            )
+            run_internvl_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=2,
+                frame_cache_root=frame_root,
+                revision="abc123",
+                adapter=StaticInternVLFrameAdapter(),
+            )
+
+            output_json = output_dir / "aligned_qa_frame_answers_OpenGVLab_InternVL2_5-4B.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["results"]), 2)
+            self.assertEqual(payload["metadata"]["provider"], "internvl")
+            self.assertEqual(payload["metadata"]["revision"], "abc123")
+            self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertFalse(payload["metadata"]["judge_enabled"])
+
+    def test_option_73_is_registered_with_internvl_4b_label(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_INTERNVL_FRAME_ANSWER_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_INTERNVL_FRAME_ANSWER_BENCHMARK, "73")
+        self.assertIn("73", actions)
+        self.assertEqual(actions["73"].action_id, "aligned.qa_quality.internvl_frame_answer_benchmark")
+        self.assertEqual(actions["73"].section, "FRAME INPUT ANSWER BENCHMARK")
+        self.assertIn("InternVL 4B", actions["73"].title)
 
     def test_video_resolution_supports_modalities_and_excludes_rgb_with_audio(self):
         with tempfile.TemporaryDirectory() as tmp:

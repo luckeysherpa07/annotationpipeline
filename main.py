@@ -558,7 +558,7 @@ def main():
         ))
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-72 or action id): ").strip()
+        choice = input("\nEnter choice (1-73 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
