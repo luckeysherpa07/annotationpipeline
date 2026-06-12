@@ -8,6 +8,9 @@ __all__ = [
     "run_qwen_vl_video_answer_benchmark",
     "run_aligned_qa_benchmark",
     "run_aligned_qa_llm_evaluation",
+    "evaluate_segmented_qa",
+    "run_segmented_qa_llm_evaluation",
+    "clean_segmented_qa_dataset",
 ]
 
 
@@ -51,3 +54,21 @@ def run_aligned_qa_llm_evaluation(*args, **kwargs):
     from .llm_evaluator import run_aligned_qa_llm_evaluation as _run
 
     return _run(*args, **kwargs)
+
+
+def evaluate_segmented_qa(*args, **kwargs):
+    from .segmented_evaluator import evaluate_segmented_qa as _evaluate
+
+    return _evaluate(*args, **kwargs)
+
+
+def run_segmented_qa_llm_evaluation(*args, **kwargs):
+    from .segmented_llm_evaluator import run_segmented_qa_llm_evaluation as _run
+
+    return _run(*args, **kwargs)
+
+
+def clean_segmented_qa_dataset(*args, **kwargs):
+    from .segmented_cleaner import clean_segmented_qa_dataset as _clean
+
+    return _clean(*args, **kwargs)

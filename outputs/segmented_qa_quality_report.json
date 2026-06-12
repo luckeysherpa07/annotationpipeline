@@ -1,0 +1,104 @@
+{
+  "summary": {
+    "input_path": "segmented_normalized_evidence_units.json",
+    "segments": 24,
+    "qa_items": 2421,
+    "by_modality": {
+      "rgb": 737,
+      "event": 133,
+      "depth": 186,
+      "ir": 1319,
+      "audio": 46
+    },
+    "severity": {
+      "quality_warning": 1233,
+      "pass": 1069,
+      "hard_fail": 119
+    },
+    "flags": {
+      "frame_reference": 94,
+      "short_answer": 1129,
+      "duplicate_question": 239,
+      "unknown_unclear": 16,
+      "empty_field": 111,
+      "prompt_leak": 8
+    }
+  },
+  "totals": {
+    "qa_items": 2421,
+    "by_section": {
+      "rgb:action": 79,
+      "rgb:counting": 95,
+      "rgb:dynamic_counting": 79,
+      "rgb:dynamic_recognition": 44,
+      "rgb:light_change": 79,
+      "rgb:light_recognition": 23,
+      "rgb:navigation": 95,
+      "rgb:non_common": 23,
+      "rgb:object_recognition": 23,
+      "rgb:scene_sequence": 95,
+      "rgb:spatial_reasoning": 23,
+      "rgb:text_recognition": 79,
+      "event:event_navigation": 21,
+      "event:event_non_common": 21,
+      "event:event_object_recognition": 21,
+      "event:event_scene_sequence": 21,
+      "event:event_spatial_reasoning": 21,
+      "depth:depth_navigation": 22,
+      "depth:depth_non_common": 22,
+      "depth:depth_object_recognition": 22,
+      "depth:depth_scene_sequence": 22,
+      "depth:depth_spatial_reasoning": 22,
+      "ir:action": 141,
+      "ir:counting": 175,
+      "ir:dynamic_counting": 141,
+      "ir:dynamic_recognition": 141,
+      "ir:light_change": 141,
+      "ir:light_recognition": 19,
+      "ir:navigation": 175,
+      "ir:non_common": 23,
+      "ir:object_recognition": 23,
+      "ir:scene_sequence": 175,
+      "ir:spatial_reasoning": 23,
+      "ir:text_recognition": 142,
+      "audio:audio_ambient_environment_understanding": 2,
+      "audio:audio_sound_source_identification": 23,
+      "audio:audio_event_detection": 5,
+      "depth:depth_action": 19,
+      "depth:depth_counting": 19,
+      "depth:depth_dynamic_counting": 19,
+      "depth:depth_dynamic_recognition": 19,
+      "audio:audio_acoustic_environment": 2,
+      "audio:audio_sound_characteristics": 1,
+      "audio:audio_contextual_relevance": 1,
+      "audio:audio_percussive_sound": 1,
+      "audio:audio_spatial_location": 1,
+      "audio:audio_contextual_and_semantic_understanding": 1,
+      "audio:audio_sound_quality_and_characteristics": 1,
+      "audio:audio_temporal_reasoning": 1,
+      "audio:audio_sound_event_duration": 1,
+      "audio:audio_visual_correspondence": 1,
+      "event:event_action": 7,
+      "event:event_counting": 7,
+      "event:event_dynamic_counting": 7,
+      "event:event_dynamic_recognition": 7,
+      "audio:audio_sound_event_counting": 1,
+      "audio:audio_ambient_sound_analysis": 1,
+      "audio:audio_environment_spatial_context": 1,
+      "audio:audio_temporal_analysis": 1,
+      "audio:audio_event_occurrence_detection": 1
+    },
+    "split_items": 2421,
+    "cleaned_items": 2302,
+    "cleaned_export": {
+      "source_file": "segmented_normalized_evidence_units.json",
+      "total_cleaned_items": 2302,
+      "excluded": {
+        "hard_fail": 119
+      },
+      "transforms": {
+        "none": 2302
+      }
+    }
+  }
+}

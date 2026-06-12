@@ -16,6 +16,7 @@ from annotation_feature.cli.actions.aligned_ir import build_aligned_ir_actions
 from annotation_feature.cli.actions.aligned_audio import build_aligned_audio_actions
 from annotation_feature.cli.actions.aligned_marigold import build_aligned_marigold_actions
 from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+from annotation_feature.cli.actions.segmented_qa_quality import build_segmented_qa_quality_actions
 from annotation_feature.cli.actions.aligned_choices import (
     REGISTERED_MENU_CHOICE_ORDER,
     REGISTERED_MENU_SECTION_ORDER,
@@ -122,6 +123,10 @@ REGISTERED_MENU_ACTIONS = {
         confirm=_confirm,
     ),
     **build_aligned_qa_quality_actions(
+        confirm=_confirm,
+        output_dir="outputs",
+    ),
+    **build_segmented_qa_quality_actions(
         confirm=_confirm,
         output_dir="outputs",
     ),
@@ -558,7 +563,7 @@ def main():
         ))
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-72 or action id): ").strip()
+        choice = input("\nEnter choice (1-75 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
