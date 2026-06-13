@@ -294,7 +294,7 @@ As of June 13, 2026:
 |---|---:|---:|---:|---:|
 | Qwen3-VL-8B | 5465 | 0 | 1.896 s | 8.46 GB |
 | InternVL3-8B | 5465 | 0 | 0.765 s | 10.09 GB |
-| Molmo2-8B | Formal run pending confirmation | - | Smoke test: about 2.8-3.5 s | Smoke test: about 21.01 GB |
+| Molmo2-8B | 5465 | 0 | 2.876 s | 21.01 GB |
 
 This table records answer-generation completion only; it does not report answer
 accuracy.
@@ -573,6 +573,6 @@ model_answer 非空
 |---|---:|---:|---:|---:|
 | Qwen3-VL-8B | 5465 | 0 | 1.896 秒 | 8.46 GB |
 | InternVL3-8B | 5465 | 0 | 0.765 秒 | 10.09 GB |
-| Molmo2-8B | 正式运行待确认 | - | 小批量约 2.8-3.5 秒 | 小批量约 21.01 GB |
+| Molmo2-8B | 5465 | 0 | 2.876 秒 | 21.01 GB |
 
 该表仅记录回答生成是否完成，不表示答案正确率。

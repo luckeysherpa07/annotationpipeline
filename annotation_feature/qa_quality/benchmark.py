@@ -1195,7 +1195,7 @@ def _internvl_image_to_tensor(image: Any, image_size: int) -> Any:
     if image.mode != "RGB":
         image = image.convert("RGB")
     resized = image.resize((image_size, image_size), Image.BICUBIC)
-    data = torch.ByteTensor(torch.ByteStorage.from_buffer(resized.tobytes()))
+    data = torch.frombuffer(bytearray(resized.tobytes()), dtype=torch.uint8)
     tensor = data.view(image_size, image_size, 3).permute(2, 0, 1).float().div(255.0)
     mean = torch.tensor((0.485, 0.456, 0.406), dtype=tensor.dtype).view(3, 1, 1)
     std = torch.tensor((0.229, 0.224, 0.225), dtype=tensor.dtype).view(3, 1, 1)
