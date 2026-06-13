@@ -3,6 +3,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import ModuleType
 from unittest.mock import patch
 
 
@@ -181,6 +182,85 @@ class FixedFrameBenchmarkTests(unittest.TestCase):
         self.assertEqual(loader.call_count, 2)
         self.assertEqual(adapter.frame_cache_hits, 1)
         self.assertEqual(adapter.frame_cache_misses, 2)
+
+    def test_molmo2_rope_compatibility_registers_default(self):
+        original = MODULE.ROPE_INIT_FUNCTIONS
+        MODULE.ROPE_INIT_FUNCTIONS = {}
+        try:
+            MODULE._ensure_molmo2_rope_compatibility()
+            config = type(
+                "Config",
+                (),
+                {
+                    "hidden_size": 16,
+                    "num_attention_heads": 2,
+                    "rope_theta": 10000.0,
+                },
+            )()
+            inv_freq, scaling = MODULE.ROPE_INIT_FUNCTIONS["default"](config)
+        finally:
+            MODULE.ROPE_INIT_FUNCTIONS = original
+
+        self.assertEqual(tuple(inv_freq.shape), (4,))
+        self.assertEqual(scaling, 1.0)
+
+    def test_molmo2_generation_compatibility_creates_cache_position(self):
+        calls = []
+
+        class FakeModel:
+            def prepare_inputs_for_generation(
+                self,
+                input_ids,
+                past_key_values=None,
+                cache_position=None,
+                **kwargs,
+            ):
+                calls.append(cache_position)
+                return {"cache_position": cache_position}
+
+        model = FakeModel()
+        MODULE._ensure_molmo2_generation_compatibility(model)
+        input_ids = MODULE.torch.zeros((1, 5), dtype=MODULE.torch.long)
+        result = model.prepare_inputs_for_generation(input_ids)
+        self.assertEqual(result["cache_position"].tolist(), [0, 1, 2, 3, 4])
+
+        cache = type("FakeCache", (), {"get_seq_length": lambda self: 5})()
+        result = model.prepare_inputs_for_generation(
+            input_ids,
+            past_key_values=cache,
+            next_sequence_length=1,
+        )
+        self.assertEqual(result["cache_position"].tolist(), [5])
+
+    def test_molmo2_mask_compatibility_renames_legacy_arguments(self):
+        module_name = "fake_molmo2_modeling"
+        module = ModuleType(module_name)
+        calls = []
+
+        def mask_function(*args, **kwargs):
+            calls.append((args, kwargs))
+            return kwargs
+
+        module.create_causal_mask = mask_function
+        module.create_masks_for_generate = mask_function
+        original_module = MODULE.sys.modules.get(module_name)
+        MODULE.sys.modules[module_name] = module
+        fake_class = type("FakeMolmo2", (), {})
+        fake_class.__module__ = module_name
+        try:
+            MODULE._ensure_molmo2_mask_compatibility(fake_class())
+            result = module.create_causal_mask(
+                input_embeds="embeds",
+                cache_position="legacy",
+            )
+        finally:
+            if original_module is None:
+                MODULE.sys.modules.pop(module_name, None)
+            else:
+                MODULE.sys.modules[module_name] = original_module
+
+        self.assertEqual(result, {"inputs_embeds": "embeds"})
+        self.assertEqual(calls[0][1], {"inputs_embeds": "embeds"})
 
 
 if __name__ == "__main__":

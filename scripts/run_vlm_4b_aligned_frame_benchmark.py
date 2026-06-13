@@ -16,6 +16,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
+from types import MethodType
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -39,10 +40,12 @@ except ImportError:
 
 try:
     from transformers import AutoModelForImageTextToText, AutoProcessor
+    from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
     from transformers.processing_utils import ProcessorMixin
 except ImportError:
     AutoModelForImageTextToText = None
     AutoProcessor = None
+    ROPE_INIT_FUNCTIONS = None
     ProcessorMixin = None
 
 try:
@@ -319,6 +322,90 @@ def _ensure_molmo2_chat_template(processor: Any, model_name: str) -> Any:
     return processor
 
 
+def _ensure_molmo2_rope_compatibility() -> None:
+    if ROPE_INIT_FUNCTIONS is None or "default" in ROPE_INIT_FUNCTIONS:
+        return
+
+    def default_rope_parameters(
+        config: Any,
+        device: Any = None,
+        seq_len: int | None = None,
+        layer_type: str | None = None,
+    ) -> tuple[Any, float]:
+        del seq_len, layer_type
+        head_dim = getattr(config, "head_dim", None)
+        if head_dim is None:
+            head_dim = int(config.hidden_size) // int(config.num_attention_heads)
+        partial_rotary_factor = float(getattr(config, "partial_rotary_factor", 1.0))
+        dimension = int(head_dim * partial_rotary_factor)
+        rope_theta = float(getattr(config, "rope_theta", 10000.0))
+        exponents = torch.arange(0, dimension, 2, dtype=torch.int64, device=device).float()
+        inv_freq = 1.0 / (rope_theta ** (exponents / dimension))
+        return inv_freq, 1.0
+
+    ROPE_INIT_FUNCTIONS["default"] = default_rope_parameters
+
+
+def _ensure_molmo2_generation_compatibility(model: Any) -> None:
+    if getattr(model, "_aligned_benchmark_cache_position_compat", False):
+        return
+    original_prepare = model.prepare_inputs_for_generation
+
+    def compatible_prepare(
+        self: Any,
+        input_ids: Any,
+        past_key_values: Any = None,
+        cache_position: Any = None,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        if cache_position is None:
+            past_seen_tokens = (
+                int(past_key_values.get_seq_length())
+                if past_key_values is not None
+                else 0
+            )
+            next_sequence_length = kwargs.get("next_sequence_length")
+            sequence_length = (
+                int(next_sequence_length)
+                if next_sequence_length is not None
+                else int(input_ids.shape[-1])
+            )
+            cache_position = torch.arange(
+                sequence_length,
+                device=input_ids.device,
+            ) + past_seen_tokens
+        return original_prepare(
+            input_ids,
+            past_key_values=past_key_values,
+            cache_position=cache_position,
+            **kwargs,
+        )
+
+    model.prepare_inputs_for_generation = MethodType(compatible_prepare, model)
+    model._aligned_benchmark_cache_position_compat = True
+
+
+def _ensure_molmo2_mask_compatibility(model: Any) -> None:
+    module = sys.modules.get(model.__class__.__module__)
+    if module is None or getattr(module, "_aligned_benchmark_mask_compat", False):
+        return
+
+    def wrap_mask_function(function: Any) -> Any:
+        def compatible_mask(*args: Any, **kwargs: Any) -> Any:
+            if "input_embeds" in kwargs and "inputs_embeds" not in kwargs:
+                kwargs["inputs_embeds"] = kwargs.pop("input_embeds")
+            kwargs.pop("cache_position", None)
+            return function(*args, **kwargs)
+
+        return compatible_mask
+
+    for name in ("create_causal_mask", "create_masks_for_generate"):
+        function = getattr(module, name, None)
+        if callable(function):
+            setattr(module, name, wrap_mask_function(function))
+    module._aligned_benchmark_mask_compat = True
+
+
 class CachedQwenVLFrameAnswerAdapter(_SingleRGBFrameSetCache, QwenVLFrameAnswerAdapter):
     """Qwen-VL adapter that keeps one decoded RGB frame set in memory."""
 
@@ -421,6 +508,7 @@ class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
         if AutoProcessor is None or AutoModelForImageTextToText is None:
             raise RuntimeError("Molmo2 requires Transformers.")
         self.processor = _load_molmo2_processor(model_name)
+        _ensure_molmo2_rope_compatibility()
         self.model = AutoModelForImageTextToText.from_pretrained(
             model_name,
             trust_remote_code=True,
@@ -429,6 +517,8 @@ class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
             device_map="auto",
             low_cpu_mem_usage=True,
         ).eval()
+        _ensure_molmo2_mask_compatibility(self.model)
+        _ensure_molmo2_generation_compatibility(self.model)
 
     def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
         images = self._rgb_frames(frame_paths)

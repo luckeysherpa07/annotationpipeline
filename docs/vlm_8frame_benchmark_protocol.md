@@ -1,8 +1,8 @@
-# 8B VLM Frame-Input Benchmark Protocol
+# 4B/8B VLM Frame-Input Benchmark Protocol
 
 This document records the data, sampling procedure, runtime environment, model
-configuration, and output format used to evaluate Qwen3-VL-8B, InternVL3-8B,
-and Molmo2-8B on aligned QA with frame inputs.
+configuration, and output format used to evaluate the 4B and 8B variants of
+Qwen3-VL, InternVL, and Molmo2 on aligned QA with frame inputs.
 
 ## 1. Evaluation Objective
 
@@ -10,6 +10,8 @@ This benchmark compares the models under identical visual evidence.
 
 - All models answer the same QA items.
 - All models receive exactly the same eight images for a given QA item.
+- Each 4B model uses the same quantization or numerical precision policy as
+  the corresponding 8B model family.
 - Native model-specific video sampling is not evaluated here.
 - Native full-video input must be reported as a separate experiment.
 
@@ -122,11 +124,10 @@ Twelve questions in the formal manifest explicitly reference a frame number:
 
 ## 5. Inference Rules
 
-Shared resource and generation rules:
+Shared generation rules:
 
 | Setting | Value |
 |---|---|
-| GPU | One NVIDIA GeForce RTX 4090, 24 GB |
 | Batch size | 1 QA item |
 | Input images | 8 |
 | Day/night allocation | 4 + 4 |
@@ -137,24 +138,33 @@ Shared resource and generation rules:
 | Resume support | Enabled |
 | CUDA allocator | `expandable_segments:True` |
 
+The completed 8B runs used one NVIDIA GeForce RTX 4090 with 24 GB of memory.
+The 4B runs use one NVIDIA GeForce RTX 4080 with 16 GB of memory. Hardware,
+driver, CUDA, and framework differences mean that latency and memory values
+must not be compared directly across the 4B and 8B runs. Answer accuracy may
+be compared because the visual evidence, prompts, generation settings, and
+family-specific precision policies are held fixed.
+
 Models must not run concurrently. OOM errors, empty answers, and other failures
 must be recorded. A failed QA item must not be rerun with fewer frames and then
 mixed into the same result set.
 
 ## 6. Model Configurations
 
-### Qwen3-VL-8B-Instruct
+### Qwen3-VL
 
 ```text
-Model: models/qwen/Qwen3-VL-8B-Instruct
+4B model: models/qwen/Qwen3-VL-4B-Instruct
+8B model: models/qwen/Qwen3-VL-8B-Instruct
 Weights: bitsandbytes 4-bit NF4
 Compute dtype: float16
 ```
 
-### InternVL3-8B
+### InternVL
 
 ```text
-Model: models/internvl/InternVL3-8B
+4B model: models/internvl/InternVL3_5-4B-Instruct
+8B model: models/internvl/InternVL3-8B
 Weights: bitsandbytes 8-bit
 Image size: 448 x 448
 Maximum tiles per frame: 1
@@ -168,21 +178,44 @@ When FlashAttention2 is unavailable, InternVL falls back to eager attention.
 This does not change the selected frames, but it can affect runtime and memory
 usage and must therefore be reported.
 
-### Molmo2-8B
+The 4B tokenizer is loaded with `fix_mistral_regex=true` to correct the
+tokenizer's known legacy regular-expression pattern.
+
+### Molmo2
 
 ```text
-Model: models/molmo2/Molmo2-8B
+4B model: models/molmo2/Molmo2-4B
+8B model: models/molmo2/Molmo2-8B
 Weight and compute dtype: bfloat16
 Image processor: use_fast=false
 ```
 
 Generic full-model bitsandbytes 4-bit loading triggers a Byte LayerNorm
 compatibility error. The formal benchmark therefore uses the verified BF16
-configuration.
+configuration. The 4B runner includes compatibility shims for the local
+Molmo2 remote code under Transformers 5.12.0. These restore the legacy default
+RoPE registration and adapt generation cache and causal-mask argument names;
+they do not alter model weights, prompts, frames, or generation settings.
+
+### 4B Input Cache
+
+The 4B runner groups QA items by their ordered eight-frame tuple and keeps only
+the current frame set in memory. The formal manifest contains 5,465 QA items
+but only 246 distinct frame sets.
+
+- Qwen3-VL-4B and Molmo2-4B cache one decoded RGB frame set.
+- InternVL-4B caches one preprocessed `pixel_values` tensor.
+- The cache is replaced when the frame set changes.
+- Visual encoder outputs are not cached; the vision encoder still runs for
+  every question.
+- The input remains eight independent images, so this optimization does not
+  change the benchmark evidence or convert the input into video.
 
 ## 7. Software and Hardware Environment
 
-Environment recorded on June 13, 2026:
+### 8B Environment
+
+Environment recorded for the completed 8B runs on June 13, 2026:
 
 ```text
 Operating system: Ubuntu 22.04.5 LTS
@@ -197,6 +230,29 @@ OpenCV: 4.13.0
 GPU: NVIDIA GeForce RTX 4090, 24564 MiB
 ```
 
+### 4B Environment
+
+The 4B environment was created separately because the machine's NVIDIA
+535.309.01 driver cannot run the original CUDA 13.0 PyTorch environment:
+
+```text
+Operating system: Ubuntu 22.04.5 LTS
+Kernel: Linux 6.8.0-111-generic x86_64
+Python: 3.10.12
+Virtual environment: .venv-cu126
+PyTorch: 2.11.0+cu126
+CUDA runtime: 12.6
+Transformers: 5.12.0
+bitsandbytes: 0.49.2
+Pillow: 12.2.0
+OpenCV: 4.13.0
+NVIDIA driver: 535.309.01
+GPU: NVIDIA GeForce RTX 4080, 16376 MiB
+```
+
+The system driver was not upgraded or otherwise modified. The isolated
+environment dependencies are recorded in `requirements-vlm-cu126.txt`.
+
 Model versions are determined by the contents of the local model directories.
 For archival reproducibility, the Git commit and model source revisions or
 model-file hashes should also be saved. The current working tree has not yet
@@ -204,7 +260,7 @@ been identified by a commit containing this complete experiment setup.
 
 ## 8. Execution
 
-Benchmark script:
+### 8B Execution
 
 ```text
 scripts/run_vlm_8frame_smoke.py
@@ -238,13 +294,53 @@ For a preflight smoke test, add:
 This runs one QA item from each of the four modalities. Remove the option to
 continue with the full dataset.
 
+### 4B Execution
+
+Benchmark script:
+
+```text
+scripts/run_vlm_4b_aligned_frame_benchmark.py
+```
+
+Activate the isolated CUDA 12.6 environment:
+
+```bash
+source .venv-cu126/bin/activate
+```
+
+Formal execution for one model:
+
+```bash
+python scripts/run_vlm_4b_aligned_frame_benchmark.py --models qwen_vl
+```
+
+Replace `qwen_vl` with `internvl` or `molmo2`. The default experiment
+directory is:
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b
+```
+
+For a four-item preflight run, add `--max-items-per-modality 1`. Remove that
+option for the formal run. Resume is enabled by default; do not use
+`--no-resume` when continuing an interrupted run.
+
 ## 9. Result Format
 
-Each model produces one JSON file and one CSV file under:
+The 8B result files are stored under:
 
 ```text
 outputs/benchmarks/vlm_8frame_aligned/frames_8/
 ```
+
+The 4B result files are stored separately under:
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b/
+```
+
+Each model has its own JSON and CSV file. The 4B files do not overwrite the
+8B results or the results of another 4B model.
 
 Each result item stores:
 
@@ -285,35 +381,47 @@ removed.
   produced by the downstream judge.
 - Answer generation and correctness judging are separate stages. This script
   only generates answers.
+- Cross-size latency and GPU-memory comparisons are not valid because the 4B
+  and 8B runs use different GPUs and software environments.
+- Accuracy comparisons remain meaningful under this protocol, but the
+  environment difference and the 4B compatibility shims must be disclosed.
 
-## 11. Completed Runs
+## 11. Run Status
 
 As of June 13, 2026:
 
-| Model | Completed | Failed/OOM | Mean latency | Mean peak GPU memory |
-|---|---:|---:|---:|---:|
-| Qwen3-VL-8B | 5465 | 0 | 1.896 s | 8.46 GB |
-| InternVL3-8B | 5465 | 0 | 0.765 s | 10.09 GB |
-| Molmo2-8B | 5465 | 0 | 2.876 s | 21.01 GB |
+| Model | Run type | Completed | Failed/OOM | Mean latency | Mean peak GPU memory |
+|---|---|---:|---:|---:|---:|
+| Qwen3-VL-4B | Preflight smoke | 4 | 0 | 2.087 s | 4.89 GB |
+| InternVL3.5-4B | Preflight smoke | 4 | 0 | 1.163 s | 7.21 GB |
+| Molmo2-4B | Preflight smoke | 4 | 0 | 6.573 s | 13.88 GB |
+| Qwen3-VL-8B | Formal | 5465 | 0 | 1.896 s | 8.46 GB |
+| InternVL3-8B | Formal | 5465 | 0 | 0.765 s | 10.09 GB |
+| Molmo2-8B | Formal | 5465 | 0 | 2.876 s | 21.01 GB |
+
+The 4B rows record implementation preflight tests only. The formal 4B
+benchmark has not yet been recorded as complete in this document.
 
 This table records answer-generation completion only; it does not report answer
-accuracy.
+accuracy. Latency and memory numbers must only be compared within runs made on
+the same hardware and software environment.
 
 ---
 
 # 中文版
 
-# 8B VLM 帧输入评估规范
+# 4B/8B VLM 帧输入评估规范
 
-本文记录本项目对 Qwen3-VL-8B、InternVL3-8B 和 Molmo2-8B 进行 aligned QA
-帧输入评估时采用的数据、采样规则、运行环境和结果格式。
+本文记录本项目对 Qwen3-VL、InternVL 和 Molmo2 的 4B 与 8B 版本进行 aligned
+QA 帧输入评估时采用的数据、采样规则、运行环境、模型配置和结果格式。
 
 ## 1. 评估目标
 
-本评估用于比较三个模型在获得相同视觉证据时的问答能力。
+本评估用于比较模型在获得相同视觉证据时的问答能力。
 
 - 所有模型回答相同的 QA。
-- 同一条 QA 对三个模型使用完全相同的 8 张图像。
+- 同一条 QA 对所有模型使用完全相同的 8 张图像。
+- 同一家族的 4B 和 8B 模型采用相同的量化或数值精度策略。
 - 本评估不包含模型原生的视频采样能力。
 - 原生完整视频输入应作为另一套独立实验报告。
 
@@ -417,11 +525,10 @@ referenced_or_nearest_then_stratified_uniform_v2
 
 ## 5. 推理规则
 
-统一规则：
+统一生成规则：
 
 | 配置 | 值 |
 |---|---|
-| GPU | 单张 NVIDIA GeForce RTX 4090，24 GB |
 | Batch size | 1 条 QA |
 | 输入图像数 | 8 |
 | Day/night | 4 + 4 |
@@ -432,23 +539,30 @@ referenced_or_nearest_then_stratified_uniform_v2
 | 断点续跑 | 启用 |
 | CUDA allocator | `expandable_segments:True` |
 
+已完成的 8B 正式运行使用单张 NVIDIA GeForce RTX 4090（24 GB）；4B 运行使用
+单张 NVIDIA GeForce RTX 4080（16 GB）。由于硬件、驱动、CUDA 和框架版本不同，
+4B 与 8B 的延迟和显存数值不能直接比较。回答准确率仍可比较，因为视觉证据、
+prompt、生成参数以及同模型家族的精度策略保持一致。
+
 模型不得同时运行，以免互相占用 GPU 显存。OOM、空答案和普通异常必须记录，
 不得针对失败 QA 临时降低帧数后混入同一结果。
 
 ## 6. 模型配置
 
-### Qwen3-VL-8B-Instruct
+### Qwen3-VL
 
 ```text
-模型：models/qwen/Qwen3-VL-8B-Instruct
+4B 模型：models/qwen/Qwen3-VL-4B-Instruct
+8B 模型：models/qwen/Qwen3-VL-8B-Instruct
 权重：bitsandbytes 4-bit NF4
 计算 dtype：float16
 ```
 
-### InternVL3-8B
+### InternVL
 
 ```text
-模型：models/internvl/InternVL3-8B
+4B 模型：models/internvl/InternVL3_5-4B-Instruct
+8B 模型：models/internvl/InternVL3-8B
 权重：bitsandbytes 8-bit
 图像尺寸：448 x 448
 每帧最大 tile：1
@@ -460,20 +574,39 @@ referenced_or_nearest_then_stratified_uniform_v2
 未安装 FlashAttention2 时，InternVL 使用 eager attention。该回退不改变输入帧，
 但会影响速度和显存，因此应在报告中注明。
 
-### Molmo2-8B
+4B tokenizer 使用 `fix_mistral_regex=true` 加载，以修正已知的旧版正则表达式
+分词问题。
+
+### Molmo2
 
 ```text
-模型：models/molmo2/Molmo2-8B
+4B 模型：models/molmo2/Molmo2-4B
+8B 模型：models/molmo2/Molmo2-8B
 权重和计算 dtype：bfloat16
 image processor：use_fast=false
 ```
 
 通用 bitsandbytes 全模型 4-bit 加载会触发 Byte LayerNorm 兼容错误，因此正式评估
-使用已验证可运行的 BF16 配置。
+使用已验证可运行的 BF16 配置。4B runner 为本地 Molmo2 remote code 和
+Transformers 5.12.0 提供兼容层，包括恢复旧版默认 RoPE 注册，以及适配 generation
+cache 和 causal-mask 参数名称。这些兼容层不修改模型权重、prompt、输入帧或生成参数。
+
+### 4B 输入缓存
+
+4B runner 按有序的 8 帧路径组合对 QA 分组，并且内存中只保留当前一组帧。正式
+manifest 包含 5465 条 QA，但只有 246 组不同的 8 帧输入。
+
+- Qwen3-VL-4B 和 Molmo2-4B 缓存一组已解码 RGB 图像。
+- InternVL-4B 缓存一组预处理后的 `pixel_values` tensor。
+- 切换帧组时释放并替换缓存。
+- 不缓存视觉编码器输出；每个问题仍会执行一次 vision encoder。
+- 输入仍为 8 张独立图像，不会转成视频，也不会改变 benchmark 视觉证据。
 
 ## 7. 软件环境
 
-本轮实验环境记录于 2026-06-13：
+### 8B 环境
+
+已完成 8B 正式运行的环境记录于 2026-06-13：
 
 ```text
 操作系统：Ubuntu 22.04.5 LTS
@@ -488,12 +621,34 @@ OpenCV：4.13.0
 GPU：NVIDIA GeForce RTX 4090，24564 MiB
 ```
 
+### 4B 环境
+
+由于当前机器的 NVIDIA 535.309.01 驱动无法运行原 CUDA 13.0 PyTorch 环境，
+4B 使用独立虚拟环境：
+
+```text
+操作系统：Ubuntu 22.04.5 LTS
+内核：Linux 6.8.0-111-generic x86_64
+Python：3.10.12
+虚拟环境：.venv-cu126
+PyTorch：2.11.0+cu126
+CUDA runtime：12.6
+Transformers：5.12.0
+bitsandbytes：0.49.2
+Pillow：12.2.0
+OpenCV：4.13.0
+NVIDIA 驱动：535.309.01
+GPU：NVIDIA GeForce RTX 4080，16376 MiB
+```
+
+系统驱动没有升级或修改。独立环境依赖记录在 `requirements-vlm-cu126.txt`。
+
 模型版本由本地模型目录内容决定。正式归档时应同时保存 Git commit、模型目录来源
 或模型文件哈希；当前工作树尚未以 commit 标识本轮配置。
 
 ## 8. 执行方式
 
-脚本：
+### 8B 执行方式
 
 ```text
 scripts/run_vlm_8frame_smoke.py
@@ -525,13 +680,51 @@ scripts/run_vlm_8frame_smoke.py
 
 该参数会运行四种 modality 各 1 条；去掉后继续全集评估。
 
+### 4B 执行方式
+
+脚本：
+
+```text
+scripts/run_vlm_4b_aligned_frame_benchmark.py
+```
+
+激活独立 CUDA 12.6 环境：
+
+```bash
+source .venv-cu126/bin/activate
+```
+
+正式运行单个模型：
+
+```bash
+python scripts/run_vlm_4b_aligned_frame_benchmark.py --models qwen_vl
+```
+
+将 `qwen_vl` 替换为 `internvl` 或 `molmo2`。默认实验目录为：
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b
+```
+
+四条预检测试添加 `--max-items-per-modality 1`；正式运行时去掉该参数。默认启用
+断点续跑，继续中断任务时不要添加 `--no-resume`。
+
 ## 9. 结果格式
 
-每个模型分别生成 JSON 和 CSV：
+8B 结果存放在：
 
 ```text
 outputs/benchmarks/vlm_8frame_aligned/frames_8/
 ```
+
+4B 结果独立存放在：
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b/
+```
+
+每个模型分别生成独立 JSON 和 CSV。4B 文件不会覆盖 8B 结果，也不会覆盖另一个
+4B 模型的结果。
 
 每条结果保存：
 
@@ -564,15 +757,23 @@ model_answer 非空
 - 当前基准不能衡量模型原生视频解码、视频采样或时序压缩能力。
 - 少量模型答案可能超过“简短回答”的要求，应由后续 judge 据实评分。
 - 回答生成与正确性评分是两个阶段；本脚本只生成答案，不执行 judge。
+- 由于 4B 和 8B 使用不同 GPU 和软件环境，不能直接比较跨规模延迟和显存。
+- 按本规范可以比较回答准确率，但正式报告必须披露环境差异和 4B 兼容层。
 
-## 11. 已完成运行
+## 11. 运行状态
 
 截至 2026-06-13：
 
-| 模型 | 完成数量 | 失败/OOM | 平均单题耗时 | 平均峰值显存 |
-|---|---:|---:|---:|---:|
-| Qwen3-VL-8B | 5465 | 0 | 1.896 秒 | 8.46 GB |
-| InternVL3-8B | 5465 | 0 | 0.765 秒 | 10.09 GB |
-| Molmo2-8B | 5465 | 0 | 2.876 秒 | 21.01 GB |
+| 模型 | 运行类型 | 完成数量 | 失败/OOM | 平均单题耗时 | 平均峰值显存 |
+|---|---|---:|---:|---:|---:|
+| Qwen3-VL-4B | 预检 smoke | 4 | 0 | 2.087 秒 | 4.89 GB |
+| InternVL3.5-4B | 预检 smoke | 4 | 0 | 1.163 秒 | 7.21 GB |
+| Molmo2-4B | 预检 smoke | 4 | 0 | 6.573 秒 | 13.88 GB |
+| Qwen3-VL-8B | 正式运行 | 5465 | 0 | 1.896 秒 | 8.46 GB |
+| InternVL3-8B | 正式运行 | 5465 | 0 | 0.765 秒 | 10.09 GB |
+| Molmo2-8B | 正式运行 | 5465 | 0 | 2.876 秒 | 21.01 GB |
 
-该表仅记录回答生成是否完成，不表示答案正确率。
+4B 行仅记录实现预检测试；本文档尚未将 4B 正式 benchmark 标记为完成。
+
+该表仅记录回答生成是否完成，不表示答案正确率。延迟和显存只能在相同硬件及软件
+环境内比较。

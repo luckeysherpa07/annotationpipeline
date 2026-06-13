@@ -680,6 +680,7 @@ class InternVLFrameAnswerAdapter:
                 self.model_name,
                 trust_remote_code=True,
                 use_fast=False,
+                fix_mistral_regex=True,
                 **revision_kwargs,
             )
         except Exception as exc:
@@ -698,6 +699,7 @@ class InternVLFrameAnswerAdapter:
                 tokenizer_model,
                 trust_remote_code=True,
                 use_fast=False,
+                fix_mistral_regex=True,
             )
             tokenizer.add_special_tokens(
                 {"additional_special_tokens": list(DEFAULT_INTERNVL_ADDITIONAL_SPECIAL_TOKENS)}
