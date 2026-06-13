@@ -108,13 +108,22 @@ def _referenced_frame_numbers(question: str) -> list[int]:
 
 
 def _sample_side(paths: list[Path], question: str, count: int) -> list[Path]:
-    """Select referenced frames first, then uniformly fill the remaining side quota."""
+    """Select referenced or nearest cached frames, then uniformly fill the side quota."""
     paths = _dedupe_sorted(paths)
-    wanted = set(_referenced_frame_numbers(question))
-    exact = [path for path in paths if _frame_number(path) in wanted][:count]
-    exact_keys = {path.as_posix() for path in exact}
-    remaining = [path for path in paths if path.as_posix() not in exact_keys]
-    return [*exact, *_uniform_sample(remaining, count - len(exact))]
+    selected: list[Path] = []
+    selected_keys: set[str] = set()
+    for frame_number in _referenced_frame_numbers(question):
+        candidates = [path for path in paths if path.as_posix() not in selected_keys]
+        if not candidates or len(selected) >= count:
+            break
+        nearest = min(
+            candidates,
+            key=lambda path: (abs(_frame_number(path) - frame_number), _frame_number(path)),
+        )
+        selected.append(nearest)
+        selected_keys.add(nearest.as_posix())
+    remaining = [path for path in paths if path.as_posix() not in selected_keys]
+    return [*selected, *_uniform_sample(remaining, count - len(selected))]
 
 
 def _split_candidates_by_side(item: dict[str, Any], frame_cache_root: Path) -> dict[str, list[Path]]:
@@ -155,22 +164,26 @@ def build_fixed_qa_manifest(
     output_path: Path,
     frame_cache_root: Path,
     modalities: tuple[str, ...],
-    items_per_modality: int,
+    items_per_modality: int | None,
     maximum_frames_per_side: int,
 ) -> dict[str, Any]:
     """Select one fixed QA set that supports every requested frame-count tier."""
     selected: list[dict[str, Any]] = []
     counts: dict[str, int] = defaultdict(int)
+    skipped_insufficient_frames: dict[str, int] = defaultdict(int)
     wanted = set(modalities)
     for item in load_valid_qa_items(input_path):
         modality = str(item.get("modality", "")).lower()
-        if modality not in wanted or counts[modality] >= items_per_modality:
+        if modality not in wanted:
+            continue
+        if items_per_modality is not None and counts[modality] >= items_per_modality:
             continue
         grouped = _split_candidates_by_side(item, frame_cache_root)
         if (
             len(grouped["day"]) < maximum_frames_per_side
             or len(grouped["night"]) < maximum_frames_per_side
         ):
+            skipped_insufficient_frames[modality] += 1
             continue
         selected.append(
             {
@@ -185,21 +198,34 @@ def build_fixed_qa_manifest(
             }
         )
         counts[modality] += 1
-        if all(counts[modality] >= items_per_modality for modality in wanted):
+        if (
+            items_per_modality is not None
+            and all(counts[modality] >= items_per_modality for modality in wanted)
+        ):
             break
 
-    missing = {modality: items_per_modality - counts[modality] for modality in wanted if counts[modality] < items_per_modality}
-    if missing:
-        raise RuntimeError(f"Could not build fixed QA manifest; insufficient balanced frame coverage: {missing}")
+    if items_per_modality is not None:
+        missing = {
+            modality: items_per_modality - counts[modality]
+            for modality in wanted
+            if counts[modality] < items_per_modality
+        }
+        if missing:
+            raise RuntimeError(
+                f"Could not build fixed QA manifest; insufficient balanced frame coverage: {missing}"
+            )
 
     metadata = {
         "manifest_type": "fixed_aligned_qa_selection_v1",
         "input_path": input_path.as_posix(),
         "frame_cache_root": frame_cache_root.as_posix(),
         "modalities": list(modalities),
-        "items_per_modality": items_per_modality,
+        "items_per_modality": items_per_modality or 0,
         "selected_items": len(selected),
         "counts_by_modality": dict(sorted(counts.items())),
+        "skipped_insufficient_frames_by_modality": dict(
+            sorted(skipped_insufficient_frames.items())
+        ),
         "minimum_frames_required_per_side": maximum_frames_per_side,
     }
     payload = {"metadata": metadata, "items": selected}
@@ -264,7 +290,7 @@ def build_frame_manifest(
     metadata = {
         "manifest_type": "balanced_frame_sampling_v1",
         "qa_manifest_sha256": qa_manifest["metadata"]["manifest_sha256"],
-        "sampling_algorithm": "referenced_then_stratified_uniform_v1",
+        "sampling_algorithm": "referenced_or_nearest_then_stratified_uniform_v2",
         "anchor_manifest_sha256": (
             anchor_manifest["metadata"]["manifest_sha256"]
             if anchor_manifest is not None
@@ -316,6 +342,7 @@ class Molmo2FrameAnswerAdapter:
             model_name,
             trust_remote_code=True,
             local_files_only=True,
+            use_fast=False,
             dtype="auto",
             device_map="auto",
         )
@@ -406,11 +433,23 @@ def run_model(
     frame_manifest: dict[str, Any],
     output_dir: Path,
     resume: bool,
+    max_items_per_modality: int | None = None,
 ) -> None:
     safe_model = _safe_name(Path(model_name).name)
     output_json = output_dir / f"{label}_{safe_model}.json"
     results = _load_results(output_json) if resume else {}
-    rows = manifest_items(input_path, frame_manifest)
+    all_rows = manifest_items(input_path, frame_manifest)
+    if max_items_per_modality is None:
+        rows = all_rows
+    else:
+        selected_counts: dict[str, int] = defaultdict(int)
+        rows = []
+        for item, frame_paths in all_rows:
+            modality = str(item.get("modality", "")).lower()
+            if selected_counts[modality] >= max_items_per_modality:
+                continue
+            rows.append((item, frame_paths))
+            selected_counts[modality] += 1
     for item, frame_paths in rows:
         if results.get(item["qa_id"], {}).get("status") == "answered":
             continue
@@ -464,7 +503,9 @@ def run_model(
             "frame_manifest_sha256": frame_manifest["metadata"]["manifest_sha256"],
             "total_frames": frame_manifest["metadata"]["total_frames"],
             "frames_per_side": frame_manifest["metadata"]["frames_per_side"],
-            "total_items": len(rows),
+            "total_manifest_items": len(all_rows),
+            "run_item_limit_per_modality": max_items_per_modality or 0,
+            "run_items": len(rows),
             "attempted_items": len(results),
             "status_counts": dict(Counter(row["status"] for row in results.values())),
             "generation_config": dict(GENERATION_CONFIG),
@@ -510,12 +551,23 @@ def main() -> None:
     parser.add_argument("--frame-cache-root", default=str(DEFAULT_FRAME_CACHE_ROOT))
     parser.add_argument("--experiment-dir", default=str(DEFAULT_EXPERIMENT_DIR))
     parser.add_argument("--qa-manifest", default=str(DEFAULT_QA_MANIFEST))
-    parser.add_argument("--items-per-modality", type=int, default=5)
+    parser.add_argument(
+        "--items-per-modality",
+        type=int,
+        default=5,
+        help="QA items per modality; use 0 to include every eligible visual QA item.",
+    )
     parser.add_argument("--frame-counts", default=",".join(map(str, DEFAULT_FRAME_COUNTS)))
     parser.add_argument("--modalities", default=",".join(DEFAULT_MODALITIES))
     parser.add_argument("--build-only", action="store_true")
     parser.add_argument("--rebuild-qa-manifest", action="store_true")
     parser.add_argument("--no-resume", action="store_true")
+    parser.add_argument(
+        "--max-items-per-modality",
+        type=int,
+        default=0,
+        help="Limit inference to N items per modality for a smoke test; 0 runs all items.",
+    )
     parser.add_argument("--models", default="qwen_vl,internvl,molmo2")
     parser.add_argument("--qwen-vl-model", default=str(DEFAULT_QWEN_VL_8B))
     parser.add_argument("--internvl-model", default=str(DEFAULT_INTERNVL_8B))
@@ -530,6 +582,12 @@ def main() -> None:
     modalities = tuple(part.strip().lower() for part in args.modalities.split(",") if part.strip())
     frame_counts = _parse_frame_counts(args.frame_counts)
     maximum_frames_per_side = max(frame_counts) // 2
+    items_per_modality = None if args.items_per_modality == 0 else max(1, args.items_per_modality)
+    max_run_items_per_modality = (
+        None
+        if args.max_items_per_modality == 0
+        else max(1, args.max_items_per_modality)
+    )
 
     if args.rebuild_qa_manifest or not qa_manifest_path.exists():
         qa_manifest = build_fixed_qa_manifest(
@@ -537,14 +595,14 @@ def main() -> None:
             output_path=qa_manifest_path,
             frame_cache_root=frame_cache_root,
             modalities=modalities,
-            items_per_modality=max(1, args.items_per_modality),
+            items_per_modality=items_per_modality,
             maximum_frames_per_side=maximum_frames_per_side,
         )
     else:
         qa_manifest = load_manifest(qa_manifest_path)
         expected = {
             "modalities": list(modalities),
-            "items_per_modality": max(1, args.items_per_modality),
+            "items_per_modality": items_per_modality or 0,
         }
         for key, value in expected.items():
             if qa_manifest.get("metadata", {}).get(key) != value:
@@ -609,6 +667,7 @@ def main() -> None:
                     frame_manifest=frame_manifests[frame_count],
                     output_dir=experiment_dir / f"frames_{frame_count}",
                     resume=not args.no_resume,
+                    max_items_per_modality=max_run_items_per_modality,
                 )
         finally:
             del adapter
