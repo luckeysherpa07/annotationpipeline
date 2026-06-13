@@ -323,9 +323,9 @@ def build_aligned_qa_quality_actions(
                 return
             max_items = None if parsed_limit == 0 else max(0, parsed_limit)
 
-        raw_max_frames = input("Max frames per item? (default 6, 0 = all): ").strip()
+        raw_max_frames = input("Max frames per item? (default 30, 0 = all): ").strip()
         if not raw_max_frames:
-            max_frames_per_item = 6
+            max_frames_per_item = 30
         else:
             try:
                 parsed_frames = int(raw_max_frames)
@@ -393,9 +393,9 @@ def build_aligned_qa_quality_actions(
                 return
             max_items = None if parsed_limit == 0 else max(0, parsed_limit)
 
-        raw_max_frames = input("Max frames per item? (default 6, 0 = all): ").strip()
+        raw_max_frames = input("Max frames per item? (default 30, 0 = all): ").strip()
         if not raw_max_frames:
-            max_frames_per_item = 6
+            max_frames_per_item = 30
         else:
             try:
                 parsed_frames = int(raw_max_frames)
@@ -524,7 +524,7 @@ def build_aligned_qa_quality_actions(
         print("Reads cached frames from aligned_dataset/.frames_cache*.")
         print(f"Writes answer-only JSON/CSV files under {benchmark_output_dir}.")
         print("No judge runs in this option; correctness scoring can run later.")
-        print("Local InternVL 4B uses Transformers + bitsandbytes 8-bit and requires CUDA.")
+        print("Local InternVL 4B uses Transformers + bitsandbytes 4-bit NF4 and requires CUDA.")
         print("-" * 60)
 
         model_name = input("InternVL 4B model name? (default OpenGVLab/InternVL2_5-4B): ").strip() or "OpenGVLab/InternVL2_5-4B"
@@ -541,9 +541,9 @@ def build_aligned_qa_quality_actions(
                 return
             max_items = None if parsed_limit == 0 else max(0, parsed_limit)
 
-        raw_max_frames = input("Max frames per item? (default 6, 0 = all): ").strip()
+        raw_max_frames = input("Max frames per item? (default 30, 0 = all): ").strip()
         if not raw_max_frames:
-            max_frames_per_item = 6
+            max_frames_per_item = 30
         else:
             try:
                 parsed_frames = int(raw_max_frames)
@@ -551,6 +551,26 @@ def build_aligned_qa_quality_actions(
                 print("Invalid max frames value.")
                 return
             max_frames_per_item = 0 if parsed_frames == 0 else max(1, parsed_frames)
+
+        raw_image_size = input("InternVL image size? (default 448): ").strip()
+        if not raw_image_size:
+            image_size = 448
+        else:
+            try:
+                image_size = max(1, int(raw_image_size))
+            except ValueError:
+                print("Invalid image size value.")
+                return
+
+        raw_max_num_tiles = input("InternVL max tiles per frame? (default 1): ").strip()
+        if not raw_max_num_tiles:
+            max_num_tiles = 1
+        else:
+            try:
+                max_num_tiles = max(1, int(raw_max_num_tiles))
+            except ValueError:
+                print("Invalid max tiles value.")
+                return
 
         raw_batch_size = input("Batch size? (default 1): ").strip()
         if not raw_batch_size:
@@ -583,6 +603,8 @@ def build_aligned_qa_quality_actions(
                     delay_between_batches=delay_between_batches,
                     max_frames_per_item=max_frames_per_item,
                     revision=revision,
+                    image_size=image_size,
+                    max_num_tiles=max_num_tiles,
                 )
             except (ImportError, RuntimeError, NotImplementedError) as exc:
                 print(str(exc))

@@ -123,7 +123,8 @@ DEFAULT_INTERNVL_ADDITIONAL_SPECIAL_TOKENS = (
     "</box>",
 )
 DEFAULT_FRAME_CACHE_ROOT = Path("aligned_dataset")
-DEFAULT_FRAME_MAX_FRAMES_PER_ITEM = 6
+DEFAULT_FRAME_MAX_FRAMES_PER_ITEM = 30
+DEFAULT_INTERNVL_BENCHMARK_MAX_NUM_TILES = 1
 FRAME_ANSWER_BENCHMARK_TYPE = "frame_input_answer_generation"
 FRAME_CACHE_SUBDIRS = {
     "rgb": ".frames_cache",
@@ -655,6 +656,8 @@ class InternVLFrameAnswerAdapter:
     def runtime_summary(
         model_name: str = DEFAULT_INTERNVL_MODEL_NAME,
         revision: str | None = DEFAULT_INTERNVL_REVISION,
+        image_size: int = DEFAULT_INTERNVL_IMAGE_SIZE,
+        max_num_tiles: int = DEFAULT_INTERNVL_MAX_NUM_TILES,
     ) -> str:
         cuda_available = bool(torch is not None and torch.cuda.is_available())
         gpu_name = "none"
@@ -668,8 +671,8 @@ class InternVLFrameAnswerAdapter:
             f"revision={str(revision or '').strip() or '<default>'}, "
             f"auto_model_available={AutoModel is not None}, auto_tokenizer_available={AutoTokenizer is not None}, "
             f"pillow_available={Image is not None}, max_tokens={DEFAULT_INTERNVL_MAX_TOKENS}, "
-            f"quantization=8bit, image_size={DEFAULT_INTERNVL_IMAGE_SIZE}, "
-            f"max_num_tiles={DEFAULT_INTERNVL_MAX_NUM_TILES}, "
+            f"quantization=4bit_nf4, image_size={max(1, int(image_size))}, "
+            f"max_num_tiles={max(1, int(max_num_tiles))}, "
             f"cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
         )
 
@@ -710,7 +713,11 @@ class InternVLFrameAnswerAdapter:
         revision_kwargs = {"revision": self.revision} if self.revision else {}
         try:
             self.tokenizer = self._load_tokenizer()
-            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
+            )
             _ensure_transformers_tied_weights_compatibility()
             self.model = AutoModel.from_pretrained(
                 self.model_name,
@@ -734,7 +741,7 @@ class InternVLFrameAnswerAdapter:
                     "again or run `pip install sentencepiece tiktoken` in the active environment."
                 )
             raise RuntimeError(
-                f"Failed to load local InternVL 4B model '{self.model_name}' in 8-bit mode. "
+                f"Failed to load local InternVL 4B model '{self.model_name}' in 4-bit NF4 mode. "
                 "Check Transformers trust_remote_code support, CUDA availability, bitsandbytes, and free GPU memory. "
                 f"Original error: {cause}.{tokenizer_hint}"
             ) from exc
@@ -2093,6 +2100,8 @@ def run_internvl_frame_answer_benchmark(
     frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
     max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
     revision: str | None = DEFAULT_INTERNVL_REVISION,
+    image_size: int = DEFAULT_INTERNVL_IMAGE_SIZE,
+    max_num_tiles: int = DEFAULT_INTERNVL_BENCHMARK_MAX_NUM_TILES,
     adapter: InternVLFrameAnswerAdapter | None = None,
 ) -> dict[str, Path]:
     """Generate local InternVL 4B answers from cached aligned-dataset frames without judging correctness."""
@@ -2106,8 +2115,13 @@ def run_internvl_frame_answer_benchmark(
         batch_size = 1
 
     revision = str(revision or "").strip() or None
+    image_size = max(1, int(image_size))
+    max_num_tiles = max(1, int(max_num_tiles))
 
-    print(f"Local InternVL 4B runtime: {InternVLFrameAnswerAdapter.runtime_summary(model_name=model_name, revision=revision)}")
+    print(
+        "Local InternVL 4B runtime: "
+        f"{InternVLFrameAnswerAdapter.runtime_summary(model_name=model_name, revision=revision, image_size=image_size, max_num_tiles=max_num_tiles)}"
+    )
 
     items = load_valid_qa_items(input_path)
     results_by_id = _load_existing_results(output_json) if resume else {}
@@ -2132,6 +2146,8 @@ def run_internvl_frame_answer_benchmark(
             "judge_enabled": False,
             "frame_cache_root": frame_cache_root.as_posix(),
             "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "internvl_image_size": image_size,
+            "internvl_max_num_tiles": max_num_tiles,
             "resume": resume,
             "total_valid_items": len(items),
             "answered_items": answered_count,
@@ -2155,7 +2171,12 @@ def run_internvl_frame_answer_benchmark(
         _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
         return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
 
-    frame_adapter = adapter or InternVLFrameAnswerAdapter(model_name=model_name, revision=revision)
+    frame_adapter = adapter or InternVLFrameAnswerAdapter(
+        model_name=model_name,
+        revision=revision,
+        image_size=image_size,
+        max_num_tiles=max_num_tiles,
+    )
 
     try:
         for start in range(0, len(pending), batch_size):

@@ -49,6 +49,17 @@ def write_valid_items(path: Path, count: int = 1) -> None:
     path.write_text(json.dumps({"valid_qa": items}), encoding="utf-8")
 
 
+def write_rgb_frame_cache(frame_root: Path, pair_index: int, count: int = 30) -> list[Path]:
+    frame_dir = frame_root / ".frames_cache" / f"pair-{pair_index}" / "rgb"
+    frame_dir.mkdir(parents=True, exist_ok=True)
+    paths = []
+    for index in range(count):
+        frame_path = frame_dir / f"frame_{index * 30:06d}.png"
+        frame_path.write_bytes(b"fake")
+        paths.append(frame_path)
+    return paths
+
+
 class StaticJudge(BenchmarkJudge):
     def judge(self, item, model_answer):
         return {"score": "correct", "numeric_score": 1.0, "reason": "matches"}
@@ -679,9 +690,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             frame_root = root / "aligned_dataset"
             write_valid_items(input_path, count=2)
             for index in range(2):
-                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
-                frame_path.parent.mkdir(parents=True, exist_ok=True)
-                frame_path.write_bytes(b"fake")
+                write_rgb_frame_cache(frame_root, pair_index=index, count=30)
 
             run_gemini_frame_answer_benchmark(
                 input_path=input_path,
@@ -821,9 +830,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             frame_root = root / "aligned_dataset"
             write_valid_items(input_path, count=2)
             for index in range(2):
-                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
-                frame_path.parent.mkdir(parents=True, exist_ok=True)
-                frame_path.write_bytes(b"fake")
+                write_rgb_frame_cache(frame_root, pair_index=index, count=30)
 
             run_qwen_vl_frame_answer_benchmark(
                 input_path=input_path,
@@ -845,7 +852,11 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             self.assertEqual(len(payload["results"]), 2)
             self.assertEqual(payload["metadata"]["provider"], "qwen_vl")
             self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertEqual(payload["metadata"]["max_frames_per_item"], 30)
             self.assertFalse(payload["metadata"]["judge_enabled"])
+            for result in payload["results"].values():
+                self.assertEqual(result["frame_count"], 30)
+                self.assertEqual(len(result["frame_paths"]), 30)
 
     def test_option_71_is_registered(self):
         from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_QWEN_VL_FRAME_ANSWER_BENCHMARK
@@ -904,6 +915,8 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 model_name="OpenGVLab/InternVL2_5-4B",
                 model=FakeModel(),
                 tokenizer=object(),
+                image_size=224,
+                max_num_tiles=1,
             )
 
             answer = adapter.answer(
@@ -917,6 +930,11 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             )
 
         self.assertEqual(answer, "internvl decoded answer")
+        mock_pixels.assert_called_once_with(
+            [Path("frame_000000.png")],
+            image_size=224,
+            max_num_tiles=1,
+        )
         self.assertEqual(chat_calls[0]["generation_config"]["do_sample"], False)
         self.assertEqual(chat_calls[0]["kwargs"]["num_patches_list"], [1])
 
@@ -938,6 +956,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
                             mock_torch.cuda.is_available.return_value = True
                             mock_torch.bfloat16 = "bfloat16"
+                            mock_torch.float16 = "float16"
                             mock_model.from_pretrained.side_effect = ValueError("bitsandbytes exploded")
 
                             with self.assertRaisesRegex(RuntimeError, "Original error: ValueError: bitsandbytes exploded"):
@@ -947,12 +966,17 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                                 )
 
         mock_tokenizer.from_pretrained.assert_called_once()
-        mock_bnb.assert_called_once_with(load_in_8bit=True)
+        mock_bnb.assert_called_once_with(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype="float16",
+            bnb_4bit_quant_type="nf4",
+        )
         self.assertEqual(DummyPreTrainedModel.all_tied_weights_keys, {})
         self.assertEqual(mock_tokenizer.from_pretrained.call_args.kwargs["revision"], "abc123")
         self.assertEqual(mock_model.from_pretrained.call_args.kwargs["revision"], "abc123")
         self.assertEqual(mock_model.from_pretrained.call_args.kwargs["quantization_config"], mock_bnb.return_value)
         self.assertNotIn("load_in_8bit", mock_model.from_pretrained.call_args.kwargs)
+        self.assertNotIn("load_in_4bit", mock_model.from_pretrained.call_args.kwargs)
 
     def test_internvl_frame_answer_benchmark_output_and_resume(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -962,9 +986,7 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             frame_root = root / "aligned_dataset"
             write_valid_items(input_path, count=2)
             for index in range(2):
-                frame_path = frame_root / ".frames_cache" / f"pair-{index}" / "rgb" / "frame_000000.png"
-                frame_path.parent.mkdir(parents=True, exist_ok=True)
-                frame_path.write_bytes(b"fake")
+                write_rgb_frame_cache(frame_root, pair_index=index, count=30)
 
             run_internvl_frame_answer_benchmark(
                 input_path=input_path,
@@ -972,6 +994,8 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 max_items=1,
                 frame_cache_root=frame_root,
                 revision="abc123",
+                image_size=224,
+                max_num_tiles=1,
                 adapter=StaticInternVLFrameAdapter(),
             )
             run_internvl_frame_answer_benchmark(
@@ -980,6 +1004,8 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 max_items=2,
                 frame_cache_root=frame_root,
                 revision="abc123",
+                image_size=224,
+                max_num_tiles=1,
                 adapter=StaticInternVLFrameAdapter(),
             )
 
@@ -989,7 +1015,13 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             self.assertEqual(payload["metadata"]["provider"], "internvl")
             self.assertEqual(payload["metadata"]["revision"], "abc123")
             self.assertEqual(payload["metadata"]["answered_items"], 2)
+            self.assertEqual(payload["metadata"]["max_frames_per_item"], 30)
+            self.assertEqual(payload["metadata"]["internvl_image_size"], 224)
+            self.assertEqual(payload["metadata"]["internvl_max_num_tiles"], 1)
             self.assertFalse(payload["metadata"]["judge_enabled"])
+            for result in payload["results"].values():
+                self.assertEqual(result["frame_count"], 30)
+                self.assertEqual(len(result["frame_paths"]), 30)
 
     def test_option_73_is_registered_with_internvl_4b_label(self):
         from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_INTERNVL_FRAME_ANSWER_BENCHMARK
