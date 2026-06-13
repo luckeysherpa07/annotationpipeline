@@ -26,6 +26,9 @@ from annotation_feature.qa_quality.benchmark import (
     DEFAULT_INPUT_PATH,
     InternVLFrameAnswerAdapter,
     QwenVLFrameAnswerAdapter,
+    build_frame_answer_prompt,
+    build_internvl_frame_prompt,
+    load_internvl_pixel_values,
     load_valid_qa_items,
 )
 
@@ -119,6 +122,56 @@ def _resolve_existing_path(path: Path, *, base_dir: Path = REPO_ROOT) -> Path:
     if path.is_file():
         return path
     return base_dir / path
+
+
+def _frame_set_key(frame_paths: list[Path]) -> tuple[str, ...]:
+    return tuple(path.resolve().as_posix() for path in frame_paths)
+
+
+def _group_rows_by_frame_set(
+    rows: list[tuple[dict[str, Any], list[Path]]],
+) -> list[tuple[dict[str, Any], list[Path]]]:
+    grouped: dict[tuple[str, ...], list[tuple[dict[str, Any], list[Path]]]] = {}
+    for row in rows:
+        grouped.setdefault(_frame_set_key(row[1]), []).append(row)
+    return [row for group in grouped.values() for row in group]
+
+
+class _SingleRGBFrameSetCache:
+    frame_cache_level = "decoded_rgb_frames"
+
+    def _init_frame_cache(self) -> None:
+        self._cached_frame_key: tuple[str, ...] | None = None
+        self._cached_images: list[Any] = []
+        self.frame_cache_hits = 0
+        self.frame_cache_misses = 0
+
+    def _rgb_frames(self, frame_paths: list[Path]) -> list[Any]:
+        key = _frame_set_key(frame_paths)
+        if key == self._cached_frame_key:
+            self.frame_cache_hits += 1
+            return self._cached_images
+
+        self.clear_frame_cache()
+        images = []
+        try:
+            for path in frame_paths:
+                with Image.open(path) as image:
+                    images.append(image.convert("RGB"))
+        except Exception:
+            for image in images:
+                image.close()
+            raise
+        self._cached_frame_key = key
+        self._cached_images = images
+        self.frame_cache_misses += 1
+        return images
+
+    def clear_frame_cache(self) -> None:
+        for image in getattr(self, "_cached_images", []):
+            image.close()
+        self._cached_images = []
+        self._cached_frame_key = None
 
 
 def manifest_items(input_path: Path, manifest: dict[str, Any]) -> list[tuple[dict[str, Any], list[Path]]]:
@@ -266,13 +319,98 @@ def _ensure_molmo2_chat_template(processor: Any, model_name: str) -> Any:
     return processor
 
 
-class Molmo2FrameAnswerAdapter:
+class CachedQwenVLFrameAnswerAdapter(_SingleRGBFrameSetCache, QwenVLFrameAnswerAdapter):
+    """Qwen-VL adapter that keeps one decoded RGB frame set in memory."""
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        self._init_frame_cache()
+        super().__init__(*args, **kwargs)
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        images = self._rgb_frames(frame_paths)
+        content: list[dict[str, Any]] = [
+            {"type": "image", "image": image}
+            for image in images
+        ]
+        content.append(
+            {"type": "text", "text": build_frame_answer_prompt(item, frame_paths)}
+        )
+        return self._answer_messages([{"role": "user", "content": content}])
+
+
+class CachedInternVLFrameAnswerAdapter(InternVLFrameAnswerAdapter):
+    """InternVL adapter that keeps one preprocessed frame tensor on the model device."""
+
+    frame_cache_level = "preprocessed_pixel_values"
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        self._cached_frame_key: tuple[str, ...] | None = None
+        self._cached_pixel_values: Any | None = None
+        self._cached_num_patches: list[int] = []
+        self.frame_cache_hits = 0
+        self.frame_cache_misses = 0
+        self.last_input_stats: dict[str, Any] = {}
+        super().__init__(*args, **kwargs)
+
+    def _frame_inputs(self, frame_paths: list[Path]) -> tuple[Any, list[int]]:
+        key = _frame_set_key(frame_paths)
+        if key == self._cached_frame_key:
+            self.frame_cache_hits += 1
+            return self._cached_pixel_values, self._cached_num_patches
+
+        self.clear_frame_cache()
+        pixel_values, num_patches = load_internvl_pixel_values(
+            frame_paths,
+            image_size=self.image_size,
+            max_num_tiles=self.max_num_tiles,
+        )
+        device = getattr(self.model, "device", None)
+        if device is None:
+            try:
+                device = next(self.model.parameters()).device
+            except Exception:
+                device = None
+        if device is not None and hasattr(pixel_values, "to"):
+            pixel_values = pixel_values.to(device)
+        self._cached_frame_key = key
+        self._cached_pixel_values = pixel_values
+        self._cached_num_patches = num_patches
+        self.frame_cache_misses += 1
+        return pixel_values, num_patches
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        pixel_values, num_patches = self._frame_inputs(frame_paths)
+        self.last_input_stats = {
+            "pixel_values_shape": list(pixel_values.shape),
+            "num_patches_list": list(num_patches),
+        }
+        answer = self.model.chat(
+            self.tokenizer,
+            pixel_values,
+            build_internvl_frame_prompt(item, frame_paths),
+            {"max_new_tokens": self.max_tokens, "do_sample": False},
+            num_patches_list=num_patches,
+            history=None,
+            return_history=False,
+        )
+        if isinstance(answer, tuple):
+            answer = answer[0]
+        return str(answer).strip()
+
+    def clear_frame_cache(self) -> None:
+        self._cached_frame_key = None
+        self._cached_pixel_values = None
+        self._cached_num_patches = []
+
+
+class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
     """Local Molmo2 adapter for independent image-frame input."""
 
     provider = "molmo2"
     quantization = "bfloat16"
 
     def __init__(self, model_name: str, max_tokens: int = 128, require_cuda: bool = True):
+        self._init_frame_cache()
         self.model_name = model_name
         self.max_tokens = max(1, int(max_tokens))
         self.last_input_stats: dict[str, Any] = {}
@@ -293,10 +431,7 @@ class Molmo2FrameAnswerAdapter:
         ).eval()
 
     def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
-        images = []
-        for path in frame_paths:
-            with Image.open(path) as image:
-                images.append(image.convert("RGB"))
+        images = self._rgb_frames(frame_paths)
         half = len(frame_paths) // 2
         prompt = "\n".join(
             [
@@ -313,42 +448,38 @@ class Molmo2FrameAnswerAdapter:
         )
         content: list[dict[str, Any]] = [{"type": "image", "image": image} for image in images]
         content.append({"type": "text", "text": prompt})
-        try:
-            inputs = self.processor.apply_chat_template(
-                [{"role": "user", "content": content}],
-                tokenize=True,
-                add_generation_prompt=True,
-                return_tensors="pt",
-                return_dict=True,
+        inputs = self.processor.apply_chat_template(
+            [{"role": "user", "content": content}],
+            tokenize=True,
+            add_generation_prompt=True,
+            return_tensors="pt",
+            return_dict=True,
+        )
+        self.last_input_stats = {
+            "input_tokens": int(inputs["input_ids"].shape[-1]),
+            "pixel_values_shape": list(inputs["pixel_values"].shape),
+        }
+        device = getattr(self.model, "device", None)
+        if device is None:
+            try:
+                device = next(self.model.parameters()).device
+            except Exception:
+                device = None
+        inputs = {
+            key: value.to(device) if device is not None and hasattr(value, "to") else value
+            for key, value in inputs.items()
+        }
+        input_length = int(inputs["input_ids"].shape[-1])
+        with torch.inference_mode():
+            generated = self.model.generate(
+                **inputs,
+                max_new_tokens=self.max_tokens,
+                do_sample=False,
             )
-            self.last_input_stats = {
-                "input_tokens": int(inputs["input_ids"].shape[-1]),
-                "pixel_values_shape": list(inputs["pixel_values"].shape),
-            }
-            device = getattr(self.model, "device", None)
-            if device is None:
-                try:
-                    device = next(self.model.parameters()).device
-                except Exception:
-                    device = None
-            inputs = {
-                key: value.to(device) if device is not None and hasattr(value, "to") else value
-                for key, value in inputs.items()
-            }
-            input_length = int(inputs["input_ids"].shape[-1])
-            with torch.inference_mode():
-                generated = self.model.generate(
-                    **inputs,
-                    max_new_tokens=self.max_tokens,
-                    do_sample=False,
-                )
-            new_tokens = generated[0, input_length:]
-            return str(
-                self.processor.tokenizer.decode(new_tokens, skip_special_tokens=True)
-            ).strip()
-        finally:
-            for image in images:
-                image.close()
+        new_tokens = generated[0, input_length:]
+        return str(
+            self.processor.tokenizer.decode(new_tokens, skip_special_tokens=True)
+        ).strip()
 
 
 def _load_results(
@@ -432,6 +563,8 @@ def _run_fixed_frame_model(
             rows.append((item, frame_paths))
             selected_counts[modality] += 1
 
+    rows = _group_rows_by_frame_set(rows)
+
     for item, frame_paths in rows:
         if _completed(results.get(item["qa_id"], {})):
             continue
@@ -447,6 +580,7 @@ def _run_fixed_frame_model(
         answer = ""
         status = "failed"
         reason = ""
+        cache_hits_before = int(getattr(adapter, "frame_cache_hits", 0))
         try:
             answer = adapter.answer(item, frame_paths)
             status = "answered" if answer else "failed"
@@ -478,6 +612,7 @@ def _run_fixed_frame_model(
             "peak_gpu_gb": round(peak_bytes / 1024**3, 3),
             "incremental_peak_gpu_gb": round(max(0, peak_bytes - baseline_bytes) / 1024**3, 3),
             "input_stats": dict(getattr(adapter, "last_input_stats", {}) or {}),
+            "frame_cache_hit": int(getattr(adapter, "frame_cache_hits", 0)) > cache_hits_before,
             "generation_config": dict(GENERATION_CONFIG),
         }
 
@@ -498,6 +633,10 @@ def _run_fixed_frame_model(
             "run_items": len(rows),
             "attempted_items": len(results),
             "status_counts": dict(Counter(row["status"] for row in results.values())),
+            "frame_cache_level": getattr(adapter, "frame_cache_level", "none"),
+            "frame_cache_capacity_sets": 1,
+            "frame_cache_hits": int(getattr(adapter, "frame_cache_hits", 0)),
+            "frame_cache_misses": int(getattr(adapter, "frame_cache_misses", 0)),
             "generation_config": dict(GENERATION_CONFIG),
             "resume": resume,
         }
@@ -510,11 +649,11 @@ def _run_fixed_frame_model(
 
 def _adapter_for(label: str, model_name: str) -> Any:
     if label == "qwen_vl":
-        adapter = QwenVLFrameAnswerAdapter(model_name=model_name)
+        adapter = CachedQwenVLFrameAnswerAdapter(model_name=model_name)
         adapter.quantization = "4bit_nf4"
         return adapter
     if label == "internvl":
-        adapter = InternVLFrameAnswerAdapter(model_name=model_name, max_num_tiles=1)
+        adapter = CachedInternVLFrameAnswerAdapter(model_name=model_name, max_num_tiles=1)
         adapter.quantization = "8bit;max_num_tiles_per_frame=1"
         return adapter
     if label == "molmo2":
@@ -595,6 +734,9 @@ def main() -> None:
             )
         finally:
             if adapter is not None:
+                clear_frame_cache = getattr(adapter, "clear_frame_cache", None)
+                if callable(clear_frame_cache):
+                    clear_frame_cache()
                 del adapter
             clear_cuda()
 
