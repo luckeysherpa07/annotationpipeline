@@ -22,48 +22,28 @@ if REPO_ROOT.as_posix() not in sys.path:
 from annotation_feature.qa_quality.benchmark import (
     DEFAULT_FRAME_CACHE_ROOT,
     DEFAULT_INPUT_PATH,
+    DEFAULT_MOLMO2_MODEL_NAME,
     InternVLFrameAnswerAdapter,
+    Molmo2FrameAnswerAdapter,
     QwenVLFrameAnswerAdapter,
     load_valid_qa_items,
     resolve_frame_cache_candidates,
 )
 
 try:
-    from PIL import Image
-except ImportError:
-    Image = None
-
-try:
     import torch
 except ImportError:
     torch = None
-
-try:
-    from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
-except ImportError:
-    AutoModelForImageTextToText = None
-    AutoProcessor = None
-    BitsAndBytesConfig = None
 
 
 DEFAULT_EXPERIMENT_DIR = Path("outputs/benchmarks/vlm_frame_count_smoke")
 DEFAULT_QA_MANIFEST = DEFAULT_EXPERIMENT_DIR / "fixed_qa_manifest.json"
 DEFAULT_QWEN_VL_8B = Path("models/qwen/Qwen3-VL-8B-Instruct")
 DEFAULT_INTERNVL_8B = Path("models/internvl/InternVL3-8B")
-DEFAULT_MOLMO2_8B = Path("models/molmo2/Molmo2-8B")
+DEFAULT_MOLMO2_4B = DEFAULT_MOLMO2_MODEL_NAME
 DEFAULT_MODALITIES = ("rgb", "ir", "event", "depth")
 DEFAULT_FRAME_COUNTS = (4, 6, 8)
 GENERATION_CONFIG = {"max_new_tokens": 128, "do_sample": False}
-
-
-def _model_input_device(model: Any) -> Any | None:
-    device = getattr(model, "device", None)
-    if device is not None:
-        return device
-    try:
-        return next(model.parameters()).device
-    except Exception:
-        return None
 
 
 def _frame_number(path: Path) -> int:
@@ -157,7 +137,6 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
                 if isinstance(value, (dict, list)):
                     converted[key] = json.dumps(value, ensure_ascii=False)
             writer.writerow(converted)
-
 
 def build_fixed_qa_manifest(
     input_path: Path,
@@ -320,81 +299,6 @@ def manifest_items(input_path: Path, manifest: dict[str, Any]) -> list[tuple[dic
             raise RuntimeError(f"Manifest contains missing frames for {item['qa_id']}: {missing}")
         resolved.append((item, frame_paths))
     return resolved
-
-
-class Molmo2FrameAnswerAdapter:
-    """Local Molmo2 adapter for independent image-frame input."""
-
-    provider = "molmo2"
-    quantization = "bfloat16"
-
-    def __init__(self, model_name: str, max_tokens: int = 128, require_cuda: bool = True):
-        self.model_name = model_name
-        self.max_tokens = max(1, int(max_tokens))
-        self.last_input_stats: dict[str, Any] = {}
-        if torch is None or Image is None:
-            raise RuntimeError("Molmo2 requires PyTorch and Pillow.")
-        if require_cuda and not torch.cuda.is_available():
-            raise RuntimeError("CUDA is not available.")
-        if AutoProcessor is None or AutoModelForImageTextToText is None:
-            raise RuntimeError("Molmo2 requires Transformers.")
-        self.processor = AutoProcessor.from_pretrained(
-            model_name,
-            trust_remote_code=True,
-            local_files_only=True,
-            use_fast=False,
-            dtype="auto",
-            device_map="auto",
-        )
-        self.model = AutoModelForImageTextToText.from_pretrained(
-            model_name,
-            trust_remote_code=True,
-            local_files_only=True,
-            dtype=torch.bfloat16,
-            device_map="auto",
-            low_cpu_mem_usage=True,
-        ).eval()
-
-    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
-        images = [Image.open(path).convert("RGB") for path in frame_paths]
-        half = len(frame_paths) // 2
-        prompt = "\n".join(
-            [
-                "Answer using only the provided image frames.",
-                f"Frames 1-{half} are daytime/with-light observations.",
-                f"Frames {half + 1}-{len(frame_paths)} are nighttime/no-light observations.",
-                "Return only a concise answer. Do not include explanation.",
-                f"Modality: {item.get('modality', '')}",
-                f"Section: {item.get('section', '')}",
-                "",
-                "Question:",
-                str(item.get("question", "")).strip(),
-            ]
-        )
-        content: list[dict[str, Any]] = [{"type": "image", "image": image} for image in images]
-        content.append({"type": "text", "text": prompt})
-        inputs = self.processor.apply_chat_template(
-            [{"role": "user", "content": content}],
-            tokenize=True,
-            add_generation_prompt=True,
-            return_tensors="pt",
-            return_dict=True,
-        )
-        self.last_input_stats = {
-            "input_tokens": int(inputs["input_ids"].shape[-1]),
-            "pixel_values_shape": list(inputs["pixel_values"].shape),
-        }
-        device = _model_input_device(self.model)
-        inputs = {key: value.to(device) if hasattr(value, "to") else value for key, value in inputs.items()}
-        input_length = int(inputs["input_ids"].shape[-1])
-        with torch.inference_mode():
-            generated = self.model.generate(
-                **inputs,
-                max_new_tokens=self.max_tokens,
-                do_sample=False,
-            )
-        new_tokens = generated[0, input_length:]
-        return str(self.processor.tokenizer.decode(new_tokens, skip_special_tokens=True)).strip()
 
 
 def _safe_name(value: str) -> str:
@@ -571,7 +475,7 @@ def main() -> None:
     parser.add_argument("--models", default="qwen_vl,internvl,molmo2")
     parser.add_argument("--qwen-vl-model", default=str(DEFAULT_QWEN_VL_8B))
     parser.add_argument("--internvl-model", default=str(DEFAULT_INTERNVL_8B))
-    parser.add_argument("--molmo2-model", default=str(DEFAULT_MOLMO2_8B))
+    parser.add_argument("--molmo2-model", default=str(DEFAULT_MOLMO2_4B))
     args = parser.parse_args()
 
     os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")

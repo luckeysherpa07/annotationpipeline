@@ -9,6 +9,7 @@ from annotation_feature.qa_quality.benchmark import (
     BenchmarkJudge,
     BenchmarkModelAdapter,
     InternVLFrameAnswerAdapter,
+    Molmo2FrameAnswerAdapter,
     OpenAICaptionAdapter,
     QwenLocalCaptionAdapter,
     QwenVLFrameAnswerAdapter,
@@ -21,11 +22,16 @@ from annotation_feature.qa_quality.benchmark import (
     build_model_prompt,
     cleanup_stale_qwen_workers,
     load_api_keys,
+    _auto_map_class_ref,
+    _ensure_rope_default_compatibility,
+    _molmo2_model_class_from_config_module,
+    _patch_tie_weights_accepts_extra_kwargs,
     resolve_frame_inputs_for_item,
     resolve_video_input_for_item,
     run_aligned_qa_benchmark,
     run_gemini_frame_answer_benchmark,
     run_internvl_frame_answer_benchmark,
+    run_molmo2_frame_answer_benchmark,
     run_qwen_vl_frame_answer_benchmark,
     run_qwen_vl_video_answer_benchmark,
     select_frames_for_question,
@@ -135,6 +141,18 @@ class StaticQwenVLFrameAdapter:
 class StaticInternVLFrameAdapter:
     def answer(self, item, frame_paths):
         return f"internvl answer using {len(frame_paths)} frame(s)"
+
+
+class StaticMolmo2FrameAdapter:
+    def answer(self, item, frame_paths):
+        return f"molmo2 answer using {len(frame_paths)} frame(s)"
+
+
+class FailingSecondMolmo2FrameAdapter:
+    def answer(self, item, frame_paths):
+        if item["qa_id"] == "qa-1":
+            raise RuntimeError("molmo2 exploded")
+        return f"molmo2 answer using {len(frame_paths)} frame(s)"
 
 
 class StaticQwenVLVideoAdapter:
@@ -1034,6 +1052,385 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertEqual(actions["73"].action_id, "aligned.qa_quality.internvl_frame_answer_benchmark")
         self.assertEqual(actions["73"].section, "FRAME INPUT ANSWER BENCHMARK")
         self.assertIn("InternVL 4B", actions["73"].title)
+
+    def test_molmo2_frame_answer_benchmark_output_resume_failures_and_no_frames(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            output_dir = root / "benchmarks"
+            frame_root = root / "aligned_dataset"
+            write_valid_items(input_path, count=3)
+            write_rgb_frame_cache(frame_root, pair_index=0, count=30)
+            write_rgb_frame_cache(frame_root, pair_index=1, count=30)
+
+            run_molmo2_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=1,
+                frame_cache_root=frame_root,
+                adapter=StaticMolmo2FrameAdapter(),
+            )
+            run_molmo2_frame_answer_benchmark(
+                input_path=input_path,
+                output_dir=output_dir,
+                max_items=3,
+                batch_size=3,
+                frame_cache_root=frame_root,
+                adapter=FailingSecondMolmo2FrameAdapter(),
+            )
+
+            output_json = output_dir / "aligned_qa_frame_answers_allenai_Molmo2-4B.json"
+            payload = json.loads(output_json.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["results"]), 2)
+            self.assertEqual(payload["metadata"]["provider"], "molmo2")
+            self.assertEqual(payload["metadata"]["model_name"], "allenai/Molmo2-4B")
+            self.assertEqual(payload["metadata"]["answered_items"], 1)
+            self.assertEqual(payload["metadata"]["skipped_no_frames"], 1)
+            self.assertEqual(payload["metadata"]["batch_size"], 1)
+            self.assertEqual(payload["metadata"]["quantization"], "4bit_nf4")
+            self.assertEqual(payload["metadata"]["max_frames_per_item"], 30)
+            self.assertFalse(payload["metadata"]["judge_enabled"])
+            self.assertEqual(payload["results"]["qa-0"]["status"], "answered")
+            self.assertEqual(payload["results"]["qa-0"]["frame_count"], 30)
+            self.assertEqual(payload["results"]["qa-1"]["status"], "failed")
+            self.assertIn("molmo2 exploded", payload["results"]["qa-1"]["reason"])
+            self.assertNotIn("qa-2", payload["results"])
+
+    def test_molmo2_frame_answer_benchmark_requires_model_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / "valid.json"
+            write_valid_items(input_path)
+
+            with self.assertRaisesRegex(ValueError, "Molmo2 model name is required"):
+                run_molmo2_frame_answer_benchmark(
+                    input_path=input_path,
+                    output_dir=root / "benchmarks",
+                    model_name="",
+                    adapter=StaticMolmo2FrameAdapter(),
+                )
+
+            with self.assertRaisesRegex(ValueError, "Molmo2 model name is required"):
+                Molmo2FrameAnswerAdapter(model_name="", model=object(), processor=object())
+
+    def test_molmo2_adapter_skips_chat_template_when_processor_has_no_template(self):
+        process_calls = []
+        chat_template_calls = []
+
+        class FakeProcessor:
+            chat_template = "template that the runtime still rejects"
+
+            def apply_chat_template(self, *args, **kwargs):
+                chat_template_calls.append((args, kwargs))
+                raise ValueError("Cannot use apply_chat_template because this processor does not have a chat template")
+
+            def process(self, **kwargs):
+                process_calls.append(kwargs)
+                return {"input_ids": [1, 2, 3]}
+
+            def decode(self, tokens, skip_special_tokens=True):
+                return " molmo answer "
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        class NoGrad:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.Image") as mock_image:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                mock_image.open.return_value.convert.return_value = "image"
+                mock_torch.no_grad.return_value = NoGrad()
+                adapter = Molmo2FrameAnswerAdapter(
+                    model_name="allenai/Molmo2-4B",
+                    model=FakeModel(),
+                    processor=FakeProcessor(),
+                )
+
+                answer = adapter.answer(
+                    {
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                        "question": "What is shown?",
+                    },
+                    [Path("frame_000000.png")],
+                )
+
+        self.assertEqual(answer, "molmo answer")
+        self.assertEqual(chat_template_calls, [])
+        self.assertEqual(len(process_calls), 1)
+        self.assertEqual(process_calls[0]["text"].count("What is shown?"), 1)
+        self.assertIn("<|image|>", process_calls[0]["text"])
+
+    def test_molmo2_adapter_falls_back_to_plain_prompt_when_chat_template_rejected(self):
+        processor_calls = []
+        chat_template_calls = []
+
+        class FakeProcessor:
+            chat_template = "template that the runtime still rejects"
+
+            def apply_chat_template(self, *args, **kwargs):
+                chat_template_calls.append((args, kwargs))
+                raise ValueError("Cannot use apply_chat_template because this processor does not have a chat template")
+
+            def __call__(self, **kwargs):
+                processor_calls.append(kwargs)
+                return {"input_ids": [1, 2, 3]}
+
+            def decode(self, tokens, skip_special_tokens=True):
+                return " molmo answer "
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        class NoGrad:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.Image") as mock_image:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                mock_image.open.return_value.convert.return_value = "image"
+                mock_torch.no_grad.return_value = NoGrad()
+                adapter = Molmo2FrameAnswerAdapter(
+                    model_name="allenai/Molmo2-4B",
+                    model=FakeModel(),
+                    processor=FakeProcessor(),
+                )
+
+                answer = adapter.answer(
+                    {
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                        "question": "What is shown?",
+                    },
+                    [Path("frame_000000.png")],
+                )
+
+        self.assertEqual(answer, "molmo answer")
+        self.assertEqual(len(chat_template_calls), 1)
+        self.assertEqual(len(processor_calls), 1)
+        self.assertEqual(processor_calls[0]["text"][0].count("What is shown?"), 1)
+        self.assertIn("<|image|>", processor_calls[0]["text"][0])
+        self.assertEqual(processor_calls[0]["images"], ["image"])
+
+    def test_molmo2_adapter_uses_image_placeholder_without_chat_template(self):
+        processor_calls = []
+
+        class FakeProcessor:
+            image_placeholder_token = "<|image|>"
+
+            def __call__(self, **kwargs):
+                processor_calls.append(kwargs)
+                return {"input_ids": [1, 2, 3]}
+
+            def decode(self, tokens, skip_special_tokens=True):
+                return " molmo answer "
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        class NoGrad:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.Image") as mock_image:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                mock_image.open.return_value.convert.return_value = "image"
+                mock_torch.no_grad.return_value = NoGrad()
+                adapter = Molmo2FrameAnswerAdapter(
+                    model_name="allenai/Molmo2-4B",
+                    model=FakeModel(),
+                    processor=FakeProcessor(),
+                )
+
+                answer = adapter.answer(
+                    {
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                        "question": "What is shown?",
+                    },
+                    [Path("frame_000000.png")],
+                )
+
+        self.assertEqual(answer, "molmo answer")
+        self.assertEqual(len(processor_calls), 1)
+        self.assertIn("<|image|>", processor_calls[0]["text"][0])
+        self.assertEqual(processor_calls[0]["images"], ["image"])
+
+    def test_tie_weights_patch_ignores_unexpected_missing_keys_kwarg(self):
+        calls = []
+
+        class FakeMolmoModelClass:
+            def tie_weights(self):
+                calls.append("called")
+                return "tied"
+
+        patched = _patch_tie_weights_accepts_extra_kwargs(FakeMolmoModelClass)
+
+        self.assertTrue(patched)
+        self.assertEqual(FakeMolmoModelClass().tie_weights(missing_keys=["lm_head.weight"]), "tied")
+        self.assertEqual(calls, ["called"])
+
+    def test_auto_map_class_ref_supports_default_dict_shape(self):
+        self.assertEqual(
+            _auto_map_class_ref(
+                {"AutoModelForImageTextToText": {"default": "modeling_molmo2.Molmo2ForConditionalGeneration"}},
+                "AutoModelForImageTextToText",
+            ),
+            "modeling_molmo2.Molmo2ForConditionalGeneration",
+        )
+        self.assertEqual(
+            _auto_map_class_ref(
+                {
+                    "AutoModelForImageTextToText": {
+                        "default": {
+                            "default": ["modeling_molmo2.Molmo2ForConditionalGeneration"]
+                        }
+                    }
+                },
+                "AutoModelForImageTextToText",
+            ),
+            "modeling_molmo2.Molmo2ForConditionalGeneration",
+        )
+
+    def test_molmo2_load_sets_tied_weights_compatibility_attribute(self):
+        class DummyPreTrainedModel:
+            pass
+
+        class FakeMolmoModel:
+            def eval(self):
+                return None
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoProcessor") as mock_processor:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModelForImageTextToText") as mock_model:
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
+                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
+                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                            mock_torch.cuda.is_available.return_value = True
+                            mock_torch.float16 = "float16"
+                            fake_model = FakeMolmoModel()
+                            mock_model.from_pretrained.return_value = fake_model
+
+                            adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
+
+        self.assertIs(adapter.model, fake_model)
+        self.assertEqual(DummyPreTrainedModel.all_tied_weights_keys, {})
+        self.assertEqual(fake_model.all_tied_weights_keys, {})
+        mock_processor.from_pretrained.assert_called_once_with("allenai/Molmo2-4B", trust_remote_code=True)
+        mock_bnb.assert_called_once_with(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype="float16",
+            bnb_4bit_quant_type="nf4",
+        )
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["quantization_config"], mock_bnb.return_value)
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["device_map"], "auto")
+
+    def test_molmo2_loader_uses_dynamic_auto_map_when_auto_models_fail(self):
+        class FakeConfig:
+            auto_map = {
+                "AutoModelForImageTextToText": {
+                    "default": "modeling_molmo2.Molmo2ForConditionalGeneration",
+                }
+            }
+
+        class FakeDynamicModel:
+            pass
+
+        class FakeDynamicModelClass:
+            @staticmethod
+            def from_pretrained(*args, **kwargs):
+                FakeDynamicModelClass.load_args = args
+                FakeDynamicModelClass.load_kwargs = kwargs
+                return FakeDynamicModel()
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoProcessor"):
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModelForImageTextToText") as mock_image_text:
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModelForCausalLM") as mock_causal:
+                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoConfig") as mock_config:
+                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.get_class_from_dynamic_module") as mock_get_class:
+                            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
+                                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                                    mock_torch.cuda.is_available.return_value = True
+                                    mock_torch.float16 = "float16"
+                                    mock_image_text.from_pretrained.side_effect = KeyError("default")
+                                    mock_causal.from_pretrained.side_effect = ValueError("Unrecognized configuration class")
+                                    mock_config.from_pretrained.return_value = FakeConfig()
+                                    mock_get_class.return_value = FakeDynamicModelClass
+
+                                    adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
+
+        self.assertIsInstance(adapter.model, FakeDynamicModel)
+        mock_get_class.assert_called_with(
+            "modeling_molmo2.Molmo2ForConditionalGeneration",
+            "allenai/Molmo2-4B",
+            trust_remote_code=True,
+        )
+        self.assertEqual(FakeDynamicModelClass.load_args[0], "allenai/Molmo2-4B")
+        self.assertEqual(FakeDynamicModelClass.load_kwargs["quantization_config"], mock_bnb.return_value)
+        self.assertEqual(FakeDynamicModelClass.load_kwargs["device_map"], "auto")
+        self.assertIs(FakeDynamicModelClass.load_kwargs["config"], mock_config.from_pretrained.return_value)
+
+    def test_molmo2_model_class_can_be_found_from_config_module(self):
+        class FakeModelClass:
+            pass
+
+        FakeConfig = type(
+            "FakeConfig",
+            (),
+            {"__module__": "transformers_modules.allenai.Molmo2_hyphen_4B.hash.configuration_molmo2"},
+        )
+
+        fake_module = type("FakeModule", (), {"Molmo2ForConditionalGeneration": FakeModelClass})()
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.importlib.import_module", return_value=fake_module) as mock_import:
+            model_class = _molmo2_model_class_from_config_module(FakeConfig())
+
+        self.assertIs(model_class, FakeModelClass)
+        mock_import.assert_called_with("transformers_modules.allenai.Molmo2_hyphen_4B.hash.modeling_molmo2")
+
+    def test_rope_default_compatibility_registers_missing_default_key(self):
+        fake_registry = {}
+
+        with unittest.mock.patch.dict("sys.modules", {}):
+            fake_module = type("FakeRopeModule", (), {"ROPE_INIT_FUNCTIONS": fake_registry})()
+            with unittest.mock.patch.dict("sys.modules", {"transformers.modeling_rope_utils": fake_module}):
+                _ensure_rope_default_compatibility()
+
+        self.assertIn("default", fake_registry)
+
+    def test_option_74_is_registered_with_molmo2_4b_label(self):
+        from annotation_feature.cli.actions.aligned_choices import ALIGNED_QA_MOLMO2_FRAME_ANSWER_BENCHMARK
+        from annotation_feature.cli.actions.aligned_qa_quality import build_aligned_qa_quality_actions
+
+        actions = build_aligned_qa_quality_actions(confirm=lambda prompt: False)
+
+        self.assertEqual(ALIGNED_QA_MOLMO2_FRAME_ANSWER_BENCHMARK, "74")
+        self.assertIn("74", actions)
+        self.assertEqual(actions["74"].action_id, "aligned.qa_quality.molmo2_frame_answer_benchmark")
+        self.assertEqual(actions["74"].section, "FRAME INPUT ANSWER BENCHMARK")
+        self.assertIn("Molmo2-4B", actions["74"].title)
 
     def test_video_resolution_supports_modalities_and_excludes_rgb_with_audio(self):
         with tempfile.TemporaryDirectory() as tmp:

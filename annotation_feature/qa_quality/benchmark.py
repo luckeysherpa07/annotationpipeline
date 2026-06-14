@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import inspect
 import json
 import os
 import re
 import subprocess
 import time
+import importlib
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -71,6 +73,11 @@ except ImportError:
     Qwen3VLForConditionalGeneration = None
 
 try:
+    from transformers.dynamic_module_utils import get_class_from_dynamic_module
+except ImportError:
+    get_class_from_dynamic_module = None
+
+try:
     from qwen_vl_utils import process_vision_info
 except ImportError:
     process_vision_info = None
@@ -94,6 +101,8 @@ DEFAULT_QWEN_MAX_CAPTION_CHARS = 3000
 DEFAULT_QWEN_MAX_QUESTION_CHARS = 600
 DEFAULT_QWEN_VL_MODEL_NAME = "Qwen/Qwen3-VL-4B-Instruct"
 DEFAULT_QWEN_VL_MAX_TOKENS = 128
+DEFAULT_MOLMO2_MODEL_NAME = "allenai/Molmo2-4B"
+DEFAULT_MOLMO2_MAX_TOKENS = 128
 DEFAULT_INTERNVL_MODEL_NAME = "OpenGVLab/InternVL2_5-4B"
 DEFAULT_INTERNVL_REVISION = ""
 DEFAULT_INTERNVL_MAX_TOKENS = 128
@@ -609,6 +618,235 @@ class QwenVLVideoAnswerAdapter(QwenVLFrameAnswerAdapter):
         return self._answer_messages(messages)
 
 
+class Molmo2FrameAnswerAdapter:
+    """Local Molmo2-4B frame-input answer adapter."""
+
+    provider = "molmo2"
+
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MOLMO2_MODEL_NAME,
+        model: Any | None = None,
+        processor: Any | None = None,
+        require_cuda: bool = True,
+        max_tokens: int = DEFAULT_MOLMO2_MAX_TOKENS,
+    ):
+        self.model_name = str(model_name or "").strip()
+        if not self.model_name:
+            raise ValueError("Molmo2 model name is required.")
+        self.max_tokens = max(1, int(max_tokens))
+        if model is not None and processor is not None:
+            self.model = model
+            self.processor = processor
+            return
+
+        self._validate_runtime(require_cuda=require_cuda)
+        self._load_model()
+
+    @staticmethod
+    def _validate_runtime(require_cuda: bool = True) -> None:
+        if torch is None:
+            raise RuntimeError("PyTorch is not installed. Install project requirements before running local Molmo2.")
+        if require_cuda and not torch.cuda.is_available():
+            raise RuntimeError(
+                "CUDA is not available. Local Molmo2 frame benchmark requires GPU execution; "
+                "fix NVIDIA driver/CUDA visibility first."
+            )
+        if Image is None:
+            raise RuntimeError("Molmo2 requires Pillow. Install project requirements first.")
+        if AutoProcessor is None or BitsAndBytesConfig is None:
+            raise RuntimeError("Molmo2 requires transformers and bitsandbytes. Install project requirements first.")
+        if AutoModelForImageTextToText is None and AutoModelForCausalLM is None:
+            raise RuntimeError("Molmo2 requires a compatible Transformers AutoModel class.")
+
+    @staticmethod
+    def runtime_summary(model_name: str = DEFAULT_MOLMO2_MODEL_NAME) -> str:
+        cuda_available = bool(torch is not None and torch.cuda.is_available())
+        gpu_name = "none"
+        if cuda_available:
+            try:
+                gpu_name = str(torch.cuda.get_device_name(0))
+            except Exception:
+                gpu_name = "visible"
+        return (
+            f"provider=molmo2, model={str(model_name or '').strip() or '<required>'}, "
+            f"cuda_available={cuda_available}, gpu={gpu_name}, "
+            f"auto_processor_available={AutoProcessor is not None}, "
+            f"image_text_model_available={AutoModelForImageTextToText is not None}, "
+            f"causal_lm_available={AutoModelForCausalLM is not None}, "
+            f"pillow_available={Image is not None}, max_tokens={DEFAULT_MOLMO2_MAX_TOKENS}, "
+            f"quantization=4bit_nf4, cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
+        )
+
+    def _load_model(self) -> None:
+        try:
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_quant_type="nf4",
+            )
+            self.processor = AutoProcessor.from_pretrained(self.model_name, trust_remote_code=True)
+            _ensure_transformers_tied_weights_compatibility()
+            _ensure_rope_default_compatibility()
+            self.model = self._load_model_with_supported_auto_class(quantization_config)
+            if "all_tied_weights_keys" not in vars(self.model):
+                self.model.all_tied_weights_keys = {}
+            if hasattr(self.model, "eval"):
+                self.model.eval()
+        except Exception as exc:
+            cause = f"{type(exc).__name__}: {exc}"
+            raise RuntimeError(
+                f"Failed to load local Molmo2 model '{self.model_name}' in 4-bit NF4 mode. "
+                "Check Transformers trust_remote_code support, CUDA availability, bitsandbytes, and free GPU memory. "
+                f"Original error: {cause}."
+            ) from exc
+
+    def _load_model_with_supported_auto_class(self, quantization_config: Any) -> Any:
+        load_kwargs = {
+            "trust_remote_code": True,
+            "quantization_config": quantization_config,
+            "device_map": "auto",
+        }
+        image_text_error: Exception | None = None
+        if AutoModelForImageTextToText is not None:
+            try:
+                return AutoModelForImageTextToText.from_pretrained(self.model_name, **load_kwargs)
+            except Exception as exc:
+                image_text_error = exc
+        causal_error: Exception | None = None
+        if AutoModelForCausalLM is not None:
+            try:
+                return AutoModelForCausalLM.from_pretrained(self.model_name, **load_kwargs)
+            except Exception as exc:
+                causal_error = exc
+        try:
+            return self._load_dynamic_auto_map_model(load_kwargs)
+        except Exception as exc:
+            raise RuntimeError(
+                "Molmo2 model could not be loaded by AutoModelForImageTextToText, AutoModelForCausalLM, "
+                f"or dynamic auto_map. ImageTextToText error: {image_text_error}; "
+                f"CausalLM error: {causal_error}; dynamic auto_map error: {exc}"
+            ) from exc
+
+    def _load_dynamic_auto_map_model(self, load_kwargs: dict[str, Any]) -> Any:
+        if AutoConfig is None:
+            raise RuntimeError("Transformers dynamic-module support is unavailable.")
+        config = AutoConfig.from_pretrained(self.model_name, trust_remote_code=True)
+        auto_map = getattr(config, "auto_map", {}) or {}
+        class_ref = (
+            _auto_map_class_ref(auto_map, "AutoModelForImageTextToText")
+            or _auto_map_class_ref(auto_map, "AutoModelForCausalLM")
+        )
+        dynamic_error: Exception | None = None
+        direct_load_kwargs = {**load_kwargs, "config": config}
+        if class_ref and get_class_from_dynamic_module is not None:
+            try:
+                model_class = get_class_from_dynamic_module(
+                    class_ref,
+                    self.model_name,
+                    trust_remote_code=True,
+                )
+                _patch_tie_weights_accepts_extra_kwargs(model_class)
+                return model_class.from_pretrained(self.model_name, **direct_load_kwargs)
+            except Exception as exc:
+                dynamic_error = exc
+
+        try:
+            model_class = _molmo2_model_class_from_config_module(config)
+            _patch_tie_weights_accepts_extra_kwargs(model_class)
+            return model_class.from_pretrained(self.model_name, **direct_load_kwargs)
+        except Exception as exc:
+            if dynamic_error is not None:
+                raise RuntimeError(
+                    f"auto_map class load failed: {dynamic_error}; config-module class load failed: {exc}"
+                ) from exc
+            raise
+
+    def answer(self, item: dict[str, Any], frame_paths: list[Path]) -> str:
+        if Image is None:
+            raise RuntimeError("Molmo2 requires Pillow. Install project requirements first.")
+        images = [Image.open(path).convert("RGB") for path in frame_paths]
+        prompt = build_frame_answer_prompt(item, frame_paths)
+
+        if hasattr(self.processor, "process"):
+            inputs = self._process_plain_prompt(images, prompt)
+        elif self._has_chat_template() and hasattr(self.processor, "apply_chat_template"):
+            content: list[dict[str, Any]] = [{"type": "image", "image": image} for image in images]
+            content.append({"type": "text", "text": prompt})
+            try:
+                text = self.processor.apply_chat_template(
+                    [{"role": "user", "content": content}],
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                inputs = self.processor(text=[text], images=images, return_tensors="pt", padding=True)
+            except Exception as exc:
+                if not self._is_missing_chat_template_error(exc):
+                    raise
+                inputs = self._process_plain_prompt(images, prompt)
+        else:
+            inputs = self._process_plain_prompt(images, prompt)
+
+        model_device = _model_input_device(self.model)
+        if model_device is not None:
+            inputs = _move_tokenizer_output_to_device(inputs, model_device)
+        input_length = _tokenizer_input_length(inputs)
+        with torch.no_grad():
+            if hasattr(self.model, "generate_from_batch"):
+                generated = self.model.generate_from_batch(
+                    inputs,
+                    max_new_tokens=self.max_tokens,
+                    tokenizer=getattr(self.processor, "tokenizer", None),
+                )
+            else:
+                generated = self.model.generate(
+                    **inputs,
+                    max_new_tokens=self.max_tokens,
+                    do_sample=False,
+                )
+        sequence = _first_generated_sequence(generated)
+        new_tokens = sequence[input_length:] if input_length else sequence
+        return self._decode_generated_tokens(new_tokens)
+
+    def _process_plain_prompt(self, images: list[Any], prompt: str) -> Any:
+        text = self._plain_image_prompt(len(images), prompt)
+        if hasattr(self.processor, "process"):
+            inputs = self.processor.process(images=images, text=text)
+            return {
+                key: value.unsqueeze(0) if hasattr(value, "unsqueeze") else value
+                for key, value in inputs.items()
+            }
+        return self.processor(text=[text], images=images, return_tensors="pt", padding=True)
+
+    def _plain_image_prompt(self, image_count: int, prompt: str) -> str:
+        image_placeholder = getattr(self.processor, "image_placeholder_token", "<|image|>")
+        image_prefix = "\n".join(str(image_placeholder) for _ in range(max(0, int(image_count))))
+        return f"{image_prefix}\n{prompt}" if image_prefix else prompt
+
+    def _decode_generated_tokens(self, tokens: Any) -> str:
+        if hasattr(self.processor, "post_process_image_text_to_text"):
+            decoded = self.processor.post_process_image_text_to_text(
+                tokens,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )
+            if isinstance(decoded, list):
+                return str(decoded[0] if decoded else "").strip()
+            return str(decoded).strip()
+        tokenizer = getattr(self.processor, "tokenizer", self.processor)
+        return str(tokenizer.decode(tokens, skip_special_tokens=True)).strip()
+
+    def _has_chat_template(self) -> bool:
+        processor_template = getattr(self.processor, "chat_template", None)
+        tokenizer_template = getattr(getattr(self.processor, "tokenizer", None), "chat_template", None)
+        return bool(processor_template or tokenizer_template)
+
+    @staticmethod
+    def _is_missing_chat_template_error(exc: Exception) -> bool:
+        message = str(exc)
+        return "apply_chat_template" in message and "chat template" in message
+
+
 class InternVLFrameAnswerAdapter:
     """Local InternVL 4B frame-input answer adapter."""
 
@@ -874,6 +1112,119 @@ def _qwen_vl_model_class(model_name: str) -> Any | None:
 def _ensure_transformers_tied_weights_compatibility() -> None:
     if PreTrainedModel is not None and not hasattr(PreTrainedModel, "all_tied_weights_keys"):
         PreTrainedModel.all_tied_weights_keys = {}
+
+
+def _ensure_rope_default_compatibility() -> None:
+    try:
+        from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
+    except Exception:
+        return
+    if "default" in ROPE_INIT_FUNCTIONS:
+        return
+
+    def _compute_default_rope_parameters(
+        config: Any = None,
+        device: Any = None,
+        seq_len: int | None = None,
+        layer_type: str | None = None,
+    ) -> tuple[Any, float]:
+        del seq_len, layer_type
+        if torch is None:
+            raise RuntimeError("PyTorch is required to initialize default RoPE parameters.")
+        base = getattr(config, "rope_theta", getattr(config, "default_theta", 10000.0))
+        partial_rotary_factor = getattr(config, "partial_rotary_factor", 1.0)
+        head_dim = getattr(config, "head_dim", None) or config.hidden_size // config.num_attention_heads
+        dim = int(head_dim * partial_rotary_factor)
+        inv_freq = 1.0 / (
+            base ** (torch.arange(0, dim, 2, dtype=torch.int64).to(device=device, dtype=torch.float) / dim)
+        )
+        return inv_freq, 1.0
+
+    ROPE_INIT_FUNCTIONS["default"] = _compute_default_rope_parameters
+
+
+def _patch_tie_weights_accepts_extra_kwargs(model_class: Any) -> bool:
+    tie_weights = getattr(model_class, "tie_weights", None)
+    if tie_weights is None or getattr(tie_weights, "_accepts_extra_kwargs", False):
+        return False
+    try:
+        signature = inspect.signature(tie_weights)
+    except (TypeError, ValueError):
+        signature = None
+    if signature is not None and any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    ):
+        return False
+
+    def compatible_tie_weights(self, *args: Any, **kwargs: Any) -> Any:
+        try:
+            return tie_weights(self, *args, **kwargs)
+        except TypeError as exc:
+            if kwargs and "unexpected keyword argument" in str(exc):
+                return tie_weights(self, *args)
+            raise
+
+    compatible_tie_weights._accepts_extra_kwargs = True  # type: ignore[attr-defined]
+    setattr(model_class, "tie_weights", compatible_tie_weights)
+    return True
+
+
+def _auto_map_class_ref(auto_map: Any, key: str) -> Any | None:
+    if not isinstance(auto_map, dict):
+        return None
+    class_ref = auto_map.get(key)
+    return _flatten_auto_map_class_ref(class_ref)
+
+
+def _flatten_auto_map_class_ref(class_ref: Any) -> Any | None:
+    if isinstance(class_ref, str):
+        return class_ref
+    if isinstance(class_ref, dict):
+        if "default" in class_ref:
+            flattened = _flatten_auto_map_class_ref(class_ref.get("default"))
+            if flattened:
+                return flattened
+        for value in class_ref.values():
+            flattened = _flatten_auto_map_class_ref(value)
+            if flattened:
+                return flattened
+        return None
+    if isinstance(class_ref, (list, tuple)):
+        for value in class_ref:
+            flattened = _flatten_auto_map_class_ref(value)
+            if flattened:
+                return flattened
+    return None
+
+
+def _molmo2_model_class_from_config_module(config: Any) -> Any:
+    config_module_name = config.__class__.__module__
+    if not config_module_name:
+        raise RuntimeError("Molmo2 config module name is unavailable.")
+    candidate_module_names = []
+    if config_module_name.endswith(".configuration_molmo2"):
+        candidate_module_names.append(config_module_name.rsplit(".", 1)[0] + ".modeling_molmo2")
+    candidate_module_names.append(config_module_name.replace("configuration_molmo2", "modeling_molmo2"))
+    candidate_class_names = (
+        "Molmo2ForConditionalGeneration",
+        "Molmo2ForImageTextToText",
+        "Molmo2ForCausalLM",
+        "Molmo2ModelForConditionalGeneration",
+    )
+    errors: list[str] = []
+    for module_name in dict.fromkeys(candidate_module_names):
+        try:
+            module = importlib.import_module(module_name)
+        except Exception as exc:
+            errors.append(f"{module_name}: {exc}")
+            continue
+        for class_name in candidate_class_names:
+            model_class = getattr(module, class_name, None)
+            if model_class is not None:
+                return model_class
+        errors.append(f"{module_name}: no known Molmo2 model class found")
+    raise RuntimeError("; ".join(errors) or "No Molmo2 model module candidates were available.")
 
 
 def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
@@ -2222,6 +2573,137 @@ def run_internvl_frame_answer_benchmark(
                 time.sleep(delay_between_batches)
     except KeyboardInterrupt:
         print("\nInternVL 4B frame-answer benchmark cancelled by user. Progress saved.")
+        _save_frame_answer_outputs(
+            output_json,
+            output_csv,
+            results_by_id,
+            make_metadata(stopped_reason="user_cancelled"),
+        )
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata(stopped_reason="completed"))
+    return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+
+def run_molmo2_frame_answer_benchmark(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_MOLMO2_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    adapter: Molmo2FrameAnswerAdapter | None = None,
+) -> dict[str, Path]:
+    """Generate local Molmo2 answers from cached aligned-dataset frames without judging correctness."""
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    frame_cache_root = Path(frame_cache_root)
+    model_name = str(model_name or "").strip()
+    if not model_name:
+        raise ValueError("Molmo2 model name is required.")
+    output_json, output_csv = _frame_answer_output_paths(output_dir, model_name)
+    batch_size = max(1, int(batch_size))
+    if batch_size != 1:
+        print("Local Molmo2 frame benchmark forces batch size to 1 to reduce GPU memory pressure.")
+        batch_size = 1
+
+    print(f"Local Molmo2 runtime: {Molmo2FrameAnswerAdapter.runtime_summary(model_name=model_name)}")
+
+    items = load_valid_qa_items(input_path)
+    results_by_id = _load_existing_results(output_json) if resume else {}
+    pending = [
+        item
+        for item in items
+        if not _is_completed_frame_answer(results_by_id.get(item["qa_id"], {}))
+    ]
+    if max_items is not None:
+        pending = pending[: max(0, int(max_items))]
+
+    skipped_no_frames = 0
+
+    def make_metadata(stopped_reason: str | None = None) -> dict[str, Any]:
+        answered_count = sum(1 for result in results_by_id.values() if _is_completed_frame_answer(result))
+        metadata = {
+            "benchmark_type": FRAME_ANSWER_BENCHMARK_TYPE,
+            "input_path": input_path.as_posix(),
+            "provider": "molmo2",
+            "model_name": model_name,
+            "judge_enabled": False,
+            "frame_cache_root": frame_cache_root.as_posix(),
+            "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "resume": resume,
+            "total_valid_items": len(items),
+            "answered_items": answered_count,
+            "pending_items": max(0, len(items) - answered_count),
+            "skipped_no_frames": skipped_no_frames,
+            "batch_size": batch_size,
+            "key_rotation_enabled": False,
+            "keys_available": 0,
+            "exhausted_key_count": 0,
+            "quantization": "4bit_nf4",
+        }
+        if stopped_reason:
+            metadata["stopped_reason"] = stopped_reason
+        return metadata
+
+    print(
+        f"Molmo2 frame-input answer benchmark resume scan: {len(results_by_id)} complete skipped, "
+        f"{len(pending)} pending selected, {len(items)} valid total, model={model_name}."
+    )
+
+    if not pending:
+        _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+        return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
+
+    frame_adapter = adapter or Molmo2FrameAnswerAdapter(model_name=model_name)
+
+    try:
+        for start in range(0, len(pending), batch_size):
+            batch = pending[start:start + batch_size]
+            print(f"Running Molmo2 frame-answer batch {start // batch_size + 1}: {len(batch)} item(s)")
+            for item in batch:
+                frame_paths = resolve_frame_inputs_for_item(
+                    item,
+                    frame_cache_root=frame_cache_root,
+                    max_frames_per_item=max_frames_per_item,
+                )
+                if not frame_paths:
+                    skipped_no_frames += 1
+                    print(f"Skipping {item['qa_id']}: no cached frames found.")
+                    continue
+
+                try:
+                    model_answer = frame_adapter.answer(item, frame_paths)
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="molmo2",
+                        model_name=model_name,
+                        model_answer=model_answer,
+                        frame_paths=frame_paths,
+                        status="answered" if model_answer else "failed",
+                        reason="" if model_answer else "Frame answer call failed: empty model answer",
+                    )
+                except Exception as exc:
+                    results_by_id[item["qa_id"]] = _frame_answer_row(
+                        item,
+                        provider="molmo2",
+                        model_name=model_name,
+                        model_answer="",
+                        frame_paths=frame_paths,
+                        status="failed",
+                        reason=f"Frame answer call failed: {exc}",
+                    )
+
+                _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
+                print(f"Checkpoint saved: {len(results_by_id)} frame answer item(s)")
+
+            if delay_between_batches > 0 and start + batch_size < len(pending):
+                time.sleep(delay_between_batches)
+    except KeyboardInterrupt:
+        print("\nMolmo2 frame-answer benchmark cancelled by user. Progress saved.")
         _save_frame_answer_outputs(
             output_json,
             output_csv,
