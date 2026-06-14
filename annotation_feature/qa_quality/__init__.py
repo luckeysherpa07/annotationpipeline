@@ -9,6 +9,9 @@ __all__ = [
     "run_qwen_vl_video_answer_benchmark",
     "run_aligned_qa_benchmark",
     "run_aligned_qa_llm_evaluation",
+    "load_evaluation_records",
+    "score_records",
+    "write_evaluation_outputs",
 ]
 
 
@@ -58,3 +61,21 @@ def run_aligned_qa_llm_evaluation(*args, **kwargs):
     from .llm_evaluator import run_aligned_qa_llm_evaluation as _run
 
     return _run(*args, **kwargs)
+
+
+def load_evaluation_records(*args, **kwargs):
+    from .result_loader import load_evaluation_records as _load
+
+    return _load(*args, **kwargs)
+
+
+def score_records(*args, **kwargs):
+    from .evaluation_report import score_records as _score
+
+    return _score(*args, **kwargs)
+
+
+def write_evaluation_outputs(*args, **kwargs):
+    from .evaluation_report import write_evaluation_outputs as _write
+
+    return _write(*args, **kwargs)

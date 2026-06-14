@@ -1,0 +1,1493 @@
+{
+  "models": {
+    "qwen_vl:Qwen3-VL-4B-Instruct:frame:6e85eecd": {
+      "identity": {
+        "provider": "qwen_vl",
+        "model_name": "Qwen/Qwen3-VL-4B-Instruct",
+        "input_type": "frame",
+        "benchmark_type": "frame_input_answer_generation",
+        "source_path": "outputs/benchmarks/aligned_qa_frame_answers_Qwen_Qwen3-VL-4B-Instruct.json"
+      },
+      "overall": {
+        "total": 5465,
+        "answered": 5465,
+        "answer_rate": 1.0,
+        "status_counts": {
+          "answered": 5465
+        },
+        "repetition_rate": 0.001646843549862763,
+        "conciseness_violation_rate": 0.0069533394327538885,
+        "latency_mean_seconds": null,
+        "latency_median_seconds": null,
+        "latency_p95_seconds": null,
+        "throughput_qa_per_hour": null,
+        "peak_gpu_gb_max": null,
+        "incremental_peak_gpu_gb_max": null,
+        "normalized_exact_match": 0.20731930466605672,
+        "token_f1": 0.31356756291087584,
+        "rouge_l_f1": 0.3114257998080731,
+        "anls": 0.22985845894404458,
+        "character_f1": 0.40135873594065097,
+        "task_aware_score": 0.45151957307901247,
+        "judge_evaluated": 0,
+        "judge_label_counts": {},
+        "judge_strict_accuracy": null,
+        "judge_soft_accuracy": null,
+        "judge_unjudgeable_rate": null,
+        "task_aware_score_ci95": {
+          "mean": 0.45151957307901247,
+          "low": 0.4387577178585704,
+          "high": 0.46339851759668954
+        },
+        "token_f1_ci95": {
+          "mean": 0.31356756291087584,
+          "low": 0.30314287857600664,
+          "high": 0.3236788283802903
+        },
+        "judge_strict_accuracy_ci95": {
+          "mean": null,
+          "low": null,
+          "high": null
+        },
+        "modality_macro_task_aware_score": 0.44944014382397535,
+        "section_macro_task_aware_score": 0.4496626099037658,
+        "modality_macro_judge_strict_accuracy": null,
+        "section_macro_judge_strict_accuracy": null
+      },
+      "by_modality": {
+        "depth": {
+          "total": 764,
+          "answered": 764,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 764
+          },
+          "repetition_rate": 0.0013089005235602095,
+          "conciseness_violation_rate": 0.003926701570680628,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.22774869109947643,
+          "token_f1": 0.30283881276975855,
+          "rouge_l_f1": 0.30283881276975855,
+          "anls": 0.24241337013087447,
+          "character_f1": 0.3881158909103857,
+          "task_aware_score": 0.40625674350409874,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.40625674350409874,
+            "low": 0.3741213419349689,
+            "high": 0.44086070239040875
+          },
+          "token_f1_ci95": {
+            "mean": 0.30283881276975855,
+            "low": 0.2738992413494762,
+            "high": 0.33300272528365665
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event": {
+          "total": 822,
+          "answered": 822,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 822
+          },
+          "repetition_rate": 0.004866180048661801,
+          "conciseness_violation_rate": 0.01824817518248175,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.2542579075425791,
+          "token_f1": 0.33423965482014095,
+          "rouge_l_f1": 0.33353000356304446,
+          "anls": 0.2828698591607346,
+          "character_f1": 0.43715974278625724,
+          "task_aware_score": 0.476602386158932,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.476602386158932,
+            "low": 0.4459396587808762,
+            "high": 0.5093432315982949
+          },
+          "token_f1_ci95": {
+            "mean": 0.33423965482014095,
+            "low": 0.30370489086939795,
+            "high": 0.3620263664968194
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "ir": {
+          "total": 1561,
+          "answered": 1561,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 1561
+          },
+          "repetition_rate": 0.0006406149903907751,
+          "conciseness_violation_rate": 0.004484304932735426,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.23126201153106982,
+          "token_f1": 0.345402759698005,
+          "rouge_l_f1": 0.34222886794622936,
+          "anls": 0.2587810775291813,
+          "character_f1": 0.429950719790081,
+          "task_aware_score": 0.4693981473711551,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.4693981473711551,
+            "low": 0.44584417786778974,
+            "high": 0.4909581623451894
+          },
+          "token_f1_ci95": {
+            "mean": 0.345402759698005,
+            "low": 0.3246178714935692,
+            "high": 0.36504171889665615
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "rgb": {
+          "total": 2318,
+          "answered": 2318,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 2318
+          },
+          "repetition_rate": 0.0012942191544434857,
+          "conciseness_violation_rate": 0.0056082830025884385,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.16781708369283865,
+          "token_f1": 0.28833441509969776,
+          "rouge_l_f1": 0.2856739504754691,
+          "anls": 0.1874445112579982,
+          "character_f1": 0.3737733257538839,
+          "task_aware_score": 0.4455032982617155,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.4455032982617155,
+            "low": 0.4264502935864471,
+            "high": 0.46407329800720165
+          },
+          "token_f1_ci95": {
+            "mean": 0.28833441509969776,
+            "low": 0.27353550468776067,
+            "high": 0.3028859220306414
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        }
+      },
+      "by_section": {
+        "action": {
+          "total": 429,
+          "answered": 429,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 429
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.009324009324009324,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.15384615384615385,
+          "token_f1": 0.34113017451433597,
+          "rouge_l_f1": 0.33945575922412474,
+          "anls": 0.2020854190768834,
+          "character_f1": 0.5140767260502894,
+          "task_aware_score": 0.39275238946439955,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.39275238946439955,
+            "low": 0.35537015699783964,
+            "high": 0.43277153322969575
+          },
+          "token_f1_ci95": {
+            "mean": 0.34113017451433597,
+            "low": 0.31041605757771945,
+            "high": 0.3764709603664766
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "counting": {
+          "total": 450,
+          "answered": 450,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 450
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.07111111111111111,
+          "token_f1": 0.10477739904811378,
+          "rouge_l_f1": 0.10477739904811378,
+          "anls": 0.07256038647342995,
+          "character_f1": 0.09422538670914729,
+          "task_aware_score": 0.5666666666666667,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5666666666666667,
+            "low": 0.5222222222222223,
+            "high": 0.6133333333333333
+          },
+          "token_f1_ci95": {
+            "mean": 0.10477739904811378,
+            "low": 0.08036319161429852,
+            "high": 0.13072423717964515
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_action": {
+          "total": 151,
+          "answered": 151,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 151
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.006622516556291391,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.25165562913907286,
+          "token_f1": 0.3198998497473955,
+          "rouge_l_f1": 0.3198998497473955,
+          "anls": 0.2903841258083417,
+          "character_f1": 0.5431555625430015,
+          "task_aware_score": 0.34009852524408424,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.34009852524408424,
+            "low": 0.2691350592012844,
+            "high": 0.40511560817075537
+          },
+          "token_f1_ci95": {
+            "mean": 0.3198998497473955,
+            "low": 0.25226434473483134,
+            "high": 0.3825297938456591
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_counting": {
+          "total": 103,
+          "answered": 103,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 103
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.019417475728155338,
+          "token_f1": 0.02912621359223301,
+          "rouge_l_f1": 0.02912621359223301,
+          "anls": 0.019417475728155338,
+          "character_f1": 0.03637236549857909,
+          "task_aware_score": 0.0970873786407767,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.0970873786407767,
+            "low": 0.04854368932038835,
+            "high": 0.1553398058252427
+          },
+          "token_f1_ci95": {
+            "mean": 0.02912621359223301,
+            "low": 0.0048543689320388345,
+            "high": 0.06310679611650485
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_dynamic_counting": {
+          "total": 118,
+          "answered": 118,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 118
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.1694915254237288,
+          "token_f1": 0.20338983050847456,
+          "rouge_l_f1": 0.20338983050847456,
+          "anls": 0.17372881355932204,
+          "character_f1": 0.1950436569080637,
+          "task_aware_score": 0.4576271186440678,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.4576271186440678,
+            "low": 0.3728813559322034,
+            "high": 0.5508474576271186
+          },
+          "token_f1_ci95": {
+            "mean": 0.20338983050847456,
+            "low": 0.1384180790960452,
+            "high": 0.2796610169491525
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_dynamic_recognition": {
+          "total": 131,
+          "answered": 131,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 131
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.3435114503816794,
+          "token_f1": 0.4039076699382043,
+          "rouge_l_f1": 0.4039076699382043,
+          "anls": 0.3701187790380237,
+          "character_f1": 0.48810312762651453,
+          "task_aware_score": 0.45321701199563796,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.45321701199563796,
+            "low": 0.3707742639040349,
+            "high": 0.535659760087241
+          },
+          "token_f1_ci95": {
+            "mean": 0.4039076699382043,
+            "low": 0.3271901126862959,
+            "high": 0.47795347146492184
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_navigation": {
+          "total": 53,
+          "answered": 53,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 53
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.16981132075471697,
+          "token_f1": 0.32551662174303686,
+          "rouge_l_f1": 0.32551662174303686,
+          "anls": 0.16037735849056603,
+          "character_f1": 0.39107652709348767,
+          "task_aware_score": 0.5283018867924528,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5283018867924528,
+            "low": 0.39622641509433965,
+            "high": 0.660377358490566
+          },
+          "token_f1_ci95": {
+            "mean": 0.32551662174303686,
+            "low": 0.23333333333333334,
+            "high": 0.4238993710691824
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_non_common": {
+          "total": 56,
+          "answered": 56,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 56
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.7857142857142857,
+          "token_f1": 0.8566326530612245,
+          "rouge_l_f1": 0.8566326530612245,
+          "anls": 0.7857142857142857,
+          "character_f1": 0.8320599375642067,
+          "task_aware_score": 0.9642857142857143,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.9642857142857143,
+            "low": 0.9107142857142857,
+            "high": 1.0
+          },
+          "token_f1_ci95": {
+            "mean": 0.8566326530612245,
+            "low": 0.7790816326530612,
+            "high": 0.9267857142857143
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_object_recognition": {
+          "total": 49,
+          "answered": 49,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 49
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.04081632653061224,
+          "token_f1": 0.07023809523809524,
+          "rouge_l_f1": 0.07023809523809524,
+          "anls": 0.052597850734496694,
+          "character_f1": 0.3655430794797441,
+          "task_aware_score": 0.06258503401360545,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.06258503401360545,
+            "low": 0.00816326530612245,
+            "high": 0.1306122448979592
+          },
+          "token_f1_ci95": {
+            "mean": 0.07023809523809524,
+            "low": 0.015816326530612244,
+            "high": 0.1369047619047619
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_scene_sequence": {
+          "total": 53,
+          "answered": 53,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 53
+          },
+          "repetition_rate": 0.018867924528301886,
+          "conciseness_violation_rate": 0.03773584905660377,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.1509433962264151,
+          "token_f1": 0.36225311706940305,
+          "rouge_l_f1": 0.36225311706940305,
+          "anls": 0.1575594217103651,
+          "character_f1": 0.3477504718382213,
+          "task_aware_score": 0.5660377358490566,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5660377358490566,
+            "low": 0.4339622641509434,
+            "high": 0.6981132075471698
+          },
+          "token_f1_ci95": {
+            "mean": 0.36225311706940305,
+            "low": 0.27377248151826106,
+            "high": 0.4551142005958292
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "depth_spatial_reasoning": {
+          "total": 50,
+          "answered": 50,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 50
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.12,
+          "token_f1": 0.3057435897435897,
+          "rouge_l_f1": 0.3057435897435897,
+          "anls": 0.13884615384615384,
+          "character_f1": 0.4027247497895851,
+          "task_aware_score": 0.41174358974358977,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.41174358974358977,
+            "low": 0.28933333333333333,
+            "high": 0.5293333333333333
+          },
+          "token_f1_ci95": {
+            "mean": 0.3057435897435897,
+            "low": 0.20266666666666666,
+            "high": 0.40107692307692305
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "dynamic_counting": {
+          "total": 449,
+          "answered": 449,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 449
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.29398663697104677,
+          "token_f1": 0.33083737593759865,
+          "rouge_l_f1": 0.33083737593759865,
+          "anls": 0.3015472980893213,
+          "character_f1": 0.33028130352738205,
+          "task_aware_score": 0.629790798164963,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.629790798164963,
+            "low": 0.5860849370871642,
+            "high": 0.674334228009061
+          },
+          "token_f1_ci95": {
+            "mean": 0.33083737593759865,
+            "low": 0.2897034789016972,
+            "high": 0.37498619915100984
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "dynamic_recognition": {
+          "total": 322,
+          "answered": 322,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 322
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.003105590062111801,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.30434782608695654,
+          "token_f1": 0.38720051182717874,
+          "rouge_l_f1": 0.38720051182717874,
+          "anls": 0.31405806817934484,
+          "character_f1": 0.47725665709927856,
+          "task_aware_score": 0.49320057961362307,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.49320057961362307,
+            "low": 0.44081664539739074,
+            "high": 0.5445129921837997
+          },
+          "token_f1_ci95": {
+            "mean": 0.38720051182717874,
+            "low": 0.3385518176748971,
+            "high": 0.42951528799957966
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_action": {
+          "total": 155,
+          "answered": 155,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 155
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.012903225806451613,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.2645161290322581,
+          "token_f1": 0.3840424626612723,
+          "rouge_l_f1": 0.3840424626612723,
+          "anls": 0.326853901466555,
+          "character_f1": 0.5807085648339742,
+          "task_aware_score": 0.3933614590770429,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.3933614590770429,
+            "low": 0.32719391618528376,
+            "high": 0.45969278033794164
+          },
+          "token_f1_ci95": {
+            "mean": 0.3840424626612723,
+            "low": 0.3182846902201741,
+            "high": 0.45007420869301834
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_counting": {
+          "total": 139,
+          "answered": 139,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 139
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.10071942446043165,
+          "token_f1": 0.10071942446043165,
+          "rouge_l_f1": 0.10071942446043165,
+          "anls": 0.10431654676258993,
+          "character_f1": 0.10431654676258993,
+          "task_aware_score": 0.5179856115107914,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5179856115107914,
+            "low": 0.4316546762589928,
+            "high": 0.5971223021582733
+          },
+          "token_f1_ci95": {
+            "mean": 0.10071942446043165,
+            "low": 0.05755395683453238,
+            "high": 0.1510791366906475
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_dynamic_counting": {
+          "total": 130,
+          "answered": 130,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 130
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.12307692307692308,
+          "token_f1": 0.12307692307692308,
+          "rouge_l_f1": 0.12307692307692308,
+          "anls": 0.12307692307692308,
+          "character_f1": 0.12307692307692308,
+          "task_aware_score": 0.5923076923076923,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5923076923076923,
+            "low": 0.5153846153846153,
+            "high": 0.6692307692307692
+          },
+          "token_f1_ci95": {
+            "mean": 0.12307692307692308,
+            "low": 0.06923076923076923,
+            "high": 0.17692307692307693
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_dynamic_recognition": {
+          "total": 123,
+          "answered": 123,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 123
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.4715447154471545,
+          "token_f1": 0.5433604336043361,
+          "rouge_l_f1": 0.5433604336043361,
+          "anls": 0.5089769647696477,
+          "character_f1": 0.6166216635443853,
+          "task_aware_score": 0.5555555555555556,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.5555555555555556,
+            "low": 0.47317073170731705,
+            "high": 0.634959349593496
+          },
+          "token_f1_ci95": {
+            "mean": 0.5433604336043361,
+            "low": 0.45799457994579945,
+            "high": 0.6235772357723577
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_navigation": {
+          "total": 54,
+          "answered": 54,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 54
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.018518518518518517,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.018518518518518517,
+          "token_f1": 0.14508105845666233,
+          "rouge_l_f1": 0.14508105845666233,
+          "anls": 0.05115740740740741,
+          "character_f1": 0.35600028136159717,
+          "task_aware_score": 0.07098765432098765,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.07098765432098765,
+            "low": 0.018518518518518517,
+            "high": 0.1388888888888889
+          },
+          "token_f1_ci95": {
+            "mean": 0.14508105845666233,
+            "low": 0.08682121130792628,
+            "high": 0.21079799606369654
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_non_common": {
+          "total": 57,
+          "answered": 57,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 57
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.8947368421052632,
+          "token_f1": 0.9315789473684211,
+          "rouge_l_f1": 0.9315789473684211,
+          "anls": 0.8947368421052632,
+          "character_f1": 0.9166400850611377,
+          "task_aware_score": 0.9824561403508771,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.9824561403508771,
+            "low": 0.9473684210526315,
+            "high": 1.0
+          },
+          "token_f1_ci95": {
+            "mean": 0.9315789473684211,
+            "low": 0.8736842105263158,
+            "high": 0.980701754385965
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_object_recognition": {
+          "total": 54,
+          "answered": 54,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 54
+          },
+          "repetition_rate": 0.018518518518518517,
+          "conciseness_violation_rate": 0.037037037037037035,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.3148148148148148,
+          "token_f1": 0.48923835234576923,
+          "rouge_l_f1": 0.48306551283959637,
+          "anls": 0.32966553968015955,
+          "character_f1": 0.6159848966346043,
+          "task_aware_score": 0.47456099992331874,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.47456099992331874,
+            "low": 0.35383789586688136,
+            "high": 0.591358024691358
+          },
+          "token_f1_ci95": {
+            "mean": 0.48923835234576923,
+            "low": 0.367134760506457,
+            "high": 0.6008785639859808
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_scene_sequence": {
+          "total": 55,
+          "answered": 55,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 55
+          },
+          "repetition_rate": 0.05454545454545454,
+          "conciseness_violation_rate": 0.16363636363636364,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.01818181818181818,
+          "token_f1": 0.158399850239141,
+          "rouge_l_f1": 0.15385439569368645,
+          "anls": 0.04458874458874459,
+          "character_f1": 0.4864829236903796,
+          "task_aware_score": 0.07424242424242425,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.07424242424242425,
+            "low": 0.022727272727272728,
+            "high": 0.13636363636363635
+          },
+          "token_f1_ci95": {
+            "mean": 0.158399850239141,
+            "low": 0.10702336129017807,
+            "high": 0.22100903843656447
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "event_spatial_reasoning": {
+          "total": 55,
+          "answered": 55,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 55
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.01818181818181818,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.18181818181818182,
+          "token_f1": 0.4058152958152958,
+          "rouge_l_f1": 0.4058152958152958,
+          "anls": 0.2679215043823923,
+          "character_f1": 0.5727049298514081,
+          "task_aware_score": 0.4349062049062049,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.4349062049062049,
+            "low": 0.32707070707070707,
+            "high": 0.5478210678210679
+          },
+          "token_f1_ci95": {
+            "mean": 0.4058152958152958,
+            "low": 0.3082972582972583,
+            "high": 0.5066233766233766
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "light_change": {
+          "total": 464,
+          "answered": 464,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 464
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.2823275862068966,
+          "token_f1": 0.3675989228331394,
+          "rouge_l_f1": 0.3670111485384685,
+          "anls": 0.2878947020742502,
+          "character_f1": 0.3978258153999914,
+          "task_aware_score": 0.519862871802527,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.519862871802527,
+            "low": 0.47361326413050553,
+            "high": 0.563986516357206
+          },
+          "token_f1_ci95": {
+            "mean": 0.3675989228331394,
+            "low": 0.33059075144204453,
+            "high": 0.4058628415547153
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "light_recognition": {
+          "total": 106,
+          "answered": 106,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 106
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.009433962264150943,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.10377358490566038,
+          "token_f1": 0.2833197041661651,
+          "rouge_l_f1": 0.2702169787992888,
+          "anls": 0.14183265537696993,
+          "character_f1": 0.5087342836628118,
+          "task_aware_score": 0.28556236740199004,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.28556236740199004,
+            "low": 0.2190386395575075,
+            "high": 0.3554221459881837
+          },
+          "token_f1_ci95": {
+            "mean": 0.2833197041661651,
+            "low": 0.22627750885555833,
+            "high": 0.34568896235100455
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "navigation": {
+          "total": 438,
+          "answered": 438,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 438
+          },
+          "repetition_rate": 0.00228310502283105,
+          "conciseness_violation_rate": 0.00684931506849315,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.17123287671232876,
+          "token_f1": 0.2936808576845539,
+          "rouge_l_f1": 0.2907938309619107,
+          "anls": 0.18684219282973344,
+          "character_f1": 0.39708755331168283,
+          "task_aware_score": 0.3304794520547945,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.3304794520547945,
+            "low": 0.2853881278538813,
+            "high": 0.375
+          },
+          "token_f1_ci95": {
+            "mean": 0.2936808576845539,
+            "low": 0.2578978660917315,
+            "high": 0.32986620328770766
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "non_common": {
+          "total": 124,
+          "answered": 124,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 124
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.3225806451612903,
+          "token_f1": 0.44816476697220664,
+          "rouge_l_f1": 0.4468309936311732,
+          "anls": 0.3270609318996416,
+          "character_f1": 0.4302261437981107,
+          "task_aware_score": 0.8387634506818155,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.8387634506818155,
+            "low": 0.7767773659253323,
+            "high": 0.8991596638655462
+          },
+          "token_f1_ci95": {
+            "mean": 0.44816476697220664,
+            "low": 0.38561352435609536,
+            "high": 0.5153368084582506
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "object_recognition": {
+          "total": 101,
+          "answered": 101,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 101
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.19801980198019803,
+          "token_f1": 0.41043561276472657,
+          "rouge_l_f1": 0.39256539118857686,
+          "anls": 0.23483919309699813,
+          "character_f1": 0.5716728627685763,
+          "task_aware_score": 0.3721143542925721,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.3721143542925721,
+            "low": 0.2938965325103939,
+            "high": 0.4466303773234466
+          },
+          "token_f1_ci95": {
+            "mean": 0.41043561276472657,
+            "low": 0.3376870158700196,
+            "high": 0.4816838145218805
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "scene_sequence": {
+          "total": 480,
+          "answered": 480,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 480
+          },
+          "repetition_rate": 0.004166666666666667,
+          "conciseness_violation_rate": 0.0125,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.12083333333333333,
+          "token_f1": 0.2789858281291244,
+          "rouge_l_f1": 0.2708684580794172,
+          "anls": 0.14108787082204147,
+          "character_f1": 0.45928915741767745,
+          "task_aware_score": 0.24774305555555556,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.24774305555555556,
+            "low": 0.2107638888888889,
+            "high": 0.28802083333333334
+          },
+          "token_f1_ci95": {
+            "mean": 0.2789858281291244,
+            "low": 0.25044164741345376,
+            "high": 0.3089144849976508
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "spatial_reasoning": {
+          "total": 101,
+          "answered": 101,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 101
+          },
+          "repetition_rate": 0.0,
+          "conciseness_violation_rate": 0.0,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.06930693069306931,
+          "token_f1": 0.37831913300687664,
+          "rouge_l_f1": 0.370684853095369,
+          "anls": 0.17505390376171862,
+          "character_f1": 0.48008882282570353,
+          "task_aware_score": 0.39230857542937975,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.39230857542937975,
+            "low": 0.32375406237252174,
+            "high": 0.45773211604833464
+          },
+          "token_f1_ci95": {
+            "mean": 0.37831913300687664,
+            "low": 0.31077782068447496,
+            "high": 0.43655253876503486
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        },
+        "text_recognition": {
+          "total": 415,
+          "answered": 415,
+          "answer_rate": 1.0,
+          "status_counts": {
+            "answered": 415
+          },
+          "repetition_rate": 0.0024096385542168677,
+          "conciseness_violation_rate": 0.012048192771084338,
+          "latency_mean_seconds": null,
+          "latency_median_seconds": null,
+          "latency_p95_seconds": null,
+          "throughput_qa_per_hour": null,
+          "peak_gpu_gb_max": null,
+          "incremental_peak_gpu_gb_max": null,
+          "normalized_exact_match": 0.1927710843373494,
+          "token_f1": 0.3432139725676155,
+          "rouge_l_f1": 0.3411916500870175,
+          "anls": 0.24687750747352044,
+          "character_f1": 0.4341451227096924,
+          "task_aware_score": 0.44328599858080675,
+          "judge_evaluated": 0,
+          "judge_label_counts": {},
+          "judge_strict_accuracy": null,
+          "judge_soft_accuracy": null,
+          "judge_unjudgeable_rate": null,
+          "task_aware_score_ci95": {
+            "mean": 0.44328599858080675,
+            "low": 0.39540044004101704,
+            "high": 0.4872526009370824
+          },
+          "token_f1_ci95": {
+            "mean": 0.3432139725676155,
+            "low": 0.3043357614188322,
+            "high": 0.379270289979401
+          },
+          "judge_strict_accuracy_ci95": {
+            "mean": null,
+            "low": null,
+            "high": null
+          }
+        }
+      }
+    }
+  },
+  "pairwise_judge_comparisons": [],
+  "skipped_inputs": []
+}
