@@ -1087,14 +1087,25 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             self.assertEqual(payload["metadata"]["answered_items"], 1)
             self.assertEqual(payload["metadata"]["skipped_no_frames"], 1)
             self.assertEqual(payload["metadata"]["batch_size"], 1)
-            self.assertEqual(payload["metadata"]["quantization"], "4bit_nf4")
+            self.assertEqual(payload["metadata"]["dtype"], "float16")
+            self.assertEqual(payload["metadata"]["device_map"], "cuda:0")
+            self.assertEqual(payload["metadata"]["quantization"], "none")
             self.assertEqual(payload["metadata"]["max_frames_per_item"], 30)
+            self.assertEqual(payload["metadata"]["molmo2_max_image_size"], 0)
+            self.assertEqual(payload["metadata"]["molmo2_frame_input_mode"], "separate")
+            self.assertEqual(payload["metadata"]["molmo2_contact_sheet_cell_size"], 320)
             self.assertFalse(payload["metadata"]["judge_enabled"])
             self.assertEqual(payload["results"]["qa-0"]["status"], "answered")
             self.assertEqual(payload["results"]["qa-0"]["frame_count"], 30)
             self.assertEqual(payload["results"]["qa-1"]["status"], "failed")
             self.assertIn("molmo2 exploded", payload["results"]["qa-1"]["reason"])
             self.assertNotIn("qa-2", payload["results"])
+            output_log = output_dir / "aligned_qa_frame_answers_allenai_Molmo2-4B.log"
+            self.assertTrue(output_log.exists())
+            log_text = output_log.read_text(encoding="utf-8")
+            self.assertIn("Local Molmo2 runtime:", log_text)
+            self.assertIn("Molmo2 frame answer failed for qa-1", log_text)
+            self.assertIn("RuntimeError: molmo2 exploded", log_text)
 
     def test_molmo2_frame_answer_benchmark_requires_model_name(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1279,6 +1290,120 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
         self.assertIn("<|image|>", processor_calls[0]["text"][0])
         self.assertEqual(processor_calls[0]["images"], ["image"])
 
+    def test_molmo2_adapter_resizes_images_before_processor(self):
+        processor_calls = []
+        resize_calls = []
+
+        class FakeImage:
+            size = (2000, 1000)
+
+            def resize(self, size, resampling):
+                resize_calls.append((size, resampling))
+                return "resized-image"
+
+        class FakeProcessor:
+            image_placeholder_token = "<|image|>"
+
+            def __call__(self, **kwargs):
+                processor_calls.append(kwargs)
+                return {"input_ids": [1, 2, 3]}
+
+            def decode(self, tokens, skip_special_tokens=True):
+                return " molmo answer "
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        class NoGrad:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.Image") as mock_image:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                mock_image.open.return_value.convert.return_value = FakeImage()
+                mock_torch.no_grad.return_value = NoGrad()
+                adapter = Molmo2FrameAnswerAdapter(
+                    model_name="allenai/Molmo2-4B",
+                    model=FakeModel(),
+                    processor=FakeProcessor(),
+                    max_image_size=500,
+                )
+
+                answer = adapter.answer(
+                    {
+                        "modality": "rgb",
+                        "section": "test",
+                        "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                        "question": "What is shown?",
+                    },
+                    [Path("frame_000000.png")],
+                )
+
+        self.assertEqual(answer, "molmo answer")
+        self.assertEqual(resize_calls[0][0], (500, 250))
+        self.assertEqual(processor_calls[0]["images"], ["resized-image"])
+
+    def test_molmo2_adapter_contact_sheet_passes_one_visual_input(self):
+        processor_calls = []
+
+        class FakeProcessor:
+            image_placeholder_token = "<|image|>"
+
+            def __call__(self, **kwargs):
+                processor_calls.append(kwargs)
+                return {"input_ids": [1, 2, 3]}
+
+            def decode(self, tokens, skip_special_tokens=True):
+                return " molmo answer "
+
+        class FakeModel:
+            device = None
+
+            def generate(self, **kwargs):
+                return [[1, 2, 3, 4, 5]]
+
+        class NoGrad:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.Image") as mock_image:
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark._build_molmo2_contact_sheet") as mock_sheet:
+                    mock_image.open.return_value.convert.return_value = "frame-image"
+                    mock_torch.no_grad.return_value = NoGrad()
+                    mock_sheet.return_value = "contact-sheet-image"
+                    adapter = Molmo2FrameAnswerAdapter(
+                        model_name="allenai/Molmo2-4B",
+                        model=FakeModel(),
+                        processor=FakeProcessor(),
+                        frame_input_mode="contact_sheet",
+                    )
+
+                    answer = adapter.answer(
+                        {
+                            "modality": "rgb",
+                            "section": "test",
+                            "pair_key": "aligned_dataset/scene_split/Seg1/rgb",
+                            "question": "What is shown?",
+                        },
+                        [Path("frame_000000.png"), Path("frame_000010.png")],
+                    )
+
+        self.assertEqual(answer, "molmo answer")
+        mock_sheet.assert_called_once()
+        self.assertEqual(processor_calls[0]["images"], ["contact-sheet-image"])
+        self.assertEqual(processor_calls[0]["text"][0].count("<|image|>"), 1)
+        self.assertIn("contact sheet", processor_calls[0]["text"][0])
+
     def test_tie_weights_patch_ignores_unexpected_missing_keys_kwarg(self):
         calls = []
 
@@ -1325,27 +1450,24 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
 
         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoProcessor") as mock_processor:
             with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModelForImageTextToText") as mock_model:
-                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
-                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
-                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
-                            mock_torch.cuda.is_available.return_value = True
-                            mock_torch.float16 = "float16"
-                            fake_model = FakeMolmoModel()
-                            mock_model.from_pretrained.return_value = fake_model
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
+                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                        mock_torch.cuda.is_available.return_value = True
+                        mock_torch.float16 = "float16"
+                        fake_model = FakeMolmoModel()
+                        mock_model.from_pretrained.return_value = fake_model
 
-                            adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
+                        adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
 
         self.assertIs(adapter.model, fake_model)
         self.assertEqual(DummyPreTrainedModel.all_tied_weights_keys, {})
         self.assertEqual(fake_model.all_tied_weights_keys, {})
-        mock_processor.from_pretrained.assert_called_once_with("allenai/Molmo2-4B", trust_remote_code=True)
-        mock_bnb.assert_called_once_with(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype="float16",
-            bnb_4bit_quant_type="nf4",
+        mock_processor.from_pretrained.assert_called_once_with(
+            "allenai/Molmo2-4B",
+            trust_remote_code=True,
         )
-        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["quantization_config"], mock_bnb.return_value)
-        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["device_map"], "auto")
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["dtype"], "float16")
+        self.assertEqual(mock_model.from_pretrained.call_args.kwargs["device_map"], {"": "cuda:0"})
 
     def test_molmo2_loader_uses_dynamic_auto_map_when_auto_models_fail(self):
         class FakeConfig:
@@ -1370,16 +1492,15 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
                 with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModelForCausalLM") as mock_causal:
                     with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoConfig") as mock_config:
                         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.get_class_from_dynamic_module") as mock_get_class:
-                            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
-                                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
-                                    mock_torch.cuda.is_available.return_value = True
-                                    mock_torch.float16 = "float16"
-                                    mock_image_text.from_pretrained.side_effect = KeyError("default")
-                                    mock_causal.from_pretrained.side_effect = ValueError("Unrecognized configuration class")
-                                    mock_config.from_pretrained.return_value = FakeConfig()
-                                    mock_get_class.return_value = FakeDynamicModelClass
+                            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                                mock_torch.cuda.is_available.return_value = True
+                                mock_torch.float16 = "float16"
+                                mock_image_text.from_pretrained.side_effect = KeyError("default")
+                                mock_causal.from_pretrained.side_effect = ValueError("Unrecognized configuration class")
+                                mock_config.from_pretrained.return_value = FakeConfig()
+                                mock_get_class.return_value = FakeDynamicModelClass
 
-                                    adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
+                                adapter = Molmo2FrameAnswerAdapter(model_name="allenai/Molmo2-4B")
 
         self.assertIsInstance(adapter.model, FakeDynamicModel)
         mock_get_class.assert_called_with(
@@ -1388,8 +1509,8 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             trust_remote_code=True,
         )
         self.assertEqual(FakeDynamicModelClass.load_args[0], "allenai/Molmo2-4B")
-        self.assertEqual(FakeDynamicModelClass.load_kwargs["quantization_config"], mock_bnb.return_value)
-        self.assertEqual(FakeDynamicModelClass.load_kwargs["device_map"], "auto")
+        self.assertEqual(FakeDynamicModelClass.load_kwargs["dtype"], "float16")
+        self.assertEqual(FakeDynamicModelClass.load_kwargs["device_map"], {"": "cuda:0"})
         self.assertIs(FakeDynamicModelClass.load_kwargs["config"], mock_config.from_pretrained.return_value)
 
     def test_molmo2_model_class_can_be_found_from_config_module(self):

@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import inspect
 import json
+import math
 import os
 import re
 import subprocess
+import sys
 import time
+import traceback
 import importlib
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
@@ -32,9 +36,10 @@ except ImportError:
     OpenAI = None
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageDraw
 except ImportError:
     Image = None
+    ImageDraw = None
 
 try:
     import torch
@@ -103,6 +108,9 @@ DEFAULT_QWEN_VL_MODEL_NAME = "Qwen/Qwen3-VL-4B-Instruct"
 DEFAULT_QWEN_VL_MAX_TOKENS = 128
 DEFAULT_MOLMO2_MODEL_NAME = "allenai/Molmo2-4B"
 DEFAULT_MOLMO2_MAX_TOKENS = 128
+DEFAULT_MOLMO2_MAX_IMAGE_SIZE = 0
+DEFAULT_MOLMO2_FRAME_INPUT_MODE = "separate"
+DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE = 320
 DEFAULT_INTERNVL_MODEL_NAME = "OpenGVLab/InternVL2_5-4B"
 DEFAULT_INTERNVL_REVISION = ""
 DEFAULT_INTERNVL_MAX_TOKENS = 128
@@ -630,11 +638,17 @@ class Molmo2FrameAnswerAdapter:
         processor: Any | None = None,
         require_cuda: bool = True,
         max_tokens: int = DEFAULT_MOLMO2_MAX_TOKENS,
+        max_image_size: int = DEFAULT_MOLMO2_MAX_IMAGE_SIZE,
+        frame_input_mode: str = DEFAULT_MOLMO2_FRAME_INPUT_MODE,
+        contact_sheet_cell_size: int = DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE,
     ):
         self.model_name = str(model_name or "").strip()
         if not self.model_name:
             raise ValueError("Molmo2 model name is required.")
         self.max_tokens = max(1, int(max_tokens))
+        self.max_image_size = max(0, int(max_image_size))
+        self.frame_input_mode = _normalize_molmo2_frame_input_mode(frame_input_mode)
+        self.contact_sheet_cell_size = max(1, int(contact_sheet_cell_size))
         if model is not None and processor is not None:
             self.model = model
             self.processor = processor
@@ -654,13 +668,18 @@ class Molmo2FrameAnswerAdapter:
             )
         if Image is None:
             raise RuntimeError("Molmo2 requires Pillow. Install project requirements first.")
-        if AutoProcessor is None or BitsAndBytesConfig is None:
-            raise RuntimeError("Molmo2 requires transformers and bitsandbytes. Install project requirements first.")
+        if AutoProcessor is None:
+            raise RuntimeError("Molmo2 requires transformers. Install project requirements first.")
         if AutoModelForImageTextToText is None and AutoModelForCausalLM is None:
             raise RuntimeError("Molmo2 requires a compatible Transformers AutoModel class.")
 
     @staticmethod
-    def runtime_summary(model_name: str = DEFAULT_MOLMO2_MODEL_NAME) -> str:
+    def runtime_summary(
+        model_name: str = DEFAULT_MOLMO2_MODEL_NAME,
+        max_image_size: int = DEFAULT_MOLMO2_MAX_IMAGE_SIZE,
+        frame_input_mode: str = DEFAULT_MOLMO2_FRAME_INPUT_MODE,
+        contact_sheet_cell_size: int = DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE,
+    ) -> str:
         cuda_available = bool(torch is not None and torch.cuda.is_available())
         gpu_name = "none"
         if cuda_available:
@@ -675,20 +694,22 @@ class Molmo2FrameAnswerAdapter:
             f"image_text_model_available={AutoModelForImageTextToText is not None}, "
             f"causal_lm_available={AutoModelForCausalLM is not None}, "
             f"pillow_available={Image is not None}, max_tokens={DEFAULT_MOLMO2_MAX_TOKENS}, "
-            f"quantization=4bit_nf4, cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
+            f"max_image_size={max(0, int(max_image_size))}, "
+            f"frame_input_mode={_normalize_molmo2_frame_input_mode(frame_input_mode)}, "
+            f"contact_sheet_cell_size={max(1, int(contact_sheet_cell_size))}, "
+            f"dtype=float16, device_map=cuda:0, quantization=none, "
+            f"cuda_alloc_conf={os.environ.get('PYTORCH_CUDA_ALLOC_CONF', '')}"
         )
 
     def _load_model(self) -> None:
         try:
-            quantization_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_quant_type="nf4",
+            self.processor = AutoProcessor.from_pretrained(
+                self.model_name,
+                trust_remote_code=True,
             )
-            self.processor = AutoProcessor.from_pretrained(self.model_name, trust_remote_code=True)
             _ensure_transformers_tied_weights_compatibility()
             _ensure_rope_default_compatibility()
-            self.model = self._load_model_with_supported_auto_class(quantization_config)
+            self.model = self._load_model_with_supported_auto_class()
             if "all_tied_weights_keys" not in vars(self.model):
                 self.model.all_tied_weights_keys = {}
             if hasattr(self.model, "eval"):
@@ -696,16 +717,16 @@ class Molmo2FrameAnswerAdapter:
         except Exception as exc:
             cause = f"{type(exc).__name__}: {exc}"
             raise RuntimeError(
-                f"Failed to load local Molmo2 model '{self.model_name}' in 4-bit NF4 mode. "
-                "Check Transformers trust_remote_code support, CUDA availability, bitsandbytes, and free GPU memory. "
+                f"Failed to load local Molmo2 model '{self.model_name}' with dtype=float16 on cuda:0. "
+                "Check Transformers trust_remote_code support, CUDA availability, and free GPU memory. "
                 f"Original error: {cause}."
             ) from exc
 
-    def _load_model_with_supported_auto_class(self, quantization_config: Any) -> Any:
+    def _load_model_with_supported_auto_class(self) -> Any:
         load_kwargs = {
             "trust_remote_code": True,
-            "quantization_config": quantization_config,
-            "device_map": "auto",
+            "dtype": torch.float16,
+            "device_map": {"": "cuda:0"},
         }
         image_text_error: Exception | None = None
         if AutoModelForImageTextToText is not None:
@@ -766,7 +787,19 @@ class Molmo2FrameAnswerAdapter:
         if Image is None:
             raise RuntimeError("Molmo2 requires Pillow. Install project requirements first.")
         images = [Image.open(path).convert("RGB") for path in frame_paths]
-        prompt = build_frame_answer_prompt(item, frame_paths)
+        if self.frame_input_mode == "contact_sheet":
+            images = [_build_molmo2_contact_sheet(images, cell_size=self.contact_sheet_cell_size)]
+            images = [
+                _resize_molmo2_image_for_processor(image, self.max_image_size)
+                for image in images
+            ]
+            prompt = _build_molmo2_contact_sheet_prompt(item, frame_paths)
+        else:
+            images = [
+                _resize_molmo2_image_for_processor(image, self.max_image_size)
+                for image in images
+            ]
+            prompt = build_frame_answer_prompt(item, frame_paths)
 
         if hasattr(self.processor, "process"):
             inputs = self._process_plain_prompt(images, prompt)
@@ -790,6 +823,7 @@ class Molmo2FrameAnswerAdapter:
         model_device = _model_input_device(self.model)
         if model_device is not None:
             inputs = _move_tokenizer_output_to_device(inputs, model_device)
+        inputs = _prepare_molmo2_visual_inputs(inputs, self.model)
         input_length = _tokenizer_input_length(inputs)
         with torch.no_grad():
             if hasattr(self.model, "generate_from_batch"):
@@ -1055,6 +1089,109 @@ def _move_tokenizer_output_to_device(encoded: Any, device: Any) -> Any:
     return encoded
 
 
+def _prepare_molmo2_visual_inputs(encoded: Any, model: Any) -> Any:
+    visual_keys = {"pixel_values", "pixel_values_videos", "images"}
+    target_dtype = _molmo2_visual_dtype(model)
+
+    def cast_value(key: str, value: Any) -> Any:
+        if key not in visual_keys or not hasattr(value, "to"):
+            return value
+        dtype = getattr(value, "dtype", None)
+        if torch is not None and dtype in {torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64}:
+            return value.to(dtype=target_dtype)
+        return value
+
+    if isinstance(encoded, dict):
+        return {key: cast_value(key, value) for key, value in encoded.items()}
+    if hasattr(encoded, "items"):
+        for key, value in list(encoded.items()):
+            try:
+                encoded[key] = cast_value(key, value)
+            except Exception:
+                pass
+    return encoded
+
+
+def _molmo2_visual_dtype(model: Any) -> Any:
+    if torch is None:
+        return None
+    candidates = [
+        getattr(getattr(getattr(model, "model", None), "vision_backbone", None), "dtype", None),
+        getattr(model, "dtype", None),
+    ]
+    for candidate in candidates:
+        if candidate is not None:
+            return candidate
+    return torch.float16 if torch.cuda.is_available() else torch.float32
+
+
+def _normalize_molmo2_frame_input_mode(mode: str) -> str:
+    normalized = str(mode or DEFAULT_MOLMO2_FRAME_INPUT_MODE).strip().lower().replace("-", "_")
+    if normalized in {"contact", "contactsheet", "sheet", "grid"}:
+        normalized = "contact_sheet"
+    if normalized not in {"separate", "contact_sheet"}:
+        raise ValueError("Molmo2 frame input mode must be 'separate' or 'contact_sheet'.")
+    return normalized
+
+
+def _build_molmo2_contact_sheet(images: list[Any], cell_size: int = DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE) -> Any:
+    if Image is None:
+        raise RuntimeError("Molmo2 contact sheet mode requires Pillow. Install project requirements first.")
+    if not images:
+        raise ValueError("Molmo2 contact sheet mode requires at least one frame image.")
+    cell_size = max(1, int(cell_size))
+    label_height = max(18, cell_size // 12)
+    columns = min(6, max(1, int(math.ceil(math.sqrt(len(images))))))
+    rows = int(math.ceil(len(images) / columns))
+    sheet = Image.new("RGB", (columns * cell_size, rows * (cell_size + label_height)), "white")
+    draw = ImageDraw.Draw(sheet) if ImageDraw is not None else None
+    for index, image in enumerate(images):
+        row, column = divmod(index, columns)
+        x = column * cell_size
+        y = row * (cell_size + label_height)
+        thumbnail = _resize_image_to_fit_cell(image, cell_size, cell_size)
+        offset_x = x + (cell_size - thumbnail.size[0]) // 2
+        offset_y = y + label_height + (cell_size - thumbnail.size[1]) // 2
+        sheet.paste(thumbnail, (offset_x, offset_y))
+        if draw is not None:
+            draw.rectangle((x, y, x + cell_size - 1, y + label_height - 1), fill="white")
+            draw.text((x + 4, y + 2), f"F{index + 1:02d}", fill="black")
+            draw.rectangle((x, y, x + cell_size - 1, y + cell_size + label_height - 1), outline="black")
+    return sheet
+
+
+def _resize_image_to_fit_cell(image: Any, max_width: int, max_height: int) -> Any:
+    size = getattr(image, "size", None)
+    if not size or len(size) != 2:
+        return image
+    width, height = int(size[0]), int(size[1])
+    if width <= 0 or height <= 0:
+        return image
+    scale = min(max_width / float(width), max_height / float(height), 1.0)
+    resized_size = (max(1, int(round(width * scale))), max(1, int(round(height * scale))))
+    if resized_size == (width, height):
+        return image
+    resampling = getattr(getattr(Image, "Resampling", None), "BICUBIC", getattr(Image, "BICUBIC", 3))
+    return image.resize(resized_size, resampling)
+
+
+def _resize_molmo2_image_for_processor(image: Any, max_image_size: int = DEFAULT_MOLMO2_MAX_IMAGE_SIZE) -> Any:
+    max_image_size = max(0, int(max_image_size))
+    if max_image_size <= 0:
+        return image
+    size = getattr(image, "size", None)
+    if not size or len(size) != 2:
+        return image
+    width, height = int(size[0]), int(size[1])
+    longest = max(width, height)
+    if width <= 0 or height <= 0 or longest <= max_image_size:
+        return image
+    scale = max_image_size / float(longest)
+    resized_size = (max(1, int(round(width * scale))), max(1, int(round(height * scale))))
+    resampling = getattr(getattr(Image, "Resampling", None), "BICUBIC", getattr(Image, "BICUBIC", 3))
+    return image.resize(resized_size, resampling)
+
+
 def _tokenizer_input_length(encoded: Any) -> int:
     input_ids = encoded.get("input_ids") if isinstance(encoded, dict) else getattr(encoded, "input_ids", None)
     shape = getattr(input_ids, "shape", None)
@@ -1233,6 +1370,47 @@ def _frame_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path,
         output_dir / f"aligned_qa_frame_answers_{safe_name}.json",
         output_dir / f"aligned_qa_frame_answers_{safe_name}.csv",
     )
+
+
+def _frame_answer_log_path(output_dir: Path, model_name: str) -> Path:
+    safe_name = _safe_model_name(model_name)
+    return output_dir / f"aligned_qa_frame_answers_{safe_name}.log"
+
+
+class _TeeStream:
+    def __init__(self, *streams: Any):
+        self.streams = streams
+
+    def write(self, data: str) -> int:
+        for stream in self.streams:
+            stream.write(data)
+            stream.flush()
+        return len(data)
+
+    def flush(self) -> None:
+        for stream in self.streams:
+            stream.flush()
+
+    def isatty(self) -> bool:
+        return any(bool(getattr(stream, "isatty", lambda: False)()) for stream in self.streams)
+
+
+@contextlib.contextmanager
+def _tee_output_to_log(log_path: Path):
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as log_file:
+        print(f"\n===== Benchmark log started {time.strftime('%Y-%m-%d %H:%M:%S')} =====", file=log_file)
+        print(f"Log path: {log_path.as_posix()}", file=log_file)
+        log_file.flush()
+        with contextlib.redirect_stdout(_TeeStream(sys.stdout, log_file)):
+            with contextlib.redirect_stderr(_TeeStream(sys.stderr, log_file)):
+                try:
+                    yield
+                except Exception:
+                    traceback.print_exc()
+                    raise
+                finally:
+                    print(f"===== Benchmark log ended {time.strftime('%Y-%m-%d %H:%M:%S')} =====")
 
 
 def _video_answer_output_paths(output_dir: Path, model_name: str) -> tuple[Path, Path]:
@@ -1447,6 +1625,20 @@ def build_frame_answer_prompt(item: dict[str, Any], frame_paths: list[Path]) -> 
             "",
             "Question:",
             str(item.get("question", "")).strip(),
+        ]
+    )
+
+
+def _build_molmo2_contact_sheet_prompt(item: dict[str, Any], frame_paths: list[Path]) -> str:
+    labels = [f"F{index + 1:02d}={path.name}" for index, path in enumerate(frame_paths)]
+    return "\n".join(
+        [
+            build_frame_answer_prompt(item, frame_paths),
+            "",
+            "Visual input format:",
+            "The provided image is one contact sheet containing all selected frames in time order.",
+            "Each tile is labeled F01, F02, and so on. Use these labels as frame references.",
+            f"Contact sheet labels: {', '.join(labels)}",
         ]
     )
 
@@ -2595,22 +2787,68 @@ def run_molmo2_frame_answer_benchmark(
     resume: bool = True,
     frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
     max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    max_image_size: int = DEFAULT_MOLMO2_MAX_IMAGE_SIZE,
+    frame_input_mode: str = DEFAULT_MOLMO2_FRAME_INPUT_MODE,
+    contact_sheet_cell_size: int = DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE,
     adapter: Molmo2FrameAnswerAdapter | None = None,
 ) -> dict[str, Path]:
     """Generate local Molmo2 answers from cached aligned-dataset frames without judging correctness."""
-    input_path = Path(input_path)
     output_dir = Path(output_dir)
-    frame_cache_root = Path(frame_cache_root)
     model_name = str(model_name or "").strip()
     if not model_name:
         raise ValueError("Molmo2 model name is required.")
+    log_path = _frame_answer_log_path(output_dir, model_name)
+    with _tee_output_to_log(log_path):
+        outputs = _run_molmo2_frame_answer_benchmark_impl(
+            input_path=input_path,
+            output_dir=output_dir,
+            model_name=model_name,
+            max_items=max_items,
+            batch_size=batch_size,
+            delay_between_batches=delay_between_batches,
+            resume=resume,
+            frame_cache_root=frame_cache_root,
+            max_frames_per_item=max_frames_per_item,
+            max_image_size=max_image_size,
+            frame_input_mode=frame_input_mode,
+            contact_sheet_cell_size=contact_sheet_cell_size,
+            adapter=adapter,
+        )
+        outputs["frame_answers_log"] = log_path
+        return outputs
+
+
+def _run_molmo2_frame_answer_benchmark_impl(
+    input_path: Path | str = DEFAULT_INPUT_PATH,
+    output_dir: Path | str = DEFAULT_OUTPUT_DIR,
+    model_name: str = DEFAULT_MOLMO2_MODEL_NAME,
+    max_items: int | None = 100,
+    batch_size: int = 1,
+    delay_between_batches: int = 0,
+    resume: bool = True,
+    frame_cache_root: Path | str = DEFAULT_FRAME_CACHE_ROOT,
+    max_frames_per_item: int | None = DEFAULT_FRAME_MAX_FRAMES_PER_ITEM,
+    max_image_size: int = DEFAULT_MOLMO2_MAX_IMAGE_SIZE,
+    frame_input_mode: str = DEFAULT_MOLMO2_FRAME_INPUT_MODE,
+    contact_sheet_cell_size: int = DEFAULT_MOLMO2_CONTACT_SHEET_CELL_SIZE,
+    adapter: Molmo2FrameAnswerAdapter | None = None,
+) -> dict[str, Path]:
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    frame_cache_root = Path(frame_cache_root)
     output_json, output_csv = _frame_answer_output_paths(output_dir, model_name)
     batch_size = max(1, int(batch_size))
     if batch_size != 1:
         print("Local Molmo2 frame benchmark forces batch size to 1 to reduce GPU memory pressure.")
         batch_size = 1
+    max_image_size = max(0, int(max_image_size))
+    frame_input_mode = _normalize_molmo2_frame_input_mode(frame_input_mode)
+    contact_sheet_cell_size = max(1, int(contact_sheet_cell_size))
 
-    print(f"Local Molmo2 runtime: {Molmo2FrameAnswerAdapter.runtime_summary(model_name=model_name)}")
+    print(
+        "Local Molmo2 runtime: "
+        f"{Molmo2FrameAnswerAdapter.runtime_summary(model_name=model_name, max_image_size=max_image_size, frame_input_mode=frame_input_mode, contact_sheet_cell_size=contact_sheet_cell_size)}"
+    )
 
     items = load_valid_qa_items(input_path)
     results_by_id = _load_existing_results(output_json) if resume else {}
@@ -2634,6 +2872,9 @@ def run_molmo2_frame_answer_benchmark(
             "judge_enabled": False,
             "frame_cache_root": frame_cache_root.as_posix(),
             "max_frames_per_item": 0 if max_frames_per_item == 0 else max_frames_per_item,
+            "molmo2_max_image_size": max_image_size,
+            "molmo2_frame_input_mode": frame_input_mode,
+            "molmo2_contact_sheet_cell_size": contact_sheet_cell_size,
             "resume": resume,
             "total_valid_items": len(items),
             "answered_items": answered_count,
@@ -2643,7 +2884,9 @@ def run_molmo2_frame_answer_benchmark(
             "key_rotation_enabled": False,
             "keys_available": 0,
             "exhausted_key_count": 0,
-            "quantization": "4bit_nf4",
+            "dtype": "float16",
+            "device_map": "cuda:0",
+            "quantization": "none",
         }
         if stopped_reason:
             metadata["stopped_reason"] = stopped_reason
@@ -2658,7 +2901,12 @@ def run_molmo2_frame_answer_benchmark(
         _save_frame_answer_outputs(output_json, output_csv, results_by_id, make_metadata())
         return {"frame_answers_json": output_json, "frame_answers_csv": output_csv}
 
-    frame_adapter = adapter or Molmo2FrameAnswerAdapter(model_name=model_name)
+    frame_adapter = adapter or Molmo2FrameAnswerAdapter(
+        model_name=model_name,
+        max_image_size=max_image_size,
+        frame_input_mode=frame_input_mode,
+        contact_sheet_cell_size=contact_sheet_cell_size,
+    )
 
     try:
         for start in range(0, len(pending), batch_size):
@@ -2687,6 +2935,8 @@ def run_molmo2_frame_answer_benchmark(
                         reason="" if model_answer else "Frame answer call failed: empty model answer",
                     )
                 except Exception as exc:
+                    print(f"Molmo2 frame answer failed for {item['qa_id']}: {exc}")
+                    traceback.print_exc()
                     results_by_id[item["qa_id"]] = _frame_answer_row(
                         item,
                         provider="molmo2",

@@ -624,7 +624,9 @@ def build_aligned_qa_quality_actions(
         print("Reads cached frames from aligned_dataset/.frames_cache*.")
         print(f"Writes answer-only JSON/CSV files under {benchmark_output_dir}.")
         print("No judge runs in this option; correctness scoring can run later.")
-        print("Local Molmo2 uses Transformers + bitsandbytes 4-bit NF4 and requires CUDA.")
+        print('Local Molmo2 uses Transformers with dtype=torch.float16 on cuda:0; CUDA is required.')
+        print("Molmo2 max image size caps each frame's longest side before processor input; 0 keeps original size.")
+        print("Molmo2 contact sheet mode keeps all selected frames but sends them as one labeled grid image.")
         print("-" * 60)
 
         default_model_name = "allenai/Molmo2-4B"
@@ -651,6 +653,34 @@ def build_aligned_qa_quality_actions(
                 print("Invalid max frames value.")
                 return
             max_frames_per_item = 0 if parsed_frames == 0 else max(1, parsed_frames)
+
+        raw_max_image_size = input("Molmo2 max image size? (default 0 = original, try 768 for lower memory): ").strip()
+        if not raw_max_image_size:
+            max_image_size = 0
+        else:
+            try:
+                max_image_size = max(0, int(raw_max_image_size))
+            except ValueError:
+                print("Invalid max image size value.")
+                return
+
+        raw_frame_input_mode = input("Molmo2 frame input mode? (default contact_sheet; options: contact_sheet, separate): ").strip()
+        frame_input_mode = raw_frame_input_mode or "contact_sheet"
+        if frame_input_mode.strip().lower().replace("-", "_") in {"contact", "contactsheet", "sheet", "grid"}:
+            frame_input_mode = "contact_sheet"
+        if frame_input_mode not in {"contact_sheet", "separate"}:
+            print("Invalid Molmo2 frame input mode.")
+            return
+
+        raw_contact_sheet_cell_size = input("Contact sheet tile size? (default 320 px): ").strip()
+        if not raw_contact_sheet_cell_size:
+            contact_sheet_cell_size = 320
+        else:
+            try:
+                contact_sheet_cell_size = max(1, int(raw_contact_sheet_cell_size))
+            except ValueError:
+                print("Invalid contact sheet tile size value.")
+                return
 
         raw_batch_size = input("Batch size? (default 1, forced to 1 for local Molmo2): ").strip()
         if not raw_batch_size:
@@ -682,6 +712,9 @@ def build_aligned_qa_quality_actions(
                     batch_size=batch_size,
                     delay_between_batches=delay_between_batches,
                     max_frames_per_item=max_frames_per_item,
+                    max_image_size=max_image_size,
+                    frame_input_mode=frame_input_mode,
+                    contact_sheet_cell_size=contact_sheet_cell_size,
                 )
             except (ImportError, RuntimeError, NotImplementedError, ValueError) as exc:
                 print(str(exc))
