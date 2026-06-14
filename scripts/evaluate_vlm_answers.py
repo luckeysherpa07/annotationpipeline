@@ -54,6 +54,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--judge-delay-seconds", type=float, default=0.0)
     parser.add_argument("--judge-max-retries", type=int, default=3)
     parser.add_argument("--judge-retry-delay-seconds", type=float, default=2.0)
+    parser.add_argument(
+        "--judge-service-unavailable-max-retries",
+        type=int,
+        default=8,
+    )
+    parser.add_argument(
+        "--judge-service-unavailable-retry-delay-seconds",
+        type=float,
+        default=15.0,
+    )
     parser.add_argument("--judge-max-items", type=int, default=None)
     parser.add_argument(
         "--api-key-list",
@@ -91,6 +101,14 @@ def main() -> None:
             delay_seconds=max(0.0, args.judge_delay_seconds),
             max_retries=max(1, args.judge_max_retries),
             retry_delay_seconds=max(0.0, args.judge_retry_delay_seconds),
+            service_unavailable_max_retries=max(
+                1,
+                args.judge_service_unavailable_max_retries,
+            ),
+            service_unavailable_retry_delay_seconds=max(
+                0.0,
+                args.judge_service_unavailable_retry_delay_seconds,
+            ),
             max_items=args.judge_max_items,
             api_key_list_path=args.api_key_list,
         )

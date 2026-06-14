@@ -25,18 +25,34 @@ def is_quota_or_rate_limit_error(exc: BaseException | str) -> bool:
     )
 
 
+def is_service_unavailable_error(exc: BaseException | str) -> bool:
+    text = str(exc).lower()
+    return any(
+        token in text
+        for token in (
+            "503",
+            "unavailable",
+            "high demand",
+            "temporarily unavailable",
+            "service unavailable",
+        )
+    )
+
+
 def retry_wait_seconds(
     exc: BaseException,
     attempt: int,
     *,
     base_delay_seconds: float = 2.0,
     quota_delay_seconds: float = 30.0,
+    service_unavailable_delay_seconds: float = 15.0,
 ) -> float:
-    delay = (
-        quota_delay_seconds
-        if is_quota_or_rate_limit_error(exc)
-        else base_delay_seconds
-    )
+    if is_quota_or_rate_limit_error(exc):
+        delay = quota_delay_seconds
+    elif is_service_unavailable_error(exc):
+        delay = service_unavailable_delay_seconds
+    else:
+        delay = base_delay_seconds
     return max(0.0, float(delay)) * max(1, attempt)
 
 
@@ -44,20 +60,28 @@ def call_with_retry(
     operation: Callable[[], T],
     *,
     max_attempts: int = 3,
+    attempt_limit: Callable[[Exception], int] | None = None,
     retry_if: Callable[[Exception], bool] | None = None,
     wait_seconds: Callable[[Exception, int], float] | None = None,
     label: str = "Gemini call",
     sleep: Callable[[float], None] = time.sleep,
 ) -> T:
-    attempts = max(1, int(max_attempts))
+    default_attempts = max(1, int(max_attempts))
     should_retry = retry_if or (lambda _exc: True)
     resolve_wait = wait_seconds or (
         lambda exc, attempt: retry_wait_seconds(exc, attempt)
     )
-    for attempt in range(1, attempts + 1):
+    attempt = 0
+    while True:
+        attempt += 1
         try:
             return operation()
         except Exception as exc:
+            attempts = (
+                max(1, int(attempt_limit(exc)))
+                if attempt_limit is not None
+                else default_attempts
+            )
             if attempt >= attempts or not should_retry(exc):
                 raise
             delay = max(0.0, float(resolve_wait(exc, attempt)))
@@ -67,26 +91,33 @@ def call_with_retry(
                 flush=True,
             )
             sleep(delay)
-    raise RuntimeError(f"{label} failed")
 
 
 async def call_with_retry_async(
     operation: Callable[[], T],
     *,
     max_attempts: int = 3,
+    attempt_limit: Callable[[Exception], int] | None = None,
     retry_if: Callable[[Exception], bool] | None = None,
     wait_seconds: Callable[[Exception, int], float] | None = None,
     label: str = "Gemini call",
 ) -> T:
-    attempts = max(1, int(max_attempts))
+    default_attempts = max(1, int(max_attempts))
     should_retry = retry_if or (lambda _exc: True)
     resolve_wait = wait_seconds or (
         lambda exc, attempt: retry_wait_seconds(exc, attempt)
     )
-    for attempt in range(1, attempts + 1):
+    attempt = 0
+    while True:
+        attempt += 1
         try:
             return await asyncio.to_thread(operation)
         except Exception as exc:
+            attempts = (
+                max(1, int(attempt_limit(exc)))
+                if attempt_limit is not None
+                else default_attempts
+            )
             if attempt >= attempts or not should_retry(exc):
                 raise
             delay = max(0.0, float(resolve_wait(exc, attempt)))
@@ -96,4 +127,3 @@ async def call_with_retry_async(
                 flush=True,
             )
             await asyncio.sleep(delay)
-    raise RuntimeError(f"{label} failed")

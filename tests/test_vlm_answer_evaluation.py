@@ -203,6 +203,10 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             self.assertEqual(results["record-1"]["score"], 1.0)
             self.assertTrue(results["record-1"]["evaluation_input_sha256"])
             self.assertEqual(results["record-1"]["model_name"], "model-name")
+            self.assertEqual(
+                results["record-1"]["judge_model"],
+                "gemini-3.1-flash-lite",
+            )
             run_llm_judge(
                 [record()],
                 output,
@@ -321,6 +325,84 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             )
             self.assertEqual(client.models.calls, 1)
             self.assertEqual(results["record-1"]["label"], "incorrect")
+
+    def test_llm_judge_reuses_cache_across_judge_models(self):
+        class Models:
+            def __init__(self):
+                self.calls = 0
+
+            def generate_content(self, **kwargs):
+                self.calls += 1
+                requested = json.loads(
+                    kwargs["contents"][0].split("Items:\n", 1)[1]
+                )
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": item["record_id"],
+                                        "label": "correct",
+                                        "reason": "Equivalent.",
+                                        "error_type": "none",
+                                    }
+                                    for item in requested
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "judge.json"
+            client = Client()
+            common = {
+                "batch_size": 1,
+                "api_key_list_path": Path(directory) / "missing",
+                "client_factory": lambda _key: client,
+            }
+            run_llm_judge(
+                [record(), record(record_id="record-2", qa_id="qa-2")],
+                output,
+                model_name="gemini-2.5-flash",
+                max_items=1,
+                **common,
+            )
+            results = run_llm_judge(
+                [record(), record(record_id="record-2", qa_id="qa-2")],
+                output,
+                model_name="gemini-3.1-flash-lite",
+                **common,
+            )
+
+            self.assertEqual(client.models.calls, 2)
+            self.assertEqual(
+                results["record-1"]["judge_model"],
+                "gemini-2.5-flash",
+            )
+            self.assertEqual(
+                results["record-2"]["judge_model"],
+                "gemini-3.1-flash-lite",
+            )
+            metadata = json.loads(output.read_text(encoding="utf-8"))["metadata"]
+            self.assertEqual(
+                metadata["active_judge_model"],
+                "gemini-3.1-flash-lite",
+            )
+            self.assertEqual(
+                metadata["judge_model_counts"],
+                {
+                    "gemini-2.5-flash": 1,
+                    "gemini-3.1-flash-lite": 1,
+                },
+            )
 
     def test_llm_judge_warns_when_response_omits_an_item(self):
         calls = 0
@@ -459,6 +541,59 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             self.assertEqual(payload["metadata"]["stopped_reason"], "judge_error")
             self.assertEqual(payload["metadata"]["evaluated_items"], 0)
 
+    def test_llm_judge_uses_longer_retry_policy_for_503(self):
+        class Models:
+            def __init__(self):
+                self.calls = 0
+
+            def generate_content(self, **_kwargs):
+                self.calls += 1
+                if self.calls < 4:
+                    raise RuntimeError(
+                        "503 UNAVAILABLE: This model is currently experiencing high demand."
+                    )
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": "record-1",
+                                        "label": "correct",
+                                        "reason": "Equivalent.",
+                                        "error_type": "none",
+                                    }
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            client = Client()
+            delays = []
+            results = run_llm_judge(
+                [record()],
+                Path(directory) / "judge.json",
+                batch_size=1,
+                max_retries=3,
+                retry_delay_seconds=2,
+                service_unavailable_max_retries=8,
+                service_unavailable_retry_delay_seconds=15,
+                retry_sleep=delays.append,
+                api_key_list_path=Path(directory) / "missing",
+                client_factory=lambda _key: client,
+            )
+            self.assertEqual(client.models.calls, 4)
+            self.assertEqual(delays, [15, 30, 45])
+            self.assertEqual(results["record-1"]["label"], "correct")
+
     def test_report_outputs_and_pairwise_comparison(self):
         left = record("left", "qa-1")
         right = EvaluationRecord(**{**left.to_dict(), "record_id": "right", "model_name": "other"})
@@ -467,6 +602,7 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             "right": {"label": "incorrect", "score": 0.0},
         }
         rows = score_records([left, right], judgments)
+        self.assertIsNone(rows[0]["judge_model"])
         comparison = pairwise_judge_comparisons(rows)
         self.assertEqual(len(comparison), 1)
         self.assertEqual(comparison[0]["model_a_only_correct"], 1)

@@ -49,6 +49,7 @@ summary files are ignored automatically.
   --judge-model gemini-2.5-flash \
   --judge-batch-size 100 \
   --judge-max-retries 3 \
+  --judge-service-unavailable-max-retries 8 \
   --api-key-list api_keys.txt
 ```
 
@@ -63,9 +64,18 @@ error type. If a batch response omits, duplicates, or returns unexpected record
 IDs, the evaluator prints a warning with the affected count and sample IDs.
 Omitted items are not treated as completed cache entries and are retried the
 next time the evaluator runs.
+
+The cache can be continued with a different judge model. Existing judgments
+remain reusable, while every item records the judge model that produced it.
+Cache metadata reports the active judge model and per-model item counts. This
+supports quota-driven model changes, but aggregate scores from a mixed-judge
+cache should be interpreted as using more than one evaluator.
 Transient request and response errors are retried three times by default with
 an increasing delay. Configure this with `--judge-max-retries` and
-`--judge-retry-delay-seconds`.
+`--judge-retry-delay-seconds`. HTTP 503/model-high-demand errors use a separate
+policy: eight attempts with a 15-second increasing delay by default. Configure
+it with `--judge-service-unavailable-max-retries` and
+`--judge-service-unavailable-retry-delay-seconds`.
 
 Run a small validation before the full judge:
 
@@ -116,6 +126,7 @@ Run a small validation before the full judge:
   --judge-model gemini-2.5-flash \
   --judge-batch-size 100 \
   --judge-max-retries 3 \
+  --judge-service-unavailable-max-retries 8 \
   --api-key-list api_keys.txt
 ```
 
@@ -123,4 +134,8 @@ Run a small validation before the full judge:
 哈希校验缓存。回答内容修改后会自动重新评估；仅移动输入文件不会导致重复评估。
 如果批量响应缺失、重复或返回了意外的记录 ID，终端会立即打印数量和 ID 示例。
 缺失项不会被视为已经完成，下次执行相同命令时会自动补评。
+缓存允许切换 judge 模型后继续运行。已有评分仍会复用，每条评分会记录实际使用的
+judge 模型，元数据同时保存当前模型及各模型的评分数量。混合 judge 的汇总结果应
+明确按多个评估器共同产生来解释。
 网络断连、超时和临时响应错误默认最多尝试三次，并逐次增加等待时间。
+HTTP 503 或模型高负载错误默认最多尝试八次，等待时间从 15 秒起逐次增加。

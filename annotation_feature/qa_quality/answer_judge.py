@@ -13,7 +13,10 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from annotation_feature.pipeline.client import create_gemini_client
-from annotation_feature.pipeline.gemini_retry import call_with_retry
+from annotation_feature.pipeline.gemini_retry import (
+    call_with_retry,
+    is_service_unavailable_error,
+)
 
 from .benchmark import (
     DEFAULT_GEMINI_API_KEY_LIST_PATH,
@@ -25,7 +28,7 @@ from .result_loader import EvaluationRecord
 
 DEFAULT_JUDGE_MODEL = "gemini-3.1-flash-lite"
 JUDGE_PROMPT_VERSION = "reference_guided_vlm_answer_judge_v1"
-JUDGE_CACHE_SCHEMA_VERSION = 2
+JUDGE_CACHE_SCHEMA_VERSION = 3
 VALID_LABELS = {"correct", "partially_correct", "incorrect", "unjudgeable"}
 LABEL_SCORES = {
     "correct": 1.0,
@@ -122,7 +125,11 @@ def _is_reusable_judgment(item: Any, input_sha256: str) -> bool:
     )
 
 
-def _normalize_judgment(raw: dict[str, Any], record: EvaluationRecord) -> dict[str, Any]:
+def _normalize_judgment(
+    raw: dict[str, Any],
+    record: EvaluationRecord,
+    judge_model: str,
+) -> dict[str, Any]:
     label = str(raw.get("label", "unjudgeable")).strip().lower()
     if label not in VALID_LABELS:
         label = "unjudgeable"
@@ -135,6 +142,7 @@ def _normalize_judgment(raw: dict[str, Any], record: EvaluationRecord) -> dict[s
         "reason": str(raw.get("reason", "")).strip(),
         "error_type": error_type,
         "judge_prompt_version": JUDGE_PROMPT_VERSION,
+        "judge_model": judge_model,
         "evaluation_input_sha256": evaluation_input_sha256(record),
         "model_name": record.model_name,
         "provider": record.provider,
@@ -194,6 +202,7 @@ def _judge_batch(client: Any, model_name: str, batch: list[EvaluationRecord]) ->
                 },
             ),
             record,
+            model_name,
         )
         for record in batch
     ]
@@ -209,6 +218,8 @@ def run_llm_judge(
     delay_seconds: float = 0.0,
     max_retries: int = 3,
     retry_delay_seconds: float = 2.0,
+    service_unavailable_max_retries: int = 8,
+    service_unavailable_retry_delay_seconds: float = 15.0,
     max_items: int | None = None,
     api_key_list_path: Path | str = DEFAULT_GEMINI_API_KEY_LIST_PATH,
     client_factory: Callable[[str | None], Any] = create_gemini_client,
@@ -216,11 +227,16 @@ def run_llm_judge(
 ) -> dict[str, dict[str, Any]]:
     output_path = Path(output_path)
     existing: dict[str, Any] = {}
+    legacy_judge_model = ""
     if output_path.exists():
         payload = json.loads(output_path.read_text(encoding="utf-8"))
         metadata = payload.get("metadata", {}) if isinstance(payload, dict) else {}
+        legacy_judge_model = str(
+            metadata.get("active_judge_model")
+            or metadata.get("judge_model")
+            or ""
+        ).strip()
         expected = {
-            "judge_model": model_name,
             "judge_prompt_version": JUDGE_PROMPT_VERSION,
             "judge_prompt_sha256": judge_prompt_sha256(),
         }
@@ -232,6 +248,10 @@ def run_llm_judge(
         existing = payload.get("items", {}) if isinstance(payload, dict) else {}
         if not isinstance(existing, dict):
             existing = {}
+        if legacy_judge_model:
+            for item in existing.values():
+                if isinstance(item, dict) and not item.get("judge_model"):
+                    item["judge_model"] = legacy_judge_model
 
     reusable_by_input = {
         str(item.get("evaluation_input_sha256")): item
@@ -271,6 +291,38 @@ def run_llm_judge(
     stopped_reason: str | None = None
     keys = load_api_keys(api_key_list_path)
 
+    def judge_model_counts() -> dict[str, int]:
+        counts = Counter(
+            str(item.get("judge_model") or "unknown")
+            for item in existing.values()
+            if isinstance(item, dict)
+        )
+        return dict(sorted(counts.items()))
+
+    def cache_metadata() -> dict[str, Any]:
+        model_counts = judge_model_counts()
+        return {
+            "cache_schema_version": JUDGE_CACHE_SCHEMA_VERSION,
+            "active_judge_model": model_name,
+            "judge_models": sorted(model_counts),
+            "judge_model_counts": model_counts,
+            "judge_prompt_version": JUDGE_PROMPT_VERSION,
+            "judge_prompt_sha256": judge_prompt_sha256(),
+            "evaluated_items": evaluated_input_count(),
+            "cached_items": len(existing),
+            "total_input_records": len(records),
+            "batch_size": batch_size,
+            "max_retries": max_retries,
+            "retry_delay_seconds": retry_delay_seconds,
+            "service_unavailable_max_retries": service_unavailable_max_retries,
+            "service_unavailable_retry_delay_seconds": (
+                service_unavailable_retry_delay_seconds
+            ),
+            "key_rotation_enabled": bool(keys),
+            "keys_available": len(keys),
+            "exhausted_key_count": exhausted_keys,
+        }
+
     def evaluated_input_count() -> int:
         return sum(
             _is_reusable_judgment(
@@ -281,21 +333,8 @@ def run_llm_judge(
         )
 
     if not pending:
-        metadata = {
-            "cache_schema_version": JUDGE_CACHE_SCHEMA_VERSION,
-            "judge_model": model_name,
-            "judge_prompt_version": JUDGE_PROMPT_VERSION,
-            "judge_prompt_sha256": judge_prompt_sha256(),
-            "evaluated_items": evaluated_input_count(),
-            "cached_items": len(existing),
-            "total_input_records": len(records),
-            "batch_size": batch_size,
-            "max_retries": max_retries,
-            "retry_delay_seconds": retry_delay_seconds,
-            "key_rotation_enabled": bool(keys),
-            "keys_available": len(keys),
-            "exhausted_key_count": 0,
-        }
+        exhausted_keys = 0
+        metadata = cache_metadata()
         _atomic_write_json(output_path, {"items": existing, "metadata": metadata})
         return existing
     key_index = 0
@@ -304,21 +343,7 @@ def run_llm_judge(
     completed_batches = 0
 
     def checkpoint(reason: str | None = None) -> None:
-        metadata = {
-            "cache_schema_version": JUDGE_CACHE_SCHEMA_VERSION,
-            "judge_model": model_name,
-            "judge_prompt_version": JUDGE_PROMPT_VERSION,
-            "judge_prompt_sha256": judge_prompt_sha256(),
-            "evaluated_items": evaluated_input_count(),
-            "cached_items": len(existing),
-            "total_input_records": len(records),
-            "batch_size": batch_size,
-            "max_retries": max_retries,
-            "retry_delay_seconds": retry_delay_seconds,
-            "key_rotation_enabled": bool(keys),
-            "keys_available": len(keys),
-            "exhausted_key_count": exhausted_keys,
-        }
+        metadata = cache_metadata()
         if reason:
             metadata["stopped_reason"] = reason
         _atomic_write_json(output_path, {"items": existing, "metadata": metadata})
@@ -331,9 +356,20 @@ def run_llm_judge(
                     judgments = call_with_retry(
                         lambda: _judge_batch(client, model_name, batch),
                         max_attempts=max(1, max_retries),
+                        attempt_limit=lambda exc: (
+                            max(1, service_unavailable_max_retries)
+                            if is_service_unavailable_error(exc)
+                            else max(1, max_retries)
+                        ),
                         retry_if=lambda exc: not is_quota_error(exc),
-                        wait_seconds=lambda _exc, attempt: (
-                            max(0.0, retry_delay_seconds) * attempt
+                        wait_seconds=lambda exc, attempt: (
+                            max(
+                                0.0,
+                                service_unavailable_retry_delay_seconds
+                                if is_service_unavailable_error(exc)
+                                else retry_delay_seconds,
+                            )
+                            * attempt
                         ),
                         label=f"Gemini judge batch ({len(batch)} item(s))",
                         sleep=retry_sleep,

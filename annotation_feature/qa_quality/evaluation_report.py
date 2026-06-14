@@ -64,6 +64,7 @@ def score_records(
                 "judge_score": judgment.get("score"),
                 "judge_reason": judgment.get("reason"),
                 "judge_error_type": judgment.get("error_type"),
+                "judge_model": judgment.get("judge_model"),
             }
         )
         scored.append(row)
