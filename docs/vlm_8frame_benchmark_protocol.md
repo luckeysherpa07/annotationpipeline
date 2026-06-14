@@ -325,6 +325,20 @@ For a four-item preflight run, add `--max-items-per-modality 1`. Remove that
 option for the formal run. Resume is enabled by default; do not use
 `--no-resume` when continuing an interrupted run.
 
+The current-machine CUDA 13 runner checkpoints JSON and CSV results every 25
+new QA items instead of rewriting the complete files after every answer. It
+also forces a final checkpoint on normal completion, exceptions, and
+`Ctrl+C`. Each checkpoint is written to temporary files and then replaces the
+previous files. The interval can be overridden for a run with:
+
+```bash
+VLM_CHECKPOINT_EVERY_ITEMS=50 \
+python scripts/run_vlm_4b_aligned_frame_benchmark_cu130.py --models qwen_vl
+```
+
+A larger interval reduces disk writes but increases the number of recent
+answers that can be lost after a power failure or forced process kill.
+
 ## 9. Result Format
 
 The 8B result files are stored under:
@@ -338,6 +352,18 @@ The 4B result files are stored separately under:
 ```text
 outputs/benchmarks/vlm_8frame_aligned_4b/
 ```
+
+This directory represents the current-machine formal run performed with
+`scripts/run_vlm_4b_aligned_frame_benchmark_cu130.py` in the primary CUDA 13
+environment. Results previously produced on the other CUDA 12.6 / RTX 4080
+machine are archived under:
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b_other_machine_cu126/
+```
+
+The archived results are retained for provenance and must not be mixed with
+the current formal result set.
 
 Each model has its own JSON and CSV file. The 4B files do not overwrite the
 8B results or the results of another 4B model.
@@ -709,6 +735,19 @@ outputs/benchmarks/vlm_8frame_aligned_4b
 四条预检测试添加 `--max-items-per-modality 1`；正式运行时去掉该参数。默认启用
 断点续跑，继续中断任务时不要添加 `--no-resume`。
 
+本机 CUDA 13 runner 不再每回答一题就重写完整 JSON 和 CSV，而是默认每新增
+25 条 QA 保存一次 checkpoint。正常结束、异常退出和 `Ctrl+C` 时都会强制保存
+最后一批结果。每次保存先写临时文件，再替换旧结果文件。可以通过下列环境变量
+调整间隔：
+
+```bash
+VLM_CHECKPOINT_EVERY_ITEMS=50 \
+python scripts/run_vlm_4b_aligned_frame_benchmark_cu130.py --models qwen_vl
+```
+
+间隔越大，磁盘写入次数越少，但强制断电或进程被直接终止时可能丢失的最近答案
+也越多。
+
 ## 9. 结果格式
 
 8B 结果存放在：
@@ -722,6 +761,16 @@ outputs/benchmarks/vlm_8frame_aligned/frames_8/
 ```text
 outputs/benchmarks/vlm_8frame_aligned_4b/
 ```
+
+该目录表示本机使用
+`scripts/run_vlm_4b_aligned_frame_benchmark_cu130.py` 和主 CUDA 13 环境生成的
+正式结果。此前在另一台 CUDA 12.6 / RTX 4080 机器上生成的结果已归档到：
+
+```text
+outputs/benchmarks/vlm_8frame_aligned_4b_other_machine_cu126/
+```
+
+归档结果仅用于保留实验来源，不得与本机正式结果混合使用。
 
 每个模型分别生成独立 JSON 和 CSV。4B 文件不会覆盖 8B 结果，也不会覆盖另一个
 4B 模型的结果。
