@@ -47,14 +47,25 @@ summary files are ignored automatically.
   --output outputs/evaluations/vlm_8frame_aligned_4b \
   --metrics deterministic,llm_judge \
   --judge-model gemini-2.5-flash \
-  --judge-batch-size 20 \
+  --judge-batch-size 100 \
+  --judge-max-retries 3 \
   --api-key-list api_keys.txt
 ```
 
-Judge results are stored in `judge_cache.json`. Re-running the same command
-only sends records that are not already cached. Model identity is excluded
-from the judge prompt. The judge returns `correct`, `partially_correct`,
-`incorrect`, or `unjudgeable`, plus a short reason and error type.
+Judge results are stored in `llm_judge_cache.json`. Re-running the same command
+only sends records whose evaluation input is not already cached. The cache
+fingerprint covers the QA ID, modality, section, question, reference answer,
+and candidate answer, so edited answers are evaluated again while moved input
+files can reuse matching results. Model identity is excluded from the judge
+prompt but retained in the cache for auditing. The judge returns `correct`,
+`partially_correct`, `incorrect`, or `unjudgeable`, plus a short reason and
+error type. If a batch response omits, duplicates, or returns unexpected record
+IDs, the evaluator prints a warning with the affected count and sample IDs.
+Omitted items are not treated as completed cache entries and are retried the
+next time the evaluator runs.
+Transient request and response errors are retried three times by default with
+an increasing delay. Configure this with `--judge-max-retries` and
+`--judge-retry-delay-seconds`.
 
 Run a small validation before the full judge:
 
@@ -76,7 +87,7 @@ Run a small validation before the full judge:
 - `pairwise_comparisons.csv`: paired model comparisons when judge scores exist
 - `failures.csv`: failed or unanswered records
 - `report.md`: compact comparison table
-- `judge_cache.json`: resumable LLM Judge cache, when enabled
+- `llm_judge_cache.json`: resumable, content-validated LLM Judge cache
 
 ---
 
@@ -103,8 +114,13 @@ Run a small validation before the full judge:
   --output outputs/evaluations/vlm_8frame_aligned_4b \
   --metrics deterministic,llm_judge \
   --judge-model gemini-2.5-flash \
-  --judge-batch-size 20 \
+  --judge-batch-size 100 \
+  --judge-max-retries 3 \
   --api-key-list api_keys.txt
 ```
 
-`judge_cache.json` 支持断点续跑；再次执行时不会重复评估已经缓存的回答。
+`llm_judge_cache.json` 支持断点续跑，并使用问题、标准答案和模型回答等内容的
+哈希校验缓存。回答内容修改后会自动重新评估；仅移动输入文件不会导致重复评估。
+如果批量响应缺失、重复或返回了意外的记录 ID，终端会立即打印数量和 ID 示例。
+缺失项不会被视为已经完成，下次执行相同命令时会自动补评。
+网络断连、超时和临时响应错误默认最多尝试三次，并逐次增加等待时间。

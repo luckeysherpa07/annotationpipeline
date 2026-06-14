@@ -6,11 +6,14 @@ import hashlib
 import json
 import os
 import re
+import sys
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from annotation_feature.pipeline.client import create_gemini_client
+from annotation_feature.pipeline.gemini_retry import call_with_retry
 
 from .benchmark import (
     DEFAULT_GEMINI_API_KEY_LIST_PATH,
@@ -22,6 +25,7 @@ from .result_loader import EvaluationRecord
 
 DEFAULT_JUDGE_MODEL = "gemini-3.1-flash-lite"
 JUDGE_PROMPT_VERSION = "reference_guided_vlm_answer_judge_v1"
+JUDGE_CACHE_SCHEMA_VERSION = 2
 VALID_LABELS = {"correct", "partially_correct", "incorrect", "unjudgeable"}
 LABEL_SCORES = {
     "correct": 1.0,
@@ -92,6 +96,32 @@ def judge_prompt_sha256() -> str:
     return hashlib.sha256(template.encode("utf-8")).hexdigest()
 
 
+def evaluation_input_sha256(record: EvaluationRecord) -> str:
+    payload = {
+        "qa_id": record.qa_id,
+        "modality": record.modality,
+        "section": record.section,
+        "question": record.question,
+        "ground_truth_answer": record.ground_truth_answer,
+        "model_answer": record.model_answer,
+    }
+    serialized = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _is_reusable_judgment(item: Any, input_sha256: str) -> bool:
+    return (
+        isinstance(item, dict)
+        and item.get("evaluation_input_sha256") == input_sha256
+        and item.get("reason") != "Judge omitted this item."
+    )
+
+
 def _normalize_judgment(raw: dict[str, Any], record: EvaluationRecord) -> dict[str, Any]:
     label = str(raw.get("label", "unjudgeable")).strip().lower()
     if label not in VALID_LABELS:
@@ -105,6 +135,10 @@ def _normalize_judgment(raw: dict[str, Any], record: EvaluationRecord) -> dict[s
         "reason": str(raw.get("reason", "")).strip(),
         "error_type": error_type,
         "judge_prompt_version": JUDGE_PROMPT_VERSION,
+        "evaluation_input_sha256": evaluation_input_sha256(record),
+        "model_name": record.model_name,
+        "provider": record.provider,
+        "source_path": record.source_path,
     }
 
 
@@ -117,6 +151,33 @@ def _judge_batch(client: Any, model_name: str, batch: list[EvaluationRecord]) ->
     raw_items = payload.get("items")
     if not isinstance(raw_items, list):
         raise ValueError("Judge response is missing the items list")
+    requested_ids = {record.record_id for record in batch}
+    returned_ids = [
+        str(item.get("record_id"))
+        for item in raw_items
+        if isinstance(item, dict) and item.get("record_id")
+    ]
+    returned_counts = Counter(returned_ids)
+    missing_ids = sorted(requested_ids - returned_counts.keys())
+    extra_ids = sorted(returned_counts.keys() - requested_ids)
+    duplicate_ids = sorted(
+        record_id for record_id, count in returned_counts.items() if count > 1
+    )
+    diagnostics = (
+        ("missing", missing_ids),
+        ("unexpected", extra_ids),
+        ("duplicate", duplicate_ids),
+    )
+    for label, record_ids in diagnostics:
+        if record_ids:
+            sample = ", ".join(record_ids[:5])
+            suffix = "" if len(record_ids) <= 5 else ", ..."
+            print(
+                f"WARNING: Gemini judge response has {len(record_ids)} {label} "
+                f"record_id(s): {sample}{suffix}",
+                file=sys.stderr,
+                flush=True,
+            )
     by_id = {
         str(item.get("record_id")): item
         for item in raw_items
@@ -143,12 +204,15 @@ def run_llm_judge(
     output_path: Path | str,
     *,
     model_name: str = DEFAULT_JUDGE_MODEL,
-    batch_size: int = 20,
+    batch_size: int = 100,
     checkpoint_every_batches: int = 1,
     delay_seconds: float = 0.0,
+    max_retries: int = 3,
+    retry_delay_seconds: float = 2.0,
     max_items: int | None = None,
     api_key_list_path: Path | str = DEFAULT_GEMINI_API_KEY_LIST_PATH,
     client_factory: Callable[[str | None], Any] = create_gemini_client,
+    retry_sleep: Callable[[float], None] = time.sleep,
 ) -> dict[str, dict[str, Any]]:
     output_path = Path(output_path)
     existing: dict[str, Any] = {}
@@ -169,26 +233,65 @@ def run_llm_judge(
         if not isinstance(existing, dict):
             existing = {}
 
+    reusable_by_input = {
+        str(item.get("evaluation_input_sha256")): item
+        for item in existing.values()
+        if isinstance(item, dict)
+        and item.get("evaluation_input_sha256")
+        and item.get("reason") != "Judge omitted this item."
+    }
+    for record in records:
+        input_sha256 = evaluation_input_sha256(record)
+        cached = existing.get(record.record_id)
+        if not _is_reusable_judgment(cached, input_sha256):
+            cached = reusable_by_input.get(input_sha256)
+        if _is_reusable_judgment(cached, input_sha256):
+            existing[record.record_id] = {
+                **cached,
+                "record_id": record.record_id,
+                "qa_id": record.qa_id,
+                "model_name": record.model_name,
+                "provider": record.provider,
+                "source_path": record.source_path,
+            }
+
     pending = [
         record
         for record in records
         if record.status == "answered"
         and record.model_answer.strip()
-        and record.record_id not in existing
+        and not _is_reusable_judgment(
+            existing.get(record.record_id),
+            evaluation_input_sha256(record),
+        )
     ]
     if max_items is not None:
         pending = pending[: max(0, int(max_items))]
 
     stopped_reason: str | None = None
     keys = load_api_keys(api_key_list_path)
+
+    def evaluated_input_count() -> int:
+        return sum(
+            _is_reusable_judgment(
+                existing.get(record.record_id),
+                evaluation_input_sha256(record),
+            )
+            for record in records
+        )
+
     if not pending:
         metadata = {
+            "cache_schema_version": JUDGE_CACHE_SCHEMA_VERSION,
             "judge_model": model_name,
             "judge_prompt_version": JUDGE_PROMPT_VERSION,
             "judge_prompt_sha256": judge_prompt_sha256(),
-            "evaluated_items": len(existing),
+            "evaluated_items": evaluated_input_count(),
+            "cached_items": len(existing),
             "total_input_records": len(records),
             "batch_size": batch_size,
+            "max_retries": max_retries,
+            "retry_delay_seconds": retry_delay_seconds,
             "key_rotation_enabled": bool(keys),
             "keys_available": len(keys),
             "exhausted_key_count": 0,
@@ -202,12 +305,16 @@ def run_llm_judge(
 
     def checkpoint(reason: str | None = None) -> None:
         metadata = {
+            "cache_schema_version": JUDGE_CACHE_SCHEMA_VERSION,
             "judge_model": model_name,
             "judge_prompt_version": JUDGE_PROMPT_VERSION,
             "judge_prompt_sha256": judge_prompt_sha256(),
-            "evaluated_items": len(existing),
+            "evaluated_items": evaluated_input_count(),
+            "cached_items": len(existing),
             "total_input_records": len(records),
             "batch_size": batch_size,
+            "max_retries": max_retries,
+            "retry_delay_seconds": retry_delay_seconds,
             "key_rotation_enabled": bool(keys),
             "keys_available": len(keys),
             "exhausted_key_count": exhausted_keys,
@@ -221,7 +328,16 @@ def run_llm_judge(
             batch = pending[start : start + max(1, batch_size)]
             while True:
                 try:
-                    judgments = _judge_batch(client, model_name, batch)
+                    judgments = call_with_retry(
+                        lambda: _judge_batch(client, model_name, batch),
+                        max_attempts=max(1, max_retries),
+                        retry_if=lambda exc: not is_quota_error(exc),
+                        wait_seconds=lambda _exc, attempt: (
+                            max(0.0, retry_delay_seconds) * attempt
+                        ),
+                        label=f"Gemini judge batch ({len(batch)} item(s))",
+                        sleep=retry_sleep,
+                    )
                     break
                 except Exception as exc:
                     if not is_quota_error(exc) or not keys or key_index + 1 >= len(keys):

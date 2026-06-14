@@ -1,9 +1,14 @@
 import json
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 
-from annotation_feature.qa_quality.answer_judge import run_llm_judge
+from annotation_feature.qa_quality.answer_judge import (
+    judge_prompt_sha256,
+    run_llm_judge,
+)
 from annotation_feature.qa_quality.answer_metrics import (
     anls,
     boolean_accuracy,
@@ -196,6 +201,8 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
                 client_factory=lambda _key: client,
             )
             self.assertEqual(results["record-1"]["score"], 1.0)
+            self.assertTrue(results["record-1"]["evaluation_input_sha256"])
+            self.assertEqual(results["record-1"]["model_name"], "model-name")
             run_llm_judge(
                 [record()],
                 output,
@@ -204,6 +211,253 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
                 client_factory=lambda _key: client,
             )
             self.assertEqual(client.models.calls, 1)
+
+    def test_llm_judge_rejudges_changed_answer_and_reuses_moved_record(self):
+        class Models:
+            def __init__(self):
+                self.calls = 0
+
+            def generate_content(self, **kwargs):
+                self.calls += 1
+                prompt = kwargs["contents"][0]
+                record_id = json.loads(prompt.split("Items:\n", 1)[1])[0]["record_id"]
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": record_id,
+                                        "label": "correct",
+                                        "reason": "Equivalent.",
+                                        "error_type": "none",
+                                    }
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "judge.json"
+            client = Client()
+            options = {
+                "batch_size": 1,
+                "api_key_list_path": Path(directory) / "missing",
+                "client_factory": lambda _key: client,
+            }
+            run_llm_judge([record()], output, **options)
+            run_llm_judge([record(record_id="moved-record")], output, **options)
+            self.assertEqual(client.models.calls, 1)
+
+            changed = record(record_id="moved-record", answer="three")
+            results = run_llm_judge([changed], output, **options)
+            self.assertEqual(client.models.calls, 2)
+            self.assertEqual(results["moved-record"]["record_id"], "moved-record")
+
+    def test_llm_judge_does_not_trust_legacy_cache_without_input_hash(self):
+        class Models:
+            calls = 0
+
+            def generate_content(self, **_kwargs):
+                self.calls += 1
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": "record-1",
+                                        "label": "incorrect",
+                                        "reason": "Re-evaluated.",
+                                        "error_type": "wrong_count",
+                                    }
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "judge.json"
+            output.write_text(
+                json.dumps(
+                    {
+                        "items": {
+                            "record-1": {
+                                "record_id": "record-1",
+                                "label": "correct",
+                                "score": 1.0,
+                            }
+                        },
+                        "metadata": {
+                            "judge_model": "gemini-3.1-flash-lite",
+                            "judge_prompt_version": "reference_guided_vlm_answer_judge_v1",
+                            "judge_prompt_sha256": judge_prompt_sha256(),
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            client = Client()
+            results = run_llm_judge(
+                [record()],
+                output,
+                batch_size=1,
+                api_key_list_path=Path(directory) / "missing",
+                client_factory=lambda _key: client,
+            )
+            self.assertEqual(client.models.calls, 1)
+            self.assertEqual(results["record-1"]["label"], "incorrect")
+
+    def test_llm_judge_warns_when_response_omits_an_item(self):
+        calls = 0
+
+        class Client:
+            class Models:
+                @staticmethod
+                def generate_content(**_kwargs):
+                    nonlocal calls
+                    calls += 1
+                    returned_ids = ["record-1"] if calls == 1 else ["record-2"]
+                    return type(
+                        "Response",
+                        (),
+                        {
+                            "text": json.dumps(
+                                {
+                                    "items": [
+                                        {
+                                            "record_id": record_id,
+                                            "label": "correct",
+                                            "reason": "Equivalent.",
+                                            "error_type": "none",
+                                        }
+                                        for record_id in returned_ids
+                                    ]
+                                }
+                            )
+                        },
+                    )()
+
+            models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            warning_output = io.StringIO()
+            with redirect_stderr(warning_output):
+                results = run_llm_judge(
+                    [record(), record(record_id="record-2", qa_id="qa-2")],
+                    Path(directory) / "judge.json",
+                    batch_size=2,
+                    api_key_list_path=Path(directory) / "missing",
+                    client_factory=lambda _key: Client(),
+                )
+            self.assertIn(
+                "WARNING: Gemini judge response has 1 missing record_id(s): record-2",
+                warning_output.getvalue(),
+            )
+            self.assertEqual(results["record-2"]["label"], "unjudgeable")
+            self.assertEqual(results["record-2"]["reason"], "Judge omitted this item.")
+
+            results = run_llm_judge(
+                [record(), record(record_id="record-2", qa_id="qa-2")],
+                Path(directory) / "judge.json",
+                batch_size=2,
+                api_key_list_path=Path(directory) / "missing",
+                client_factory=lambda _key: Client(),
+            )
+            self.assertEqual(calls, 2)
+            self.assertEqual(results["record-2"]["label"], "correct")
+
+    def test_llm_judge_retries_transient_network_error(self):
+        class Models:
+            def __init__(self):
+                self.calls = 0
+
+            def generate_content(self, **_kwargs):
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("Server disconnected without sending a response.")
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": "record-1",
+                                        "label": "correct",
+                                        "reason": "Equivalent.",
+                                        "error_type": "none",
+                                    }
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            client = Client()
+            delays = []
+            results = run_llm_judge(
+                [record()],
+                Path(directory) / "judge.json",
+                batch_size=1,
+                max_retries=3,
+                retry_delay_seconds=2,
+                retry_sleep=delays.append,
+                api_key_list_path=Path(directory) / "missing",
+                client_factory=lambda _key: client,
+            )
+            self.assertEqual(client.models.calls, 2)
+            self.assertEqual(delays, [2])
+            self.assertEqual(results["record-1"]["label"], "correct")
+
+    def test_llm_judge_checkpoints_after_retry_exhaustion(self):
+        class Client:
+            class Models:
+                calls = 0
+
+                def generate_content(self, **_kwargs):
+                    self.calls += 1
+                    raise RuntimeError("Server disconnected without sending a response.")
+
+            models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "judge.json"
+            client = Client()
+            with self.assertRaisesRegex(RuntimeError, "Server disconnected"):
+                run_llm_judge(
+                    [record()],
+                    output,
+                    batch_size=1,
+                    max_retries=3,
+                    retry_delay_seconds=0,
+                    api_key_list_path=Path(directory) / "missing",
+                    client_factory=lambda _key: client,
+                )
+            self.assertEqual(client.models.calls, 3)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(payload["metadata"]["stopped_reason"], "judge_error")
+            self.assertEqual(payload["metadata"]["evaluated_items"], 0)
 
     def test_report_outputs_and_pairwise_comparison(self):
         left = record("left", "qa-1")

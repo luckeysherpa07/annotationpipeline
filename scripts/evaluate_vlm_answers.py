@@ -49,9 +49,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-records", type=int, default=None)
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
-    parser.add_argument("--judge-batch-size", type=int, default=20)
+    parser.add_argument("--judge-batch-size", type=int, default=100)
     parser.add_argument("--judge-checkpoint-every-batches", type=int, default=1)
     parser.add_argument("--judge-delay-seconds", type=float, default=0.0)
+    parser.add_argument("--judge-max-retries", type=int, default=3)
+    parser.add_argument("--judge-retry-delay-seconds", type=float, default=2.0)
     parser.add_argument("--judge-max-items", type=int, default=None)
     parser.add_argument(
         "--api-key-list",
@@ -87,6 +89,8 @@ def main() -> None:
             batch_size=max(1, args.judge_batch_size),
             checkpoint_every_batches=max(1, args.judge_checkpoint_every_batches),
             delay_seconds=max(0.0, args.judge_delay_seconds),
+            max_retries=max(1, args.judge_max_retries),
+            retry_delay_seconds=max(0.0, args.judge_retry_delay_seconds),
             max_items=args.judge_max_items,
             api_key_list_path=args.api_key_list,
         )

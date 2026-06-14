@@ -12,6 +12,10 @@ from pathlib import Path
 from typing import Any
 
 from annotation_feature.pipeline.client import create_gemini_client
+from annotation_feature.pipeline.gemini_retry import (
+    call_with_retry_async,
+    retry_wait_seconds,
+)
 
 
 VERIFIER_MODEL_NAME = "gemini-2.0-flash"
@@ -42,35 +46,22 @@ def _save_json(data: dict[str, Any], path: Path) -> None:
         json.dump(data, handle, indent=2, ensure_ascii=False)
 
 
-def _is_quota_or_rate_limit_error(exc: Exception) -> bool:
-    text = str(exc).lower()
-    return any(token in text for token in ("quota", "rate limit", "rate_limit", "429", "resource_exhausted"))
-
-
 async def _call_verifier_gemini_with_retry(
     client,
     contents: list,
     max_retries: int = 3,
     model_name: str = VERIFIER_MODEL_NAME,
 ) -> str:
-    for attempt in range(1, max_retries + 1):
-        try:
-            response = await asyncio.to_thread(
-                client.models.generate_content,
-                model=model_name,
-                contents=contents,
-            )
-            return response.text
-        except Exception as exc:
-            if attempt == max_retries:
-                raise
-            wait_seconds = 30 * attempt if _is_quota_or_rate_limit_error(exc) else 2 * attempt
-            print(
-                f"    QA verifier Gemini call failed on attempt {attempt}/{max_retries}; "
-                f"retrying in {wait_seconds}s: {exc}"
-            )
-            await asyncio.sleep(wait_seconds)
-    raise RuntimeError("QA verifier Gemini call failed")
+    response = await call_with_retry_async(
+        lambda: client.models.generate_content(
+            model=model_name,
+            contents=contents,
+        ),
+        max_attempts=max_retries,
+        wait_seconds=retry_wait_seconds,
+        label="    QA verifier Gemini call",
+    )
+    return response.text
 
 
 def _parse_json_object_response(text: str) -> dict[str, Any]:
