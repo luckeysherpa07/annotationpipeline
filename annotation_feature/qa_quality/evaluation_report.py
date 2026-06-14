@@ -268,9 +268,17 @@ def summarize_scores(
 def _binomial_two_sided_p_value(successes: int, trials: int) -> float:
     if trials == 0:
         return 1.0
-    probability = sum(
-        math.comb(trials, index) * (0.5**trials)
-        for index in range(0, min(successes, trials - successes) + 1)
+    tail_end = min(successes, trials - successes)
+    log_probabilities = [
+        math.lgamma(trials + 1)
+        - math.lgamma(index + 1)
+        - math.lgamma(trials - index + 1)
+        - trials * math.log(2.0)
+        for index in range(tail_end + 1)
+    ]
+    maximum = max(log_probabilities)
+    probability = math.exp(maximum) * sum(
+        math.exp(value - maximum) for value in log_probabilities
     )
     return min(1.0, 2 * probability)
 

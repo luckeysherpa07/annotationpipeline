@@ -18,6 +18,7 @@ from annotation_feature.qa_quality.answer_metrics import (
     token_prf,
 )
 from annotation_feature.qa_quality.evaluation_report import (
+    _binomial_two_sided_p_value,
     pairwise_judge_comparisons,
     score_records,
     write_evaluation_outputs,
@@ -56,6 +57,12 @@ def record(record_id="record-1", qa_id="qa-1", answer="two"):
 
 
 class VLMAnswerEvaluationTests(unittest.TestCase):
+    def test_binomial_two_sided_p_value_is_stable_for_large_samples(self):
+        p_value = _binomial_two_sided_p_value(2200, 5000)
+        self.assertTrue(0.0 <= p_value <= 1.0)
+        self.assertLess(p_value, 1e-10)
+        self.assertEqual(_binomial_two_sided_p_value(2500, 5000), 1.0)
+
     def test_deterministic_short_answer_metrics(self):
         self.assertEqual(token_prf("A ceramic teapot", "teapot")["f1"], 2 / 3)
         self.assertEqual(boolean_accuracy("Yes.", "true"), 1.0)
