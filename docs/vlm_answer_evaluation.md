@@ -5,6 +5,14 @@ supports frame-input and video-input result files that contain the question,
 ground-truth answer, model answer, task section, modality, latency, and GPU
 memory measurements.
 
+1. BLEU ROUGE Meteor, LLM-as-a-judge
+2. observation 4B to 8B, modality, attribute
+3. Ego challenge
+4. Pr: structure, describe the dataset, QA attributes
+5. detail analysis
+6. is Molmo2 better in video QA? as it stated in its paper.
+7. For challenge, QA quality is important
+
 ## Metrics
 
 - Normalized exact match
