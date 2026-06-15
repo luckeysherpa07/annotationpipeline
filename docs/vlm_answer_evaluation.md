@@ -117,6 +117,29 @@ Evaluate all result JSON files in a benchmark directory:
 Multiple files or directories may be passed after `--input`. Manifest and
 summary files are ignored automatically.
 
+### 30-Frame 4B Evaluation
+
+The three complete 30-frame 4B result files can be evaluated together with the
+same deterministic metrics, LLM Judge, modality summaries, section summaries,
+and pairwise comparisons used by the fixed 8-frame experiments:
+
+```bash
+.venv/bin/python scripts/evaluate_vlm_answers.py \
+  --input \
+    outputs/benchmarks/aligned_qa_frame_answers_allenai_Molmo2-4B.json \
+    outputs/benchmarks/aligned_qa_frame_answers_OpenGVLab_InternVL2_5-4B.json \
+    outputs/benchmarks/aligned_qa_frame_answers_Qwen_Qwen3-VL-4B-Instruct.json \
+  --output outputs/evaluations/vlm_30frame_aligned_4b \
+  --require-frame-count 30 \
+  --metrics deterministic,llm_judge \
+  --judge-model gemini-3.1-flash-lite \
+  --judge-batch-size 150
+```
+
+`--require-frame-count 30` validates every answered input record before any
+judge request is sent. Reports retain both the configured maximum and observed
+frame counts, so 8-frame and 30-frame experiments remain distinguishable.
+
 ## Evaluation With LLM Judge
 
 ```bash
@@ -269,6 +292,27 @@ Judge 标签映射为：`correct = 1.0`、`partially_correct = 0.5`、
   --output outputs/evaluations/vlm_8frame_aligned_4b \
   --metrics deterministic
 ```
+
+### 4B 模型 30 帧评估
+
+三份完整的 4B 模型 30 帧结果可以复用与固定 8 帧实验完全相同的确定性指标、
+LLM Judge、模态汇总、任务汇总和模型配对比较：
+
+```bash
+.venv/bin/python scripts/evaluate_vlm_answers.py \
+  --input \
+    outputs/benchmarks/aligned_qa_frame_answers_allenai_Molmo2-4B.json \
+    outputs/benchmarks/aligned_qa_frame_answers_OpenGVLab_InternVL2_5-4B.json \
+    outputs/benchmarks/aligned_qa_frame_answers_Qwen_Qwen3-VL-4B-Instruct.json \
+  --output outputs/evaluations/vlm_30frame_aligned_4b \
+  --require-frame-count 30 \
+  --metrics deterministic,llm_judge \
+  --judge-model gemini-3.1-flash-lite \
+  --judge-batch-size 150
+```
+
+`--require-frame-count 30` 会在发送任何 Judge 请求前验证所有已回答记录。
+报告会保留配置的最大帧数和实际帧数，因此 8 帧与 30 帧实验可以明确区分。
 
 增加 LLM Judge：
 

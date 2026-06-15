@@ -32,6 +32,24 @@ def _load_judgments(path: Path) -> dict[str, dict]:
     return items if isinstance(items, dict) else {}
 
 
+def validate_required_frame_count(records: list, expected_frame_count: int) -> None:
+    expected = max(0, int(expected_frame_count))
+    mismatched = [
+        record
+        for record in records
+        if record.status == "answered" and record.frame_count != expected
+    ]
+    if mismatched:
+        examples = ", ".join(
+            f"{record.source_path}:{record.qa_id}={record.frame_count!r}"
+            for record in mismatched[:5]
+        )
+        raise RuntimeError(
+            f"{len(mismatched)} answered record(s) do not use "
+            f"{expected} frames. Examples: {examples}"
+        )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -47,6 +65,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Comma-separated stages: deterministic,llm_judge.",
     )
     parser.add_argument("--max-records", type=int, default=None)
+    parser.add_argument(
+        "--require-frame-count",
+        type=int,
+        default=None,
+        help="Reject inputs whose answered records do not use this frame count.",
+    )
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--judge-batch-size", type=int, default=100)
@@ -82,6 +106,8 @@ def main() -> None:
         raise ValueError(f"Unsupported metric stages: {sorted(unsupported)}")
 
     records, skipped = load_evaluation_records(args.input)
+    if args.require_frame_count is not None:
+        validate_required_frame_count(records, args.require_frame_count)
     if args.max_records is not None:
         records = records[: max(0, args.max_records)]
     if not records:

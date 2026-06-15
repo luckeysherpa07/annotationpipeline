@@ -29,6 +29,7 @@ from annotation_feature.qa_quality.result_loader import (
     load_evaluation_records,
     load_result_file,
 )
+from scripts.evaluate_vlm_answers import validate_required_frame_count
 
 
 def record(record_id="record-1", qa_id="qa-1", answer="two"):
@@ -93,10 +94,13 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
                                     "ground_truth_answer": "answer",
                                     "model_answer": "answer",
                                     "status": "answered",
-                                    "frame_paths": ["frame.jpg"],
+                                    "frame_paths": ["frame-1.jpg", "frame-2.jpg"],
                                 }
                             },
-                            "metadata": {"benchmark_type": "frame_test"},
+                            "metadata": {
+                                "benchmark_type": "frame_test",
+                                "max_frames_per_item": 2,
+                            },
                         }
                     ),
                     encoding="utf-8",
@@ -104,6 +108,20 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
                 loaded = load_result_file(path)
                 self.assertEqual(len(loaded), 1)
                 self.assertEqual(loaded[0].input_type, "frame")
+                self.assertEqual(loaded[0].frame_count, 2)
+                self.assertEqual(loaded[0].max_frames_per_item, 2)
+
+    def test_required_frame_count_rejects_mixed_inputs(self):
+        two_frames = EvaluationRecord(
+            **{
+                **record().to_dict(),
+                "frame_count": 2,
+                "max_frames_per_item": 2,
+            }
+        )
+        validate_required_frame_count([two_frames], 2)
+        with self.assertRaisesRegex(RuntimeError, "do not use 30 frames"):
+            validate_required_frame_count([two_frames], 30)
 
     def test_directory_loader_skips_manifests(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -602,7 +620,13 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             self.assertEqual(results["record-1"]["label"], "correct")
 
     def test_report_outputs_and_pairwise_comparison(self):
-        left = record("left", "qa-1")
+        left = EvaluationRecord(
+            **{
+                **record("left", "qa-1").to_dict(),
+                "frame_count": 30,
+                "max_frames_per_item": 30,
+            }
+        )
         right = EvaluationRecord(**{**left.to_dict(), "record_id": "right", "model_name": "other"})
         judgments = {
             "left": {"label": "correct", "score": 1.0},
@@ -622,6 +646,9 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             self.assertTrue(outputs["summary_json"].is_file())
             summary = json.loads(outputs["summary_json"].read_text(encoding="utf-8"))
             self.assertEqual(len(summary["models"]), 2)
+            first_model = next(iter(summary["models"].values()))
+            self.assertEqual(first_model["identity"]["frame_counts"], [30])
+            self.assertEqual(first_model["identity"]["max_frames_per_item"], 30)
 
 
 if __name__ == "__main__":

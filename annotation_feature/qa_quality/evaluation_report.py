@@ -33,6 +33,29 @@ def _model_key(record: EvaluationRecord) -> str:
     return f"{record.provider}:{model_short}:{record.input_type}:{source_tag}"
 
 
+def _frame_configuration(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    frame_counts = sorted(
+        {
+            int(row["frame_count"])
+            for row in rows
+            if isinstance(row.get("frame_count"), int)
+        }
+    )
+    configured_maxima = sorted(
+        {
+            int(row["max_frames_per_item"])
+            for row in rows
+            if isinstance(row.get("max_frames_per_item"), int)
+        }
+    )
+    return {
+        "frame_counts": frame_counts,
+        "max_frames_per_item": (
+            configured_maxima[0] if len(configured_maxima) == 1 else configured_maxima
+        ),
+    }
+
+
 def score_records(
     records: Iterable[EvaluationRecord],
     judgments: dict[str, dict[str, Any]] | None = None,
@@ -243,6 +266,7 @@ def summarize_scores(
         overall["section_macro_judge_strict_accuracy"] = _macro_average(
             section_summaries, "judge_strict_accuracy"
         )
+        frame_configuration = _frame_configuration(model_rows)
         summary_models[model_key] = {
             "identity": {
                 key: model_rows[0].get(key)
@@ -253,15 +277,30 @@ def summarize_scores(
                     "benchmark_type",
                     "source_path",
                 )
-            },
+            }
+            | frame_configuration,
             "overall": overall,
             "by_modality": modality_summaries,
             "by_section": section_summaries,
         }
         for modality, values in modality_summaries.items():
-            modality_rows.append({"model_key": model_key, "modality": modality, **values})
+            modality_rows.append(
+                {
+                    "model_key": model_key,
+                    "modality": modality,
+                    **frame_configuration,
+                    **values,
+                }
+            )
         for section, values in section_summaries.items():
-            section_rows.append({"model_key": model_key, "section": section, **values})
+            section_rows.append(
+                {
+                    "model_key": model_key,
+                    "section": section,
+                    **frame_configuration,
+                    **values,
+                }
+            )
     return {"models": summary_models}, modality_rows, section_rows
 
 
@@ -351,12 +390,16 @@ def _write_report_markdown(path: Path, summary: dict[str, Any]) -> None:
         identity = model["identity"]
         values = model["overall"]
         format_value = lambda value: "" if value is None else f"{value:.4f}"
+        frame_counts = identity.get("frame_counts") or []
+        input_label = str(identity.get("input_type", ""))
+        if frame_counts:
+            input_label += f" ({'/'.join(str(value) for value in frame_counts)} frames)"
         lines.append(
             "| "
             + " | ".join(
                 (
                     Path(str(identity.get("model_name", model_key))).name,
-                    str(identity.get("input_type", "")),
+                    input_label,
                     format_value(values.get("answer_rate")),
                     format_value(values.get("task_aware_score")),
                     format_value(values.get("token_f1")),

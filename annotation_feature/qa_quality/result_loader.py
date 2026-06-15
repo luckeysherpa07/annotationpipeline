@@ -31,6 +31,8 @@ class EvaluationRecord:
     peak_gpu_gb: float | None
     incremental_peak_gpu_gb: float | None
     source_metadata: dict[str, Any]
+    frame_count: int | None = None
+    max_frames_per_item: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -39,6 +41,13 @@ class EvaluationRecord:
 def _optional_float(value: Any) -> float | None:
     try:
         return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _optional_int(value: Any) -> int | None:
+    try:
+        return int(value) if value is not None else None
     except (TypeError, ValueError):
         return None
 
@@ -159,6 +168,18 @@ def load_result_file(path: Path | str) -> list[EvaluationRecord]:
                     row.get("incremental_peak_gpu_gb")
                 ),
                 source_metadata=record_metadata,
+                frame_count=_optional_int(
+                    row.get("frame_count")
+                    or (
+                        len(row["frame_paths"])
+                        if isinstance(row.get("frame_paths"), list)
+                        else None
+                    )
+                ),
+                max_frames_per_item=_optional_int(
+                    metadata.get("max_frames_per_item")
+                    or metadata.get("max_frames")
+                ),
             )
         )
     return records
