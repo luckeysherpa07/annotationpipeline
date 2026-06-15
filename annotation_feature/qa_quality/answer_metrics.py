@@ -97,6 +97,72 @@ def rouge_l_f1(reference: str, candidate: str) -> float:
     return 2 * precision * recall / (precision + recall) if precision + recall else 0.0
 
 
+def _ngrams(tokens: list[str], size: int) -> Counter[tuple[str, ...]]:
+    return Counter(tuple(tokens[index : index + size]) for index in range(len(tokens) - size + 1))
+
+
+def bleu_4(reference: str, candidate: str) -> float:
+    """Sentence-level BLEU-4 with add-one smoothing for short answers."""
+    reference_tokens = normalized_tokens(reference)
+    candidate_tokens = normalized_tokens(candidate)
+    if not reference_tokens and not candidate_tokens:
+        return 1.0
+    if not reference_tokens or not candidate_tokens:
+        return 0.0
+
+    precisions = []
+    for size in range(1, 5):
+        candidate_ngrams = _ngrams(candidate_tokens, size)
+        reference_ngrams = _ngrams(reference_tokens, size)
+        total = sum(candidate_ngrams.values())
+        if total == 0:
+            precisions.append(1.0)
+            continue
+        overlap = sum((candidate_ngrams & reference_ngrams).values())
+        precisions.append((overlap + 1.0) / (total + 1.0))
+
+    brevity_penalty = (
+        1.0
+        if len(candidate_tokens) > len(reference_tokens)
+        else math.exp(1.0 - len(reference_tokens) / len(candidate_tokens))
+    )
+    return brevity_penalty * math.exp(sum(math.log(value) for value in precisions) / 4.0)
+
+
+def meteor(reference: str, candidate: str) -> float:
+    """Exact-token METEOR variant with recall-weighted F mean and chunk penalty."""
+    reference_tokens = normalized_tokens(reference)
+    candidate_tokens = normalized_tokens(candidate)
+    if not reference_tokens and not candidate_tokens:
+        return 1.0
+    if not reference_tokens or not candidate_tokens:
+        return 0.0
+
+    unused_reference_positions: dict[str, list[int]] = {}
+    for index, token in enumerate(reference_tokens):
+        unused_reference_positions.setdefault(token, []).append(index)
+
+    matched_positions: list[int] = []
+    for token in candidate_tokens:
+        positions = unused_reference_positions.get(token)
+        if positions:
+            matched_positions.append(positions.pop(0))
+
+    matches = len(matched_positions)
+    if matches == 0:
+        return 0.0
+
+    precision = matches / len(candidate_tokens)
+    recall = matches / len(reference_tokens)
+    f_mean = (10.0 * precision * recall) / (recall + 9.0 * precision)
+    chunks = 1 + sum(
+        current != previous + 1
+        for previous, current in zip(matched_positions, matched_positions[1:])
+    )
+    penalty = 0.5 * (chunks / matches) ** 3
+    return f_mean * (1.0 - penalty)
+
+
 def levenshtein_distance(left: str, right: str) -> int:
     if len(left) > len(right):
         left, right = right, left
@@ -231,7 +297,9 @@ def deterministic_metrics(reference: str, candidate: str) -> dict[str, Any]:
         "token_precision": token["precision"],
         "token_recall": token["recall"],
         "token_f1": token["f1"],
+        "bleu_4": bleu_4(reference, candidate),
         "rouge_l_f1": rouge_l_f1(reference, candidate),
+        "meteor": meteor(reference, candidate),
         "anls": anls(reference, candidate),
         "character_f1": character_f1(reference, candidate),
         "boolean_accuracy": boolean_accuracy(reference, candidate),

@@ -20,7 +20,9 @@ from .result_loader import EvaluationRecord
 SCORE_FIELDS = (
     "normalized_exact_match",
     "token_f1",
+    "bleu_4",
     "rouge_l_f1",
+    "meteor",
     "anls",
     "character_f1",
     "task_aware_score",
@@ -379,6 +381,26 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(_flatten_for_csv(row) for row in rows)
 
 
+def _select_fields(rows: list[dict[str, Any]], fields: tuple[str, ...]) -> list[dict[str, Any]]:
+    return [{field: row.get(field) for field in fields} for row in rows]
+
+
+def _backup_existing_outputs(output_dir: Path, paths: Iterable[Path]) -> Path | None:
+    existing = [path for path in paths if path.exists()]
+    if not existing:
+        return None
+    backup_root = output_dir / "report_backups"
+    backup_dir = backup_root / "latest"
+    counter = 1
+    while backup_dir.exists():
+        counter += 1
+        backup_dir = backup_root / f"latest_{counter}"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    for path in existing:
+        path.replace(backup_dir / path.name)
+    return backup_dir
+
+
 def _write_report_markdown(path: Path, summary: dict[str, Any]) -> None:
     lines = [
         "# VLM Answer Evaluation Report",
@@ -414,12 +436,50 @@ def _write_report_markdown(path: Path, summary: dict[str, Any]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_answer_metrics_report_markdown(path: Path, summary: dict[str, Any]) -> None:
+    lines = [
+        "# VLM Answer Metrics Report",
+        "",
+        "Focused report for BLEU-4, ROUGE-L, METEOR, and LLM-as-a-judge.",
+        "",
+        "| Model | Input | Answer rate | BLEU-4 | ROUGE-L | METEOR | Judge strict | Judge soft | Judge unjudgeable |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for model_key, model in summary.get("models", {}).items():
+        identity = model["identity"]
+        values = model["overall"]
+        format_value = lambda value: "" if value is None else f"{value:.4f}"
+        frame_counts = identity.get("frame_counts") or []
+        input_label = str(identity.get("input_type", ""))
+        if frame_counts:
+            input_label += f" ({'/'.join(str(value) for value in frame_counts)} frames)"
+        lines.append(
+            "| "
+            + " | ".join(
+                (
+                    Path(str(identity.get("model_name", model_key))).name,
+                    input_label,
+                    format_value(values.get("answer_rate")),
+                    format_value(values.get("bleu_4")),
+                    format_value(values.get("rouge_l_f1")),
+                    format_value(values.get("meteor")),
+                    format_value(values.get("judge_strict_accuracy")),
+                    format_value(values.get("judge_soft_accuracy")),
+                    format_value(values.get("judge_unjudgeable_rate")),
+                )
+            )
+            + " |"
+        )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def write_evaluation_outputs(
     output_dir: Path | str,
     rows: list[dict[str, Any]],
     *,
     skipped_inputs: list[dict[str, str]] | None = None,
     bootstrap_samples: int = 1000,
+    backup_existing_reports: bool = False,
 ) -> dict[str, Path]:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -443,7 +503,16 @@ def write_evaluation_outputs(
         "section_csv": output_dir / "section_scores.csv",
         "failures_csv": output_dir / "failures.csv",
         "report_md": output_dir / "report.md",
+        "answer_metrics_report_md": output_dir / "answer_metrics_report.md",
+        "answer_metrics_summary_csv": output_dir / "answer_metrics_summary.csv",
+        "answer_metrics_modality_csv": output_dir / "answer_metrics_modality_scores.csv",
+        "answer_metrics_section_csv": output_dir / "answer_metrics_section_scores.csv",
     }
+    backup_dir = (
+        _backup_existing_outputs(output_dir, paths.values())
+        if backup_existing_reports
+        else None
+    )
     paths["per_item_json"].write_text(
         json.dumps({"items": rows}, indent=2, ensure_ascii=False),
         encoding="utf-8",
@@ -462,4 +531,28 @@ def write_evaluation_outputs(
     _write_csv(paths["section_csv"], section_rows)
     _write_csv(paths["failures_csv"], failures)
     _write_report_markdown(paths["report_md"], summary)
+    answer_metric_fields = (
+        "model_key",
+        "provider",
+        "model_name",
+        "input_type",
+        "benchmark_type",
+        "frame_counts",
+        "max_frames_per_item",
+        "answer_rate",
+        "bleu_4",
+        "rouge_l_f1",
+        "meteor",
+        "judge_evaluated",
+        "judge_strict_accuracy",
+        "judge_soft_accuracy",
+        "judge_unjudgeable_rate",
+    )
+    grouped_metric_fields = answer_metric_fields + ("modality", "section")
+    _write_csv(paths["answer_metrics_summary_csv"], _select_fields(summary_rows, answer_metric_fields))
+    _write_csv(paths["answer_metrics_modality_csv"], _select_fields(modality_rows, grouped_metric_fields))
+    _write_csv(paths["answer_metrics_section_csv"], _select_fields(section_rows, grouped_metric_fields))
+    _write_answer_metrics_report_markdown(paths["answer_metrics_report_md"], summary)
+    if backup_dir is not None:
+        paths["report_backup_dir"] = backup_dir
     return paths

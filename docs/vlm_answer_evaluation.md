@@ -5,7 +5,7 @@ supports frame-input and video-input result files that contain the question,
 ground-truth answer, model answer, task section, modality, latency, and GPU
 memory measurements.
 
-1. BLEU ROUGE Meteor, LLM-as-a-judge
+1. BLEU, ROUGE, METEOR, and LLM-as-a-judge
 2. observation 4B to 8B, modality, attribute
 3. Ego challenge
 4. Pr: structure, describe the dataset, QA attributes
@@ -17,7 +17,9 @@ memory measurements.
 
 - Normalized exact match
 - Token precision, recall, and F1
+- BLEU-4 for n-gram precision with a brevity penalty
 - ROUGE-L F1 as a secondary lexical diagnostic
+- METEOR for recall-weighted unigram overlap with a fragmentation penalty
 - ANLS and character F1 for OCR/text answers
 - Boolean accuracy for yes/no tasks
 - Numeric accuracy for counting tasks
@@ -44,7 +46,9 @@ better unless stated otherwise.
 | `token_precision` | Fraction of candidate tokens that overlap the reference | Detects unsupported or excessive candidate content |
 | `token_recall` | Fraction of reference tokens covered by the candidate | Detects missing reference content |
 | `token_f1` | Harmonic mean of token precision and recall | General lexical similarity for short open-ended answers |
+| `bleu_4` | Sentence-level BLEU-4 over normalized tokens, with add-one smoothing and a brevity penalty | Compact n-gram-overlap metric for model-to-model comparison |
 | `rouge_l_f1` | F1 based on the longest common token subsequence | Secondary diagnostic when word order matters |
+| `meteor` | Exact-token METEOR variant using recall-weighted F mean and a chunk penalty | Lexical metric that rewards reference coverage more than precision-only overlap |
 | `anls` | Character-edit similarity, set to zero below a similarity threshold of `0.5` | OCR and text-reading answers |
 | `character_f1` | Character overlap F1 after normalization | OCR spelling and transcription diagnostic |
 | `boolean_accuracy` | Whether parsed yes/no polarity matches exactly | Boolean questions |
@@ -206,7 +210,15 @@ Run a small validation before the full judge:
 - `pairwise_comparisons.csv`: paired model comparisons when judge scores exist
 - `failures.csv`: failed or unanswered records
 - `report.md`: compact comparison table
+- `answer_metrics_report.md`: focused BLEU-4, ROUGE-L, METEOR, and LLM-as-a-judge report
+- `answer_metrics_summary.csv`: focused one-row-per-model metric table
+- `answer_metrics_modality_scores.csv`: focused model-by-modality metric table
+- `answer_metrics_section_scores.csv`: focused model-by-section metric table
 - `llm_judge_cache.json`: resumable, content-validated LLM Judge cache
+
+When refreshing an existing output directory, add `--backup-existing-reports`
+to move the previous report/output files into `report_backups/latest/` before
+the new files are written.
 
 ---
 
@@ -214,7 +226,7 @@ Run a small validation before the full judge:
 
 该工具直接评估已经保存的模型回答，不会重新执行模型推理。它同时兼容帧输入和视频输入结果。
 
-确定性指标包括精确匹配、Token F1、ROUGE-L、ANLS、字符 F1，以及按任务选择的布尔、计数、集合和顺序指标。可选的 LLM Judge 会在隐藏模型身份的情况下判断回答为正确、部分正确、错误或无法判断。报告还会统计回答率、失败数、延迟、吞吐量、峰值显存、模态与任务宏平均及 95% bootstrap 置信区间。
+确定性指标包括精确匹配、Token F1、BLEU-4、ROUGE-L、METEOR、ANLS、字符 F1，以及按任务选择的布尔、计数、集合和顺序指标。可选的 LLM Judge 会在隐藏模型身份的情况下判断回答为正确、部分正确、错误或无法判断。报告还会统计回答率、失败数、延迟、吞吐量、峰值显存、模态与任务宏平均及 95% bootstrap 置信区间。
 
 ## 指标说明
 
@@ -226,7 +238,9 @@ Run a small validation before the full judge:
 | `token_precision` | 模型回答中的 token 有多少与标准答案重合 | 检查多余或无依据内容 |
 | `token_recall` | 标准答案中的 token 有多少被模型回答覆盖 | 检查遗漏内容 |
 | `token_f1` | Token precision 与 recall 的调和平均 | 一般开放式短回答的词汇相似度 |
+| `bleu_4` | 标准化 token 上的句级 BLEU-4，包含 add-one smoothing 和 brevity penalty | 紧凑的 n-gram 重合对比指标 |
 | `rouge_l_f1` | 基于最长公共 token 子序列的 F1 | 对词序敏感的辅助指标 |
+| `meteor` | 精确 token 匹配版 METEOR，使用偏向 recall 的 F mean 和片段惩罚 | 更重视覆盖标准答案内容的词汇指标 |
 | `anls` | 字符编辑相似度；低于 `0.5` 时记为 0 | OCR 与文字识别 |
 | `character_f1` | 标准化后的字符重合 F1 | 拼写和转录质量 |
 | `boolean_accuracy` | 解析后的 Yes/No 极性是否一致 | 布尔问题 |
@@ -291,6 +305,10 @@ Judge 标签映射为：`correct = 1.0`、`partially_correct = 0.5`、
 
 `summary.csv` 每个模型一行，`modality_scores.csv` 每个“模型 + 模态”一行，
 `section_scores.csv` 每个“模型 + QA section”一行。
+四指标最新报告会单独写入 `answer_metrics_report.md`、
+`answer_metrics_summary.csv`、`answer_metrics_modality_scores.csv` 和
+`answer_metrics_section_scores.csv`。刷新已有输出目录时，可以添加
+`--backup-existing-reports`，旧版报告文件会先移动到 `report_backups/latest/`。
 
 正式执行确定性评估：
 

@@ -11,8 +11,10 @@ from annotation_feature.qa_quality.answer_judge import (
 )
 from annotation_feature.qa_quality.answer_metrics import (
     anls,
+    bleu_4,
     boolean_accuracy,
     deterministic_metrics,
+    meteor,
     numeric_accuracy,
     rouge_l_f1,
     token_prf,
@@ -69,7 +71,14 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
         self.assertEqual(boolean_accuracy("Yes.", "true"), 1.0)
         self.assertEqual(numeric_accuracy("two", "2"), 1.0)
         self.assertGreater(rouge_l_f1("open the door then enter", "open door enter"), 0.7)
+        self.assertEqual(bleu_4("open the door", "open the door"), 1.0)
+        self.assertEqual(meteor("open the door", "open the door"), 0.9375)
+        self.assertGreater(bleu_4("open the door then enter", "open door enter"), 0.0)
+        self.assertGreater(meteor("open the door then enter", "open door enter"), 0.5)
         self.assertGreater(anls("mailbox", "mail box"), 0.8)
+        metrics = deterministic_metrics("open the door", "open the door")
+        self.assertIn("bleu_4", metrics)
+        self.assertIn("meteor", metrics)
 
     def test_metric_router_uses_task_specific_metrics(self):
         metrics = deterministic_metrics("two", "2")
@@ -649,6 +658,20 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             first_model = next(iter(summary["models"].values()))
             self.assertEqual(first_model["identity"]["frame_counts"], [30])
             self.assertEqual(first_model["identity"]["max_frames_per_item"], 30)
+            self.assertTrue(outputs["answer_metrics_report_md"].is_file())
+            self.assertTrue(outputs["answer_metrics_summary_csv"].is_file())
+
+            outputs["report_md"].write_text("old report", encoding="utf-8")
+            refreshed = write_evaluation_outputs(
+                directory,
+                rows,
+                bootstrap_samples=20,
+                backup_existing_reports=True,
+            )
+            backup_dir = refreshed["report_backup_dir"]
+            self.assertTrue((backup_dir / "report.md").is_file())
+            self.assertEqual((backup_dir / "report.md").read_text(encoding="utf-8"), "old report")
+            self.assertIn("BLEU-4", refreshed["answer_metrics_report_md"].read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

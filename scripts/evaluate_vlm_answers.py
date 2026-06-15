@@ -72,6 +72,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Reject inputs whose answered records do not use this frame count.",
     )
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
+    parser.add_argument(
+        "--backup-existing-reports",
+        action="store_true",
+        help="Move existing report/output files in the output directory to report_backups/ before writing new reports.",
+    )
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--judge-batch-size", type=int, default=100)
     parser.add_argument("--judge-checkpoint-every-batches", type=int, default=1)
@@ -145,6 +150,7 @@ def main() -> None:
         rows,
         skipped_inputs=skipped,
         bootstrap_samples=max(1, args.bootstrap_samples),
+        backup_existing_reports=args.backup_existing_reports,
     )
     for label, path in outputs.items():
         print(f"{label}: {path}")
