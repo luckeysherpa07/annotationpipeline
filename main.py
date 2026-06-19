@@ -65,6 +65,7 @@ from annotation_feature.temporal_alignment import (
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_day_night_temporal_alignment,
 )
+from scripts.make_qa_distribution_figure import build_svg, load_items
 
 
 ALIGNED_QA_OUTPUT_DIR = Path("qa_pairs/aligned")
@@ -459,6 +460,30 @@ def _run_multimodal_qa_verifier_menu_option() -> None:
     print(f"Wrote verified v2 implicit multimodal QA to {result_path}")
 
 
+def _run_qa_distribution_presentation_output() -> None:
+    input_path = Path("outputs/aligned_qa_valid_items.json")
+    output_path = Path("outputs/figures/qa_type_distribution_visual.svg")
+
+    print("\n" + "-" * 60)
+    print("Running: generate QA distribution presentation figure")
+    print("-" * 60)
+    print(f"Input:  {input_path}")
+    print(f"Output: {output_path}")
+    print("Format: SVG presentation graphic")
+    print("Content: visual modality pie chart plus QA-type bar panels.")
+    print("This is local and does not call Gemini or any external service.")
+    print("-" * 60)
+
+    if not input_path.exists():
+        print(f"Missing input file: {input_path}")
+        return
+
+    items = load_items(input_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(build_svg(items), encoding="utf-8")
+    print(f"Wrote presentation figure to {output_path}")
+
+
 def main():
     _migrate_legacy_aligned_qa_results()
 
@@ -556,9 +581,11 @@ def main():
             "BENCHMARK EVALUATION",
             "FRAME INPUT ANSWER BENCHMARK",
         ))
+        print("\n--- PRESENTATION OUTPUT ---")
+        print("75. Generate QA distribution presentation figure")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-73 or action id): ").strip()
+        choice = input("\nEnter choice (1-75 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1267,6 +1294,9 @@ def main():
 
         elif choice == "62":
             _run_multimodal_qa_verifier_menu_option()
+
+        elif choice == "75":
+            _run_qa_distribution_presentation_output()
 
         elif choice == "63":
             print("\nExiting.")
