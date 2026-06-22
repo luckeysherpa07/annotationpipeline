@@ -67,9 +67,9 @@ def _agent(x: float, y: float, color: str, label: str) -> str:
     )
 
 
-def _image_card(x: float, y: float, day: bool) -> str:
-    sky = "#b9def7" if day else "#111d35"
-    window = "#ffd166" if not day else "#d9f0ff"
+def _image_card(x: float, y: float, day: bool, thermal: bool = False) -> str:
+    sky = ("#743c8f" if day else "#26133f") if thermal else ("#b9def7" if day else "#111d35")
+    window = "#ffb347" if thermal else ("#ffd166" if not day else "#d9f0ff")
     return "\n".join(
         [
             f'<rect x="{x}" y="{y}" width="135" height="128" rx="4" fill="{sky}" stroke="#252b3a" stroke-width="3" />',
@@ -91,9 +91,29 @@ def _phase(x: float, y: float, width: float, fill: str, label: str) -> str:
     return f'<polygon points="{points}" fill="{fill}" stroke="#8a6b75" stroke-width="1.5" />\n{_text(x + width / 2, y + 27, label, 15, weight="700")}'
 
 
-def build_svg() -> str:
+def build_svg(modality: str = "rgb") -> str:
+    if modality not in {"rgb", "ir"}:
+        raise ValueError("modality must be 'rgb' or 'ir'")
+    is_ir = modality == "ir"
+    modality_label = "IR" if is_ir else "RGB"
+    title = f"Gemini-Powered {modality_label} QA Annotation"
+    input_lines = ["Paired DAY/NIGHT IR", "without QA pairs"] if is_ir else ["Night RGB media", "without QA pairs"]
+    caption_label = "1 · Analyze and caption IR stream" if is_ir else "1 · Caption NIGHT RGB frames"
+    question_lines = (
+        ["2 · Generate an IR-oriented", "question from the caption"]
+        if is_ir
+        else ["2 · Generate a night-oriented", "question from the caption"]
+    )
+    evidence_lines = ["Paired thermal IR evidence", "supports grounded answering"] if is_ir else ["DAY RGB reference", "provides clearer evidence"]
+    answer_lines = ["3 · Answer using paired", "IR-stream evidence"] if is_ir else ["3 · DAY-grounded answer", "to the night-oriented question"]
+    output_lines = ["Paired DAY/NIGHT IR", "with grounded QA pairs"] if is_ir else ["NIGHT RGB images/video", "with grounded QA pairs"]
+    footer = (
+        "Prompt focus: thermal contrast, shapes, hotspots, and IR scenes"
+        if is_ir
+        else "Prompt focus: objects, colors, textures, and visible scenes"
+    )
     parts = [
-        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="400" viewBox="0 0 1600 400">',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="430" viewBox="0 0 1600 430">',
         """<defs>
   <linearGradient id="geminiGradient" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#4285f4"/><stop offset="0.48" stop-color="#8b5cf6"/>
@@ -103,27 +123,27 @@ def build_svg() -> str:
     <path d="M0,0 L0,6 L9,3 z" fill="#171923"/>
   </marker>
 </defs>""",
-        '<rect width="1600" height="400" fill="#ffffff" />',
-        '<rect x="8" y="54" width="1584" height="326" rx="38" fill="#fff4d8" stroke="#d39b29" stroke-width="2" stroke-dasharray="7 6" />',
+        '<rect width="1600" height="430" fill="#ffffff" />',
+        '<rect x="8" y="54" width="1584" height="356" rx="38" fill="#fff4d8" stroke="#d39b29" stroke-width="2" stroke-dasharray="7 6" />',
         _gemini_mark(510, 27, 0.65),
-        _text(800, 38, "Gemini-Powered RGB/IR QA Annotation", 27, weight="700"),
+        _text(800, 38, title, 27, weight="700"),
         '<rect x="202" y="62" width="895" height="207" rx="28" fill="#f7f1ff" fill-opacity="0.62" stroke="#7c5cc4" stroke-width="2.5" stroke-dasharray="8 6" />',
         '<rect x="447" y="57" width="405" height="31" rx="15" fill="#ffffff" stroke="#7c5cc4" stroke-width="2" />',
         _text(650, 79, "ONE GEMINI MEGA-PROMPT · ONE API CALL", 15, weight="700", fill="#6545ad"),
-        _image_card(38, 92, False),
-        _multiline(106, 239, ["Night RGB/IR media", "without QA pairs"], 15, "600"),
+        _image_card(38, 92, False, thermal=is_ir),
+        _multiline(106, 239, input_lines, 15, "600"),
         _arrow(173, 139, 224, 139),
         _agent(224, 94, "#cfe7ff", "Caption"),
-        _text(319, 229, "1 · Caption NIGHT RGB/IR frames", 14, weight="700"),
+        _text(319, 229, caption_label, 14, weight="700"),
         _arrow(414, 139, 459, 139),
         _agent(459, 94, "#cceca0", "Question"),
-        _multiline(554, 229, ["2 · Generate a night-oriented", "question from the caption"], 14, "700"),
+        _multiline(554, 229, question_lines, 14, "700"),
         _arrow(649, 139, 700, 139),
-        _image_card(700, 92, True),
-        _multiline(768, 239, ["DAY RGB/IR reference", "provides clearer evidence"], 13, "700"),
+        _image_card(700, 92, True, thermal=is_ir),
+        _multiline(768, 239, evidence_lines, 13, "700"),
         _arrow(835, 139, 884, 139),
         _agent(884, 94, "#ffc9d3", "Answering"),
-        _multiline(979, 229, ["3 · DAY-grounded answer", "to the night-oriented question"], 13, "700"),
+        _multiline(979, 229, answer_lines, 13, "700"),
         _arrow(1074, 139, 1127, 139),
         '<circle cx="1174" cy="139" r="46" fill="#e6e9ef" stroke="#e05a67" stroke-width="5" />',
         '<circle cx="1174" cy="119" r="13" fill="#55708d" />',
@@ -137,11 +157,12 @@ def build_svg() -> str:
         '<rect x="1405" y="105" width="153" height="65" rx="12" fill="#bcefdc" stroke="#30977d" stroke-width="2" />',
         _text(1482, 132, "Q", 24, weight="700", fill="#146b61"),
         _text(1482, 157, "+ A", 21, weight="700", fill="#146b61"),
-        _multiline(1414, 239, ["NIGHT RGB/IR images/video", "with grounded QA pairs"], 15, "700"),
-        _phase(28, 326, 310, "#ffd0c5", "Night-time captioning"),
-        _phase(328, 326, 390, "#d7e8ff", "Night-time question generation"),
-        _phase(708, 326, 360, "#d4efcb", "Day-augmented answer synthesis"),
+        _multiline(1414, 239, output_lines, 15, "700"),
+        _phase(28, 326, 310, "#ffd0c5", "IR-stream captioning" if is_ir else "Night-time captioning"),
+        _phase(328, 326, 390, "#d7e8ff", "IR question generation" if is_ir else "Night-time question generation"),
+        _phase(708, 326, 360, "#d4efcb", "Paired IR answer synthesis" if is_ir else "Day-augmented answer synthesis"),
         _phase(1058, 326, 514, "#e7d9ef", "Human refinement and QA export"),
+        _text(800, 397, footer, 15, weight="700", fill="#4c3d2f"),
         "</svg>",
     ]
     return "\n".join(parts)
@@ -149,15 +170,17 @@ def build_svg() -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--modality", choices=("rgb", "ir"), default="rgb")
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("outputs/figures/rgb_qa_pipeline_corrected.svg"),
+        default=None,
     )
     args = parser.parse_args()
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(build_svg(), encoding="utf-8")
-    print(args.output)
+    output = args.output or Path(f"outputs/figures/{args.modality}_qa_pipeline.svg")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(build_svg(args.modality), encoding="utf-8")
+    print(output)
 
 
 if __name__ == "__main__":

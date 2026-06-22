@@ -490,16 +490,16 @@ def _run_gemini_annotation_pipeline_figure() -> None:
     output_path = Path("outputs/figures/rgb_qa_pipeline_corrected.svg")
 
     print("\n" + "-" * 60)
-    print("Running: generate corrected Gemini RGB/IR QA pipeline figure")
+    print("Running: generate corrected Gemini RGB QA pipeline figure")
     print("-" * 60)
     print(f"Output: {output_path}")
     print("Format: SVG presentation graphic")
-    print("Content: one Gemini mega-prompt with caption, question, and answer stages.")
+    print("Content: RGB caption, question, and day-grounded answer stages in one Gemini call.")
     print("This is local and does not call Gemini or any external service.")
     print("-" * 60)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(build_gemini_pipeline_svg(), encoding="utf-8")
+    output_path.write_text(build_gemini_pipeline_svg("rgb"), encoding="utf-8")
     print(f"Wrote presentation figure to {output_path}")
 
 
@@ -517,6 +517,23 @@ def _run_segment_preprocessing_figure() -> None:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(build_segment_preprocessing_svg(), encoding="utf-8")
+    print(f"Wrote presentation figure to {output_path}")
+
+
+def _run_ir_annotation_pipeline_figure() -> None:
+    output_path = Path("outputs/figures/ir_qa_pipeline.svg")
+
+    print("\n" + "-" * 60)
+    print("Running: generate Gemini IR QA pipeline figure")
+    print("-" * 60)
+    print(f"Output: {output_path}")
+    print("Format: SVG presentation graphic")
+    print("Content: paired IR-stream caption, question, and answer stages in one Gemini call.")
+    print("This is local and does not call Gemini or any external service.")
+    print("-" * 60)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(build_gemini_pipeline_svg("ir"), encoding="utf-8")
     print(f"Wrote presentation figure to {output_path}")
 
 
@@ -619,11 +636,12 @@ def main():
         ))
         print("\n--- PRESENTATION OUTPUT ---")
         print("75. Generate QA distribution presentation figure")
-        print("76. Generate corrected Gemini RGB/IR QA pipeline figure")
+        print("76. Generate corrected Gemini RGB QA pipeline figure")
         print("77. Generate segmented QA preprocessing figure")
+        print("78. Generate Gemini IR QA pipeline figure")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-77 or action id): ").strip()
+        choice = input("\nEnter choice (1-78 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1341,6 +1359,9 @@ def main():
 
         elif choice == "77":
             _run_segment_preprocessing_figure()
+
+        elif choice == "78":
+            _run_ir_annotation_pipeline_figure()
 
         elif choice == "63":
             print("\nExiting.")
