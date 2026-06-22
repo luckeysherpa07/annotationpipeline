@@ -66,6 +66,7 @@ from annotation_feature.temporal_alignment import (
     run_day_night_temporal_alignment,
 )
 from scripts.make_qa_distribution_figure import build_svg, load_items
+from scripts.make_gemini_annotation_pipeline_figure import build_svg as build_gemini_pipeline_svg
 
 
 ALIGNED_QA_OUTPUT_DIR = Path("qa_pairs/aligned")
@@ -484,6 +485,23 @@ def _run_qa_distribution_presentation_output() -> None:
     print(f"Wrote presentation figure to {output_path}")
 
 
+def _run_gemini_annotation_pipeline_figure() -> None:
+    output_path = Path("outputs/figures/rgb_qa_pipeline_corrected.svg")
+
+    print("\n" + "-" * 60)
+    print("Running: generate corrected Gemini RGB/IR QA pipeline figure")
+    print("-" * 60)
+    print(f"Output: {output_path}")
+    print("Format: SVG presentation graphic")
+    print("Content: one Gemini mega-prompt with caption, question, and answer stages.")
+    print("This is local and does not call Gemini or any external service.")
+    print("-" * 60)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(build_gemini_pipeline_svg(), encoding="utf-8")
+    print(f"Wrote presentation figure to {output_path}")
+
+
 def main():
     _migrate_legacy_aligned_qa_results()
 
@@ -583,9 +601,10 @@ def main():
         ))
         print("\n--- PRESENTATION OUTPUT ---")
         print("75. Generate QA distribution presentation figure")
+        print("76. Generate corrected Gemini RGB/IR QA pipeline figure")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-75 or action id): ").strip()
+        choice = input("\nEnter choice (1-76 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1297,6 +1316,9 @@ def main():
 
         elif choice == "75":
             _run_qa_distribution_presentation_output()
+
+        elif choice == "76":
+            _run_gemini_annotation_pipeline_figure()
 
         elif choice == "63":
             print("\nExiting.")
