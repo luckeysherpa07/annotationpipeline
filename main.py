@@ -67,6 +67,7 @@ from annotation_feature.temporal_alignment import (
 )
 from scripts.make_qa_distribution_figure import build_svg, load_items
 from scripts.make_gemini_annotation_pipeline_figure import build_svg as build_gemini_pipeline_svg
+from scripts.make_segment_preprocessing_figure import build_svg as build_segment_preprocessing_svg
 
 
 ALIGNED_QA_OUTPUT_DIR = Path("qa_pairs/aligned")
@@ -502,6 +503,23 @@ def _run_gemini_annotation_pipeline_figure() -> None:
     print(f"Wrote presentation figure to {output_path}")
 
 
+def _run_segment_preprocessing_figure() -> None:
+    output_path = Path("outputs/figures/segmented_qa_preprocessing.svg")
+
+    print("\n" + "-" * 60)
+    print("Running: generate segmented QA preprocessing figure")
+    print("-" * 60)
+    print(f"Output: {output_path}")
+    print("Format: SVG presentation graphic")
+    print("Content: reusable frame caches and semantic segment timestamps.")
+    print("This is local and does not call Gemini or any external service.")
+    print("-" * 60)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(build_segment_preprocessing_svg(), encoding="utf-8")
+    print(f"Wrote presentation figure to {output_path}")
+
+
 def main():
     _migrate_legacy_aligned_qa_results()
 
@@ -602,9 +620,10 @@ def main():
         print("\n--- PRESENTATION OUTPUT ---")
         print("75. Generate QA distribution presentation figure")
         print("76. Generate corrected Gemini RGB/IR QA pipeline figure")
+        print("77. Generate segmented QA preprocessing figure")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-76 or action id): ").strip()
+        choice = input("\nEnter choice (1-77 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1319,6 +1338,9 @@ def main():
 
         elif choice == "76":
             _run_gemini_annotation_pipeline_figure()
+
+        elif choice == "77":
+            _run_segment_preprocessing_figure()
 
         elif choice == "63":
             print("\nExiting.")

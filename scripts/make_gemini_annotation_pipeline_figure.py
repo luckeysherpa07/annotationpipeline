@@ -93,7 +93,7 @@ def _phase(x: float, y: float, width: float, fill: str, label: str) -> str:
 
 def build_svg() -> str:
     parts = [
-        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="360" viewBox="0 0 1600 360">',
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="400" viewBox="0 0 1600 400">',
         """<defs>
   <linearGradient id="geminiGradient" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#4285f4"/><stop offset="0.48" stop-color="#8b5cf6"/>
@@ -103,15 +103,15 @@ def build_svg() -> str:
     <path d="M0,0 L0,6 L9,3 z" fill="#171923"/>
   </marker>
 </defs>""",
-        '<rect width="1600" height="360" fill="#ffffff" />',
-        '<rect x="8" y="54" width="1584" height="286" rx="38" fill="#fff4d8" stroke="#d39b29" stroke-width="2" stroke-dasharray="7 6" />',
-        _gemini_mark(548, 27, 0.65),
+        '<rect width="1600" height="400" fill="#ffffff" />',
+        '<rect x="8" y="54" width="1584" height="326" rx="38" fill="#fff4d8" stroke="#d39b29" stroke-width="2" stroke-dasharray="7 6" />',
+        _gemini_mark(510, 27, 0.65),
         _text(800, 38, "Gemini-Powered RGB/IR QA Annotation", 27, weight="700"),
         '<rect x="202" y="62" width="895" height="207" rx="28" fill="#f7f1ff" fill-opacity="0.62" stroke="#7c5cc4" stroke-width="2.5" stroke-dasharray="8 6" />',
         '<rect x="447" y="57" width="405" height="31" rx="15" fill="#ffffff" stroke="#7c5cc4" stroke-width="2" />',
         _text(650, 79, "ONE GEMINI MEGA-PROMPT · ONE API CALL", 15, weight="700", fill="#6545ad"),
         _image_card(38, 92, False),
-        _multiline(106, 239, ["Night RGB/IR images/video", "without QA pairs"], 15, "600"),
+        _multiline(106, 239, ["Night RGB/IR media", "without QA pairs"], 15, "600"),
         _arrow(173, 139, 224, 139),
         _agent(224, 94, "#cfe7ff", "Caption"),
         _text(319, 229, "1 · Caption NIGHT RGB/IR frames", 14, weight="700"),
@@ -120,10 +120,10 @@ def build_svg() -> str:
         _multiline(554, 229, ["2 · Generate a night-oriented", "question from the caption"], 14, "700"),
         _arrow(649, 139, 700, 139),
         _image_card(700, 92, True),
-        _multiline(768, 239, ["Corresponding DAY RGB/IR frames", "provide clearer evidence"], 13, "700"),
+        _multiline(768, 239, ["DAY RGB/IR reference", "provides clearer evidence"], 13, "700"),
         _arrow(835, 139, 884, 139),
         _agent(884, 94, "#ffc9d3", "Answering"),
-        _multiline(979, 229, ["3 · Answer using DAY RGB/IR frames", "+ the night-oriented question"], 13, "700"),
+        _multiline(979, 229, ["3 · DAY-grounded answer", "to the night-oriented question"], 13, "700"),
         _arrow(1074, 139, 1127, 139),
         '<circle cx="1174" cy="139" r="46" fill="#e6e9ef" stroke="#e05a67" stroke-width="5" />',
         '<circle cx="1174" cy="119" r="13" fill="#55708d" />',
@@ -138,10 +138,10 @@ def build_svg() -> str:
         _text(1482, 132, "Q", 24, weight="700", fill="#146b61"),
         _text(1482, 157, "+ A", 21, weight="700", fill="#146b61"),
         _multiline(1414, 239, ["NIGHT RGB/IR images/video", "with grounded QA pairs"], 15, "700"),
-        _phase(28, 286, 310, "#ffd0c5", "Night-time captioning"),
-        _phase(328, 286, 390, "#d7e8ff", "Night-time question generation"),
-        _phase(708, 286, 360, "#d4efcb", "Day-augmented answer synthesis"),
-        _phase(1058, 286, 514, "#e7d9ef", "Human refinement and QA export"),
+        _phase(28, 326, 310, "#ffd0c5", "Night-time captioning"),
+        _phase(328, 326, 390, "#d7e8ff", "Night-time question generation"),
+        _phase(708, 326, 360, "#d4efcb", "Day-augmented answer synthesis"),
+        _phase(1058, 326, 514, "#e7d9ef", "Human refinement and QA export"),
         "</svg>",
     ]
     return "\n".join(parts)
