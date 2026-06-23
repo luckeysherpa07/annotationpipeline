@@ -97,14 +97,14 @@ def build_svg(modality: str = "rgb") -> str:
     is_ir = modality == "ir"
     modality_label = "IR" if is_ir else "RGB"
     title = f"Gemini-Powered {modality_label} QA Annotation"
-    input_lines = ["Paired DAY/NIGHT IR", "without QA pairs"] if is_ir else ["Night RGB media", "without QA pairs"]
+    input_lines = ["Paired Night IR media"] if is_ir else ["Night RGB media"]
     caption_label = "1 · Analyze and caption IR stream" if is_ir else "1 · Caption NIGHT RGB frames"
     question_lines = (
         ["2 · Generate an IR-oriented", "question from the caption"]
         if is_ir
         else ["2 · Generate a night-oriented", "question from the caption"]
     )
-    evidence_lines = ["Paired thermal IR evidence", "supports grounded answering"] if is_ir else ["DAY RGB reference", "provides clearer evidence"]
+    evidence_lines = ["Paired Day IR evidence", "supports grounded answering"] if is_ir else ["DAY RGB reference", "provides clearer evidence"]
     answer_lines = ["3 · Answer using paired", "IR-stream evidence"] if is_ir else ["3 · DAY-grounded answer", "to the night-oriented question"]
     output_lines = ["Paired DAY/NIGHT IR", "with grounded QA pairs"] if is_ir else ["NIGHT RGB images/video", "with grounded QA pairs"]
     footer = (
