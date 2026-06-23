@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420">
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L9,3 z" fill="#27364b"/>
+  </marker>
+</defs>
+<rect width="1600" height="420" fill="#ffffff" />
+<text x="800" y="47" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="29" font-weight="700" fill="#171923">Aligned Segment and Frame-Cache Preprocessing</text>
+<rect x="18" y="80" width="1564" height="300" rx="36" fill="#fff7e3" stroke="#d39b29" stroke-width="2" stroke-dasharray="7 6" />
+<rect x="42" y="166" width="220" height="150" rx="22" fill="#e8eef6" stroke="#536b87" stroke-width="2" />
+<rect x="59" y="183" width="90" height="34" rx="8" fill="#9fd0f3" stroke="#526176" stroke-width="1.5" />
+<text x="104.0" y="206" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">RGB</text>
+<rect x="155" y="183" width="90" height="34" rx="8" fill="#cbbaf7" stroke="#526176" stroke-width="1.5" />
+<text x="200.0" y="206" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">Event</text>
+<rect x="59" y="226" width="90" height="34" rx="8" fill="#f2b6c8" stroke="#526176" stroke-width="1.5" />
+<text x="104.0" y="249" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">IR</text>
+<rect x="155" y="226" width="90" height="34" rx="8" fill="#b9dfbf" stroke="#526176" stroke-width="1.5" />
+<text x="200.0" y="249" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">Depth</text>
+<text x="152" y="302" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="16" font-weight="700" fill="#171923">Source modality media</text>
+<path d="M 262 241 H 300" fill="none" stroke="#27364b" stroke-width="3" marker-end="url(#arrow)" />
+<rect x="300" y="132" width="300" height="218" rx="24" fill="#eee7ff" stroke="#7255b2" stroke-width="2" />
+<text x="450" y="169" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="20" font-weight="700" fill="#171923">Temporal alignment</text>
+<rect x="325" y="187" width="250" height="48" rx="12" fill="#dcd0fa" />
+<text x="450" y="218" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#171923">Event → RGB: windowed DTW</text>
+<rect x="325" y="246" width="250" height="70" rx="12" fill="#f6f1ff" />
+<text x="450" y="270" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" font-weight="700" fill="#171923"><tspan x="450" dy="0">IR and Depth → RGB:</tspan><tspan x="450" dy="17.5">fixed-offset cross-correlation</tspan></text>
+<text x="450" y="339" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" font-weight="600" fill="#655979">Day/night sides aligned independently</text>
+<path d="M 600 241 H 635" fill="none" stroke="#27364b" stroke-width="3" marker-end="url(#arrow)" />
+<rect x="635" y="153" width="225" height="176" rx="22" fill="#e5f3f4" stroke="#3f8990" stroke-width="2" />
+<text x="747" y="189" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#171923">Common overlap</text>
+<line x1="669" y1="222" x2="827" y2="222" stroke="#516779" stroke-width="5" />
+<line x1="689" y1="243" x2="817" y2="243" stroke="#7656bb" stroke-width="5" />
+<line x1="703" y1="264" x2="805" y2="264" stroke="#d98645" stroke-width="5" />
+<line x1="703" y1="286" x2="805" y2="286" stroke="#3b9b72" stroke-width="8" />
+<text x="754" y="316" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" font-weight="700" fill="#3d5f57">Latest start → earliest end</text>
+<path d="M 860 241 H 895" fill="none" stroke="#27364b" stroke-width="3" marker-end="url(#arrow)" />
+<rect x="895" y="153" width="250" height="176" rx="22" fill="#fff0c7" stroke="#b88628" stroke-width="2" />
+<text x="1020" y="188" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#171923">30-second segmentation</text>
+<rect x="920" y="211" width="58" height="70" rx="8" fill="#ffffff" stroke="#a77c27" stroke-width="2" />
+<rect x="991" y="211" width="58" height="70" rx="8" fill="#ffffff" stroke="#a77c27" stroke-width="2" />
+<rect x="1062" y="211" width="58" height="70" rx="8" fill="#ffffff" stroke="#a77c27" stroke-width="2" />
+<text x="949" y="253" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">Seg1</text>
+<text x="1020" y="253" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">Seg2</text>
+<text x="1091" y="253" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="13" font-weight="700" fill="#171923">SegN</text>
+<text x="1020" y="310" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="11" font-weight="600" fill="#6f592b">Exact full segments; remainder recorded</text>
+<path d="M 1145 241 H 1180" fill="none" stroke="#27364b" stroke-width="3" marker-end="url(#arrow)" />
+<rect x="1180" y="132" width="365" height="218" rx="24" fill="#e5f0ff" stroke="#4f78a8" stroke-width="2" />
+<text x="1362" y="169" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="19" font-weight="700" fill="#171923">Frame extraction and caching</text>
+<text x="1362" y="202" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="15" font-weight="700" fill="#171923"><tspan x="1362" dy="0">Extract PNG frames at 1 FPS</tspan><tspan x="1362" dy="18.75">Reuse existing modality caches</tspan></text>
+<path d="M 1228 263 H 1248 L 1256 253 H 1287 V 315 H 1228 Z" fill="#9fd0f3" stroke="#355070" stroke-width="1.7" />
+<text x="1258" y="292" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#171923">RGB</text>
+<path d="M 1295 263 H 1315 L 1323 253 H 1354 V 315 H 1295 Z" fill="#f2b6c8" stroke="#355070" stroke-width="1.7" />
+<text x="1325" y="292" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#171923">IR</text>
+<path d="M 1362 263 H 1382 L 1390 253 H 1421 V 315 H 1362 Z" fill="#cbbaf7" stroke="#355070" stroke-width="1.7" />
+<text x="1392" y="292" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="9" font-weight="700" fill="#171923">Event</text>
+<path d="M 1429 263 H 1449 L 1457 253 H 1488 V 315 H 1429 Z" fill="#b9dfbf" stroke="#355070" stroke-width="1.7" />
+<text x="1459" y="292" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="10" font-weight="700" fill="#171923">Depth</text>
+<text x="1362" y="337" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-size="14" font-weight="700" fill="#315b88">Ready for segmented QA</text>
+</svg>
