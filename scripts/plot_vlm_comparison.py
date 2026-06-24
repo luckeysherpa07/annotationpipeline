@@ -24,6 +24,11 @@ COLORS = {
     "4B": "#79BCE8",
     "8B": "#174A7E",
 }
+LEXICAL_COLORS = {
+    "BLEU-4": "#4E79A7",
+    "ROUGE-L": "#F28E2B",
+    "METEOR": "#59A14F",
+}
 EVALUATION_DIRS = (
     ROOT / "vlm_8frame_aligned_4b",
     ROOT / "vlm_8frame_aligned_8b",
@@ -206,6 +211,68 @@ def plot_efficiency() -> None:
     save(fig, "05_accuracy_efficiency_tradeoff")
 
 
+def _short_model_label(model: str, size: str) -> str:
+    if "InternVL" in model:
+        return f"InternVL {size}"
+    if "Molmo2" in model:
+        return f"Molmo2 {size}"
+    if "Qwen3" in model:
+        return f"Qwen3-VL {size}"
+    return f"{model} {size}"
+
+
+def plot_lexical_diagnostics() -> None:
+    rows = [
+        row for row in read_csv(COMPARISON / "same_size_model_comparison.csv")
+        if row["input"] == "frame 8"
+    ]
+    labels: list[str] = []
+    values = {"BLEU-4": [], "ROUGE-L": [], "METEOR": []}
+    for size in ("4B", "8B"):
+        for family in FAMILIES:
+            row = next(row for row in rows if row["size"] == size and row["model_family"] == family)
+            labels.append(_short_model_label(row["model"], size))
+            values["BLEU-4"].append(float(row["bleu_4"]))
+            values["ROUGE-L"].append(float(row["rouge_l_f1"]))
+            values["METEOR"].append(float(row["meteor"]))
+
+    y = np.arange(len(labels))
+    bar_height = 0.22
+    offsets = (-bar_height, 0.0, bar_height)
+
+    fig, ax = plt.subplots(figsize=(11.6, 6.8))
+    for (metric, metric_values), offset in zip(values.items(), offsets):
+        bars = ax.barh(
+            y + offset,
+            metric_values,
+            height=bar_height,
+            label=metric,
+            color=LEXICAL_COLORS[metric],
+        )
+        ax.bar_label(bars, labels=[f"{value:.1%}" for value in metric_values], padding=3, fontsize=9)
+
+    ax.set_yticks(y, labels)
+    ax.invert_yaxis()
+    ax.set_xlim(0.0, 0.55)
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    ax.set_xlabel("Lexical similarity score", fontsize=12)
+    ax.set_title("Supplementary Lexical Similarity Metrics", fontsize=20, fontweight="bold", pad=18)
+    ax.legend(frameon=False, loc="lower right", ncols=3)
+    style_axis(ax)
+    ax.grid(axis="x", color="#D9D9D9", linewidth=0.8, alpha=0.7)
+    ax.grid(axis="y", visible=False)
+    fig.text(
+        0.99,
+        0.01,
+        "Fixed eight-frame input only. Lexical overlap is diagnostic and does not fully measure semantic correctness.",
+        ha="right",
+        fontsize=9,
+        color="#666666",
+    )
+    fig.tight_layout()
+    save(fig, "06_lexical_diagnostics_8frame")
+
+
 def main() -> None:
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
@@ -220,6 +287,7 @@ def main() -> None:
     plot_scaling()
     plot_section_heatmap()
     plot_efficiency()
+    plot_lexical_diagnostics()
 
 
 if __name__ == "__main__":
