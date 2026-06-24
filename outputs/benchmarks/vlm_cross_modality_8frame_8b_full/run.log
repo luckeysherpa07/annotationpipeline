@@ -1,0 +1,114 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1782328765.195827 1031600 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1782328765.413803 1031600 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1782328766.318641 1031600 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING 06-24 21:19:26 [config.py:70] Support for Transformers v4 is deprecated. The Transformers v4 codepath will become unmaintained in vLLM v0.22.0 and will be removed in vLLM v0.24.0. Please upgrade to Transformers v5: pip install --upgrade transformers
+cross-modality manifest: outputs/benchmarks/vlm_cross_modality_8frame_qwen100/cross_modality_frame_manifest.json
+{
+  "manifest_type": "same_question_cross_modality_frame_sampling_v1",
+  "input_path": "outputs/aligned_qa_valid_items.json",
+  "frame_cache_root": "aligned_dataset",
+  "source_modalities": [
+    "rgb",
+    "ir",
+    "event",
+    "depth"
+  ],
+  "input_modalities": [
+    "rgb",
+    "ir",
+    "event",
+    "depth"
+  ],
+  "items_per_source_modality": 0,
+  "strict_all_input_modalities": true,
+  "total_frames": 8,
+  "frames_per_side": 4,
+  "frame_order": "day_then_night",
+  "sampling_algorithm": "referenced_or_nearest_then_stratified_uniform_v2",
+  "selected_source_questions": 5331,
+  "selected_items": 21324,
+  "selected_source_counts": {
+    "depth": 764,
+    "event": 800,
+    "ir": 1500,
+    "rgb": 2267
+  },
+  "expanded_counts_by_input_modality": {
+    "depth": 5331,
+    "event": 5331,
+    "ir": 5331,
+    "rgb": 5331
+  },
+  "expanded_counts_by_source_modality": {
+    "depth": 3056,
+    "event": 3200,
+    "ir": 6000,
+    "rgb": 9068
+  },
+  "skipped_source_counts": {
+    "event:missing_depth": 22,
+    "ir:missing_depth": 61,
+    "rgb:missing_depth": 51
+  },
+  "skipped_insufficient_input_counts": {
+    "depth": 134
+  },
+  "manifest_sha256": "3ba11f02e2e1a09c551b40046a46a5a087f1c52264ac2c4928be148c76e1dc69"
+}
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:09,  3.00s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:06<00:06,  3.23s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:09<00:03,  3.37s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:11<00:00,  2.60s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:11<00:00,  2.84s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+/home/egomultimodal/Desktop/annotationpipeline/.venv/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:468: FutureWarning: _check_is_size will be removed in a future PyTorch release along with guard_size_oblivious.     Use _check(i >= 0) instead.
+  torch._check_is_size(blocksize)
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01__input_rgb: answered, source=depth, input=rgb, latency=2.91s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01__input_rgb: answered, source=depth, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_scene_sequence__01__input_rgb: answered, source=depth, input=rgb, latency=2.63s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_navigation__01__input_rgb: answered, source=depth, input=rgb, latency=2.49s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_dynamic_recognition__01__input_rgb: answered, source=depth, input=rgb, latency=2.49s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_action__01__input_rgb: answered, source=depth, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg1_check_mailbox__depth_non_common__01__input_rgb: answered, source=depth, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01__input_rgb: answered, source=rgb, input=rgb, latency=2.49s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01__input_rgb: answered, source=rgb, input=rgb, latency=2.67s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__text_recognition__01__input_rgb: answered, source=rgb, input=rgb, latency=2.86s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__scene_sequence__01__input_rgb: answered, source=rgb, input=rgb, latency=2.59s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_recognition__01__input_rgb: answered, source=rgb, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__light_change__01__input_rgb: answered, source=rgb, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__dynamic_counting__01__input_rgb: answered, source=rgb, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__non_common__01__input_rgb: answered, source=rgb, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__navigation__01__input_rgb: answered, source=rgb, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__dynamic_recognition__01__input_rgb: answered, source=rgb, input=rgb, latency=2.62s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__action__01__input_rgb: answered, source=rgb, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01__input_rgb: answered, source=event, input=rgb, latency=2.53s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01__input_rgb: answered, source=event, input=rgb, latency=2.64s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_counting__01__input_rgb: answered, source=event, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_dynamic_counting__01__input_rgb: answered, source=event, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_navigation__01__input_rgb: answered, source=event, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_dynamic_recognition__01__input_rgb: answered, source=event, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_action__01__input_rgb: answered, source=event, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_non_common__01__input_rgb: answered, source=event, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01__input_rgb: answered, source=ir, input=rgb, latency=2.52s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01__input_rgb: answered, source=ir, input=rgb, latency=2.64s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__light_recognition__01__input_rgb: answered, source=ir, input=rgb, latency=2.52s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__light_change__01__input_rgb: answered, source=ir, input=rgb, latency=2.52s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__dynamic_counting__01__input_rgb: answered, source=ir, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__non_common__01__input_rgb: answered, source=ir, input=rgb, latency=2.54s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__navigation__01__input_rgb: answered, source=ir, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__dynamic_recognition__01__input_rgb: answered, source=ir, input=rgb, latency=2.63s, peak=8.46GB
+qwen_vl ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__action__01__input_rgb: answered, source=ir, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_object_recognition__01__input_rgb: answered, source=depth, input=rgb, latency=2.62s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_spatial_reasoning__01__input_rgb: answered, source=depth, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_scene_sequence__01__input_rgb: answered, source=depth, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_counting__01__input_rgb: answered, source=depth, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_dynamic_counting__01__input_rgb: answered, source=depth, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_navigation__01__input_rgb: answered, source=depth, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_dynamic_recognition__01__input_rgb: answered, source=depth, input=rgb, latency=2.53s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_action__01__input_rgb: answered, source=depth, input=rgb, latency=2.52s, peak=8.46GB
+qwen_vl depth__check_mailbox_split_seg2_check_mailbox__depth_non_common__01__input_rgb: answered, source=depth, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__spatial_reasoning__01__input_rgb: answered, source=rgb, input=rgb, latency=2.53s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__text_recognition__01__input_rgb: answered, source=rgb, input=rgb, latency=2.58s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__text_recognition__02__input_rgb: answered, source=rgb, input=rgb, latency=2.86s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__text_recognition__03__input_rgb: answered, source=rgb, input=rgb, latency=2.51s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__text_recognition__04__input_rgb: answered, source=rgb, input=rgb, latency=2.50s, peak=8.46GB
+qwen_vl rgb__aligned_dataset_check_mailbox_split_seg2_check_mailbox_rgb__text_recognition__05__input_rgb: answered, source=rgb, input=rgb, latency=2.51s, peak=8.46GB
