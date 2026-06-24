@@ -546,27 +546,34 @@ def _write_preview(
     return written
 
 
-def run_wash_cup_day_night_rgb_alignment(
+def run_day_night_rgb_pair_alignment(
+    sample_name: str,
     dataset_folder: Path | str = "dataset",
-    output_folder: Path | str = "day_night_alignment/wash_cup_split",
+    output_folder: Path | str | None = None,
     write_preview: bool = True,
 ) -> dict[str, Any]:
-    """Align wash-cup night RGB to day RGB and export reusable frame/time mappings."""
+    """Align one named night RGB recording to its day recording."""
+    if not sample_name or any(character in sample_name for character in ("/", "\\")):
+        raise ValueError("sample_name must be a non-empty filename-safe dataset sample name.")
     dataset_folder = Path(dataset_folder)
-    output_folder = Path(output_folder)
-    split_folder = dataset_folder / "wash_cup_split"
-    day_path = split_folder / "wash_cup_day_rgb.mp4"
-    night_path = split_folder / "wash_cup_night_rgb.mp4"
+    output_folder = Path(output_folder or f"day_night_alignment/{sample_name}_split")
+    split_folder = dataset_folder / f"{sample_name}_split"
+    day_path = split_folder / f"{sample_name}_day_rgb.mp4"
+    night_path = split_folder / f"{sample_name}_night_rgb.mp4"
     for path in (day_path, night_path):
         if not path.is_file():
-            raise FileNotFoundError(f"Required wash-cup RGB video does not exist: {path}")
+            raise FileNotFoundError(f"Required {sample_name} RGB video does not exist: {path}")
 
     output_folder.mkdir(parents=True, exist_ok=True)
     cache_folder = output_folder / ".feature_cache"
     day_meta = _video_metadata(day_path)
     night_meta = _video_metadata(night_path)
-    day = _load_or_extract_features(day_path, cache_folder / "wash_cup_day_rgb_clip_motion.npz", FEATURE_FPS)
-    night = _load_or_extract_features(night_path, cache_folder / "wash_cup_night_rgb_clip_motion.npz", FEATURE_FPS)
+    day = _load_or_extract_features(
+        day_path, cache_folder / f"{sample_name}_day_rgb_clip_motion.npz", FEATURE_FPS
+    )
+    night = _load_or_extract_features(
+        night_path, cache_folder / f"{sample_name}_night_rgb_clip_motion.npz", FEATURE_FPS
+    )
 
     path, fine_cost, night_interval, day_interval = _fine_alignment(night, day)
     knots = _path_knots_and_confidence(
@@ -592,17 +599,17 @@ def run_wash_cup_day_night_rgb_alignment(
         inverse_confidence,
     )
 
-    night_csv = output_folder / "wash_cup_night_to_day_frames.csv"
-    day_csv = output_folder / "wash_cup_day_to_night_frames.csv"
+    night_csv = output_folder / f"{sample_name}_night_to_day_frames.csv"
+    day_csv = output_folder / f"{sample_name}_day_to_night_frames.csv"
     _write_mapping_csv(night_csv, night_to_day, "night", "day")
     _write_mapping_csv(day_csv, day_to_night, "day", "night")
-    preview_path = output_folder / "wash_cup_day_night_rgb_alignment_preview.mp4"
+    preview_path = output_folder / f"{sample_name}_day_night_rgb_alignment_preview.mp4"
     preview_frames = 0
     if write_preview:
         preview_frames = _write_preview(preview_path, night_path, day_path, night_meta, day_meta, night_to_day)
 
     summary = {
-        "sample": "wash_cup",
+        "sample": sample_name,
         "reference_side": "night",
         "method": "coarse_to_fine_clip_motion_constrained_dtw",
         "settings": {
@@ -646,14 +653,56 @@ def run_wash_cup_day_night_rgb_alignment(
         "review_intervals": _review_intervals(knots),
         "knots": knots,
         "outputs": {
-            "alignment_json": str(output_folder / "wash_cup_day_night_rgb_alignment.json"),
+            "alignment_json": str(output_folder / f"{sample_name}_day_night_rgb_alignment.json"),
             "night_to_day_csv": str(night_csv),
             "day_to_night_csv": str(day_csv),
             "preview": str(preview_path) if write_preview else None,
             "preview_frames": preview_frames,
         },
     }
-    json_path = output_folder / "wash_cup_day_night_rgb_alignment.json"
+    json_path = output_folder / f"{sample_name}_day_night_rgb_alignment.json"
     with open(json_path, "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, ensure_ascii=False)
     return summary
+
+
+def run_wash_cup_day_night_rgb_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = "day_night_alignment/wash_cup_split",
+    write_preview: bool = True,
+) -> dict[str, Any]:
+    """Align the wash-cup night RGB recording to its day recording."""
+    return run_day_night_rgb_pair_alignment(
+        sample_name="wash_cup",
+        dataset_folder=dataset_folder,
+        output_folder=output_folder,
+        write_preview=write_preview,
+    )
+
+
+def run_cut_carrot_day_night_rgb_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = "day_night_alignment/cut_carrot_split",
+    write_preview: bool = True,
+) -> dict[str, Any]:
+    """Align the cut-carrot night RGB recording to its day recording."""
+    return run_day_night_rgb_pair_alignment(
+        sample_name="cut_carrot",
+        dataset_folder=dataset_folder,
+        output_folder=output_folder,
+        write_preview=write_preview,
+    )
+
+
+def run_check_mailbox_day_night_rgb_alignment(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = "day_night_alignment/check_mailbox_split",
+    write_preview: bool = True,
+) -> dict[str, Any]:
+    """Align the check-mailbox night RGB recording to its day recording."""
+    return run_day_night_rgb_pair_alignment(
+        sample_name="check_mailbox",
+        dataset_folder=dataset_folder,
+        output_folder=output_folder,
+        write_preview=write_preview,
+    )

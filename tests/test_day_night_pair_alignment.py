@@ -67,6 +67,20 @@ class DayNightPairAlignmentTests(unittest.TestCase):
             with self.assertRaisesRegex(FileNotFoundError, "wash_cup_day_rgb"):
                 alignment.run_wash_cup_day_night_rgb_alignment(dataset_folder=directory, write_preview=False)
 
+    def test_cut_carrot_wrapper_uses_cut_carrot_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(FileNotFoundError, "cut_carrot_day_rgb"):
+                alignment.run_cut_carrot_day_night_rgb_alignment(
+                    dataset_folder=directory, write_preview=False
+                )
+
+    def test_check_mailbox_wrapper_uses_check_mailbox_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(FileNotFoundError, "check_mailbox_day_rgb"):
+                alignment.run_check_mailbox_day_night_rgb_alignment(
+                    dataset_folder=directory, write_preview=False
+                )
+
     def test_end_to_end_writes_json_and_bidirectional_csv_without_preview(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -112,8 +126,12 @@ class DayNightPairAlignmentTests(unittest.TestCase):
         source = (Path(__file__).resolve().parents[1] / "main.py").read_text(encoding="utf-8")
         self.assertIn("--- DAY NIGHT PAIR ALIGNMENT ---", source)
         self.assertIn("79. Align wash_cup day/night RGB pair", source)
+        self.assertIn("80. Align cut_carrot day/night RGB pair", source)
+        self.assertIn("81. Align check_mailbox day/night RGB pair", source)
         self.assertIn('elif choice == "79":', source)
-        self.assertIn("Enter choice (1-79 or action id)", source)
+        self.assertIn('elif choice == "80":', source)
+        self.assertIn('elif choice == "81":', source)
+        self.assertIn("Enter choice (1-81 or action id)", source)
 
 
 if __name__ == "__main__":

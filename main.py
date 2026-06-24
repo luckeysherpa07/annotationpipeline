@@ -62,7 +62,9 @@ from annotation_feature.temporal_alignment import (
     run_and_export_check_mailbox_day_rgb_event_feature_alignment,
     run_and_export_cut_carrot_aligned_dataset_segments,
     run_and_export_source_rgb_with_audio_segments_for_aligned_dataset,
+    run_check_mailbox_day_night_rgb_alignment,
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
+    run_cut_carrot_day_night_rgb_alignment,
     run_day_night_temporal_alignment,
     run_wash_cup_day_night_rgb_alignment,
 )
@@ -642,9 +644,11 @@ def main():
         print("78. Generate Gemini IR QA pipeline figure")
         print("\n--- DAY NIGHT PAIR ALIGNMENT ---")
         print("79. Align wash_cup day/night RGB pair")
+        print("80. Align cut_carrot day/night RGB pair")
+        print("81. Align check_mailbox day/night RGB pair")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-79 or action id): ").strip()
+        choice = input("\nEnter choice (1-81 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1376,6 +1380,44 @@ def main():
             summary = run_wash_cup_day_night_rgb_alignment(
                 dataset_folder="dataset",
                 output_folder="day_night_alignment/wash_cup_split",
+                write_preview=True,
+            )
+            outputs = summary.get("outputs", {})
+            print(f"Alignment JSON: {outputs.get('alignment_json')}")
+            print(f"Night-to-day mapping: {outputs.get('night_to_day_csv')}")
+            print(f"Day-to-night mapping: {outputs.get('day_to_night_csv')}")
+            print(f"Preview: {outputs.get('preview')}")
+            print(f"Review intervals: {len(summary.get('review_intervals', []))}")
+
+        elif choice == "80":
+            print("\n" + "-" * 60)
+            print("Running: cut_carrot day/night RGB pair alignment")
+            print("-" * 60)
+            print("Uses cached CLIP ViT-B/32 features plus optical-flow motion features.")
+            print("Writes frame/time mappings, confidence diagnostics, and a side-by-side preview.")
+            print("Does not modify or overwrite the source dataset videos.\n")
+            summary = run_cut_carrot_day_night_rgb_alignment(
+                dataset_folder="dataset",
+                output_folder="day_night_alignment/cut_carrot_split",
+                write_preview=True,
+            )
+            outputs = summary.get("outputs", {})
+            print(f"Alignment JSON: {outputs.get('alignment_json')}")
+            print(f"Night-to-day mapping: {outputs.get('night_to_day_csv')}")
+            print(f"Day-to-night mapping: {outputs.get('day_to_night_csv')}")
+            print(f"Preview: {outputs.get('preview')}")
+            print(f"Review intervals: {len(summary.get('review_intervals', []))}")
+
+        elif choice == "81":
+            print("\n" + "-" * 60)
+            print("Running: check_mailbox day/night RGB pair alignment")
+            print("-" * 60)
+            print("Uses cached CLIP ViT-B/32 features plus optical-flow motion features.")
+            print("Writes frame/time mappings, confidence diagnostics, and a side-by-side preview.")
+            print("Does not modify or overwrite the source dataset videos.\n")
+            summary = run_check_mailbox_day_night_rgb_alignment(
+                dataset_folder="dataset",
+                output_folder="day_night_alignment/check_mailbox_split",
                 write_preview=True,
             )
             outputs = summary.get("outputs", {})
