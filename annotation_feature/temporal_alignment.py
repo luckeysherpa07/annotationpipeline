@@ -11,6 +11,8 @@ from typing import Any
 import cv2
 import numpy as np
 
+from .day_night_pair_alignment import run_wash_cup_day_night_rgb_alignment
+
 
 VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".mpeg", ".mpg"}
 REFERENCE_MODALITY = "rgb"
