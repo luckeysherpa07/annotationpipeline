@@ -64,6 +64,7 @@ from annotation_feature.temporal_alignment import (
     run_and_export_source_rgb_with_audio_segments_for_aligned_dataset,
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_day_night_temporal_alignment,
+    run_wash_cup_day_night_rgb_alignment,
 )
 from scripts.make_qa_distribution_figure import build_svg, load_items
 from scripts.make_gemini_annotation_pipeline_figure import build_svg as build_gemini_pipeline_svg
@@ -639,9 +640,11 @@ def main():
         print("76. Generate corrected Gemini RGB QA pipeline figure")
         print("77. Generate segmented QA preprocessing figure")
         print("78. Generate Gemini IR QA pipeline figure")
+        print("\n--- DAY NIGHT PAIR ALIGNMENT ---")
+        print("79. Align wash_cup day/night RGB pair")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-78 or action id): ").strip()
+        choice = input("\nEnter choice (1-79 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1362,6 +1365,25 @@ def main():
 
         elif choice == "78":
             _run_ir_annotation_pipeline_figure()
+
+        elif choice == "79":
+            print("\n" + "-" * 60)
+            print("Running: wash_cup day/night RGB pair alignment")
+            print("-" * 60)
+            print("Uses cached CLIP ViT-B/32 features plus optical-flow motion features.")
+            print("Writes frame/time mappings, confidence diagnostics, and a side-by-side preview.")
+            print("Does not modify or overwrite the source dataset videos.\n")
+            summary = run_wash_cup_day_night_rgb_alignment(
+                dataset_folder="dataset",
+                output_folder="day_night_alignment/wash_cup_split",
+                write_preview=True,
+            )
+            outputs = summary.get("outputs", {})
+            print(f"Alignment JSON: {outputs.get('alignment_json')}")
+            print(f"Night-to-day mapping: {outputs.get('night_to_day_csv')}")
+            print(f"Day-to-night mapping: {outputs.get('day_to_night_csv')}")
+            print(f"Preview: {outputs.get('preview')}")
+            print(f"Review intervals: {len(summary.get('review_intervals', []))}")
 
         elif choice == "63":
             print("\nExiting.")
