@@ -1,0 +1,1208 @@
+{
+  "metadata": {
+    "manifest_type": "same_question_cross_modality_frame_sampling_v1",
+    "input_path": "outputs/aligned_qa_valid_items.json",
+    "frame_cache_root": "aligned_dataset",
+    "source_modalities": [
+      "rgb",
+      "ir",
+      "event",
+      "depth"
+    ],
+    "input_modalities": [
+      "rgb",
+      "ir",
+      "event",
+      "depth"
+    ],
+    "items_per_source_modality": 2,
+    "strict_all_input_modalities": true,
+    "total_frames": 8,
+    "frames_per_side": 4,
+    "frame_order": "day_then_night",
+    "sampling_algorithm": "referenced_or_nearest_then_stratified_uniform_v2",
+    "selected_source_questions": 8,
+    "selected_items": 32,
+    "selected_source_counts": {
+      "depth": 2,
+      "event": 2,
+      "ir": 2,
+      "rgb": 2
+    },
+    "expanded_counts_by_input_modality": {
+      "depth": 8,
+      "event": 8,
+      "ir": 8,
+      "rgb": 8
+    },
+    "expanded_counts_by_source_modality": {
+      "depth": 8,
+      "event": 8,
+      "ir": 8,
+      "rgb": 8
+    },
+    "skipped_source_counts": {
+      "event:missing_depth": 22,
+      "ir:missing_depth": 61,
+      "rgb:missing_depth": 51
+    },
+    "skipped_insufficient_input_counts": {
+      "depth": 134
+    },
+    "manifest_sha256": "332cf4137f13c2f8bf77254515c6a252e757c3698cfae51c853237640964ec9f"
+  },
+  "items": [
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01__input_rgb",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01",
+      "source_modality": "depth",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "depth_object_recognition",
+      "source_section": "depth_object_recognition",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/rgb",
+      "question": "What is the primary geometric structure visible that connects two distinct spaces?",
+      "ground_truth_answer": "A doorway.",
+      "caption": "The video displays a room with a doorway leading to another area. There is a floor, a table-like object near the door, and several items on the floor that appear as distinct depth clusters.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01__input_ir",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01",
+      "source_modality": "depth",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "depth_object_recognition",
+      "source_section": "depth_object_recognition",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/ir",
+      "question": "What is the primary geometric structure visible that connects two distinct spaces?",
+      "ground_truth_answer": "A doorway.",
+      "caption": "The video displays a room with a doorway leading to another area. There is a floor, a table-like object near the door, and several items on the floor that appear as distinct depth clusters.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01__input_event",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01",
+      "source_modality": "depth",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "depth_object_recognition",
+      "source_section": "depth_object_recognition",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/event",
+      "question": "What is the primary geometric structure visible that connects two distinct spaces?",
+      "ground_truth_answer": "A doorway.",
+      "caption": "The video displays a room with a doorway leading to another area. There is a floor, a table-like object near the door, and several items on the floor that appear as distinct depth clusters.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01__input_depth",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_object_recognition__01",
+      "source_modality": "depth",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "depth_object_recognition",
+      "source_section": "depth_object_recognition",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/depth",
+      "question": "What is the primary geometric structure visible that connects two distinct spaces?",
+      "ground_truth_answer": "A doorway.",
+      "caption": "The video displays a room with a doorway leading to another area. There is a floor, a table-like object near the door, and several items on the floor that appear as distinct depth clusters.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01__input_rgb",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01",
+      "source_modality": "depth",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "depth_spatial_reasoning",
+      "source_section": "depth_spatial_reasoning",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/rgb",
+      "question": "Is the table-like object closer to me than the items on the floor in the further room?",
+      "ground_truth_answer": "Yes, it is closer.",
+      "caption": "The camera moves through a doorway. The doorway frame is closer to the viewer than the objects in the next room. There is a table-like object on the right side of the threshold, and items are scattered on the floor, some of which are partially occluded by the door frame.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01__input_ir",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01",
+      "source_modality": "depth",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "depth_spatial_reasoning",
+      "source_section": "depth_spatial_reasoning",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/ir",
+      "question": "Is the table-like object closer to me than the items on the floor in the further room?",
+      "ground_truth_answer": "Yes, it is closer.",
+      "caption": "The camera moves through a doorway. The doorway frame is closer to the viewer than the objects in the next room. There is a table-like object on the right side of the threshold, and items are scattered on the floor, some of which are partially occluded by the door frame.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01__input_event",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01",
+      "source_modality": "depth",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "depth_spatial_reasoning",
+      "source_section": "depth_spatial_reasoning",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/event",
+      "question": "Is the table-like object closer to me than the items on the floor in the further room?",
+      "ground_truth_answer": "Yes, it is closer.",
+      "caption": "The camera moves through a doorway. The doorway frame is closer to the viewer than the objects in the next room. There is a table-like object on the right side of the threshold, and items are scattered on the floor, some of which are partially occluded by the door frame.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01__input_depth",
+      "source_qa_id": "depth__check_mailbox_split_seg1_check_mailbox__depth_spatial_reasoning__01",
+      "source_modality": "depth",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "depth_spatial_reasoning",
+      "source_section": "depth_spatial_reasoning",
+      "source_pair_key": "check_mailbox_split/Seg1/check_mailbox",
+      "pair_key": "check_mailbox_split/Seg1/depth",
+      "question": "Is the table-like object closer to me than the items on the floor in the further room?",
+      "ground_truth_answer": "Yes, it is closer.",
+      "caption": "The camera moves through a doorway. The doorway frame is closer to the viewer than the objects in the next room. There is a table-like object on the right side of the threshold, and items are scattered on the floor, some of which are partially occluded by the door frame.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01__input_rgb",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01",
+      "source_modality": "rgb",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "object_recognition",
+      "source_section": "object_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "What color is the spray bottle located on top of the dresser?",
+      "ground_truth_answer": "The spray bottle on the dresser is red.",
+      "caption": "In these dark frames, a person is seen in a dark room with a brightly lit screen or tablet. Moving into a dark hallway, several objects are discernible: a shoe rack with multiple pairs of sneakers, a wooden dresser topped with various items including a red spray bottle and white containers, and white doors with metallic handles. At the end of the hallway, a dark wall displays a white room number sign with text.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01__input_ir",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01",
+      "source_modality": "rgb",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "object_recognition",
+      "source_section": "object_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "What color is the spray bottle located on top of the dresser?",
+      "ground_truth_answer": "The spray bottle on the dresser is red.",
+      "caption": "In these dark frames, a person is seen in a dark room with a brightly lit screen or tablet. Moving into a dark hallway, several objects are discernible: a shoe rack with multiple pairs of sneakers, a wooden dresser topped with various items including a red spray bottle and white containers, and white doors with metallic handles. At the end of the hallway, a dark wall displays a white room number sign with text.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01__input_event",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01",
+      "source_modality": "rgb",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "object_recognition",
+      "source_section": "object_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "What color is the spray bottle located on top of the dresser?",
+      "ground_truth_answer": "The spray bottle on the dresser is red.",
+      "caption": "In these dark frames, a person is seen in a dark room with a brightly lit screen or tablet. Moving into a dark hallway, several objects are discernible: a shoe rack with multiple pairs of sneakers, a wooden dresser topped with various items including a red spray bottle and white containers, and white doors with metallic handles. At the end of the hallway, a dark wall displays a white room number sign with text.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01__input_depth",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__object_recognition__01",
+      "source_modality": "rgb",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "object_recognition",
+      "source_section": "object_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "What color is the spray bottle located on top of the dresser?",
+      "ground_truth_answer": "The spray bottle on the dresser is red.",
+      "caption": "In these dark frames, a person is seen in a dark room with a brightly lit screen or tablet. Moving into a dark hallway, several objects are discernible: a shoe rack with multiple pairs of sneakers, a wooden dresser topped with various items including a red spray bottle and white containers, and white doors with metallic handles. At the end of the hallway, a dark wall displays a white room number sign with text.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01__input_rgb",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01",
+      "source_modality": "rgb",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "spatial_reasoning",
+      "source_section": "spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "Where is the grey floor mat located in relation to the shoe rack?",
+      "ground_truth_answer": "The grey floor mat is located on the floor to the left of the shoe rack.",
+      "caption": "The shoe rack is positioned against the wall on the right side of the hallway. To its left, a grey floor mat holds a pair of black shoes. The wooden dresser is located further down the hallway on the left side. A room number sign is fixed to the dark door at the end of the corridor. It's about 4 steps from the shoes to the dresser.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01__input_ir",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01",
+      "source_modality": "rgb",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "spatial_reasoning",
+      "source_section": "spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "Where is the grey floor mat located in relation to the shoe rack?",
+      "ground_truth_answer": "The grey floor mat is located on the floor to the left of the shoe rack.",
+      "caption": "The shoe rack is positioned against the wall on the right side of the hallway. To its left, a grey floor mat holds a pair of black shoes. The wooden dresser is located further down the hallway on the left side. A room number sign is fixed to the dark door at the end of the corridor. It's about 4 steps from the shoes to the dresser.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01__input_event",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01",
+      "source_modality": "rgb",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "spatial_reasoning",
+      "source_section": "spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "Where is the grey floor mat located in relation to the shoe rack?",
+      "ground_truth_answer": "The grey floor mat is located on the floor to the left of the shoe rack.",
+      "caption": "The shoe rack is positioned against the wall on the right side of the hallway. To its left, a grey floor mat holds a pair of black shoes. The wooden dresser is located further down the hallway on the left side. A room number sign is fixed to the dark door at the end of the corridor. It's about 4 steps from the shoes to the dresser.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01__input_depth",
+      "source_qa_id": "rgb__aligned_dataset_check_mailbox_split_seg1_check_mailbox_rgb__spatial_reasoning__01",
+      "source_modality": "rgb",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "spatial_reasoning",
+      "source_section": "spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_rgb",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "Where is the grey floor mat located in relation to the shoe rack?",
+      "ground_truth_answer": "The grey floor mat is located on the floor to the left of the shoe rack.",
+      "caption": "The shoe rack is positioned against the wall on the right side of the hallway. To its left, a grey floor mat holds a pair of black shoes. The wooden dresser is located further down the hallway on the left side. A room number sign is fixed to the dark door at the end of the corridor. It's about 4 steps from the shoes to the dresser.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01__input_rgb",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01",
+      "source_modality": "event",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "event_spatial_reasoning",
+      "source_section": "event_spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "Is the shoe rack located behind or in front of the chest of drawers relative to the camera's path?",
+      "ground_truth_answer": "Behind the chest.",
+      "caption": "The room layout includes a chest of drawers on the left, a shoe rack further back, and a collection of shoes on the right. The camera moves from the room interior towards a threshold, showing the spatial relationship between the interior furniture and the exterior balcony.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01__input_ir",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01",
+      "source_modality": "event",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "event_spatial_reasoning",
+      "source_section": "event_spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "Is the shoe rack located behind or in front of the chest of drawers relative to the camera's path?",
+      "ground_truth_answer": "Behind the chest.",
+      "caption": "The room layout includes a chest of drawers on the left, a shoe rack further back, and a collection of shoes on the right. The camera moves from the room interior towards a threshold, showing the spatial relationship between the interior furniture and the exterior balcony.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01__input_event",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01",
+      "source_modality": "event",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "event_spatial_reasoning",
+      "source_section": "event_spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "Is the shoe rack located behind or in front of the chest of drawers relative to the camera's path?",
+      "ground_truth_answer": "Behind the chest.",
+      "caption": "The room layout includes a chest of drawers on the left, a shoe rack further back, and a collection of shoes on the right. The camera moves from the room interior towards a threshold, showing the spatial relationship between the interior furniture and the exterior balcony.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01__input_depth",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_spatial_reasoning__01",
+      "source_modality": "event",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "event_spatial_reasoning",
+      "source_section": "event_spatial_reasoning",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "Is the shoe rack located behind or in front of the chest of drawers relative to the camera's path?",
+      "ground_truth_answer": "Behind the chest.",
+      "caption": "The room layout includes a chest of drawers on the left, a shoe rack further back, and a collection of shoes on the right. The camera moves from the room interior towards a threshold, showing the spatial relationship between the interior furniture and the exterior balcony.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01__input_rgb",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01",
+      "source_modality": "event",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "event_scene_sequence",
+      "source_section": "event_scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "What is the final area visible after moving through the doorway?",
+      "ground_truth_answer": "The balcony.",
+      "caption": "The sequence begins in a room with furniture, moves towards a doorway, and ends by looking out onto a balcony, showing a clear transition from an indoor environment to an outdoor space.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01__input_ir",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01",
+      "source_modality": "event",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "event_scene_sequence",
+      "source_section": "event_scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "What is the final area visible after moving through the doorway?",
+      "ground_truth_answer": "The balcony.",
+      "caption": "The sequence begins in a room with furniture, moves towards a doorway, and ends by looking out onto a balcony, showing a clear transition from an indoor environment to an outdoor space.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01__input_event",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01",
+      "source_modality": "event",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "event_scene_sequence",
+      "source_section": "event_scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "What is the final area visible after moving through the doorway?",
+      "ground_truth_answer": "The balcony.",
+      "caption": "The sequence begins in a room with furniture, moves towards a doorway, and ends by looking out onto a balcony, showing a clear transition from an indoor environment to an outdoor space.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01__input_depth",
+      "source_qa_id": "event__aligned_dataset_check_mailbox_split_seg1_check_mailbox_event__event_scene_sequence__01",
+      "source_modality": "event",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "event_scene_sequence",
+      "source_section": "event_scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_event",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "What is the final area visible after moving through the doorway?",
+      "ground_truth_answer": "The balcony.",
+      "caption": "The sequence begins in a room with furniture, moves towards a doorway, and ends by looking out onto a balcony, showing a clear transition from an indoor environment to an outdoor space.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01__input_rgb",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01",
+      "source_modality": "ir",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "text_recognition",
+      "source_section": "text_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "What word is prominently displayed on the magazine at the very beginning of the video?",
+      "ground_truth_answer": "REVOLUTION",
+      "caption": "In frame 0, a magazine features the bold word 'REVOLUTION' and the word 'OVER' below a graphic of a person's face. Around frame 750 and 780, text appears on a door in a common hallway reading 'N° 1'233 | 1'234 | 1'235'. This text likely serves as room identification or a directional sign for multiple units in the building.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01__input_ir",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01",
+      "source_modality": "ir",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "text_recognition",
+      "source_section": "text_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "What word is prominently displayed on the magazine at the very beginning of the video?",
+      "ground_truth_answer": "REVOLUTION",
+      "caption": "In frame 0, a magazine features the bold word 'REVOLUTION' and the word 'OVER' below a graphic of a person's face. Around frame 750 and 780, text appears on a door in a common hallway reading 'N° 1'233 | 1'234 | 1'235'. This text likely serves as room identification or a directional sign for multiple units in the building.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01__input_event",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01",
+      "source_modality": "ir",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "text_recognition",
+      "source_section": "text_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "What word is prominently displayed on the magazine at the very beginning of the video?",
+      "ground_truth_answer": "REVOLUTION",
+      "caption": "In frame 0, a magazine features the bold word 'REVOLUTION' and the word 'OVER' below a graphic of a person's face. Around frame 750 and 780, text appears on a door in a common hallway reading 'N° 1'233 | 1'234 | 1'235'. This text likely serves as room identification or a directional sign for multiple units in the building.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01__input_depth",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__text_recognition__01",
+      "source_modality": "ir",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "text_recognition",
+      "source_section": "text_recognition",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "What word is prominently displayed on the magazine at the very beginning of the video?",
+      "ground_truth_answer": "REVOLUTION",
+      "caption": "In frame 0, a magazine features the bold word 'REVOLUTION' and the word 'OVER' below a graphic of a person's face. Around frame 750 and 780, text appears on a door in a common hallway reading 'N° 1'233 | 1'234 | 1'235'. This text likely serves as room identification or a directional sign for multiple units in the building.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01__input_rgb",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01",
+      "source_modality": "ir",
+      "input_modality": "rgb",
+      "modality": "rgb",
+      "section": "scene_sequence",
+      "source_section": "scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/rgb",
+      "question": "What is the sequence of rooms or areas I pass through from the start to the end?",
+      "ground_truth_answer": "Bedroom, hallway, shoe area, exit hallway, corridor, workshop.",
+      "caption": "The video follows a sequence starting in a bedroom, then moves into a hallway passing a kitchen area. I stop in a shoe storage area to put on sneakers. From there, I continue down the hallway past a cabinet with cleaning supplies to an exit door. I open this door, enter a brighter common building corridor, pass a set of room numbers on another door, and finally enter a large room that appears to be a workshop or office area containing a large white table.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_day_rgb_with_audio/frame_000900.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/check_mailbox_split/Seg1/check_mailbox_night_rgb_with_audio/frame_000900.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01__input_ir",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01",
+      "source_modality": "ir",
+      "input_modality": "ir",
+      "modality": "ir",
+      "section": "scene_sequence",
+      "source_section": "scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/ir",
+      "question": "What is the sequence of rooms or areas I pass through from the start to the end?",
+      "ground_truth_answer": "Bedroom, hallway, shoe area, exit hallway, corridor, workshop.",
+      "caption": "The video follows a sequence starting in a bedroom, then moves into a hallway passing a kitchen area. I stop in a shoe storage area to put on sneakers. From there, I continue down the hallway past a cabinet with cleaning supplies to an exit door. I open this door, enter a brighter common building corridor, pass a set of room numbers on another door, and finally enter a large room that appears to be a workshop or office area containing a large white table.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_day_ir/frame_000870.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000300.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000570.png",
+        "aligned_dataset/.frames_cache_ir/check_mailbox_split/Seg1/check_mailbox_night_ir/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01__input_event",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01",
+      "source_modality": "ir",
+      "input_modality": "event",
+      "modality": "event",
+      "section": "scene_sequence",
+      "source_section": "scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/event",
+      "question": "What is the sequence of rooms or areas I pass through from the start to the end?",
+      "ground_truth_answer": "Bedroom, hallway, shoe area, exit hallway, corridor, workshop.",
+      "caption": "The video follows a sequence starting in a bedroom, then moves into a hallway passing a kitchen area. I stop in a shoe storage area to put on sneakers. From there, I continue down the hallway past a cabinet with cleaning supplies to an exit door. I open this door, enter a brighter common building corridor, pass a set of room numbers on another door, and finally enter a large room that appears to be a workshop or office area containing a large white table.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_day_event/frame_000870.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000570.png",
+        "aligned_dataset/.frames_cache_event/check_mailbox_split/Seg1/check_mailbox_night_event/frame_000870.png"
+      ]
+    },
+    {
+      "qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01__input_depth",
+      "source_qa_id": "ir__aligned_dataset_check_mailbox_split_seg1_check_mailbox_ir__scene_sequence__01",
+      "source_modality": "ir",
+      "input_modality": "depth",
+      "modality": "depth",
+      "section": "scene_sequence",
+      "source_section": "scene_sequence",
+      "source_pair_key": "aligned_dataset/check_mailbox_split/Seg1/check_mailbox_ir",
+      "pair_key": "aligned_dataset/check_mailbox_split/Seg1/depth",
+      "question": "What is the sequence of rooms or areas I pass through from the start to the end?",
+      "ground_truth_answer": "Bedroom, hallway, shoe area, exit hallway, corridor, workshop.",
+      "caption": "The video follows a sequence starting in a bedroom, then moves into a hallway passing a kitchen area. I stop in a shoe storage area to put on sneakers. From there, I continue down the hallway past a cabinet with cleaning supplies to an exit door. I open this door, enter a brighter common building corridor, pass a set of room numbers on another door, and finally enter a large room that appears to be a workshop or office area containing a large white table.",
+      "day_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png"
+      ],
+      "night_frames": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ],
+      "frame_paths": [
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/day/frame_000870_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000570_depth.png",
+        "aligned_dataset/.frames_cache_marigold/check_mailbox_split/Seg1/check_mailbox/night/frame_000870_depth.png"
+      ]
+    }
+  ]
+}
