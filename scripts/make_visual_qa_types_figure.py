@@ -44,14 +44,14 @@ EMPHASIS_ROWS = (
 
 
 def build_svg() -> str:
-    width, height = 1500, 990
+    width, height = 1500, 1060
     table_x, table_y = 65, 115
     label_w, col_w = 610, 190
     header_h, row_h = 58, 45
     table_w = label_w + 4 * col_w
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
-        '<rect width="1500" height="990" fill="#ffffff" />',
+        '<rect width="1500" height="1060" fill="#ffffff" />',
         _text(750, 48, "Visual QA Types Across Modalities", 30, weight="700"),
         _text(750, 78, "Configured prompt categories for RGB, IR, Event, and Depth", 16, weight="600", fill="#657083"),
         f'<rect x="{table_x}" y="{table_y}" width="{table_w}" height="{header_h + (len(QA_ROWS) + 1) * row_h}" rx="18" fill="#ffffff" stroke="#536b87" stroke-width="2" />',
@@ -92,7 +92,7 @@ def build_svg() -> str:
         parts.append(f'<path d="M {x} {table_y} V {table_y + header_h + len(all_rows) * row_h}" stroke="#9aa8b9" stroke-width="1" />')
 
     emphasis_y = 830
-    emphasis_h = 118
+    emphasis_h = 175
     parts.extend(
         [
             _text(65, 806, "Modality evidence emphasis", 21, anchor="start", weight="700"),
@@ -110,7 +110,7 @@ def build_svg() -> str:
         lines: list[str] = []
         current: list[str] = []
         for word in words:
-            if len(" ".join([*current, word])) > 34 and current:
+            if len(" ".join([*current, word])) > 27 and current:
                 lines.append(" ".join(current))
                 current = [word]
             else:
@@ -118,7 +118,7 @@ def build_svg() -> str:
         if current:
             lines.append(" ".join(current))
         for line_index, line in enumerate(lines[:3]):
-            parts.append(_text(x + 18, emphasis_y + 68 + line_index * 20, line, 13, anchor="start", weight="600", fill="#455064"))
+            parts.append(_text(x + 18, emphasis_y + 76 + line_index * 27, line, 18, anchor="start", weight="700", fill="#455064"))
 
     parts.append("</svg>")
     return "\n".join(parts)
