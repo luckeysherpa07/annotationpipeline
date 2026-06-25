@@ -34,7 +34,14 @@ from annotation_feature.qa_quality.result_loader import (
 from scripts.evaluate_vlm_answers import validate_required_frame_count
 
 
-def record(record_id="record-1", qa_id="qa-1", answer="two"):
+def record(
+    record_id="record-1",
+    qa_id="qa-1",
+    answer="two",
+    modality="rgb",
+    source_qa_id=None,
+):
+    source_qa_id = qa_id if source_qa_id is None else source_qa_id
     return EvaluationRecord(
         record_id=record_id,
         source_path="result.json",
@@ -43,9 +50,14 @@ def record(record_id="record-1", qa_id="qa-1", answer="two"):
         model_name="model-name",
         input_type="frame",
         benchmark_type="test",
-        modality="rgb",
+        modality=modality,
         section="counting",
         pair_key="pair",
+        source_qa_id=source_qa_id,
+        source_modality="rgb",
+        input_modality=modality,
+        source_section="counting",
+        source_pair_key="pair",
         question="How many cups are visible?",
         ground_truth_answer="Two",
         model_answer=answer,
@@ -298,6 +310,72 @@ class VLMAnswerEvaluationTests(unittest.TestCase):
             results = run_llm_judge([changed], output, **options)
             self.assertEqual(client.models.calls, 2)
             self.assertEqual(results["moved-record"]["record_id"], "moved-record")
+
+    def test_llm_judge_deduplicates_equivalent_source_qa_across_modalities(self):
+        class Models:
+            def __init__(self):
+                self.calls = 0
+                self.requested_batches = []
+
+            def generate_content(self, **kwargs):
+                self.calls += 1
+                requested = json.loads(
+                    kwargs["contents"][0].split("Items:\n", 1)[1]
+                )
+                self.requested_batches.append(requested)
+                return type(
+                    "Response",
+                    (),
+                    {
+                        "text": json.dumps(
+                            {
+                                "items": [
+                                    {
+                                        "record_id": requested[0]["record_id"],
+                                        "label": "correct",
+                                        "reason": "Equivalent.",
+                                        "error_type": "none",
+                                    }
+                                ]
+                            }
+                        )
+                    },
+                )()
+
+        class Client:
+            def __init__(self):
+                self.models = Models()
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "judge.json"
+            client = Client()
+            rgb = record(
+                record_id="rgb-record",
+                qa_id="source-qa-1__input_rgb",
+                modality="rgb",
+                source_qa_id="source-qa-1",
+            )
+            depth = record(
+                record_id="depth-record",
+                qa_id="source-qa-1__input_depth",
+                modality="depth",
+                source_qa_id="source-qa-1",
+            )
+            results = run_llm_judge(
+                [rgb, depth],
+                output,
+                batch_size=10,
+                api_key_list_path=Path(directory) / "missing",
+                client_factory=lambda _key: client,
+            )
+            self.assertEqual(client.models.calls, 1)
+            self.assertEqual(len(client.models.requested_batches[0]), 1)
+            self.assertEqual(results["rgb-record"]["label"], "correct")
+            self.assertEqual(results["depth-record"]["label"], "correct")
+            self.assertEqual(
+                results["rgb-record"]["evaluation_input_sha256"],
+                results["depth-record"]["evaluation_input_sha256"],
+            )
 
     def test_llm_judge_does_not_trust_legacy_cache_without_input_hash(self):
         class Models:

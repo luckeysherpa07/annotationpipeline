@@ -28,7 +28,7 @@ from .result_loader import EvaluationRecord
 
 DEFAULT_JUDGE_MODEL = "gemini-3.1-flash-lite"
 JUDGE_PROMPT_VERSION = "reference_guided_vlm_answer_judge_v1"
-JUDGE_CACHE_SCHEMA_VERSION = 3
+JUDGE_CACHE_SCHEMA_VERSION = 4
 VALID_LABELS = {"correct", "partially_correct", "incorrect", "unjudgeable"}
 LABEL_SCORES = {
     "correct": 1.0,
@@ -101,6 +101,23 @@ def judge_prompt_sha256() -> str:
 
 def evaluation_input_sha256(record: EvaluationRecord) -> str:
     payload = {
+        "source_qa_id": record.source_qa_id,
+        "source_section": record.source_section,
+        "question": record.question,
+        "ground_truth_answer": record.ground_truth_answer,
+        "model_answer": record.model_answer,
+    }
+    serialized = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _legacy_evaluation_input_sha256(record: EvaluationRecord) -> str:
+    payload = {
         "qa_id": record.qa_id,
         "modality": record.modality,
         "section": record.section,
@@ -123,6 +140,34 @@ def _is_reusable_judgment(item: Any, input_sha256: str) -> bool:
         and item.get("evaluation_input_sha256") == input_sha256
         and item.get("reason") != "Judge omitted this item."
     )
+
+
+def _matches_current_or_legacy_input(item: Any, record: EvaluationRecord) -> bool:
+    if not isinstance(item, dict) or item.get("reason") == "Judge omitted this item.":
+        return False
+    input_sha256 = str(item.get("evaluation_input_sha256") or "")
+    return input_sha256 in {
+        evaluation_input_sha256(record),
+        _legacy_evaluation_input_sha256(record),
+    }
+
+
+def _copy_judgment_for_record(
+    item: dict[str, Any],
+    record: EvaluationRecord,
+) -> dict[str, Any]:
+    copied = dict(item)
+    copied.update(
+        {
+            "record_id": record.record_id,
+            "qa_id": record.qa_id,
+            "evaluation_input_sha256": evaluation_input_sha256(record),
+            "model_name": record.model_name,
+            "provider": record.provider,
+            "source_path": record.source_path,
+        }
+    )
+    return copied
 
 
 def _normalize_judgment(
@@ -253,38 +298,37 @@ def run_llm_judge(
                 if isinstance(item, dict) and not item.get("judge_model"):
                     item["judge_model"] = legacy_judge_model
 
-    reusable_by_input = {
-        str(item.get("evaluation_input_sha256")): item
-        for item in existing.values()
-        if isinstance(item, dict)
-        and item.get("evaluation_input_sha256")
-        and item.get("reason") != "Judge omitted this item."
-    }
+    def hydrate_reusable_judgments() -> None:
+        reusable_by_input = {
+            str(item.get("evaluation_input_sha256")): item
+            for item in existing.values()
+            if isinstance(item, dict)
+            and item.get("evaluation_input_sha256")
+            and item.get("reason") != "Judge omitted this item."
+        }
+        for record in records:
+            input_sha256 = evaluation_input_sha256(record)
+            cached = existing.get(record.record_id)
+            if not _matches_current_or_legacy_input(cached, record):
+                cached = reusable_by_input.get(input_sha256)
+            if _matches_current_or_legacy_input(cached, record):
+                copied = _copy_judgment_for_record(cached, record)
+                existing[record.record_id] = copied
+                reusable_by_input[input_sha256] = copied
+
+    hydrate_reusable_judgments()
+
+    pending_by_input: dict[str, EvaluationRecord] = {}
     for record in records:
         input_sha256 = evaluation_input_sha256(record)
-        cached = existing.get(record.record_id)
-        if not _is_reusable_judgment(cached, input_sha256):
-            cached = reusable_by_input.get(input_sha256)
-        if _is_reusable_judgment(cached, input_sha256):
-            existing[record.record_id] = {
-                **cached,
-                "record_id": record.record_id,
-                "qa_id": record.qa_id,
-                "model_name": record.model_name,
-                "provider": record.provider,
-                "source_path": record.source_path,
-            }
-
-    pending = [
-        record
-        for record in records
-        if record.status == "answered"
-        and record.model_answer.strip()
-        and not _is_reusable_judgment(
-            existing.get(record.record_id),
-            evaluation_input_sha256(record),
-        )
-    ]
+        if (
+            record.status == "answered"
+            and record.model_answer.strip()
+            and not _is_reusable_judgment(existing.get(record.record_id), input_sha256)
+            and input_sha256 not in pending_by_input
+        ):
+            pending_by_input[input_sha256] = record
+    pending = list(pending_by_input.values())
     if max_items is not None:
         pending = pending[: max(0, int(max_items))]
 
@@ -387,6 +431,7 @@ def run_llm_judge(
                     client = client_factory(keys[key_index])
             for judgment in judgments:
                 existing[judgment["record_id"]] = judgment
+            hydrate_reusable_judgments()
             completed_batches += 1
             if completed_batches % max(1, checkpoint_every_batches) == 0:
                 checkpoint()
