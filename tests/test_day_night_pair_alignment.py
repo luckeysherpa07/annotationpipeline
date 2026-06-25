@@ -81,6 +81,46 @@ class DayNightPairAlignmentTests(unittest.TestCase):
                     dataset_folder=directory, write_preview=False
                 )
 
+    def test_discovery_supports_sample_name_different_from_split_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            split = Path(directory) / "wash_hand_split"
+            split.mkdir()
+            (split / "wash_hands_day_rgb.mp4").touch()
+            (split / "wash_hands_night_rgb.mp4").touch()
+            pairs = alignment._discover_day_night_rgb_pairs(Path(directory))
+        self.assertEqual(pairs[0]["sample"], "wash_hands")
+        self.assertEqual(pairs[0]["split_folder_name"], "wash_hand_split")
+
+    def test_batch_alignment_continues_after_pair_failure_and_writes_summary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dataset = root / "dataset"
+            for sample in ("alpha", "beta"):
+                split = dataset / f"{sample}_split"
+                split.mkdir(parents=True)
+                (split / f"{sample}_day_rgb.mp4").touch()
+                (split / f"{sample}_night_rgb.mp4").touch()
+
+            def run_pair(sample_name, **_kwargs):
+                if sample_name == "beta":
+                    raise RuntimeError("synthetic failure")
+                return {
+                    "coverage": {"day": 1.0, "night": 1.0},
+                    "review_intervals": [],
+                    "outputs": {"alignment_json": "alpha.json"},
+                }
+
+            with patch.object(alignment, "run_day_night_rgb_pair_alignment", side_effect=run_pair):
+                summary = alignment.run_all_day_night_rgb_pair_alignments(
+                    dataset_folder=dataset,
+                    output_folder=root / "output",
+                    write_preview=False,
+                )
+            self.assertEqual(summary["discovered_count"], 2)
+            self.assertEqual(summary["aligned_count"], 1)
+            self.assertEqual(summary["failed_count"], 1)
+            self.assertTrue(Path(summary["summary_file"]).is_file())
+
     def test_end_to_end_writes_json_and_bidirectional_csv_without_preview(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -128,10 +168,12 @@ class DayNightPairAlignmentTests(unittest.TestCase):
         self.assertIn("79. Align wash_cup day/night RGB pair", source)
         self.assertIn("80. Align cut_carrot day/night RGB pair", source)
         self.assertIn("81. Align check_mailbox day/night RGB pair", source)
+        self.assertIn("82. Align all day/night RGB pairs", source)
         self.assertIn('elif choice == "79":', source)
         self.assertIn('elif choice == "80":', source)
         self.assertIn('elif choice == "81":', source)
-        self.assertIn("Enter choice (1-81 or action id)", source)
+        self.assertIn('elif choice == "82":', source)
+        self.assertIn("Enter choice (1-82 or action id)", source)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Semantic and motion alignment for the wash-cup day/night RGB pair."""
+"""Semantic and motion alignment for day/night RGB activity pairs."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ FEATURE_FPS = 5.0
 COARSE_STRIDE = 5
 PREVIEW_FPS = 10.0
 LOW_CONFIDENCE_THRESHOLD = 0.35
+_CLIP_RUNTIME: tuple[Any, Any, Any] | None = None
 
 
 def _video_metadata(path: Path) -> dict[str, Any]:
@@ -100,7 +101,10 @@ def _robust_normalize(values: np.ndarray) -> np.ndarray:
     return np.clip((values - median) / scale, -4.0, 4.0).astype(np.float32)
 
 
-def _extract_clip_embeddings(frames: list[np.ndarray], batch_size: int = 32) -> np.ndarray:
+def _get_clip_runtime() -> tuple[Any, Any, Any]:
+    global _CLIP_RUNTIME
+    if _CLIP_RUNTIME is not None:
+        return _CLIP_RUNTIME
     try:
         import torch
         from transformers import CLIPImageProcessor, CLIPVisionModel
@@ -119,6 +123,19 @@ def _extract_clip_embeddings(frames: list[np.ndarray], batch_size: int = 32) -> 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device).eval()
+    _CLIP_RUNTIME = processor, model, device
+    return _CLIP_RUNTIME
+
+
+def _extract_clip_embeddings(frames: list[np.ndarray], batch_size: int = 32) -> np.ndarray:
+    try:
+        import torch
+    except ImportError as exc:
+        raise RuntimeError(
+            "Day/night alignment requires torch and transformers. Run it with the project virtual environment."
+        ) from exc
+
+    processor, model, device = _get_clip_runtime()
     embeddings: list[np.ndarray] = []
     with torch.inference_mode():
         for start in range(0, len(frames), batch_size):
@@ -550,14 +567,16 @@ def run_day_night_rgb_pair_alignment(
     sample_name: str,
     dataset_folder: Path | str = "dataset",
     output_folder: Path | str | None = None,
+    split_folder_name: str | None = None,
     write_preview: bool = True,
 ) -> dict[str, Any]:
     """Align one named night RGB recording to its day recording."""
     if not sample_name or any(character in sample_name for character in ("/", "\\")):
         raise ValueError("sample_name must be a non-empty filename-safe dataset sample name.")
     dataset_folder = Path(dataset_folder)
-    output_folder = Path(output_folder or f"day_night_alignment/{sample_name}_split")
-    split_folder = dataset_folder / f"{sample_name}_split"
+    split_folder_name = split_folder_name or f"{sample_name}_split"
+    output_folder = Path(output_folder or f"day_night_alignment/{split_folder_name}")
+    split_folder = dataset_folder / split_folder_name
     day_path = split_folder / f"{sample_name}_day_rgb.mp4"
     night_path = split_folder / f"{sample_name}_night_rgb.mp4"
     for path in (day_path, night_path):
@@ -610,6 +629,7 @@ def run_day_night_rgb_pair_alignment(
 
     summary = {
         "sample": sample_name,
+        "split_folder_name": split_folder_name,
         "reference_side": "night",
         "method": "coarse_to_fine_clip_motion_constrained_dtw",
         "settings": {
@@ -706,3 +726,78 @@ def run_check_mailbox_day_night_rgb_alignment(
         output_folder=output_folder,
         write_preview=write_preview,
     )
+
+
+def _discover_day_night_rgb_pairs(dataset_folder: Path) -> list[dict[str, str]]:
+    pairs: list[dict[str, str]] = []
+    for day_path in sorted(dataset_folder.glob("*_split/*_day_rgb.mp4")):
+        sample_name = day_path.stem[: -len("_day_rgb")]
+        night_path = day_path.with_name(f"{sample_name}_night_rgb.mp4")
+        if night_path.is_file():
+            pairs.append(
+                {
+                    "sample": sample_name,
+                    "split_folder_name": day_path.parent.name,
+                    "day_file": str(day_path),
+                    "night_file": str(night_path),
+                }
+            )
+    return pairs
+
+
+def run_all_day_night_rgb_pair_alignments(
+    dataset_folder: Path | str = "dataset",
+    output_folder: Path | str = "day_night_alignment",
+    write_preview: bool = True,
+) -> dict[str, Any]:
+    """Discover and align every split with a complete day/night RGB pair."""
+    dataset_folder = Path(dataset_folder)
+    output_folder = Path(output_folder)
+    pairs = _discover_day_night_rgb_pairs(dataset_folder)
+    aligned: list[dict[str, Any]] = []
+    failed: list[dict[str, str]] = []
+    for pair in pairs:
+        sample_name = pair["sample"]
+        split_folder_name = pair["split_folder_name"]
+        try:
+            result = run_day_night_rgb_pair_alignment(
+                sample_name=sample_name,
+                dataset_folder=dataset_folder,
+                output_folder=output_folder / split_folder_name,
+                split_folder_name=split_folder_name,
+                write_preview=write_preview,
+            )
+            aligned.append(
+                {
+                    "sample": sample_name,
+                    "split_folder_name": split_folder_name,
+                    "coverage": result["coverage"],
+                    "review_interval_count": len(result["review_intervals"]),
+                    "outputs": result["outputs"],
+                }
+            )
+        except Exception as exc:
+            failed.append(
+                {
+                    "sample": sample_name,
+                    "split_folder_name": split_folder_name,
+                    "reason": str(exc),
+                }
+            )
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+    summary_path = output_folder / "day_night_rgb_alignment_summary.json"
+    summary = {
+        "dataset_folder": str(dataset_folder),
+        "output_folder": str(output_folder),
+        "write_preview": write_preview,
+        "discovered_count": len(pairs),
+        "aligned_count": len(aligned),
+        "failed_count": len(failed),
+        "aligned": aligned,
+        "failed": failed,
+        "summary_file": str(summary_path),
+    }
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    return summary
