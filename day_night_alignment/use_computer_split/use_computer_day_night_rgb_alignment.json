@@ -1,0 +1,5944 @@
+{
+  "sample": "use_computer",
+  "split_folder_name": "use_computer_split",
+  "reference_side": "night",
+  "method": "coarse_to_fine_clip_motion_constrained_dtw",
+  "settings": {
+    "clip_model": "openai/clip-vit-base-patch32",
+    "feature_fps": 5.0,
+    "coarse_fps": 1.0,
+    "semantic_cost_weight": 0.8,
+    "motion_cost_weight": 0.2,
+    "fine_band_seconds": 5.0,
+    "local_playback_ratio": [
+      0.5,
+      2.0
+    ],
+    "minimum_active_coverage": 0.7,
+    "low_confidence_threshold": 0.35
+  },
+  "sources": {
+    "day": {
+      "path": "dataset/use_computer_split/use_computer_day_rgb.mp4",
+      "fps": 30.0,
+      "frame_count": 5681,
+      "duration_seconds": 189.36666666666667,
+      "width": 1280,
+      "height": 720
+    },
+    "night": {
+      "path": "dataset/use_computer_split/use_computer_night_rgb.mp4",
+      "fps": 30.0,
+      "frame_count": 5730,
+      "duration_seconds": 191.0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "matched_ranges": {
+    "night": {
+      "start_seconds": 0.0,
+      "end_seconds": 190.800003
+    },
+    "day": {
+      "start_seconds": 0.0,
+      "end_seconds": 189.199997
+    }
+  },
+  "coverage": {
+    "night": 1.0,
+    "day": 1.0
+  },
+  "unmatched_ranges": {
+    "night": [
+      {
+        "start_seconds": 190.800003,
+        "end_seconds": 191.0
+      }
+    ],
+    "day": [
+      {
+        "start_seconds": 189.199997,
+        "end_seconds": 189.366667
+      }
+    ]
+  },
+  "review_intervals": [
+    {
+      "night_start_seconds": 1.2,
+      "night_end_seconds": 1.2
+    },
+    {
+      "night_start_seconds": 2.8,
+      "night_end_seconds": 2.8
+    },
+    {
+      "night_start_seconds": 4.6,
+      "night_end_seconds": 5.4
+    },
+    {
+      "night_start_seconds": 6.6,
+      "night_end_seconds": 13.8
+    },
+    {
+      "night_start_seconds": 15.8,
+      "night_end_seconds": 23.200001
+    },
+    {
+      "night_start_seconds": 29.200001,
+      "night_end_seconds": 29.200001
+    },
+    {
+      "night_start_seconds": 32.200001,
+      "night_end_seconds": 42.400002
+    },
+    {
+      "night_start_seconds": 44.0,
+      "night_end_seconds": 44.0
+    },
+    {
+      "night_start_seconds": 45.599998,
+      "night_end_seconds": 46.200001
+    },
+    {
+      "night_start_seconds": 47.400002,
+      "night_end_seconds": 48.0
+    },
+    {
+      "night_start_seconds": 49.599998,
+      "night_end_seconds": 50.400002
+    },
+    {
+      "night_start_seconds": 51.799999,
+      "night_end_seconds": 52.400002
+    },
+    {
+      "night_start_seconds": 60.400002,
+      "night_end_seconds": 62.0
+    },
+    {
+      "night_start_seconds": 63.400002,
+      "night_end_seconds": 63.799999
+    },
+    {
+      "night_start_seconds": 65.199997,
+      "night_end_seconds": 68.199997
+    },
+    {
+      "night_start_seconds": 69.599998,
+      "night_end_seconds": 69.599998
+    },
+    {
+      "night_start_seconds": 72.0,
+      "night_end_seconds": 74.199997
+    },
+    {
+      "night_start_seconds": 77.0,
+      "night_end_seconds": 77.0
+    },
+    {
+      "night_start_seconds": 79.400002,
+      "night_end_seconds": 79.400002
+    },
+    {
+      "night_start_seconds": 81.199997,
+      "night_end_seconds": 81.199997
+    },
+    {
+      "night_start_seconds": 84.199997,
+      "night_end_seconds": 84.199997
+    },
+    {
+      "night_start_seconds": 87.800003,
+      "night_end_seconds": 88.400002
+    },
+    {
+      "night_start_seconds": 90.0,
+      "night_end_seconds": 98.800003
+    },
+    {
+      "night_start_seconds": 100.0,
+      "night_end_seconds": 107.599998
+    },
+    {
+      "night_start_seconds": 109.0,
+      "night_end_seconds": 109.199997
+    },
+    {
+      "night_start_seconds": 111.0,
+      "night_end_seconds": 116.800003
+    },
+    {
+      "night_start_seconds": 119.400002,
+      "night_end_seconds": 119.400002
+    },
+    {
+      "night_start_seconds": 123.0,
+      "night_end_seconds": 146.399994
+    },
+    {
+      "night_start_seconds": 147.800003,
+      "night_end_seconds": 147.800003
+    },
+    {
+      "night_start_seconds": 149.399994,
+      "night_end_seconds": 149.800003
+    },
+    {
+      "night_start_seconds": 152.0,
+      "night_end_seconds": 152.0
+    },
+    {
+      "night_start_seconds": 155.399994,
+      "night_end_seconds": 156.199997
+    },
+    {
+      "night_start_seconds": 164.199997,
+      "night_end_seconds": 178.399994
+    },
+    {
+      "night_start_seconds": 179.600006,
+      "night_end_seconds": 183.0
+    },
+    {
+      "night_start_seconds": 184.199997,
+      "night_end_seconds": 184.199997
+    },
+    {
+      "night_start_seconds": 186.600006,
+      "night_end_seconds": 186.800003
+    },
+    {
+      "night_start_seconds": 188.199997,
+      "night_end_seconds": 188.800003
+    },
+    {
+      "night_start_seconds": 190.0,
+      "night_end_seconds": 190.800003
+    }
+  ],
+  "knots": [
+    {
+      "night_sample_index": 0,
+      "night_time_seconds": 0.0,
+      "day_sample_index": 0,
+      "day_time_seconds": 0.0,
+      "cost": 0.386208,
+      "confidence": 0.422948,
+      "review": false
+    },
+    {
+      "night_sample_index": 2,
+      "night_time_seconds": 0.4,
+      "day_sample_index": 1,
+      "day_time_seconds": 0.2,
+      "cost": 0.321077,
+      "confidence": 0.669309,
+      "review": false
+    },
+    {
+      "night_sample_index": 3,
+      "night_time_seconds": 0.6,
+      "day_sample_index": 3,
+      "day_time_seconds": 0.6,
+      "cost": 0.355896,
+      "confidence": 0.532555,
+      "review": false
+    },
+    {
+      "night_sample_index": 4,
+      "night_time_seconds": 0.8,
+      "day_sample_index": 5,
+      "day_time_seconds": 1.0,
+      "cost": 0.352327,
+      "confidence": 0.546574,
+      "review": false
+    },
+    {
+      "night_sample_index": 6,
+      "night_time_seconds": 1.2,
+      "day_sample_index": 6,
+      "day_time_seconds": 1.2,
+      "cost": 0.413809,
+      "confidence": 0.305103,
+      "review": true
+    },
+    {
+      "night_sample_index": 8,
+      "night_time_seconds": 1.6,
+      "day_sample_index": 7,
+      "day_time_seconds": 1.4,
+      "cost": 0.383876,
+      "confidence": 0.422664,
+      "review": false
+    },
+    {
+      "night_sample_index": 10,
+      "night_time_seconds": 2.0,
+      "day_sample_index": 8,
+      "day_time_seconds": 1.6,
+      "cost": 0.373527,
+      "confidence": 0.46331,
+      "review": false
+    },
+    {
+      "night_sample_index": 12,
+      "night_time_seconds": 2.4,
+      "day_sample_index": 9,
+      "day_time_seconds": 1.8,
+      "cost": 0.391488,
+      "confidence": 0.392768,
+      "review": false
+    },
+    {
+      "night_sample_index": 14,
+      "night_time_seconds": 2.8,
+      "day_sample_index": 10,
+      "day_time_seconds": 2.0,
+      "cost": 0.467867,
+      "confidence": 0.092788,
+      "review": true
+    },
+    {
+      "night_sample_index": 16,
+      "night_time_seconds": 3.2,
+      "day_sample_index": 11,
+      "day_time_seconds": 2.2,
+      "cost": 0.301939,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 18,
+      "night_time_seconds": 3.6,
+      "day_sample_index": 12,
+      "day_time_seconds": 2.4,
+      "cost": 0.280011,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 20,
+      "night_time_seconds": 4.0,
+      "day_sample_index": 13,
+      "day_time_seconds": 2.6,
+      "cost": 0.396122,
+      "confidence": 0.37457,
+      "review": false
+    },
+    {
+      "night_sample_index": 22,
+      "night_time_seconds": 4.4,
+      "day_sample_index": 14,
+      "day_time_seconds": 2.8,
+      "cost": 0.383138,
+      "confidence": 0.425565,
+      "review": false
+    },
+    {
+      "night_sample_index": 23,
+      "night_time_seconds": 4.6,
+      "day_sample_index": 16,
+      "day_time_seconds": 3.2,
+      "cost": 0.473931,
+      "confidence": 0.068974,
+      "review": true
+    },
+    {
+      "night_sample_index": 24,
+      "night_time_seconds": 4.8,
+      "day_sample_index": 18,
+      "day_time_seconds": 3.6,
+      "cost": 0.406374,
+      "confidence": 0.334302,
+      "review": true
+    },
+    {
+      "night_sample_index": 25,
+      "night_time_seconds": 5.0,
+      "day_sample_index": 20,
+      "day_time_seconds": 4.0,
+      "cost": 0.423026,
+      "confidence": 0.268902,
+      "review": true
+    },
+    {
+      "night_sample_index": 26,
+      "night_time_seconds": 5.2,
+      "day_sample_index": 22,
+      "day_time_seconds": 4.4,
+      "cost": 0.419235,
+      "confidence": 0.283792,
+      "review": true
+    },
+    {
+      "night_sample_index": 27,
+      "night_time_seconds": 5.4,
+      "day_sample_index": 24,
+      "day_time_seconds": 4.8,
+      "cost": 0.43569,
+      "confidence": 0.219164,
+      "review": true
+    },
+    {
+      "night_sample_index": 29,
+      "night_time_seconds": 5.8,
+      "day_sample_index": 25,
+      "day_time_seconds": 5.0,
+      "cost": 0.367833,
+      "confidence": 0.485672,
+      "review": false
+    },
+    {
+      "night_sample_index": 30,
+      "night_time_seconds": 6.0,
+      "day_sample_index": 27,
+      "day_time_seconds": 5.4,
+      "cost": 0.380454,
+      "confidence": 0.436106,
+      "review": false
+    },
+    {
+      "night_sample_index": 32,
+      "night_time_seconds": 6.4,
+      "day_sample_index": 28,
+      "day_time_seconds": 5.6,
+      "cost": 0.363214,
+      "confidence": 0.503814,
+      "review": false
+    },
+    {
+      "night_sample_index": 33,
+      "night_time_seconds": 6.6,
+      "day_sample_index": 30,
+      "day_time_seconds": 6.0,
+      "cost": 0.408043,
+      "confidence": 0.327747,
+      "review": true
+    },
+    {
+      "night_sample_index": 35,
+      "night_time_seconds": 7.0,
+      "day_sample_index": 31,
+      "day_time_seconds": 6.2,
+      "cost": 0.325204,
+      "confidence": 0.653098,
+      "review": false
+    },
+    {
+      "night_sample_index": 37,
+      "night_time_seconds": 7.4,
+      "day_sample_index": 32,
+      "day_time_seconds": 6.4,
+      "cost": 0.411603,
+      "confidence": 0.313768,
+      "review": true
+    },
+    {
+      "night_sample_index": 39,
+      "night_time_seconds": 7.8,
+      "day_sample_index": 33,
+      "day_time_seconds": 6.6,
+      "cost": 0.25659,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 40,
+      "night_time_seconds": 8.0,
+      "day_sample_index": 35,
+      "day_time_seconds": 7.0,
+      "cost": 0.354908,
+      "confidence": 0.536438,
+      "review": false
+    },
+    {
+      "night_sample_index": 42,
+      "night_time_seconds": 8.4,
+      "day_sample_index": 36,
+      "day_time_seconds": 7.2,
+      "cost": 0.463525,
+      "confidence": 0.109841,
+      "review": true
+    },
+    {
+      "night_sample_index": 44,
+      "night_time_seconds": 8.8,
+      "day_sample_index": 37,
+      "day_time_seconds": 7.4,
+      "cost": 0.373364,
+      "confidence": 0.463951,
+      "review": false
+    },
+    {
+      "night_sample_index": 45,
+      "night_time_seconds": 9.0,
+      "day_sample_index": 39,
+      "day_time_seconds": 7.8,
+      "cost": 0.455609,
+      "confidence": 0.140934,
+      "review": true
+    },
+    {
+      "night_sample_index": 47,
+      "night_time_seconds": 9.4,
+      "day_sample_index": 40,
+      "day_time_seconds": 8.0,
+      "cost": 0.464122,
+      "confidence": 0.107496,
+      "review": true
+    },
+    {
+      "night_sample_index": 49,
+      "night_time_seconds": 9.8,
+      "day_sample_index": 41,
+      "day_time_seconds": 8.2,
+      "cost": 0.459514,
+      "confidence": 0.125595,
+      "review": true
+    },
+    {
+      "night_sample_index": 51,
+      "night_time_seconds": 10.2,
+      "day_sample_index": 42,
+      "day_time_seconds": 8.4,
+      "cost": 0.457878,
+      "confidence": 0.132022,
+      "review": true
+    },
+    {
+      "night_sample_index": 53,
+      "night_time_seconds": 10.6,
+      "day_sample_index": 43,
+      "day_time_seconds": 8.6,
+      "cost": 0.431231,
+      "confidence": 0.236677,
+      "review": true
+    },
+    {
+      "night_sample_index": 55,
+      "night_time_seconds": 11.0,
+      "day_sample_index": 44,
+      "day_time_seconds": 8.8,
+      "cost": 0.41633,
+      "confidence": 0.295202,
+      "review": true
+    },
+    {
+      "night_sample_index": 57,
+      "night_time_seconds": 11.4,
+      "day_sample_index": 45,
+      "day_time_seconds": 9.0,
+      "cost": 0.435436,
+      "confidence": 0.220161,
+      "review": true
+    },
+    {
+      "night_sample_index": 59,
+      "night_time_seconds": 11.8,
+      "day_sample_index": 46,
+      "day_time_seconds": 9.2,
+      "cost": 0.325618,
+      "confidence": 0.651476,
+      "review": false
+    },
+    {
+      "night_sample_index": 60,
+      "night_time_seconds": 12.0,
+      "day_sample_index": 48,
+      "day_time_seconds": 9.6,
+      "cost": 0.405731,
+      "confidence": 0.336831,
+      "review": true
+    },
+    {
+      "night_sample_index": 61,
+      "night_time_seconds": 12.2,
+      "day_sample_index": 50,
+      "day_time_seconds": 10.0,
+      "cost": 0.325386,
+      "confidence": 0.652384,
+      "review": false
+    },
+    {
+      "night_sample_index": 63,
+      "night_time_seconds": 12.6,
+      "day_sample_index": 51,
+      "day_time_seconds": 10.2,
+      "cost": 0.372378,
+      "confidence": 0.467823,
+      "review": false
+    },
+    {
+      "night_sample_index": 65,
+      "night_time_seconds": 13.0,
+      "day_sample_index": 52,
+      "day_time_seconds": 10.4,
+      "cost": 0.434864,
+      "confidence": 0.222407,
+      "review": true
+    },
+    {
+      "night_sample_index": 67,
+      "night_time_seconds": 13.4,
+      "day_sample_index": 53,
+      "day_time_seconds": 10.6,
+      "cost": 0.445664,
+      "confidence": 0.179992,
+      "review": true
+    },
+    {
+      "night_sample_index": 69,
+      "night_time_seconds": 13.8,
+      "day_sample_index": 54,
+      "day_time_seconds": 10.8,
+      "cost": 0.514399,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 71,
+      "night_time_seconds": 14.2,
+      "day_sample_index": 55,
+      "day_time_seconds": 11.0,
+      "cost": 0.401485,
+      "confidence": 0.353506,
+      "review": false
+    },
+    {
+      "night_sample_index": 73,
+      "night_time_seconds": 14.6,
+      "day_sample_index": 56,
+      "day_time_seconds": 11.2,
+      "cost": 0.380523,
+      "confidence": 0.435835,
+      "review": false
+    },
+    {
+      "night_sample_index": 75,
+      "night_time_seconds": 15.0,
+      "day_sample_index": 57,
+      "day_time_seconds": 11.4,
+      "cost": 0.374787,
+      "confidence": 0.460458,
+      "review": false
+    },
+    {
+      "night_sample_index": 77,
+      "night_time_seconds": 15.4,
+      "day_sample_index": 58,
+      "day_time_seconds": 11.6,
+      "cost": 0.332907,
+      "confidence": 0.622846,
+      "review": false
+    },
+    {
+      "night_sample_index": 79,
+      "night_time_seconds": 15.8,
+      "day_sample_index": 59,
+      "day_time_seconds": 11.8,
+      "cost": 0.442659,
+      "confidence": 0.191792,
+      "review": true
+    },
+    {
+      "night_sample_index": 81,
+      "night_time_seconds": 16.200001,
+      "day_sample_index": 60,
+      "day_time_seconds": 12.0,
+      "cost": 0.571019,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 83,
+      "night_time_seconds": 16.6,
+      "day_sample_index": 61,
+      "day_time_seconds": 12.2,
+      "cost": 0.329792,
+      "confidence": 0.63508,
+      "review": false
+    },
+    {
+      "night_sample_index": 85,
+      "night_time_seconds": 17.0,
+      "day_sample_index": 62,
+      "day_time_seconds": 12.4,
+      "cost": 0.479816,
+      "confidence": 0.045858,
+      "review": true
+    },
+    {
+      "night_sample_index": 87,
+      "night_time_seconds": 17.4,
+      "day_sample_index": 63,
+      "day_time_seconds": 12.6,
+      "cost": 0.354043,
+      "confidence": 0.539834,
+      "review": false
+    },
+    {
+      "night_sample_index": 88,
+      "night_time_seconds": 17.6,
+      "day_sample_index": 65,
+      "day_time_seconds": 13.0,
+      "cost": 0.351896,
+      "confidence": 0.548269,
+      "review": false
+    },
+    {
+      "night_sample_index": 90,
+      "night_time_seconds": 18.0,
+      "day_sample_index": 66,
+      "day_time_seconds": 13.2,
+      "cost": 0.49555,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 91,
+      "night_time_seconds": 18.200001,
+      "day_sample_index": 68,
+      "day_time_seconds": 13.6,
+      "cost": 0.485443,
+      "confidence": 0.023759,
+      "review": true
+    },
+    {
+      "night_sample_index": 93,
+      "night_time_seconds": 18.6,
+      "day_sample_index": 69,
+      "day_time_seconds": 13.8,
+      "cost": 0.524889,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 95,
+      "night_time_seconds": 19.0,
+      "day_sample_index": 70,
+      "day_time_seconds": 14.0,
+      "cost": 0.5406,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 97,
+      "night_time_seconds": 19.4,
+      "day_sample_index": 71,
+      "day_time_seconds": 14.2,
+      "cost": 0.471636,
+      "confidence": 0.077988,
+      "review": true
+    },
+    {
+      "night_sample_index": 99,
+      "night_time_seconds": 19.799999,
+      "day_sample_index": 72,
+      "day_time_seconds": 14.4,
+      "cost": 0.452307,
+      "confidence": 0.1539,
+      "review": true
+    },
+    {
+      "night_sample_index": 101,
+      "night_time_seconds": 20.200001,
+      "day_sample_index": 73,
+      "day_time_seconds": 14.6,
+      "cost": 0.454406,
+      "confidence": 0.145658,
+      "review": true
+    },
+    {
+      "night_sample_index": 103,
+      "night_time_seconds": 20.6,
+      "day_sample_index": 74,
+      "day_time_seconds": 14.8,
+      "cost": 0.491969,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 105,
+      "night_time_seconds": 21.0,
+      "day_sample_index": 75,
+      "day_time_seconds": 15.0,
+      "cost": 0.475788,
+      "confidence": 0.061678,
+      "review": true
+    },
+    {
+      "night_sample_index": 107,
+      "night_time_seconds": 21.4,
+      "day_sample_index": 76,
+      "day_time_seconds": 15.2,
+      "cost": 0.387776,
+      "confidence": 0.407347,
+      "review": false
+    },
+    {
+      "night_sample_index": 108,
+      "night_time_seconds": 21.6,
+      "day_sample_index": 78,
+      "day_time_seconds": 15.6,
+      "cost": 0.449921,
+      "confidence": 0.163274,
+      "review": true
+    },
+    {
+      "night_sample_index": 109,
+      "night_time_seconds": 21.799999,
+      "day_sample_index": 80,
+      "day_time_seconds": 16.0,
+      "cost": 0.433479,
+      "confidence": 0.227847,
+      "review": true
+    },
+    {
+      "night_sample_index": 111,
+      "night_time_seconds": 22.200001,
+      "day_sample_index": 81,
+      "day_time_seconds": 16.200001,
+      "cost": 0.420917,
+      "confidence": 0.277185,
+      "review": true
+    },
+    {
+      "night_sample_index": 112,
+      "night_time_seconds": 22.4,
+      "day_sample_index": 83,
+      "day_time_seconds": 16.6,
+      "cost": 0.349688,
+      "confidence": 0.55694,
+      "review": false
+    },
+    {
+      "night_sample_index": 113,
+      "night_time_seconds": 22.6,
+      "day_sample_index": 85,
+      "day_time_seconds": 17.0,
+      "cost": 0.503682,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 114,
+      "night_time_seconds": 22.799999,
+      "day_sample_index": 87,
+      "day_time_seconds": 17.4,
+      "cost": 0.457434,
+      "confidence": 0.133765,
+      "review": true
+    },
+    {
+      "night_sample_index": 115,
+      "night_time_seconds": 23.0,
+      "day_sample_index": 89,
+      "day_time_seconds": 17.799999,
+      "cost": 0.397824,
+      "confidence": 0.367885,
+      "review": false
+    },
+    {
+      "night_sample_index": 116,
+      "night_time_seconds": 23.200001,
+      "day_sample_index": 91,
+      "day_time_seconds": 18.200001,
+      "cost": 0.422964,
+      "confidence": 0.269147,
+      "review": true
+    },
+    {
+      "night_sample_index": 118,
+      "night_time_seconds": 23.6,
+      "day_sample_index": 92,
+      "day_time_seconds": 18.4,
+      "cost": 0.290835,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 119,
+      "night_time_seconds": 23.799999,
+      "day_sample_index": 94,
+      "day_time_seconds": 18.799999,
+      "cost": 0.265012,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 120,
+      "night_time_seconds": 24.0,
+      "day_sample_index": 96,
+      "day_time_seconds": 19.200001,
+      "cost": 0.345545,
+      "confidence": 0.573209,
+      "review": false
+    },
+    {
+      "night_sample_index": 121,
+      "night_time_seconds": 24.200001,
+      "day_sample_index": 98,
+      "day_time_seconds": 19.6,
+      "cost": 0.204521,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 122,
+      "night_time_seconds": 24.4,
+      "day_sample_index": 100,
+      "day_time_seconds": 20.0,
+      "cost": 0.359211,
+      "confidence": 0.519539,
+      "review": false
+    },
+    {
+      "night_sample_index": 123,
+      "night_time_seconds": 24.6,
+      "day_sample_index": 102,
+      "day_time_seconds": 20.4,
+      "cost": 0.295829,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 124,
+      "night_time_seconds": 24.799999,
+      "day_sample_index": 104,
+      "day_time_seconds": 20.799999,
+      "cost": 0.323098,
+      "confidence": 0.661373,
+      "review": false
+    },
+    {
+      "night_sample_index": 125,
+      "night_time_seconds": 25.0,
+      "day_sample_index": 106,
+      "day_time_seconds": 21.200001,
+      "cost": 0.353779,
+      "confidence": 0.540873,
+      "review": false
+    },
+    {
+      "night_sample_index": 127,
+      "night_time_seconds": 25.4,
+      "day_sample_index": 107,
+      "day_time_seconds": 21.4,
+      "cost": 0.375715,
+      "confidence": 0.454716,
+      "review": false
+    },
+    {
+      "night_sample_index": 129,
+      "night_time_seconds": 25.799999,
+      "day_sample_index": 108,
+      "day_time_seconds": 21.6,
+      "cost": 0.285349,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 130,
+      "night_time_seconds": 26.0,
+      "day_sample_index": 110,
+      "day_time_seconds": 22.0,
+      "cost": 0.307416,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 131,
+      "night_time_seconds": 26.200001,
+      "day_sample_index": 112,
+      "day_time_seconds": 22.4,
+      "cost": 0.284093,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 132,
+      "night_time_seconds": 26.4,
+      "day_sample_index": 114,
+      "day_time_seconds": 22.799999,
+      "cost": 0.346587,
+      "confidence": 0.569117,
+      "review": false
+    },
+    {
+      "night_sample_index": 133,
+      "night_time_seconds": 26.6,
+      "day_sample_index": 116,
+      "day_time_seconds": 23.200001,
+      "cost": 0.320136,
+      "confidence": 0.673006,
+      "review": false
+    },
+    {
+      "night_sample_index": 135,
+      "night_time_seconds": 27.0,
+      "day_sample_index": 117,
+      "day_time_seconds": 23.4,
+      "cost": 0.327848,
+      "confidence": 0.642715,
+      "review": false
+    },
+    {
+      "night_sample_index": 136,
+      "night_time_seconds": 27.200001,
+      "day_sample_index": 119,
+      "day_time_seconds": 23.799999,
+      "cost": 0.229724,
+      "confidence": 0.720598,
+      "review": false
+    },
+    {
+      "night_sample_index": 137,
+      "night_time_seconds": 27.4,
+      "day_sample_index": 120,
+      "day_time_seconds": 24.0,
+      "cost": 0.285824,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 139,
+      "night_time_seconds": 27.799999,
+      "day_sample_index": 121,
+      "day_time_seconds": 24.200001,
+      "cost": 0.347676,
+      "confidence": 0.56484,
+      "review": false
+    },
+    {
+      "night_sample_index": 141,
+      "night_time_seconds": 28.200001,
+      "day_sample_index": 122,
+      "day_time_seconds": 24.4,
+      "cost": 0.327169,
+      "confidence": 0.64538,
+      "review": false
+    },
+    {
+      "night_sample_index": 143,
+      "night_time_seconds": 28.6,
+      "day_sample_index": 123,
+      "day_time_seconds": 24.6,
+      "cost": 0.335383,
+      "confidence": 0.613122,
+      "review": false
+    },
+    {
+      "night_sample_index": 145,
+      "night_time_seconds": 29.0,
+      "day_sample_index": 124,
+      "day_time_seconds": 24.799999,
+      "cost": 0.361973,
+      "confidence": 0.508691,
+      "review": false
+    },
+    {
+      "night_sample_index": 146,
+      "night_time_seconds": 29.200001,
+      "day_sample_index": 126,
+      "day_time_seconds": 25.200001,
+      "cost": 0.416879,
+      "confidence": 0.293045,
+      "review": true
+    },
+    {
+      "night_sample_index": 147,
+      "night_time_seconds": 29.4,
+      "day_sample_index": 128,
+      "day_time_seconds": 25.6,
+      "cost": 0.330213,
+      "confidence": 0.633428,
+      "review": false
+    },
+    {
+      "night_sample_index": 148,
+      "night_time_seconds": 29.6,
+      "day_sample_index": 130,
+      "day_time_seconds": 26.0,
+      "cost": 0.322451,
+      "confidence": 0.663911,
+      "review": false
+    },
+    {
+      "night_sample_index": 150,
+      "night_time_seconds": 30.0,
+      "day_sample_index": 131,
+      "day_time_seconds": 26.200001,
+      "cost": 0.394342,
+      "confidence": 0.38156,
+      "review": false
+    },
+    {
+      "night_sample_index": 152,
+      "night_time_seconds": 30.4,
+      "day_sample_index": 132,
+      "day_time_seconds": 26.4,
+      "cost": 0.320447,
+      "confidence": 0.671785,
+      "review": false
+    },
+    {
+      "night_sample_index": 153,
+      "night_time_seconds": 30.6,
+      "day_sample_index": 134,
+      "day_time_seconds": 26.799999,
+      "cost": 0.323154,
+      "confidence": 0.661152,
+      "review": false
+    },
+    {
+      "night_sample_index": 155,
+      "night_time_seconds": 31.0,
+      "day_sample_index": 135,
+      "day_time_seconds": 27.0,
+      "cost": 0.311818,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 156,
+      "night_time_seconds": 31.200001,
+      "day_sample_index": 137,
+      "day_time_seconds": 27.4,
+      "cost": 0.313117,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 157,
+      "night_time_seconds": 31.4,
+      "day_sample_index": 139,
+      "day_time_seconds": 27.799999,
+      "cost": 0.377539,
+      "confidence": 0.447553,
+      "review": false
+    },
+    {
+      "night_sample_index": 159,
+      "night_time_seconds": 31.799999,
+      "day_sample_index": 140,
+      "day_time_seconds": 28.0,
+      "cost": 0.338838,
+      "confidence": 0.599551,
+      "review": false
+    },
+    {
+      "night_sample_index": 161,
+      "night_time_seconds": 32.200001,
+      "day_sample_index": 141,
+      "day_time_seconds": 28.200001,
+      "cost": 0.426597,
+      "confidence": 0.254877,
+      "review": true
+    },
+    {
+      "night_sample_index": 163,
+      "night_time_seconds": 32.599998,
+      "day_sample_index": 142,
+      "day_time_seconds": 28.4,
+      "cost": 0.314039,
+      "confidence": 0.696949,
+      "review": false
+    },
+    {
+      "night_sample_index": 164,
+      "night_time_seconds": 32.799999,
+      "day_sample_index": 144,
+      "day_time_seconds": 28.799999,
+      "cost": 0.321782,
+      "confidence": 0.666538,
+      "review": false
+    },
+    {
+      "night_sample_index": 166,
+      "night_time_seconds": 33.200001,
+      "day_sample_index": 145,
+      "day_time_seconds": 29.0,
+      "cost": 0.422247,
+      "confidence": 0.271961,
+      "review": true
+    },
+    {
+      "night_sample_index": 168,
+      "night_time_seconds": 33.599998,
+      "day_sample_index": 146,
+      "day_time_seconds": 29.200001,
+      "cost": 0.449843,
+      "confidence": 0.163578,
+      "review": true
+    },
+    {
+      "night_sample_index": 169,
+      "night_time_seconds": 33.799999,
+      "day_sample_index": 148,
+      "day_time_seconds": 29.6,
+      "cost": 0.453478,
+      "confidence": 0.149302,
+      "review": true
+    },
+    {
+      "night_sample_index": 171,
+      "night_time_seconds": 34.200001,
+      "day_sample_index": 149,
+      "day_time_seconds": 29.799999,
+      "cost": 0.472554,
+      "confidence": 0.07438,
+      "review": true
+    },
+    {
+      "night_sample_index": 173,
+      "night_time_seconds": 34.599998,
+      "day_sample_index": 150,
+      "day_time_seconds": 30.0,
+      "cost": 0.412723,
+      "confidence": 0.309368,
+      "review": true
+    },
+    {
+      "night_sample_index": 175,
+      "night_time_seconds": 35.0,
+      "day_sample_index": 151,
+      "day_time_seconds": 30.200001,
+      "cost": 0.458928,
+      "confidence": 0.127898,
+      "review": true
+    },
+    {
+      "night_sample_index": 177,
+      "night_time_seconds": 35.400002,
+      "day_sample_index": 152,
+      "day_time_seconds": 30.4,
+      "cost": 0.409832,
+      "confidence": 0.320722,
+      "review": true
+    },
+    {
+      "night_sample_index": 179,
+      "night_time_seconds": 35.799999,
+      "day_sample_index": 153,
+      "day_time_seconds": 30.6,
+      "cost": 0.422257,
+      "confidence": 0.271924,
+      "review": true
+    },
+    {
+      "night_sample_index": 180,
+      "night_time_seconds": 36.0,
+      "day_sample_index": 155,
+      "day_time_seconds": 31.0,
+      "cost": 0.337565,
+      "confidence": 0.60455,
+      "review": false
+    },
+    {
+      "night_sample_index": 182,
+      "night_time_seconds": 36.400002,
+      "day_sample_index": 156,
+      "day_time_seconds": 31.200001,
+      "cost": 0.458892,
+      "confidence": 0.128037,
+      "review": true
+    },
+    {
+      "night_sample_index": 183,
+      "night_time_seconds": 36.599998,
+      "day_sample_index": 158,
+      "day_time_seconds": 31.6,
+      "cost": 0.391596,
+      "confidence": 0.392345,
+      "review": false
+    },
+    {
+      "night_sample_index": 184,
+      "night_time_seconds": 36.799999,
+      "day_sample_index": 160,
+      "day_time_seconds": 32.0,
+      "cost": 0.418079,
+      "confidence": 0.288331,
+      "review": true
+    },
+    {
+      "night_sample_index": 185,
+      "night_time_seconds": 37.0,
+      "day_sample_index": 162,
+      "day_time_seconds": 32.400002,
+      "cost": 0.414139,
+      "confidence": 0.303806,
+      "review": true
+    },
+    {
+      "night_sample_index": 186,
+      "night_time_seconds": 37.200001,
+      "day_sample_index": 164,
+      "day_time_seconds": 32.799999,
+      "cost": 0.382447,
+      "confidence": 0.428278,
+      "review": false
+    },
+    {
+      "night_sample_index": 187,
+      "night_time_seconds": 37.400002,
+      "day_sample_index": 166,
+      "day_time_seconds": 33.200001,
+      "cost": 0.421235,
+      "confidence": 0.275937,
+      "review": true
+    },
+    {
+      "night_sample_index": 188,
+      "night_time_seconds": 37.599998,
+      "day_sample_index": 168,
+      "day_time_seconds": 33.599998,
+      "cost": 0.38831,
+      "confidence": 0.405249,
+      "review": false
+    },
+    {
+      "night_sample_index": 189,
+      "night_time_seconds": 37.799999,
+      "day_sample_index": 170,
+      "day_time_seconds": 34.0,
+      "cost": 0.39817,
+      "confidence": 0.366525,
+      "review": false
+    },
+    {
+      "night_sample_index": 190,
+      "night_time_seconds": 38.0,
+      "day_sample_index": 172,
+      "day_time_seconds": 34.400002,
+      "cost": 0.411127,
+      "confidence": 0.315637,
+      "review": true
+    },
+    {
+      "night_sample_index": 191,
+      "night_time_seconds": 38.200001,
+      "day_sample_index": 174,
+      "day_time_seconds": 34.799999,
+      "cost": 0.313603,
+      "confidence": 0.698661,
+      "review": false
+    },
+    {
+      "night_sample_index": 192,
+      "night_time_seconds": 38.400002,
+      "day_sample_index": 176,
+      "day_time_seconds": 35.200001,
+      "cost": 0.441775,
+      "confidence": 0.195267,
+      "review": true
+    },
+    {
+      "night_sample_index": 193,
+      "night_time_seconds": 38.599998,
+      "day_sample_index": 178,
+      "day_time_seconds": 35.599998,
+      "cost": 0.541631,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 194,
+      "night_time_seconds": 38.799999,
+      "day_sample_index": 180,
+      "day_time_seconds": 36.0,
+      "cost": 0.273917,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 196,
+      "night_time_seconds": 39.200001,
+      "day_sample_index": 181,
+      "day_time_seconds": 36.200001,
+      "cost": 0.351934,
+      "confidence": 0.548119,
+      "review": false
+    },
+    {
+      "night_sample_index": 198,
+      "night_time_seconds": 39.599998,
+      "day_sample_index": 182,
+      "day_time_seconds": 36.400002,
+      "cost": 0.432594,
+      "confidence": 0.231326,
+      "review": true
+    },
+    {
+      "night_sample_index": 200,
+      "night_time_seconds": 40.0,
+      "day_sample_index": 183,
+      "day_time_seconds": 36.599998,
+      "cost": 0.395516,
+      "confidence": 0.37695,
+      "review": false
+    },
+    {
+      "night_sample_index": 202,
+      "night_time_seconds": 40.400002,
+      "day_sample_index": 184,
+      "day_time_seconds": 36.799999,
+      "cost": 0.479329,
+      "confidence": 0.047772,
+      "review": true
+    },
+    {
+      "night_sample_index": 204,
+      "night_time_seconds": 40.799999,
+      "day_sample_index": 185,
+      "day_time_seconds": 37.0,
+      "cost": 0.409964,
+      "confidence": 0.320205,
+      "review": true
+    },
+    {
+      "night_sample_index": 206,
+      "night_time_seconds": 41.200001,
+      "day_sample_index": 186,
+      "day_time_seconds": 37.200001,
+      "cost": 0.425398,
+      "confidence": 0.259587,
+      "review": true
+    },
+    {
+      "night_sample_index": 208,
+      "night_time_seconds": 41.599998,
+      "day_sample_index": 187,
+      "day_time_seconds": 37.400002,
+      "cost": 0.509916,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 210,
+      "night_time_seconds": 42.0,
+      "day_sample_index": 188,
+      "day_time_seconds": 37.599998,
+      "cost": 0.396615,
+      "confidence": 0.372633,
+      "review": false
+    },
+    {
+      "night_sample_index": 212,
+      "night_time_seconds": 42.400002,
+      "day_sample_index": 189,
+      "day_time_seconds": 37.799999,
+      "cost": 0.414974,
+      "confidence": 0.300527,
+      "review": true
+    },
+    {
+      "night_sample_index": 214,
+      "night_time_seconds": 42.799999,
+      "day_sample_index": 190,
+      "day_time_seconds": 38.0,
+      "cost": 0.37303,
+      "confidence": 0.465262,
+      "review": false
+    },
+    {
+      "night_sample_index": 216,
+      "night_time_seconds": 43.200001,
+      "day_sample_index": 191,
+      "day_time_seconds": 38.200001,
+      "cost": 0.394946,
+      "confidence": 0.379186,
+      "review": false
+    },
+    {
+      "night_sample_index": 218,
+      "night_time_seconds": 43.599998,
+      "day_sample_index": 192,
+      "day_time_seconds": 38.400002,
+      "cost": 0.325903,
+      "confidence": 0.650353,
+      "review": false
+    },
+    {
+      "night_sample_index": 220,
+      "night_time_seconds": 44.0,
+      "day_sample_index": 193,
+      "day_time_seconds": 38.599998,
+      "cost": 0.424821,
+      "confidence": 0.261852,
+      "review": true
+    },
+    {
+      "night_sample_index": 222,
+      "night_time_seconds": 44.400002,
+      "day_sample_index": 194,
+      "day_time_seconds": 38.799999,
+      "cost": 0.368351,
+      "confidence": 0.48364,
+      "review": false
+    },
+    {
+      "night_sample_index": 224,
+      "night_time_seconds": 44.799999,
+      "day_sample_index": 195,
+      "day_time_seconds": 39.0,
+      "cost": 0.377871,
+      "confidence": 0.446251,
+      "review": false
+    },
+    {
+      "night_sample_index": 226,
+      "night_time_seconds": 45.200001,
+      "day_sample_index": 196,
+      "day_time_seconds": 39.200001,
+      "cost": 0.301722,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 228,
+      "night_time_seconds": 45.599998,
+      "day_sample_index": 197,
+      "day_time_seconds": 39.400002,
+      "cost": 0.415891,
+      "confidence": 0.296926,
+      "review": true
+    },
+    {
+      "night_sample_index": 230,
+      "night_time_seconds": 46.0,
+      "day_sample_index": 198,
+      "day_time_seconds": 39.599998,
+      "cost": 0.42824,
+      "confidence": 0.248424,
+      "review": true
+    },
+    {
+      "night_sample_index": 231,
+      "night_time_seconds": 46.200001,
+      "day_sample_index": 200,
+      "day_time_seconds": 40.0,
+      "cost": 0.408574,
+      "confidence": 0.325664,
+      "review": true
+    },
+    {
+      "night_sample_index": 232,
+      "night_time_seconds": 46.400002,
+      "day_sample_index": 202,
+      "day_time_seconds": 40.400002,
+      "cost": 0.37303,
+      "confidence": 0.465264,
+      "review": false
+    },
+    {
+      "night_sample_index": 233,
+      "night_time_seconds": 46.599998,
+      "day_sample_index": 204,
+      "day_time_seconds": 40.799999,
+      "cost": 0.370628,
+      "confidence": 0.474696,
+      "review": false
+    },
+    {
+      "night_sample_index": 234,
+      "night_time_seconds": 46.799999,
+      "day_sample_index": 206,
+      "day_time_seconds": 41.200001,
+      "cost": 0.367663,
+      "confidence": 0.486342,
+      "review": false
+    },
+    {
+      "night_sample_index": 235,
+      "night_time_seconds": 47.0,
+      "day_sample_index": 208,
+      "day_time_seconds": 41.599998,
+      "cost": 0.370496,
+      "confidence": 0.475214,
+      "review": false
+    },
+    {
+      "night_sample_index": 236,
+      "night_time_seconds": 47.200001,
+      "day_sample_index": 210,
+      "day_time_seconds": 42.0,
+      "cost": 0.394771,
+      "confidence": 0.379876,
+      "review": false
+    },
+    {
+      "night_sample_index": 237,
+      "night_time_seconds": 47.400002,
+      "day_sample_index": 212,
+      "day_time_seconds": 42.400002,
+      "cost": 0.432806,
+      "confidence": 0.23049,
+      "review": true
+    },
+    {
+      "night_sample_index": 238,
+      "night_time_seconds": 47.599998,
+      "day_sample_index": 214,
+      "day_time_seconds": 42.799999,
+      "cost": 0.378198,
+      "confidence": 0.444966,
+      "review": false
+    },
+    {
+      "night_sample_index": 240,
+      "night_time_seconds": 48.0,
+      "day_sample_index": 215,
+      "day_time_seconds": 43.0,
+      "cost": 0.413216,
+      "confidence": 0.30743,
+      "review": true
+    },
+    {
+      "night_sample_index": 242,
+      "night_time_seconds": 48.400002,
+      "day_sample_index": 216,
+      "day_time_seconds": 43.200001,
+      "cost": 0.356266,
+      "confidence": 0.531104,
+      "review": false
+    },
+    {
+      "night_sample_index": 244,
+      "night_time_seconds": 48.799999,
+      "day_sample_index": 217,
+      "day_time_seconds": 43.400002,
+      "cost": 0.387756,
+      "confidence": 0.407424,
+      "review": false
+    },
+    {
+      "night_sample_index": 246,
+      "night_time_seconds": 49.200001,
+      "day_sample_index": 218,
+      "day_time_seconds": 43.599998,
+      "cost": 0.395233,
+      "confidence": 0.378061,
+      "review": false
+    },
+    {
+      "night_sample_index": 248,
+      "night_time_seconds": 49.599998,
+      "day_sample_index": 219,
+      "day_time_seconds": 43.799999,
+      "cost": 0.462575,
+      "confidence": 0.113574,
+      "review": true
+    },
+    {
+      "night_sample_index": 250,
+      "night_time_seconds": 50.0,
+      "day_sample_index": 220,
+      "day_time_seconds": 44.0,
+      "cost": 0.42505,
+      "confidence": 0.260954,
+      "review": true
+    },
+    {
+      "night_sample_index": 252,
+      "night_time_seconds": 50.400002,
+      "day_sample_index": 221,
+      "day_time_seconds": 44.200001,
+      "cost": 0.444864,
+      "confidence": 0.183135,
+      "review": true
+    },
+    {
+      "night_sample_index": 254,
+      "night_time_seconds": 50.799999,
+      "day_sample_index": 222,
+      "day_time_seconds": 44.400002,
+      "cost": 0.382456,
+      "confidence": 0.428242,
+      "review": false
+    },
+    {
+      "night_sample_index": 255,
+      "night_time_seconds": 51.0,
+      "day_sample_index": 224,
+      "day_time_seconds": 44.799999,
+      "cost": 0.370443,
+      "confidence": 0.475423,
+      "review": false
+    },
+    {
+      "night_sample_index": 256,
+      "night_time_seconds": 51.200001,
+      "day_sample_index": 226,
+      "day_time_seconds": 45.200001,
+      "cost": 0.36654,
+      "confidence": 0.49075,
+      "review": false
+    },
+    {
+      "night_sample_index": 257,
+      "night_time_seconds": 51.400002,
+      "day_sample_index": 228,
+      "day_time_seconds": 45.599998,
+      "cost": 0.372705,
+      "confidence": 0.469877,
+      "review": false
+    },
+    {
+      "night_sample_index": 259,
+      "night_time_seconds": 51.799999,
+      "day_sample_index": 229,
+      "day_time_seconds": 45.799999,
+      "cost": 0.452397,
+      "confidence": 0.153547,
+      "review": true
+    },
+    {
+      "night_sample_index": 260,
+      "night_time_seconds": 52.0,
+      "day_sample_index": 231,
+      "day_time_seconds": 46.200001,
+      "cost": 0.447643,
+      "confidence": 0.172221,
+      "review": true
+    },
+    {
+      "night_sample_index": 262,
+      "night_time_seconds": 52.400002,
+      "day_sample_index": 232,
+      "day_time_seconds": 46.400002,
+      "cost": 0.494267,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 263,
+      "night_time_seconds": 52.599998,
+      "day_sample_index": 234,
+      "day_time_seconds": 46.799999,
+      "cost": 0.355547,
+      "confidence": 0.533929,
+      "review": false
+    },
+    {
+      "night_sample_index": 264,
+      "night_time_seconds": 52.799999,
+      "day_sample_index": 236,
+      "day_time_seconds": 47.200001,
+      "cost": 0.364426,
+      "confidence": 0.499054,
+      "review": false
+    },
+    {
+      "night_sample_index": 265,
+      "night_time_seconds": 53.0,
+      "day_sample_index": 238,
+      "day_time_seconds": 47.599998,
+      "cost": 0.310922,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 267,
+      "night_time_seconds": 53.400002,
+      "day_sample_index": 239,
+      "day_time_seconds": 47.799999,
+      "cost": 0.400659,
+      "confidence": 0.356748,
+      "review": false
+    },
+    {
+      "night_sample_index": 269,
+      "night_time_seconds": 53.799999,
+      "day_sample_index": 240,
+      "day_time_seconds": 48.0,
+      "cost": 0.373766,
+      "confidence": 0.462374,
+      "review": false
+    },
+    {
+      "night_sample_index": 271,
+      "night_time_seconds": 54.200001,
+      "day_sample_index": 241,
+      "day_time_seconds": 48.200001,
+      "cost": 0.394665,
+      "confidence": 0.380292,
+      "review": false
+    },
+    {
+      "night_sample_index": 272,
+      "night_time_seconds": 54.400002,
+      "day_sample_index": 243,
+      "day_time_seconds": 48.599998,
+      "cost": 0.339057,
+      "confidence": 0.598693,
+      "review": false
+    },
+    {
+      "night_sample_index": 274,
+      "night_time_seconds": 54.799999,
+      "day_sample_index": 244,
+      "day_time_seconds": 48.799999,
+      "cost": 0.307946,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 276,
+      "night_time_seconds": 55.200001,
+      "day_sample_index": 245,
+      "day_time_seconds": 49.0,
+      "cost": 0.377048,
+      "confidence": 0.449482,
+      "review": false
+    },
+    {
+      "night_sample_index": 278,
+      "night_time_seconds": 55.599998,
+      "day_sample_index": 246,
+      "day_time_seconds": 49.200001,
+      "cost": 0.350372,
+      "confidence": 0.554252,
+      "review": false
+    },
+    {
+      "night_sample_index": 279,
+      "night_time_seconds": 55.799999,
+      "day_sample_index": 248,
+      "day_time_seconds": 49.599998,
+      "cost": 0.31344,
+      "confidence": 0.699301,
+      "review": false
+    },
+    {
+      "night_sample_index": 281,
+      "night_time_seconds": 56.200001,
+      "day_sample_index": 249,
+      "day_time_seconds": 49.799999,
+      "cost": 0.36618,
+      "confidence": 0.492167,
+      "review": false
+    },
+    {
+      "night_sample_index": 283,
+      "night_time_seconds": 56.599998,
+      "day_sample_index": 250,
+      "day_time_seconds": 50.0,
+      "cost": 0.299448,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 285,
+      "night_time_seconds": 57.0,
+      "day_sample_index": 251,
+      "day_time_seconds": 50.200001,
+      "cost": 0.343755,
+      "confidence": 0.580241,
+      "review": false
+    },
+    {
+      "night_sample_index": 287,
+      "night_time_seconds": 57.400002,
+      "day_sample_index": 252,
+      "day_time_seconds": 50.400002,
+      "cost": 0.343418,
+      "confidence": 0.581565,
+      "review": false
+    },
+    {
+      "night_sample_index": 288,
+      "night_time_seconds": 57.599998,
+      "day_sample_index": 254,
+      "day_time_seconds": 50.799999,
+      "cost": 0.33175,
+      "confidence": 0.627392,
+      "review": false
+    },
+    {
+      "night_sample_index": 290,
+      "night_time_seconds": 58.0,
+      "day_sample_index": 255,
+      "day_time_seconds": 51.0,
+      "cost": 0.335508,
+      "confidence": 0.612632,
+      "review": false
+    },
+    {
+      "night_sample_index": 292,
+      "night_time_seconds": 58.400002,
+      "day_sample_index": 256,
+      "day_time_seconds": 51.200001,
+      "cost": 0.369787,
+      "confidence": 0.477999,
+      "review": false
+    },
+    {
+      "night_sample_index": 293,
+      "night_time_seconds": 58.599998,
+      "day_sample_index": 258,
+      "day_time_seconds": 51.599998,
+      "cost": 0.384765,
+      "confidence": 0.419172,
+      "review": false
+    },
+    {
+      "night_sample_index": 295,
+      "night_time_seconds": 59.0,
+      "day_sample_index": 259,
+      "day_time_seconds": 51.799999,
+      "cost": 0.392268,
+      "confidence": 0.389706,
+      "review": false
+    },
+    {
+      "night_sample_index": 297,
+      "night_time_seconds": 59.400002,
+      "day_sample_index": 260,
+      "day_time_seconds": 52.0,
+      "cost": 0.329588,
+      "confidence": 0.635881,
+      "review": false
+    },
+    {
+      "night_sample_index": 299,
+      "night_time_seconds": 59.799999,
+      "day_sample_index": 261,
+      "day_time_seconds": 52.200001,
+      "cost": 0.400506,
+      "confidence": 0.357349,
+      "review": false
+    },
+    {
+      "night_sample_index": 301,
+      "night_time_seconds": 60.200001,
+      "day_sample_index": 262,
+      "day_time_seconds": 52.400002,
+      "cost": 0.313959,
+      "confidence": 0.697264,
+      "review": false
+    },
+    {
+      "night_sample_index": 302,
+      "night_time_seconds": 60.400002,
+      "day_sample_index": 264,
+      "day_time_seconds": 52.799999,
+      "cost": 0.42613,
+      "confidence": 0.256713,
+      "review": true
+    },
+    {
+      "night_sample_index": 304,
+      "night_time_seconds": 60.799999,
+      "day_sample_index": 265,
+      "day_time_seconds": 53.0,
+      "cost": 0.474008,
+      "confidence": 0.068671,
+      "review": true
+    },
+    {
+      "night_sample_index": 306,
+      "night_time_seconds": 61.200001,
+      "day_sample_index": 266,
+      "day_time_seconds": 53.200001,
+      "cost": 0.394379,
+      "confidence": 0.381414,
+      "review": false
+    },
+    {
+      "night_sample_index": 308,
+      "night_time_seconds": 61.599998,
+      "day_sample_index": 267,
+      "day_time_seconds": 53.400002,
+      "cost": 0.476283,
+      "confidence": 0.059735,
+      "review": true
+    },
+    {
+      "night_sample_index": 310,
+      "night_time_seconds": 62.0,
+      "day_sample_index": 268,
+      "day_time_seconds": 53.599998,
+      "cost": 0.406432,
+      "confidence": 0.334078,
+      "review": true
+    },
+    {
+      "night_sample_index": 312,
+      "night_time_seconds": 62.400002,
+      "day_sample_index": 269,
+      "day_time_seconds": 53.799999,
+      "cost": 0.313144,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 313,
+      "night_time_seconds": 62.599998,
+      "day_sample_index": 271,
+      "day_time_seconds": 54.200001,
+      "cost": 0.324816,
+      "confidence": 0.654624,
+      "review": false
+    },
+    {
+      "night_sample_index": 315,
+      "night_time_seconds": 63.0,
+      "day_sample_index": 272,
+      "day_time_seconds": 54.400002,
+      "cost": 0.378511,
+      "confidence": 0.443735,
+      "review": false
+    },
+    {
+      "night_sample_index": 317,
+      "night_time_seconds": 63.400002,
+      "day_sample_index": 273,
+      "day_time_seconds": 54.599998,
+      "cost": 0.417914,
+      "confidence": 0.28898,
+      "review": true
+    },
+    {
+      "night_sample_index": 319,
+      "night_time_seconds": 63.799999,
+      "day_sample_index": 274,
+      "day_time_seconds": 54.799999,
+      "cost": 0.439677,
+      "confidence": 0.203506,
+      "review": true
+    },
+    {
+      "night_sample_index": 321,
+      "night_time_seconds": 64.199997,
+      "day_sample_index": 275,
+      "day_time_seconds": 55.0,
+      "cost": 0.362446,
+      "confidence": 0.506833,
+      "review": false
+    },
+    {
+      "night_sample_index": 323,
+      "night_time_seconds": 64.599998,
+      "day_sample_index": 276,
+      "day_time_seconds": 55.200001,
+      "cost": 0.386866,
+      "confidence": 0.410922,
+      "review": false
+    },
+    {
+      "night_sample_index": 325,
+      "night_time_seconds": 65.0,
+      "day_sample_index": 277,
+      "day_time_seconds": 55.400002,
+      "cost": 0.248973,
+      "confidence": 0.70498,
+      "review": false
+    },
+    {
+      "night_sample_index": 326,
+      "night_time_seconds": 65.199997,
+      "day_sample_index": 279,
+      "day_time_seconds": 55.799999,
+      "cost": 0.418484,
+      "confidence": 0.286741,
+      "review": true
+    },
+    {
+      "night_sample_index": 328,
+      "night_time_seconds": 65.599998,
+      "day_sample_index": 280,
+      "day_time_seconds": 56.0,
+      "cost": 0.427836,
+      "confidence": 0.25001,
+      "review": true
+    },
+    {
+      "night_sample_index": 329,
+      "night_time_seconds": 65.800003,
+      "day_sample_index": 282,
+      "day_time_seconds": 56.400002,
+      "cost": 0.477903,
+      "confidence": 0.053372,
+      "review": true
+    },
+    {
+      "night_sample_index": 330,
+      "night_time_seconds": 66.0,
+      "day_sample_index": 284,
+      "day_time_seconds": 56.799999,
+      "cost": 0.384235,
+      "confidence": 0.421253,
+      "review": false
+    },
+    {
+      "night_sample_index": 331,
+      "night_time_seconds": 66.199997,
+      "day_sample_index": 286,
+      "day_time_seconds": 57.200001,
+      "cost": 0.345133,
+      "confidence": 0.57483,
+      "review": false
+    },
+    {
+      "night_sample_index": 332,
+      "night_time_seconds": 66.400002,
+      "day_sample_index": 288,
+      "day_time_seconds": 57.599998,
+      "cost": 0.392652,
+      "confidence": 0.388198,
+      "review": false
+    },
+    {
+      "night_sample_index": 333,
+      "night_time_seconds": 66.599998,
+      "day_sample_index": 290,
+      "day_time_seconds": 58.0,
+      "cost": 0.335392,
+      "confidence": 0.613088,
+      "review": false
+    },
+    {
+      "night_sample_index": 334,
+      "night_time_seconds": 66.800003,
+      "day_sample_index": 292,
+      "day_time_seconds": 58.400002,
+      "cost": 0.433681,
+      "confidence": 0.227056,
+      "review": true
+    },
+    {
+      "night_sample_index": 335,
+      "night_time_seconds": 67.0,
+      "day_sample_index": 294,
+      "day_time_seconds": 58.799999,
+      "cost": 0.452778,
+      "confidence": 0.15205,
+      "review": true
+    },
+    {
+      "night_sample_index": 336,
+      "night_time_seconds": 67.199997,
+      "day_sample_index": 296,
+      "day_time_seconds": 59.200001,
+      "cost": 0.44707,
+      "confidence": 0.174469,
+      "review": true
+    },
+    {
+      "night_sample_index": 337,
+      "night_time_seconds": 67.400002,
+      "day_sample_index": 298,
+      "day_time_seconds": 59.599998,
+      "cost": 0.329018,
+      "confidence": 0.638122,
+      "review": false
+    },
+    {
+      "night_sample_index": 339,
+      "night_time_seconds": 67.800003,
+      "day_sample_index": 299,
+      "day_time_seconds": 59.799999,
+      "cost": 0.401181,
+      "confidence": 0.354699,
+      "review": false
+    },
+    {
+      "night_sample_index": 341,
+      "night_time_seconds": 68.199997,
+      "day_sample_index": 300,
+      "day_time_seconds": 60.0,
+      "cost": 0.406875,
+      "confidence": 0.332337,
+      "review": true
+    },
+    {
+      "night_sample_index": 342,
+      "night_time_seconds": 68.400002,
+      "day_sample_index": 302,
+      "day_time_seconds": 60.400002,
+      "cost": 0.376852,
+      "confidence": 0.450251,
+      "review": false
+    },
+    {
+      "night_sample_index": 344,
+      "night_time_seconds": 68.800003,
+      "day_sample_index": 303,
+      "day_time_seconds": 60.599998,
+      "cost": 0.359769,
+      "confidence": 0.517344,
+      "review": false
+    },
+    {
+      "night_sample_index": 346,
+      "night_time_seconds": 69.199997,
+      "day_sample_index": 304,
+      "day_time_seconds": 60.799999,
+      "cost": 0.360494,
+      "confidence": 0.514498,
+      "review": false
+    },
+    {
+      "night_sample_index": 348,
+      "night_time_seconds": 69.599998,
+      "day_sample_index": 305,
+      "day_time_seconds": 61.0,
+      "cost": 0.405719,
+      "confidence": 0.336875,
+      "review": true
+    },
+    {
+      "night_sample_index": 350,
+      "night_time_seconds": 70.0,
+      "day_sample_index": 306,
+      "day_time_seconds": 61.200001,
+      "cost": 0.347041,
+      "confidence": 0.567333,
+      "review": false
+    },
+    {
+      "night_sample_index": 352,
+      "night_time_seconds": 70.400002,
+      "day_sample_index": 307,
+      "day_time_seconds": 61.400002,
+      "cost": 0.361656,
+      "confidence": 0.509933,
+      "review": false
+    },
+    {
+      "night_sample_index": 354,
+      "night_time_seconds": 70.800003,
+      "day_sample_index": 308,
+      "day_time_seconds": 61.599998,
+      "cost": 0.392932,
+      "confidence": 0.387097,
+      "review": false
+    },
+    {
+      "night_sample_index": 356,
+      "night_time_seconds": 71.199997,
+      "day_sample_index": 309,
+      "day_time_seconds": 61.799999,
+      "cost": 0.358645,
+      "confidence": 0.52176,
+      "review": false
+    },
+    {
+      "night_sample_index": 358,
+      "night_time_seconds": 71.599998,
+      "day_sample_index": 310,
+      "day_time_seconds": 62.0,
+      "cost": 0.383249,
+      "confidence": 0.425128,
+      "review": false
+    },
+    {
+      "night_sample_index": 360,
+      "night_time_seconds": 72.0,
+      "day_sample_index": 311,
+      "day_time_seconds": 62.200001,
+      "cost": 0.40698,
+      "confidence": 0.331922,
+      "review": true
+    },
+    {
+      "night_sample_index": 362,
+      "night_time_seconds": 72.400002,
+      "day_sample_index": 312,
+      "day_time_seconds": 62.400002,
+      "cost": 0.376869,
+      "confidence": 0.450185,
+      "review": false
+    },
+    {
+      "night_sample_index": 363,
+      "night_time_seconds": 72.599998,
+      "day_sample_index": 314,
+      "day_time_seconds": 62.799999,
+      "cost": 0.349534,
+      "confidence": 0.557542,
+      "review": false
+    },
+    {
+      "night_sample_index": 365,
+      "night_time_seconds": 73.0,
+      "day_sample_index": 315,
+      "day_time_seconds": 63.0,
+      "cost": 0.422581,
+      "confidence": 0.270649,
+      "review": true
+    },
+    {
+      "night_sample_index": 367,
+      "night_time_seconds": 73.400002,
+      "day_sample_index": 316,
+      "day_time_seconds": 63.200001,
+      "cost": 0.362958,
+      "confidence": 0.504821,
+      "review": false
+    },
+    {
+      "night_sample_index": 369,
+      "night_time_seconds": 73.800003,
+      "day_sample_index": 317,
+      "day_time_seconds": 63.400002,
+      "cost": 0.414707,
+      "confidence": 0.301577,
+      "review": true
+    },
+    {
+      "night_sample_index": 371,
+      "night_time_seconds": 74.199997,
+      "day_sample_index": 318,
+      "day_time_seconds": 63.599998,
+      "cost": 0.431149,
+      "confidence": 0.237,
+      "review": true
+    },
+    {
+      "night_sample_index": 373,
+      "night_time_seconds": 74.599998,
+      "day_sample_index": 319,
+      "day_time_seconds": 63.799999,
+      "cost": 0.402274,
+      "confidence": 0.350405,
+      "review": false
+    },
+    {
+      "night_sample_index": 375,
+      "night_time_seconds": 75.0,
+      "day_sample_index": 320,
+      "day_time_seconds": 64.0,
+      "cost": 0.368883,
+      "confidence": 0.48155,
+      "review": false
+    },
+    {
+      "night_sample_index": 377,
+      "night_time_seconds": 75.400002,
+      "day_sample_index": 321,
+      "day_time_seconds": 64.199997,
+      "cost": 0.389777,
+      "confidence": 0.399487,
+      "review": false
+    },
+    {
+      "night_sample_index": 379,
+      "night_time_seconds": 75.800003,
+      "day_sample_index": 322,
+      "day_time_seconds": 64.400002,
+      "cost": 0.35837,
+      "confidence": 0.52284,
+      "review": false
+    },
+    {
+      "night_sample_index": 381,
+      "night_time_seconds": 76.199997,
+      "day_sample_index": 323,
+      "day_time_seconds": 64.599998,
+      "cost": 0.384002,
+      "confidence": 0.422171,
+      "review": false
+    },
+    {
+      "night_sample_index": 383,
+      "night_time_seconds": 76.599998,
+      "day_sample_index": 324,
+      "day_time_seconds": 64.800003,
+      "cost": 0.373978,
+      "confidence": 0.461539,
+      "review": false
+    },
+    {
+      "night_sample_index": 385,
+      "night_time_seconds": 77.0,
+      "day_sample_index": 325,
+      "day_time_seconds": 65.0,
+      "cost": 0.421798,
+      "confidence": 0.273725,
+      "review": true
+    },
+    {
+      "night_sample_index": 387,
+      "night_time_seconds": 77.400002,
+      "day_sample_index": 326,
+      "day_time_seconds": 65.199997,
+      "cost": 0.382788,
+      "confidence": 0.426938,
+      "review": false
+    },
+    {
+      "night_sample_index": 389,
+      "night_time_seconds": 77.800003,
+      "day_sample_index": 327,
+      "day_time_seconds": 65.400002,
+      "cost": 0.381679,
+      "confidence": 0.431293,
+      "review": false
+    },
+    {
+      "night_sample_index": 391,
+      "night_time_seconds": 78.199997,
+      "day_sample_index": 328,
+      "day_time_seconds": 65.599998,
+      "cost": 0.377416,
+      "confidence": 0.448036,
+      "review": false
+    },
+    {
+      "night_sample_index": 393,
+      "night_time_seconds": 78.599998,
+      "day_sample_index": 329,
+      "day_time_seconds": 65.800003,
+      "cost": 0.402257,
+      "confidence": 0.350474,
+      "review": false
+    },
+    {
+      "night_sample_index": 395,
+      "night_time_seconds": 79.0,
+      "day_sample_index": 330,
+      "day_time_seconds": 66.0,
+      "cost": 0.348186,
+      "confidence": 0.562836,
+      "review": false
+    },
+    {
+      "night_sample_index": 397,
+      "night_time_seconds": 79.400002,
+      "day_sample_index": 331,
+      "day_time_seconds": 66.199997,
+      "cost": 0.408818,
+      "confidence": 0.324706,
+      "review": true
+    },
+    {
+      "night_sample_index": 399,
+      "night_time_seconds": 79.800003,
+      "day_sample_index": 332,
+      "day_time_seconds": 66.400002,
+      "cost": 0.372932,
+      "confidence": 0.465648,
+      "review": false
+    },
+    {
+      "night_sample_index": 401,
+      "night_time_seconds": 80.199997,
+      "day_sample_index": 333,
+      "day_time_seconds": 66.599998,
+      "cost": 0.383026,
+      "confidence": 0.426004,
+      "review": false
+    },
+    {
+      "night_sample_index": 403,
+      "night_time_seconds": 80.599998,
+      "day_sample_index": 334,
+      "day_time_seconds": 66.800003,
+      "cost": 0.383364,
+      "confidence": 0.424674,
+      "review": false
+    },
+    {
+      "night_sample_index": 404,
+      "night_time_seconds": 80.800003,
+      "day_sample_index": 336,
+      "day_time_seconds": 67.199997,
+      "cost": 0.372278,
+      "confidence": 0.468217,
+      "review": false
+    },
+    {
+      "night_sample_index": 406,
+      "night_time_seconds": 81.199997,
+      "day_sample_index": 337,
+      "day_time_seconds": 67.400002,
+      "cost": 0.418655,
+      "confidence": 0.286072,
+      "review": true
+    },
+    {
+      "night_sample_index": 407,
+      "night_time_seconds": 81.400002,
+      "day_sample_index": 339,
+      "day_time_seconds": 67.800003,
+      "cost": 0.399546,
+      "confidence": 0.361119,
+      "review": false
+    },
+    {
+      "night_sample_index": 409,
+      "night_time_seconds": 81.800003,
+      "day_sample_index": 340,
+      "day_time_seconds": 68.0,
+      "cost": 0.379937,
+      "confidence": 0.438137,
+      "review": false
+    },
+    {
+      "night_sample_index": 411,
+      "night_time_seconds": 82.199997,
+      "day_sample_index": 341,
+      "day_time_seconds": 68.199997,
+      "cost": 0.392006,
+      "confidence": 0.390733,
+      "review": false
+    },
+    {
+      "night_sample_index": 413,
+      "night_time_seconds": 82.599998,
+      "day_sample_index": 342,
+      "day_time_seconds": 68.400002,
+      "cost": 0.368004,
+      "confidence": 0.485003,
+      "review": false
+    },
+    {
+      "night_sample_index": 415,
+      "night_time_seconds": 83.0,
+      "day_sample_index": 343,
+      "day_time_seconds": 68.599998,
+      "cost": 0.397544,
+      "confidence": 0.368982,
+      "review": false
+    },
+    {
+      "night_sample_index": 417,
+      "night_time_seconds": 83.400002,
+      "day_sample_index": 344,
+      "day_time_seconds": 68.800003,
+      "cost": 0.371821,
+      "confidence": 0.470012,
+      "review": false
+    },
+    {
+      "night_sample_index": 419,
+      "night_time_seconds": 83.800003,
+      "day_sample_index": 345,
+      "day_time_seconds": 69.0,
+      "cost": 0.397137,
+      "confidence": 0.37058,
+      "review": false
+    },
+    {
+      "night_sample_index": 421,
+      "night_time_seconds": 84.199997,
+      "day_sample_index": 346,
+      "day_time_seconds": 69.199997,
+      "cost": 0.421478,
+      "confidence": 0.274982,
+      "review": true
+    },
+    {
+      "night_sample_index": 423,
+      "night_time_seconds": 84.599998,
+      "day_sample_index": 347,
+      "day_time_seconds": 69.400002,
+      "cost": 0.366816,
+      "confidence": 0.489669,
+      "review": false
+    },
+    {
+      "night_sample_index": 425,
+      "night_time_seconds": 85.0,
+      "day_sample_index": 348,
+      "day_time_seconds": 69.599998,
+      "cost": 0.378715,
+      "confidence": 0.442936,
+      "review": false
+    },
+    {
+      "night_sample_index": 427,
+      "night_time_seconds": 85.400002,
+      "day_sample_index": 349,
+      "day_time_seconds": 69.800003,
+      "cost": 0.351509,
+      "confidence": 0.549786,
+      "review": false
+    },
+    {
+      "night_sample_index": 429,
+      "night_time_seconds": 85.800003,
+      "day_sample_index": 350,
+      "day_time_seconds": 70.0,
+      "cost": 0.363055,
+      "confidence": 0.504438,
+      "review": false
+    },
+    {
+      "night_sample_index": 430,
+      "night_time_seconds": 86.0,
+      "day_sample_index": 352,
+      "day_time_seconds": 70.400002,
+      "cost": 0.351026,
+      "confidence": 0.551685,
+      "review": false
+    },
+    {
+      "night_sample_index": 431,
+      "night_time_seconds": 86.199997,
+      "day_sample_index": 354,
+      "day_time_seconds": 70.800003,
+      "cost": 0.356158,
+      "confidence": 0.531526,
+      "review": false
+    },
+    {
+      "night_sample_index": 432,
+      "night_time_seconds": 86.400002,
+      "day_sample_index": 356,
+      "day_time_seconds": 71.199997,
+      "cost": 0.388044,
+      "confidence": 0.406293,
+      "review": false
+    },
+    {
+      "night_sample_index": 433,
+      "night_time_seconds": 86.599998,
+      "day_sample_index": 358,
+      "day_time_seconds": 71.599998,
+      "cost": 0.360878,
+      "confidence": 0.512989,
+      "review": false
+    },
+    {
+      "night_sample_index": 434,
+      "night_time_seconds": 86.800003,
+      "day_sample_index": 360,
+      "day_time_seconds": 72.0,
+      "cost": 0.365106,
+      "confidence": 0.496383,
+      "review": false
+    },
+    {
+      "night_sample_index": 436,
+      "night_time_seconds": 87.199997,
+      "day_sample_index": 361,
+      "day_time_seconds": 72.199997,
+      "cost": 0.397181,
+      "confidence": 0.370411,
+      "review": false
+    },
+    {
+      "night_sample_index": 437,
+      "night_time_seconds": 87.400002,
+      "day_sample_index": 363,
+      "day_time_seconds": 72.599998,
+      "cost": 0.342093,
+      "confidence": 0.586769,
+      "review": false
+    },
+    {
+      "night_sample_index": 439,
+      "night_time_seconds": 87.800003,
+      "day_sample_index": 364,
+      "day_time_seconds": 72.800003,
+      "cost": 0.416208,
+      "confidence": 0.29568,
+      "review": true
+    },
+    {
+      "night_sample_index": 440,
+      "night_time_seconds": 88.0,
+      "day_sample_index": 366,
+      "day_time_seconds": 73.199997,
+      "cost": 0.393738,
+      "confidence": 0.383933,
+      "review": false
+    },
+    {
+      "night_sample_index": 442,
+      "night_time_seconds": 88.400002,
+      "day_sample_index": 367,
+      "day_time_seconds": 73.400002,
+      "cost": 0.41225,
+      "confidence": 0.311227,
+      "review": true
+    },
+    {
+      "night_sample_index": 444,
+      "night_time_seconds": 88.800003,
+      "day_sample_index": 368,
+      "day_time_seconds": 73.599998,
+      "cost": 0.256081,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 446,
+      "night_time_seconds": 89.199997,
+      "day_sample_index": 369,
+      "day_time_seconds": 73.800003,
+      "cost": 0.329687,
+      "confidence": 0.635494,
+      "review": false
+    },
+    {
+      "night_sample_index": 448,
+      "night_time_seconds": 89.599998,
+      "day_sample_index": 370,
+      "day_time_seconds": 74.0,
+      "cost": 0.298092,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 450,
+      "night_time_seconds": 90.0,
+      "day_sample_index": 371,
+      "day_time_seconds": 74.199997,
+      "cost": 0.403727,
+      "confidence": 0.344698,
+      "review": true
+    },
+    {
+      "night_sample_index": 452,
+      "night_time_seconds": 90.400002,
+      "day_sample_index": 372,
+      "day_time_seconds": 74.400002,
+      "cost": 0.430208,
+      "confidence": 0.240694,
+      "review": true
+    },
+    {
+      "night_sample_index": 454,
+      "night_time_seconds": 90.800003,
+      "day_sample_index": 373,
+      "day_time_seconds": 74.599998,
+      "cost": 0.48872,
+      "confidence": 0.010889,
+      "review": true
+    },
+    {
+      "night_sample_index": 456,
+      "night_time_seconds": 91.199997,
+      "day_sample_index": 374,
+      "day_time_seconds": 74.800003,
+      "cost": 0.372142,
+      "confidence": 0.46875,
+      "review": false
+    },
+    {
+      "night_sample_index": 458,
+      "night_time_seconds": 91.599998,
+      "day_sample_index": 375,
+      "day_time_seconds": 75.0,
+      "cost": 0.431585,
+      "confidence": 0.235289,
+      "review": true
+    },
+    {
+      "night_sample_index": 460,
+      "night_time_seconds": 92.0,
+      "day_sample_index": 376,
+      "day_time_seconds": 75.199997,
+      "cost": 0.432211,
+      "confidence": 0.23283,
+      "review": true
+    },
+    {
+      "night_sample_index": 462,
+      "night_time_seconds": 92.400002,
+      "day_sample_index": 377,
+      "day_time_seconds": 75.400002,
+      "cost": 0.423974,
+      "confidence": 0.265178,
+      "review": true
+    },
+    {
+      "night_sample_index": 464,
+      "night_time_seconds": 92.800003,
+      "day_sample_index": 378,
+      "day_time_seconds": 75.599998,
+      "cost": 0.479489,
+      "confidence": 0.047142,
+      "review": true
+    },
+    {
+      "night_sample_index": 466,
+      "night_time_seconds": 93.199997,
+      "day_sample_index": 379,
+      "day_time_seconds": 75.800003,
+      "cost": 0.441231,
+      "confidence": 0.197403,
+      "review": true
+    },
+    {
+      "night_sample_index": 468,
+      "night_time_seconds": 93.599998,
+      "day_sample_index": 380,
+      "day_time_seconds": 76.0,
+      "cost": 0.403508,
+      "confidence": 0.34556,
+      "review": true
+    },
+    {
+      "night_sample_index": 470,
+      "night_time_seconds": 94.0,
+      "day_sample_index": 381,
+      "day_time_seconds": 76.199997,
+      "cost": 0.471732,
+      "confidence": 0.077611,
+      "review": true
+    },
+    {
+      "night_sample_index": 472,
+      "night_time_seconds": 94.400002,
+      "day_sample_index": 382,
+      "day_time_seconds": 76.400002,
+      "cost": 0.392434,
+      "confidence": 0.389053,
+      "review": false
+    },
+    {
+      "night_sample_index": 474,
+      "night_time_seconds": 94.800003,
+      "day_sample_index": 383,
+      "day_time_seconds": 76.599998,
+      "cost": 0.413199,
+      "confidence": 0.307498,
+      "review": true
+    },
+    {
+      "night_sample_index": 476,
+      "night_time_seconds": 95.199997,
+      "day_sample_index": 384,
+      "day_time_seconds": 76.800003,
+      "cost": 0.467695,
+      "confidence": 0.093465,
+      "review": true
+    },
+    {
+      "night_sample_index": 478,
+      "night_time_seconds": 95.599998,
+      "day_sample_index": 385,
+      "day_time_seconds": 77.0,
+      "cost": 0.4472,
+      "confidence": 0.173959,
+      "review": true
+    },
+    {
+      "night_sample_index": 480,
+      "night_time_seconds": 96.0,
+      "day_sample_index": 386,
+      "day_time_seconds": 77.199997,
+      "cost": 0.449804,
+      "confidence": 0.16373,
+      "review": true
+    },
+    {
+      "night_sample_index": 482,
+      "night_time_seconds": 96.400002,
+      "day_sample_index": 387,
+      "day_time_seconds": 77.400002,
+      "cost": 0.461931,
+      "confidence": 0.116103,
+      "review": true
+    },
+    {
+      "night_sample_index": 484,
+      "night_time_seconds": 96.800003,
+      "day_sample_index": 388,
+      "day_time_seconds": 77.599998,
+      "cost": 0.444929,
+      "confidence": 0.182879,
+      "review": true
+    },
+    {
+      "night_sample_index": 486,
+      "night_time_seconds": 97.199997,
+      "day_sample_index": 389,
+      "day_time_seconds": 77.800003,
+      "cost": 0.476421,
+      "confidence": 0.059194,
+      "review": true
+    },
+    {
+      "night_sample_index": 488,
+      "night_time_seconds": 97.599998,
+      "day_sample_index": 390,
+      "day_time_seconds": 78.0,
+      "cost": 0.416914,
+      "confidence": 0.292907,
+      "review": true
+    },
+    {
+      "night_sample_index": 490,
+      "night_time_seconds": 98.0,
+      "day_sample_index": 391,
+      "day_time_seconds": 78.199997,
+      "cost": 0.468022,
+      "confidence": 0.092179,
+      "review": true
+    },
+    {
+      "night_sample_index": 492,
+      "night_time_seconds": 98.400002,
+      "day_sample_index": 392,
+      "day_time_seconds": 78.400002,
+      "cost": 0.399911,
+      "confidence": 0.359688,
+      "review": false
+    },
+    {
+      "night_sample_index": 494,
+      "night_time_seconds": 98.800003,
+      "day_sample_index": 393,
+      "day_time_seconds": 78.599998,
+      "cost": 0.428827,
+      "confidence": 0.246118,
+      "review": true
+    },
+    {
+      "night_sample_index": 496,
+      "night_time_seconds": 99.199997,
+      "day_sample_index": 394,
+      "day_time_seconds": 78.800003,
+      "cost": 0.367272,
+      "confidence": 0.487878,
+      "review": false
+    },
+    {
+      "night_sample_index": 498,
+      "night_time_seconds": 99.599998,
+      "day_sample_index": 395,
+      "day_time_seconds": 79.0,
+      "cost": 0.400023,
+      "confidence": 0.359248,
+      "review": false
+    },
+    {
+      "night_sample_index": 500,
+      "night_time_seconds": 100.0,
+      "day_sample_index": 396,
+      "day_time_seconds": 79.199997,
+      "cost": 0.432166,
+      "confidence": 0.233005,
+      "review": true
+    },
+    {
+      "night_sample_index": 502,
+      "night_time_seconds": 100.400002,
+      "day_sample_index": 397,
+      "day_time_seconds": 79.400002,
+      "cost": 0.447485,
+      "confidence": 0.17284,
+      "review": true
+    },
+    {
+      "night_sample_index": 504,
+      "night_time_seconds": 100.800003,
+      "day_sample_index": 398,
+      "day_time_seconds": 79.599998,
+      "cost": 0.481191,
+      "confidence": 0.040458,
+      "review": true
+    },
+    {
+      "night_sample_index": 506,
+      "night_time_seconds": 101.199997,
+      "day_sample_index": 399,
+      "day_time_seconds": 79.800003,
+      "cost": 0.389031,
+      "confidence": 0.402419,
+      "review": false
+    },
+    {
+      "night_sample_index": 508,
+      "night_time_seconds": 101.599998,
+      "day_sample_index": 400,
+      "day_time_seconds": 80.0,
+      "cost": 0.452636,
+      "confidence": 0.15261,
+      "review": true
+    },
+    {
+      "night_sample_index": 510,
+      "night_time_seconds": 102.0,
+      "day_sample_index": 401,
+      "day_time_seconds": 80.199997,
+      "cost": 0.520525,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 512,
+      "night_time_seconds": 102.400002,
+      "day_sample_index": 402,
+      "day_time_seconds": 80.400002,
+      "cost": 0.371516,
+      "confidence": 0.471208,
+      "review": false
+    },
+    {
+      "night_sample_index": 514,
+      "night_time_seconds": 102.800003,
+      "day_sample_index": 403,
+      "day_time_seconds": 80.599998,
+      "cost": 0.42644,
+      "confidence": 0.255494,
+      "review": true
+    },
+    {
+      "night_sample_index": 516,
+      "night_time_seconds": 103.199997,
+      "day_sample_index": 404,
+      "day_time_seconds": 80.800003,
+      "cost": 0.336744,
+      "confidence": 0.607776,
+      "review": false
+    },
+    {
+      "night_sample_index": 518,
+      "night_time_seconds": 103.599998,
+      "day_sample_index": 405,
+      "day_time_seconds": 81.0,
+      "cost": 0.402479,
+      "confidence": 0.3496,
+      "review": true
+    },
+    {
+      "night_sample_index": 520,
+      "night_time_seconds": 104.0,
+      "day_sample_index": 406,
+      "day_time_seconds": 81.199997,
+      "cost": 0.357346,
+      "confidence": 0.526861,
+      "review": false
+    },
+    {
+      "night_sample_index": 522,
+      "night_time_seconds": 104.400002,
+      "day_sample_index": 407,
+      "day_time_seconds": 81.400002,
+      "cost": 0.486885,
+      "confidence": 0.018096,
+      "review": true
+    },
+    {
+      "night_sample_index": 524,
+      "night_time_seconds": 104.800003,
+      "day_sample_index": 408,
+      "day_time_seconds": 81.599998,
+      "cost": 0.354256,
+      "confidence": 0.538996,
+      "review": false
+    },
+    {
+      "night_sample_index": 526,
+      "night_time_seconds": 105.199997,
+      "day_sample_index": 409,
+      "day_time_seconds": 81.800003,
+      "cost": 0.442212,
+      "confidence": 0.193551,
+      "review": true
+    },
+    {
+      "night_sample_index": 528,
+      "night_time_seconds": 105.599998,
+      "day_sample_index": 410,
+      "day_time_seconds": 82.0,
+      "cost": 0.433133,
+      "confidence": 0.229207,
+      "review": true
+    },
+    {
+      "night_sample_index": 530,
+      "night_time_seconds": 106.0,
+      "day_sample_index": 411,
+      "day_time_seconds": 82.199997,
+      "cost": 0.431839,
+      "confidence": 0.234288,
+      "review": true
+    },
+    {
+      "night_sample_index": 532,
+      "night_time_seconds": 106.400002,
+      "day_sample_index": 412,
+      "day_time_seconds": 82.400002,
+      "cost": 0.410796,
+      "confidence": 0.316936,
+      "review": true
+    },
+    {
+      "night_sample_index": 534,
+      "night_time_seconds": 106.800003,
+      "day_sample_index": 413,
+      "day_time_seconds": 82.599998,
+      "cost": 0.467179,
+      "confidence": 0.095492,
+      "review": true
+    },
+    {
+      "night_sample_index": 536,
+      "night_time_seconds": 107.199997,
+      "day_sample_index": 414,
+      "day_time_seconds": 82.800003,
+      "cost": 0.351572,
+      "confidence": 0.549541,
+      "review": false
+    },
+    {
+      "night_sample_index": 538,
+      "night_time_seconds": 107.599998,
+      "day_sample_index": 415,
+      "day_time_seconds": 83.0,
+      "cost": 0.425631,
+      "confidence": 0.258672,
+      "review": true
+    },
+    {
+      "night_sample_index": 540,
+      "night_time_seconds": 108.0,
+      "day_sample_index": 416,
+      "day_time_seconds": 83.199997,
+      "cost": 0.398294,
+      "confidence": 0.366038,
+      "review": false
+    },
+    {
+      "night_sample_index": 541,
+      "night_time_seconds": 108.199997,
+      "day_sample_index": 418,
+      "day_time_seconds": 83.599998,
+      "cost": 0.400548,
+      "confidence": 0.357184,
+      "review": false
+    },
+    {
+      "night_sample_index": 543,
+      "night_time_seconds": 108.599998,
+      "day_sample_index": 419,
+      "day_time_seconds": 83.800003,
+      "cost": 0.39178,
+      "confidence": 0.391623,
+      "review": false
+    },
+    {
+      "night_sample_index": 545,
+      "night_time_seconds": 109.0,
+      "day_sample_index": 420,
+      "day_time_seconds": 84.0,
+      "cost": 0.405203,
+      "confidence": 0.338903,
+      "review": true
+    },
+    {
+      "night_sample_index": 546,
+      "night_time_seconds": 109.199997,
+      "day_sample_index": 422,
+      "day_time_seconds": 84.400002,
+      "cost": 0.403374,
+      "confidence": 0.346084,
+      "review": true
+    },
+    {
+      "night_sample_index": 548,
+      "night_time_seconds": 109.599998,
+      "day_sample_index": 423,
+      "day_time_seconds": 84.599998,
+      "cost": 0.3988,
+      "confidence": 0.364049,
+      "review": false
+    },
+    {
+      "night_sample_index": 550,
+      "night_time_seconds": 110.0,
+      "day_sample_index": 424,
+      "day_time_seconds": 84.800003,
+      "cost": 0.380115,
+      "confidence": 0.437438,
+      "review": false
+    },
+    {
+      "night_sample_index": 552,
+      "night_time_seconds": 110.400002,
+      "day_sample_index": 425,
+      "day_time_seconds": 85.0,
+      "cost": 0.352895,
+      "confidence": 0.544341,
+      "review": false
+    },
+    {
+      "night_sample_index": 554,
+      "night_time_seconds": 110.800003,
+      "day_sample_index": 426,
+      "day_time_seconds": 85.199997,
+      "cost": 0.343834,
+      "confidence": 0.579932,
+      "review": false
+    },
+    {
+      "night_sample_index": 555,
+      "night_time_seconds": 111.0,
+      "day_sample_index": 428,
+      "day_time_seconds": 85.599998,
+      "cost": 0.49538,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 557,
+      "night_time_seconds": 111.400002,
+      "day_sample_index": 429,
+      "day_time_seconds": 85.800003,
+      "cost": 0.416335,
+      "confidence": 0.295183,
+      "review": true
+    },
+    {
+      "night_sample_index": 559,
+      "night_time_seconds": 111.800003,
+      "day_sample_index": 430,
+      "day_time_seconds": 86.0,
+      "cost": 0.383831,
+      "confidence": 0.42284,
+      "review": false
+    },
+    {
+      "night_sample_index": 561,
+      "night_time_seconds": 112.199997,
+      "day_sample_index": 431,
+      "day_time_seconds": 86.199997,
+      "cost": 0.428926,
+      "confidence": 0.24573,
+      "review": true
+    },
+    {
+      "night_sample_index": 563,
+      "night_time_seconds": 112.599998,
+      "day_sample_index": 432,
+      "day_time_seconds": 86.400002,
+      "cost": 0.358698,
+      "confidence": 0.52155,
+      "review": false
+    },
+    {
+      "night_sample_index": 565,
+      "night_time_seconds": 113.0,
+      "day_sample_index": 433,
+      "day_time_seconds": 86.599998,
+      "cost": 0.417878,
+      "confidence": 0.28912,
+      "review": true
+    },
+    {
+      "night_sample_index": 567,
+      "night_time_seconds": 113.400002,
+      "day_sample_index": 434,
+      "day_time_seconds": 86.800003,
+      "cost": 0.361717,
+      "confidence": 0.509696,
+      "review": false
+    },
+    {
+      "night_sample_index": 569,
+      "night_time_seconds": 113.800003,
+      "day_sample_index": 435,
+      "day_time_seconds": 87.0,
+      "cost": 0.479874,
+      "confidence": 0.045633,
+      "review": true
+    },
+    {
+      "night_sample_index": 571,
+      "night_time_seconds": 114.199997,
+      "day_sample_index": 436,
+      "day_time_seconds": 87.199997,
+      "cost": 0.349802,
+      "confidence": 0.556489,
+      "review": false
+    },
+    {
+      "night_sample_index": 573,
+      "night_time_seconds": 114.599998,
+      "day_sample_index": 437,
+      "day_time_seconds": 87.400002,
+      "cost": 0.477309,
+      "confidence": 0.055703,
+      "review": true
+    },
+    {
+      "night_sample_index": 575,
+      "night_time_seconds": 115.0,
+      "day_sample_index": 438,
+      "day_time_seconds": 87.599998,
+      "cost": 0.390655,
+      "confidence": 0.39604,
+      "review": false
+    },
+    {
+      "night_sample_index": 577,
+      "night_time_seconds": 115.400002,
+      "day_sample_index": 439,
+      "day_time_seconds": 87.800003,
+      "cost": 0.450231,
+      "confidence": 0.162055,
+      "review": true
+    },
+    {
+      "night_sample_index": 579,
+      "night_time_seconds": 115.800003,
+      "day_sample_index": 440,
+      "day_time_seconds": 88.0,
+      "cost": 0.349277,
+      "confidence": 0.558554,
+      "review": false
+    },
+    {
+      "night_sample_index": 580,
+      "night_time_seconds": 116.0,
+      "day_sample_index": 442,
+      "day_time_seconds": 88.400002,
+      "cost": 0.428444,
+      "confidence": 0.247623,
+      "review": true
+    },
+    {
+      "night_sample_index": 582,
+      "night_time_seconds": 116.400002,
+      "day_sample_index": 443,
+      "day_time_seconds": 88.599998,
+      "cost": 0.398964,
+      "confidence": 0.363407,
+      "review": false
+    },
+    {
+      "night_sample_index": 584,
+      "night_time_seconds": 116.800003,
+      "day_sample_index": 444,
+      "day_time_seconds": 88.800003,
+      "cost": 0.413753,
+      "confidence": 0.305322,
+      "review": true
+    },
+    {
+      "night_sample_index": 586,
+      "night_time_seconds": 117.199997,
+      "day_sample_index": 445,
+      "day_time_seconds": 89.0,
+      "cost": 0.383815,
+      "confidence": 0.422905,
+      "review": false
+    },
+    {
+      "night_sample_index": 588,
+      "night_time_seconds": 117.599998,
+      "day_sample_index": 446,
+      "day_time_seconds": 89.199997,
+      "cost": 0.383098,
+      "confidence": 0.425719,
+      "review": false
+    },
+    {
+      "night_sample_index": 589,
+      "night_time_seconds": 117.800003,
+      "day_sample_index": 448,
+      "day_time_seconds": 89.599998,
+      "cost": 0.380799,
+      "confidence": 0.43475,
+      "review": false
+    },
+    {
+      "night_sample_index": 591,
+      "night_time_seconds": 118.199997,
+      "day_sample_index": 449,
+      "day_time_seconds": 89.800003,
+      "cost": 0.397635,
+      "confidence": 0.368627,
+      "review": false
+    },
+    {
+      "night_sample_index": 593,
+      "night_time_seconds": 118.599998,
+      "day_sample_index": 450,
+      "day_time_seconds": 90.0,
+      "cost": 0.388363,
+      "confidence": 0.405043,
+      "review": false
+    },
+    {
+      "night_sample_index": 594,
+      "night_time_seconds": 118.800003,
+      "day_sample_index": 452,
+      "day_time_seconds": 90.400002,
+      "cost": 0.393409,
+      "confidence": 0.385225,
+      "review": false
+    },
+    {
+      "night_sample_index": 595,
+      "night_time_seconds": 119.0,
+      "day_sample_index": 454,
+      "day_time_seconds": 90.800003,
+      "cost": 0.370755,
+      "confidence": 0.474198,
+      "review": false
+    },
+    {
+      "night_sample_index": 597,
+      "night_time_seconds": 119.400002,
+      "day_sample_index": 455,
+      "day_time_seconds": 91.0,
+      "cost": 0.480797,
+      "confidence": 0.042006,
+      "review": true
+    },
+    {
+      "night_sample_index": 599,
+      "night_time_seconds": 119.800003,
+      "day_sample_index": 456,
+      "day_time_seconds": 91.199997,
+      "cost": 0.358121,
+      "confidence": 0.523819,
+      "review": false
+    },
+    {
+      "night_sample_index": 601,
+      "night_time_seconds": 120.199997,
+      "day_sample_index": 457,
+      "day_time_seconds": 91.400002,
+      "cost": 0.373601,
+      "confidence": 0.463022,
+      "review": false
+    },
+    {
+      "night_sample_index": 603,
+      "night_time_seconds": 120.599998,
+      "day_sample_index": 458,
+      "day_time_seconds": 91.599998,
+      "cost": 0.28854,
+      "confidence": 0.704133,
+      "review": false
+    },
+    {
+      "night_sample_index": 604,
+      "night_time_seconds": 120.800003,
+      "day_sample_index": 460,
+      "day_time_seconds": 92.0,
+      "cost": 0.312519,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 606,
+      "night_time_seconds": 121.199997,
+      "day_sample_index": 461,
+      "day_time_seconds": 92.199997,
+      "cost": 0.401252,
+      "confidence": 0.354422,
+      "review": false
+    },
+    {
+      "night_sample_index": 608,
+      "night_time_seconds": 121.599998,
+      "day_sample_index": 462,
+      "day_time_seconds": 92.400002,
+      "cost": 0.333458,
+      "confidence": 0.620682,
+      "review": false
+    },
+    {
+      "night_sample_index": 609,
+      "night_time_seconds": 121.800003,
+      "day_sample_index": 464,
+      "day_time_seconds": 92.800003,
+      "cost": 0.399378,
+      "confidence": 0.361782,
+      "review": false
+    },
+    {
+      "night_sample_index": 611,
+      "night_time_seconds": 122.199997,
+      "day_sample_index": 465,
+      "day_time_seconds": 93.0,
+      "cost": 0.281487,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 613,
+      "night_time_seconds": 122.599998,
+      "day_sample_index": 466,
+      "day_time_seconds": 93.199997,
+      "cost": 0.346764,
+      "confidence": 0.568425,
+      "review": false
+    },
+    {
+      "night_sample_index": 614,
+      "night_time_seconds": 122.800003,
+      "day_sample_index": 468,
+      "day_time_seconds": 93.599998,
+      "cost": 0.330354,
+      "confidence": 0.632873,
+      "review": false
+    },
+    {
+      "night_sample_index": 615,
+      "night_time_seconds": 123.0,
+      "day_sample_index": 470,
+      "day_time_seconds": 94.0,
+      "cost": 0.458263,
+      "confidence": 0.130509,
+      "review": true
+    },
+    {
+      "night_sample_index": 616,
+      "night_time_seconds": 123.199997,
+      "day_sample_index": 472,
+      "day_time_seconds": 94.400002,
+      "cost": 0.471171,
+      "confidence": 0.079814,
+      "review": true
+    },
+    {
+      "night_sample_index": 617,
+      "night_time_seconds": 123.400002,
+      "day_sample_index": 474,
+      "day_time_seconds": 94.800003,
+      "cost": 0.473785,
+      "confidence": 0.069545,
+      "review": true
+    },
+    {
+      "night_sample_index": 618,
+      "night_time_seconds": 123.599998,
+      "day_sample_index": 476,
+      "day_time_seconds": 95.199997,
+      "cost": 0.511537,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 619,
+      "night_time_seconds": 123.800003,
+      "day_sample_index": 478,
+      "day_time_seconds": 95.599998,
+      "cost": 0.536226,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 620,
+      "night_time_seconds": 124.0,
+      "day_sample_index": 480,
+      "day_time_seconds": 96.0,
+      "cost": 0.502902,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 622,
+      "night_time_seconds": 124.400002,
+      "day_sample_index": 481,
+      "day_time_seconds": 96.199997,
+      "cost": 0.514472,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 624,
+      "night_time_seconds": 124.800003,
+      "day_sample_index": 482,
+      "day_time_seconds": 96.400002,
+      "cost": 0.510734,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 626,
+      "night_time_seconds": 125.199997,
+      "day_sample_index": 483,
+      "day_time_seconds": 96.599998,
+      "cost": 0.539464,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 628,
+      "night_time_seconds": 125.599998,
+      "day_sample_index": 484,
+      "day_time_seconds": 96.800003,
+      "cost": 0.446318,
+      "confidence": 0.177424,
+      "review": true
+    },
+    {
+      "night_sample_index": 630,
+      "night_time_seconds": 126.0,
+      "day_sample_index": 485,
+      "day_time_seconds": 97.0,
+      "cost": 0.508139,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 632,
+      "night_time_seconds": 126.400002,
+      "day_sample_index": 486,
+      "day_time_seconds": 97.199997,
+      "cost": 0.451209,
+      "confidence": 0.158213,
+      "review": true
+    },
+    {
+      "night_sample_index": 633,
+      "night_time_seconds": 126.599998,
+      "day_sample_index": 488,
+      "day_time_seconds": 97.599998,
+      "cost": 0.516226,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 635,
+      "night_time_seconds": 127.0,
+      "day_sample_index": 489,
+      "day_time_seconds": 97.800003,
+      "cost": 0.465246,
+      "confidence": 0.103084,
+      "review": true
+    },
+    {
+      "night_sample_index": 637,
+      "night_time_seconds": 127.400002,
+      "day_sample_index": 490,
+      "day_time_seconds": 98.0,
+      "cost": 0.472526,
+      "confidence": 0.074491,
+      "review": true
+    },
+    {
+      "night_sample_index": 639,
+      "night_time_seconds": 127.800003,
+      "day_sample_index": 491,
+      "day_time_seconds": 98.199997,
+      "cost": 0.515245,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 641,
+      "night_time_seconds": 128.199997,
+      "day_sample_index": 492,
+      "day_time_seconds": 98.400002,
+      "cost": 0.483418,
+      "confidence": 0.03171,
+      "review": true
+    },
+    {
+      "night_sample_index": 642,
+      "night_time_seconds": 128.399994,
+      "day_sample_index": 494,
+      "day_time_seconds": 98.800003,
+      "cost": 0.459527,
+      "confidence": 0.125543,
+      "review": true
+    },
+    {
+      "night_sample_index": 644,
+      "night_time_seconds": 128.800003,
+      "day_sample_index": 495,
+      "day_time_seconds": 99.0,
+      "cost": 0.53999,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 646,
+      "night_time_seconds": 129.199997,
+      "day_sample_index": 496,
+      "day_time_seconds": 99.199997,
+      "cost": 0.484141,
+      "confidence": 0.028874,
+      "review": true
+    },
+    {
+      "night_sample_index": 647,
+      "night_time_seconds": 129.399994,
+      "day_sample_index": 498,
+      "day_time_seconds": 99.599998,
+      "cost": 0.445488,
+      "confidence": 0.180684,
+      "review": true
+    },
+    {
+      "night_sample_index": 648,
+      "night_time_seconds": 129.600006,
+      "day_sample_index": 500,
+      "day_time_seconds": 100.0,
+      "cost": 0.48098,
+      "confidence": 0.041288,
+      "review": true
+    },
+    {
+      "night_sample_index": 649,
+      "night_time_seconds": 129.800003,
+      "day_sample_index": 502,
+      "day_time_seconds": 100.400002,
+      "cost": 0.488759,
+      "confidence": 0.010734,
+      "review": true
+    },
+    {
+      "night_sample_index": 650,
+      "night_time_seconds": 130.0,
+      "day_sample_index": 504,
+      "day_time_seconds": 100.800003,
+      "cost": 0.48091,
+      "confidence": 0.041563,
+      "review": true
+    },
+    {
+      "night_sample_index": 651,
+      "night_time_seconds": 130.199997,
+      "day_sample_index": 506,
+      "day_time_seconds": 101.199997,
+      "cost": 0.451378,
+      "confidence": 0.15755,
+      "review": true
+    },
+    {
+      "night_sample_index": 652,
+      "night_time_seconds": 130.399994,
+      "day_sample_index": 508,
+      "day_time_seconds": 101.599998,
+      "cost": 0.525747,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 653,
+      "night_time_seconds": 130.600006,
+      "day_sample_index": 510,
+      "day_time_seconds": 102.0,
+      "cost": 0.46259,
+      "confidence": 0.113516,
+      "review": true
+    },
+    {
+      "night_sample_index": 654,
+      "night_time_seconds": 130.800003,
+      "day_sample_index": 512,
+      "day_time_seconds": 102.400002,
+      "cost": 0.480634,
+      "confidence": 0.042645,
+      "review": true
+    },
+    {
+      "night_sample_index": 656,
+      "night_time_seconds": 131.199997,
+      "day_sample_index": 513,
+      "day_time_seconds": 102.599998,
+      "cost": 0.527766,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 658,
+      "night_time_seconds": 131.600006,
+      "day_sample_index": 514,
+      "day_time_seconds": 102.800003,
+      "cost": 0.473491,
+      "confidence": 0.0707,
+      "review": true
+    },
+    {
+      "night_sample_index": 659,
+      "night_time_seconds": 131.800003,
+      "day_sample_index": 516,
+      "day_time_seconds": 103.199997,
+      "cost": 0.467401,
+      "confidence": 0.094621,
+      "review": true
+    },
+    {
+      "night_sample_index": 660,
+      "night_time_seconds": 132.0,
+      "day_sample_index": 518,
+      "day_time_seconds": 103.599998,
+      "cost": 0.509002,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 661,
+      "night_time_seconds": 132.199997,
+      "day_sample_index": 520,
+      "day_time_seconds": 104.0,
+      "cost": 0.450317,
+      "confidence": 0.161718,
+      "review": true
+    },
+    {
+      "night_sample_index": 662,
+      "night_time_seconds": 132.399994,
+      "day_sample_index": 522,
+      "day_time_seconds": 104.400002,
+      "cost": 0.473787,
+      "confidence": 0.069538,
+      "review": true
+    },
+    {
+      "night_sample_index": 663,
+      "night_time_seconds": 132.600006,
+      "day_sample_index": 524,
+      "day_time_seconds": 104.800003,
+      "cost": 0.497416,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 664,
+      "night_time_seconds": 132.800003,
+      "day_sample_index": 526,
+      "day_time_seconds": 105.199997,
+      "cost": 0.467162,
+      "confidence": 0.09556,
+      "review": true
+    },
+    {
+      "night_sample_index": 666,
+      "night_time_seconds": 133.199997,
+      "day_sample_index": 527,
+      "day_time_seconds": 105.400002,
+      "cost": 0.476571,
+      "confidence": 0.058605,
+      "review": true
+    },
+    {
+      "night_sample_index": 667,
+      "night_time_seconds": 133.399994,
+      "day_sample_index": 529,
+      "day_time_seconds": 105.800003,
+      "cost": 0.512362,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 669,
+      "night_time_seconds": 133.800003,
+      "day_sample_index": 530,
+      "day_time_seconds": 106.0,
+      "cost": 0.479153,
+      "confidence": 0.048463,
+      "review": true
+    },
+    {
+      "night_sample_index": 671,
+      "night_time_seconds": 134.199997,
+      "day_sample_index": 531,
+      "day_time_seconds": 106.199997,
+      "cost": 0.487642,
+      "confidence": 0.015121,
+      "review": true
+    },
+    {
+      "night_sample_index": 673,
+      "night_time_seconds": 134.600006,
+      "day_sample_index": 532,
+      "day_time_seconds": 106.400002,
+      "cost": 0.521657,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 675,
+      "night_time_seconds": 135.0,
+      "day_sample_index": 533,
+      "day_time_seconds": 106.599998,
+      "cost": 0.564017,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 677,
+      "night_time_seconds": 135.399994,
+      "day_sample_index": 534,
+      "day_time_seconds": 106.800003,
+      "cost": 0.473219,
+      "confidence": 0.071768,
+      "review": true
+    },
+    {
+      "night_sample_index": 679,
+      "night_time_seconds": 135.800003,
+      "day_sample_index": 535,
+      "day_time_seconds": 107.0,
+      "cost": 0.533365,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 681,
+      "night_time_seconds": 136.199997,
+      "day_sample_index": 536,
+      "day_time_seconds": 107.199997,
+      "cost": 0.494493,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 683,
+      "night_time_seconds": 136.600006,
+      "day_sample_index": 537,
+      "day_time_seconds": 107.400002,
+      "cost": 0.545777,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 685,
+      "night_time_seconds": 137.0,
+      "day_sample_index": 538,
+      "day_time_seconds": 107.599998,
+      "cost": 0.523751,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 687,
+      "night_time_seconds": 137.399994,
+      "day_sample_index": 539,
+      "day_time_seconds": 107.800003,
+      "cost": 0.527656,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 689,
+      "night_time_seconds": 137.800003,
+      "day_sample_index": 540,
+      "day_time_seconds": 108.0,
+      "cost": 0.535927,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 690,
+      "night_time_seconds": 138.0,
+      "day_sample_index": 542,
+      "day_time_seconds": 108.400002,
+      "cost": 0.555593,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 692,
+      "night_time_seconds": 138.399994,
+      "day_sample_index": 543,
+      "day_time_seconds": 108.599998,
+      "cost": 0.51021,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 694,
+      "night_time_seconds": 138.800003,
+      "day_sample_index": 544,
+      "day_time_seconds": 108.800003,
+      "cost": 0.510806,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 695,
+      "night_time_seconds": 139.0,
+      "day_sample_index": 546,
+      "day_time_seconds": 109.199997,
+      "cost": 0.488782,
+      "confidence": 0.010645,
+      "review": true
+    },
+    {
+      "night_sample_index": 696,
+      "night_time_seconds": 139.199997,
+      "day_sample_index": 548,
+      "day_time_seconds": 109.599998,
+      "cost": 0.444682,
+      "confidence": 0.18385,
+      "review": true
+    },
+    {
+      "night_sample_index": 698,
+      "night_time_seconds": 139.600006,
+      "day_sample_index": 549,
+      "day_time_seconds": 109.800003,
+      "cost": 0.497347,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 700,
+      "night_time_seconds": 140.0,
+      "day_sample_index": 550,
+      "day_time_seconds": 110.0,
+      "cost": 0.500334,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 701,
+      "night_time_seconds": 140.199997,
+      "day_sample_index": 552,
+      "day_time_seconds": 110.400002,
+      "cost": 0.529803,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 703,
+      "night_time_seconds": 140.600006,
+      "day_sample_index": 553,
+      "day_time_seconds": 110.599998,
+      "cost": 0.490659,
+      "confidence": 0.003272,
+      "review": true
+    },
+    {
+      "night_sample_index": 705,
+      "night_time_seconds": 141.0,
+      "day_sample_index": 554,
+      "day_time_seconds": 110.800003,
+      "cost": 0.427606,
+      "confidence": 0.250914,
+      "review": true
+    },
+    {
+      "night_sample_index": 706,
+      "night_time_seconds": 141.199997,
+      "day_sample_index": 556,
+      "day_time_seconds": 111.199997,
+      "cost": 0.456901,
+      "confidence": 0.135859,
+      "review": true
+    },
+    {
+      "night_sample_index": 707,
+      "night_time_seconds": 141.399994,
+      "day_sample_index": 558,
+      "day_time_seconds": 111.599998,
+      "cost": 0.423447,
+      "confidence": 0.267249,
+      "review": true
+    },
+    {
+      "night_sample_index": 709,
+      "night_time_seconds": 141.800003,
+      "day_sample_index": 559,
+      "day_time_seconds": 111.800003,
+      "cost": 0.482253,
+      "confidence": 0.036287,
+      "review": true
+    },
+    {
+      "night_sample_index": 711,
+      "night_time_seconds": 142.199997,
+      "day_sample_index": 560,
+      "day_time_seconds": 112.0,
+      "cost": 0.494164,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 712,
+      "night_time_seconds": 142.399994,
+      "day_sample_index": 562,
+      "day_time_seconds": 112.400002,
+      "cost": 0.481761,
+      "confidence": 0.038221,
+      "review": true
+    },
+    {
+      "night_sample_index": 713,
+      "night_time_seconds": 142.600006,
+      "day_sample_index": 564,
+      "day_time_seconds": 112.800003,
+      "cost": 0.486342,
+      "confidence": 0.020227,
+      "review": true
+    },
+    {
+      "night_sample_index": 714,
+      "night_time_seconds": 142.800003,
+      "day_sample_index": 566,
+      "day_time_seconds": 113.199997,
+      "cost": 0.515191,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 715,
+      "night_time_seconds": 143.0,
+      "day_sample_index": 568,
+      "day_time_seconds": 113.599998,
+      "cost": 0.475976,
+      "confidence": 0.06094,
+      "review": true
+    },
+    {
+      "night_sample_index": 716,
+      "night_time_seconds": 143.199997,
+      "day_sample_index": 570,
+      "day_time_seconds": 114.0,
+      "cost": 0.490777,
+      "confidence": 0.00281,
+      "review": true
+    },
+    {
+      "night_sample_index": 717,
+      "night_time_seconds": 143.399994,
+      "day_sample_index": 572,
+      "day_time_seconds": 114.400002,
+      "cost": 0.477655,
+      "confidence": 0.054346,
+      "review": true
+    },
+    {
+      "night_sample_index": 718,
+      "night_time_seconds": 143.600006,
+      "day_sample_index": 574,
+      "day_time_seconds": 114.800003,
+      "cost": 0.511531,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 719,
+      "night_time_seconds": 143.800003,
+      "day_sample_index": 576,
+      "day_time_seconds": 115.199997,
+      "cost": 0.525282,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 720,
+      "night_time_seconds": 144.0,
+      "day_sample_index": 578,
+      "day_time_seconds": 115.599998,
+      "cost": 0.444241,
+      "confidence": 0.185582,
+      "review": true
+    },
+    {
+      "night_sample_index": 721,
+      "night_time_seconds": 144.199997,
+      "day_sample_index": 580,
+      "day_time_seconds": 116.0,
+      "cost": 0.494805,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 722,
+      "night_time_seconds": 144.399994,
+      "day_sample_index": 582,
+      "day_time_seconds": 116.400002,
+      "cost": 0.492263,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 723,
+      "night_time_seconds": 144.600006,
+      "day_sample_index": 584,
+      "day_time_seconds": 116.800003,
+      "cost": 0.439638,
+      "confidence": 0.203658,
+      "review": true
+    },
+    {
+      "night_sample_index": 724,
+      "night_time_seconds": 144.800003,
+      "day_sample_index": 586,
+      "day_time_seconds": 117.199997,
+      "cost": 0.420328,
+      "confidence": 0.279497,
+      "review": true
+    },
+    {
+      "night_sample_index": 725,
+      "night_time_seconds": 145.0,
+      "day_sample_index": 588,
+      "day_time_seconds": 117.599998,
+      "cost": 0.434276,
+      "confidence": 0.224716,
+      "review": true
+    },
+    {
+      "night_sample_index": 726,
+      "night_time_seconds": 145.199997,
+      "day_sample_index": 590,
+      "day_time_seconds": 118.0,
+      "cost": 0.464115,
+      "confidence": 0.107524,
+      "review": true
+    },
+    {
+      "night_sample_index": 727,
+      "night_time_seconds": 145.399994,
+      "day_sample_index": 592,
+      "day_time_seconds": 118.400002,
+      "cost": 0.451962,
+      "confidence": 0.155256,
+      "review": true
+    },
+    {
+      "night_sample_index": 728,
+      "night_time_seconds": 145.600006,
+      "day_sample_index": 594,
+      "day_time_seconds": 118.800003,
+      "cost": 0.47619,
+      "confidence": 0.060101,
+      "review": true
+    },
+    {
+      "night_sample_index": 729,
+      "night_time_seconds": 145.800003,
+      "day_sample_index": 596,
+      "day_time_seconds": 119.199997,
+      "cost": 0.46755,
+      "confidence": 0.094033,
+      "review": true
+    },
+    {
+      "night_sample_index": 730,
+      "night_time_seconds": 146.0,
+      "day_sample_index": 598,
+      "day_time_seconds": 119.599998,
+      "cost": 0.358209,
+      "confidence": 0.523473,
+      "review": false
+    },
+    {
+      "night_sample_index": 731,
+      "night_time_seconds": 146.199997,
+      "day_sample_index": 600,
+      "day_time_seconds": 120.0,
+      "cost": 0.413559,
+      "confidence": 0.306086,
+      "review": true
+    },
+    {
+      "night_sample_index": 732,
+      "night_time_seconds": 146.399994,
+      "day_sample_index": 602,
+      "day_time_seconds": 120.400002,
+      "cost": 0.450242,
+      "confidence": 0.162011,
+      "review": true
+    },
+    {
+      "night_sample_index": 733,
+      "night_time_seconds": 146.600006,
+      "day_sample_index": 604,
+      "day_time_seconds": 120.800003,
+      "cost": 0.401104,
+      "confidence": 0.355001,
+      "review": false
+    },
+    {
+      "night_sample_index": 734,
+      "night_time_seconds": 146.800003,
+      "day_sample_index": 606,
+      "day_time_seconds": 121.199997,
+      "cost": 0.340716,
+      "confidence": 0.592175,
+      "review": false
+    },
+    {
+      "night_sample_index": 735,
+      "night_time_seconds": 147.0,
+      "day_sample_index": 608,
+      "day_time_seconds": 121.599998,
+      "cost": 0.354214,
+      "confidence": 0.539164,
+      "review": false
+    },
+    {
+      "night_sample_index": 736,
+      "night_time_seconds": 147.199997,
+      "day_sample_index": 610,
+      "day_time_seconds": 122.0,
+      "cost": 0.346238,
+      "confidence": 0.57049,
+      "review": false
+    },
+    {
+      "night_sample_index": 737,
+      "night_time_seconds": 147.399994,
+      "day_sample_index": 612,
+      "day_time_seconds": 122.400002,
+      "cost": 0.283524,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 738,
+      "night_time_seconds": 147.600006,
+      "day_sample_index": 614,
+      "day_time_seconds": 122.800003,
+      "cost": 0.299416,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 739,
+      "night_time_seconds": 147.800003,
+      "day_sample_index": 616,
+      "day_time_seconds": 123.199997,
+      "cost": 0.475483,
+      "confidence": 0.062877,
+      "review": true
+    },
+    {
+      "night_sample_index": 740,
+      "night_time_seconds": 148.0,
+      "day_sample_index": 618,
+      "day_time_seconds": 123.599998,
+      "cost": 0.359152,
+      "confidence": 0.519769,
+      "review": false
+    },
+    {
+      "night_sample_index": 741,
+      "night_time_seconds": 148.199997,
+      "day_sample_index": 620,
+      "day_time_seconds": 124.0,
+      "cost": 0.376367,
+      "confidence": 0.452157,
+      "review": false
+    },
+    {
+      "night_sample_index": 742,
+      "night_time_seconds": 148.399994,
+      "day_sample_index": 622,
+      "day_time_seconds": 124.400002,
+      "cost": 0.30524,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 743,
+      "night_time_seconds": 148.600006,
+      "day_sample_index": 624,
+      "day_time_seconds": 124.800003,
+      "cost": 0.319899,
+      "confidence": 0.673935,
+      "review": false
+    },
+    {
+      "night_sample_index": 744,
+      "night_time_seconds": 148.800003,
+      "day_sample_index": 626,
+      "day_time_seconds": 125.199997,
+      "cost": 0.324134,
+      "confidence": 0.657303,
+      "review": false
+    },
+    {
+      "night_sample_index": 745,
+      "night_time_seconds": 149.0,
+      "day_sample_index": 628,
+      "day_time_seconds": 125.599998,
+      "cost": 0.333007,
+      "confidence": 0.622453,
+      "review": false
+    },
+    {
+      "night_sample_index": 746,
+      "night_time_seconds": 149.199997,
+      "day_sample_index": 630,
+      "day_time_seconds": 126.0,
+      "cost": 0.39192,
+      "confidence": 0.391073,
+      "review": false
+    },
+    {
+      "night_sample_index": 747,
+      "night_time_seconds": 149.399994,
+      "day_sample_index": 632,
+      "day_time_seconds": 126.400002,
+      "cost": 0.416483,
+      "confidence": 0.294601,
+      "review": true
+    },
+    {
+      "night_sample_index": 748,
+      "night_time_seconds": 149.600006,
+      "day_sample_index": 634,
+      "day_time_seconds": 126.800003,
+      "cost": 0.44971,
+      "confidence": 0.164099,
+      "review": true
+    },
+    {
+      "night_sample_index": 749,
+      "night_time_seconds": 149.800003,
+      "day_sample_index": 636,
+      "day_time_seconds": 127.199997,
+      "cost": 0.438769,
+      "confidence": 0.207073,
+      "review": true
+    },
+    {
+      "night_sample_index": 750,
+      "night_time_seconds": 150.0,
+      "day_sample_index": 638,
+      "day_time_seconds": 127.599998,
+      "cost": 0.401506,
+      "confidence": 0.353422,
+      "review": false
+    },
+    {
+      "night_sample_index": 751,
+      "night_time_seconds": 150.199997,
+      "day_sample_index": 640,
+      "day_time_seconds": 128.0,
+      "cost": 0.371027,
+      "confidence": 0.473128,
+      "review": false
+    },
+    {
+      "night_sample_index": 752,
+      "night_time_seconds": 150.399994,
+      "day_sample_index": 642,
+      "day_time_seconds": 128.399994,
+      "cost": 0.346377,
+      "confidence": 0.569941,
+      "review": false
+    },
+    {
+      "night_sample_index": 753,
+      "night_time_seconds": 150.600006,
+      "day_sample_index": 644,
+      "day_time_seconds": 128.800003,
+      "cost": 0.368322,
+      "confidence": 0.483753,
+      "review": false
+    },
+    {
+      "night_sample_index": 754,
+      "night_time_seconds": 150.800003,
+      "day_sample_index": 646,
+      "day_time_seconds": 129.199997,
+      "cost": 0.327627,
+      "confidence": 0.643582,
+      "review": false
+    },
+    {
+      "night_sample_index": 755,
+      "night_time_seconds": 151.0,
+      "day_sample_index": 648,
+      "day_time_seconds": 129.600006,
+      "cost": 0.355971,
+      "confidence": 0.532264,
+      "review": false
+    },
+    {
+      "night_sample_index": 756,
+      "night_time_seconds": 151.199997,
+      "day_sample_index": 650,
+      "day_time_seconds": 130.0,
+      "cost": 0.318843,
+      "confidence": 0.678082,
+      "review": false
+    },
+    {
+      "night_sample_index": 757,
+      "night_time_seconds": 151.399994,
+      "day_sample_index": 652,
+      "day_time_seconds": 130.399994,
+      "cost": 0.342719,
+      "confidence": 0.584311,
+      "review": false
+    },
+    {
+      "night_sample_index": 758,
+      "night_time_seconds": 151.600006,
+      "day_sample_index": 654,
+      "day_time_seconds": 130.800003,
+      "cost": 0.339008,
+      "confidence": 0.598884,
+      "review": false
+    },
+    {
+      "night_sample_index": 759,
+      "night_time_seconds": 151.800003,
+      "day_sample_index": 656,
+      "day_time_seconds": 131.199997,
+      "cost": 0.355702,
+      "confidence": 0.533317,
+      "review": false
+    },
+    {
+      "night_sample_index": 760,
+      "night_time_seconds": 152.0,
+      "day_sample_index": 658,
+      "day_time_seconds": 131.600006,
+      "cost": 0.468248,
+      "confidence": 0.091291,
+      "review": true
+    },
+    {
+      "night_sample_index": 761,
+      "night_time_seconds": 152.199997,
+      "day_sample_index": 660,
+      "day_time_seconds": 132.0,
+      "cost": 0.347387,
+      "confidence": 0.565976,
+      "review": false
+    },
+    {
+      "night_sample_index": 762,
+      "night_time_seconds": 152.399994,
+      "day_sample_index": 662,
+      "day_time_seconds": 132.399994,
+      "cost": 0.341162,
+      "confidence": 0.590425,
+      "review": false
+    },
+    {
+      "night_sample_index": 763,
+      "night_time_seconds": 152.600006,
+      "day_sample_index": 664,
+      "day_time_seconds": 132.800003,
+      "cost": 0.353703,
+      "confidence": 0.541169,
+      "review": false
+    },
+    {
+      "night_sample_index": 764,
+      "night_time_seconds": 152.800003,
+      "day_sample_index": 666,
+      "day_time_seconds": 133.199997,
+      "cost": 0.391519,
+      "confidence": 0.392646,
+      "review": false
+    },
+    {
+      "night_sample_index": 765,
+      "night_time_seconds": 153.0,
+      "day_sample_index": 668,
+      "day_time_seconds": 133.600006,
+      "cost": 0.310655,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 766,
+      "night_time_seconds": 153.199997,
+      "day_sample_index": 670,
+      "day_time_seconds": 134.0,
+      "cost": 0.380738,
+      "confidence": 0.434991,
+      "review": false
+    },
+    {
+      "night_sample_index": 767,
+      "night_time_seconds": 153.399994,
+      "day_sample_index": 672,
+      "day_time_seconds": 134.399994,
+      "cost": 0.297078,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 768,
+      "night_time_seconds": 153.600006,
+      "day_sample_index": 674,
+      "day_time_seconds": 134.800003,
+      "cost": 0.324976,
+      "confidence": 0.653994,
+      "review": false
+    },
+    {
+      "night_sample_index": 769,
+      "night_time_seconds": 153.800003,
+      "day_sample_index": 676,
+      "day_time_seconds": 135.199997,
+      "cost": 0.334309,
+      "confidence": 0.61734,
+      "review": false
+    },
+    {
+      "night_sample_index": 770,
+      "night_time_seconds": 154.0,
+      "day_sample_index": 678,
+      "day_time_seconds": 135.600006,
+      "cost": 0.375595,
+      "confidence": 0.455187,
+      "review": false
+    },
+    {
+      "night_sample_index": 771,
+      "night_time_seconds": 154.199997,
+      "day_sample_index": 680,
+      "day_time_seconds": 136.0,
+      "cost": 0.348683,
+      "confidence": 0.560886,
+      "review": false
+    },
+    {
+      "night_sample_index": 772,
+      "night_time_seconds": 154.399994,
+      "day_sample_index": 682,
+      "day_time_seconds": 136.399994,
+      "cost": 0.341092,
+      "confidence": 0.590699,
+      "review": false
+    },
+    {
+      "night_sample_index": 773,
+      "night_time_seconds": 154.600006,
+      "day_sample_index": 684,
+      "day_time_seconds": 136.800003,
+      "cost": 0.37387,
+      "confidence": 0.461965,
+      "review": false
+    },
+    {
+      "night_sample_index": 774,
+      "night_time_seconds": 154.800003,
+      "day_sample_index": 686,
+      "day_time_seconds": 137.199997,
+      "cost": 0.38172,
+      "confidence": 0.431131,
+      "review": false
+    },
+    {
+      "night_sample_index": 775,
+      "night_time_seconds": 155.0,
+      "day_sample_index": 688,
+      "day_time_seconds": 137.600006,
+      "cost": 0.359169,
+      "confidence": 0.5197,
+      "review": false
+    },
+    {
+      "night_sample_index": 776,
+      "night_time_seconds": 155.199997,
+      "day_sample_index": 690,
+      "day_time_seconds": 138.0,
+      "cost": 0.358163,
+      "confidence": 0.523652,
+      "review": false
+    },
+    {
+      "night_sample_index": 777,
+      "night_time_seconds": 155.399994,
+      "day_sample_index": 692,
+      "day_time_seconds": 138.399994,
+      "cost": 0.405223,
+      "confidence": 0.338825,
+      "review": true
+    },
+    {
+      "night_sample_index": 778,
+      "night_time_seconds": 155.600006,
+      "day_sample_index": 694,
+      "day_time_seconds": 138.800003,
+      "cost": 0.37796,
+      "confidence": 0.445898,
+      "review": false
+    },
+    {
+      "night_sample_index": 779,
+      "night_time_seconds": 155.800003,
+      "day_sample_index": 696,
+      "day_time_seconds": 139.199997,
+      "cost": 0.402741,
+      "confidence": 0.348572,
+      "review": true
+    },
+    {
+      "night_sample_index": 780,
+      "night_time_seconds": 156.0,
+      "day_sample_index": 698,
+      "day_time_seconds": 139.600006,
+      "cost": 0.342858,
+      "confidence": 0.583765,
+      "review": false
+    },
+    {
+      "night_sample_index": 781,
+      "night_time_seconds": 156.199997,
+      "day_sample_index": 700,
+      "day_time_seconds": 140.0,
+      "cost": 0.406087,
+      "confidence": 0.335431,
+      "review": true
+    },
+    {
+      "night_sample_index": 782,
+      "night_time_seconds": 156.399994,
+      "day_sample_index": 702,
+      "day_time_seconds": 140.399994,
+      "cost": 0.357495,
+      "confidence": 0.526278,
+      "review": false
+    },
+    {
+      "night_sample_index": 783,
+      "night_time_seconds": 156.600006,
+      "day_sample_index": 704,
+      "day_time_seconds": 140.800003,
+      "cost": 0.292419,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 784,
+      "night_time_seconds": 156.800003,
+      "day_sample_index": 706,
+      "day_time_seconds": 141.199997,
+      "cost": 0.270521,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 785,
+      "night_time_seconds": 157.0,
+      "day_sample_index": 708,
+      "day_time_seconds": 141.600006,
+      "cost": 0.315987,
+      "confidence": 0.689301,
+      "review": false
+    },
+    {
+      "night_sample_index": 786,
+      "night_time_seconds": 157.199997,
+      "day_sample_index": 710,
+      "day_time_seconds": 142.0,
+      "cost": 0.368837,
+      "confidence": 0.48173,
+      "review": false
+    },
+    {
+      "night_sample_index": 787,
+      "night_time_seconds": 157.399994,
+      "day_sample_index": 712,
+      "day_time_seconds": 142.399994,
+      "cost": 0.323848,
+      "confidence": 0.658427,
+      "review": false
+    },
+    {
+      "night_sample_index": 788,
+      "night_time_seconds": 157.600006,
+      "day_sample_index": 714,
+      "day_time_seconds": 142.800003,
+      "cost": 0.285884,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 789,
+      "night_time_seconds": 157.800003,
+      "day_sample_index": 716,
+      "day_time_seconds": 143.199997,
+      "cost": 0.270385,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 790,
+      "night_time_seconds": 158.0,
+      "day_sample_index": 718,
+      "day_time_seconds": 143.600006,
+      "cost": 0.322278,
+      "confidence": 0.664591,
+      "review": false
+    },
+    {
+      "night_sample_index": 791,
+      "night_time_seconds": 158.199997,
+      "day_sample_index": 720,
+      "day_time_seconds": 144.0,
+      "cost": 0.363775,
+      "confidence": 0.501613,
+      "review": false
+    },
+    {
+      "night_sample_index": 792,
+      "night_time_seconds": 158.399994,
+      "day_sample_index": 722,
+      "day_time_seconds": 144.399994,
+      "cost": 0.319855,
+      "confidence": 0.674107,
+      "review": false
+    },
+    {
+      "night_sample_index": 793,
+      "night_time_seconds": 158.600006,
+      "day_sample_index": 724,
+      "day_time_seconds": 144.800003,
+      "cost": 0.219173,
+      "confidence": 0.708075,
+      "review": false
+    },
+    {
+      "night_sample_index": 794,
+      "night_time_seconds": 158.800003,
+      "day_sample_index": 726,
+      "day_time_seconds": 145.199997,
+      "cost": 0.26307,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 795,
+      "night_time_seconds": 159.0,
+      "day_sample_index": 728,
+      "day_time_seconds": 145.600006,
+      "cost": 0.170107,
+      "confidence": 0.748183,
+      "review": false
+    },
+    {
+      "night_sample_index": 796,
+      "night_time_seconds": 159.199997,
+      "day_sample_index": 730,
+      "day_time_seconds": 146.0,
+      "cost": 0.278632,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 797,
+      "night_time_seconds": 159.399994,
+      "day_sample_index": 732,
+      "day_time_seconds": 146.399994,
+      "cost": 0.265844,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 798,
+      "night_time_seconds": 159.600006,
+      "day_sample_index": 734,
+      "day_time_seconds": 146.800003,
+      "cost": 0.213618,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 799,
+      "night_time_seconds": 159.800003,
+      "day_sample_index": 736,
+      "day_time_seconds": 147.199997,
+      "cost": 0.233684,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 800,
+      "night_time_seconds": 160.0,
+      "day_sample_index": 738,
+      "day_time_seconds": 147.600006,
+      "cost": 0.236116,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 801,
+      "night_time_seconds": 160.199997,
+      "day_sample_index": 740,
+      "day_time_seconds": 148.0,
+      "cost": 0.259841,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 802,
+      "night_time_seconds": 160.399994,
+      "day_sample_index": 742,
+      "day_time_seconds": 148.399994,
+      "cost": 0.246381,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 803,
+      "night_time_seconds": 160.600006,
+      "day_sample_index": 744,
+      "day_time_seconds": 148.800003,
+      "cost": 0.287799,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 804,
+      "night_time_seconds": 160.800003,
+      "day_sample_index": 746,
+      "day_time_seconds": 149.199997,
+      "cost": 0.292787,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 805,
+      "night_time_seconds": 161.0,
+      "day_sample_index": 748,
+      "day_time_seconds": 149.600006,
+      "cost": 0.274506,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 806,
+      "night_time_seconds": 161.199997,
+      "day_sample_index": 750,
+      "day_time_seconds": 150.0,
+      "cost": 0.256506,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 807,
+      "night_time_seconds": 161.399994,
+      "day_sample_index": 752,
+      "day_time_seconds": 150.399994,
+      "cost": 0.255743,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 808,
+      "night_time_seconds": 161.600006,
+      "day_sample_index": 754,
+      "day_time_seconds": 150.800003,
+      "cost": 0.259694,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 809,
+      "night_time_seconds": 161.800003,
+      "day_sample_index": 756,
+      "day_time_seconds": 151.199997,
+      "cost": 0.306472,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 810,
+      "night_time_seconds": 162.0,
+      "day_sample_index": 758,
+      "day_time_seconds": 151.600006,
+      "cost": 0.240482,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 811,
+      "night_time_seconds": 162.199997,
+      "day_sample_index": 760,
+      "day_time_seconds": 152.0,
+      "cost": 0.261129,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 812,
+      "night_time_seconds": 162.399994,
+      "day_sample_index": 762,
+      "day_time_seconds": 152.399994,
+      "cost": 0.286323,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 813,
+      "night_time_seconds": 162.600006,
+      "day_sample_index": 764,
+      "day_time_seconds": 152.800003,
+      "cost": 0.221243,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 814,
+      "night_time_seconds": 162.800003,
+      "day_sample_index": 766,
+      "day_time_seconds": 153.199997,
+      "cost": 0.26171,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 815,
+      "night_time_seconds": 163.0,
+      "day_sample_index": 768,
+      "day_time_seconds": 153.600006,
+      "cost": 0.261683,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 816,
+      "night_time_seconds": 163.199997,
+      "day_sample_index": 770,
+      "day_time_seconds": 154.0,
+      "cost": 0.254665,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 817,
+      "night_time_seconds": 163.399994,
+      "day_sample_index": 772,
+      "day_time_seconds": 154.399994,
+      "cost": 0.21785,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 818,
+      "night_time_seconds": 163.600006,
+      "day_sample_index": 774,
+      "day_time_seconds": 154.800003,
+      "cost": 0.257843,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 819,
+      "night_time_seconds": 163.800003,
+      "day_sample_index": 776,
+      "day_time_seconds": 155.199997,
+      "cost": 0.239781,
+      "confidence": 0.7,
+      "review": false
+    },
+    {
+      "night_sample_index": 820,
+      "night_time_seconds": 164.0,
+      "day_sample_index": 778,
+      "day_time_seconds": 155.600006,
+      "cost": 0.378445,
+      "confidence": 0.443997,
+      "review": false
+    },
+    {
+      "night_sample_index": 821,
+      "night_time_seconds": 164.199997,
+      "day_sample_index": 780,
+      "day_time_seconds": 156.0,
+      "cost": 0.427355,
+      "confidence": 0.251902,
+      "review": true
+    },
+    {
+      "night_sample_index": 822,
+      "night_time_seconds": 164.399994,
+      "day_sample_index": 782,
+      "day_time_seconds": 156.399994,
+      "cost": 0.277944,
+      "confidence": 0.715807,
+      "review": false
+    },
+    {
+      "night_sample_index": 823,
+      "night_time_seconds": 164.600006,
+      "day_sample_index": 784,
+      "day_time_seconds": 156.800003,
+      "cost": 0.404018,
+      "confidence": 0.343558,
+      "review": true
+    },
+    {
+      "night_sample_index": 824,
+      "night_time_seconds": 164.800003,
+      "day_sample_index": 786,
+      "day_time_seconds": 157.199997,
+      "cost": 0.492974,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 825,
+      "night_time_seconds": 165.0,
+      "day_sample_index": 788,
+      "day_time_seconds": 157.600006,
+      "cost": 0.345406,
+      "confidence": 0.573757,
+      "review": false
+    },
+    {
+      "night_sample_index": 826,
+      "night_time_seconds": 165.199997,
+      "day_sample_index": 790,
+      "day_time_seconds": 158.0,
+      "cost": 0.362742,
+      "confidence": 0.505668,
+      "review": false
+    },
+    {
+      "night_sample_index": 827,
+      "night_time_seconds": 165.399994,
+      "day_sample_index": 792,
+      "day_time_seconds": 158.399994,
+      "cost": 0.353572,
+      "confidence": 0.541684,
+      "review": false
+    },
+    {
+      "night_sample_index": 828,
+      "night_time_seconds": 165.600006,
+      "day_sample_index": 794,
+      "day_time_seconds": 158.800003,
+      "cost": 0.472517,
+      "confidence": 0.074528,
+      "review": true
+    },
+    {
+      "night_sample_index": 830,
+      "night_time_seconds": 166.0,
+      "day_sample_index": 795,
+      "day_time_seconds": 159.0,
+      "cost": 0.552307,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 831,
+      "night_time_seconds": 166.199997,
+      "day_sample_index": 797,
+      "day_time_seconds": 159.399994,
+      "cost": 0.512361,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 833,
+      "night_time_seconds": 166.600006,
+      "day_sample_index": 798,
+      "day_time_seconds": 159.600006,
+      "cost": 0.567659,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 834,
+      "night_time_seconds": 166.800003,
+      "day_sample_index": 800,
+      "day_time_seconds": 160.0,
+      "cost": 0.507855,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 836,
+      "night_time_seconds": 167.199997,
+      "day_sample_index": 801,
+      "day_time_seconds": 160.199997,
+      "cost": 0.547261,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 838,
+      "night_time_seconds": 167.600006,
+      "day_sample_index": 802,
+      "day_time_seconds": 160.399994,
+      "cost": 0.534572,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 839,
+      "night_time_seconds": 167.800003,
+      "day_sample_index": 804,
+      "day_time_seconds": 160.800003,
+      "cost": 0.535716,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 840,
+      "night_time_seconds": 168.0,
+      "day_sample_index": 806,
+      "day_time_seconds": 161.199997,
+      "cost": 0.557134,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 841,
+      "night_time_seconds": 168.199997,
+      "day_sample_index": 808,
+      "day_time_seconds": 161.600006,
+      "cost": 0.553969,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 843,
+      "night_time_seconds": 168.600006,
+      "day_sample_index": 809,
+      "day_time_seconds": 161.800003,
+      "cost": 0.537253,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 845,
+      "night_time_seconds": 169.0,
+      "day_sample_index": 810,
+      "day_time_seconds": 162.0,
+      "cost": 0.545862,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 846,
+      "night_time_seconds": 169.199997,
+      "day_sample_index": 812,
+      "day_time_seconds": 162.399994,
+      "cost": 0.536702,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 847,
+      "night_time_seconds": 169.399994,
+      "day_sample_index": 814,
+      "day_time_seconds": 162.800003,
+      "cost": 0.468533,
+      "confidence": 0.090175,
+      "review": true
+    },
+    {
+      "night_sample_index": 848,
+      "night_time_seconds": 169.600006,
+      "day_sample_index": 816,
+      "day_time_seconds": 163.199997,
+      "cost": 0.467898,
+      "confidence": 0.092666,
+      "review": true
+    },
+    {
+      "night_sample_index": 849,
+      "night_time_seconds": 169.800003,
+      "day_sample_index": 818,
+      "day_time_seconds": 163.600006,
+      "cost": 0.450662,
+      "confidence": 0.160362,
+      "review": true
+    },
+    {
+      "night_sample_index": 850,
+      "night_time_seconds": 170.0,
+      "day_sample_index": 820,
+      "day_time_seconds": 164.0,
+      "cost": 0.502349,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 851,
+      "night_time_seconds": 170.199997,
+      "day_sample_index": 822,
+      "day_time_seconds": 164.399994,
+      "cost": 0.474197,
+      "confidence": 0.067928,
+      "review": true
+    },
+    {
+      "night_sample_index": 852,
+      "night_time_seconds": 170.399994,
+      "day_sample_index": 824,
+      "day_time_seconds": 164.800003,
+      "cost": 0.417486,
+      "confidence": 0.29066,
+      "review": true
+    },
+    {
+      "night_sample_index": 853,
+      "night_time_seconds": 170.600006,
+      "day_sample_index": 826,
+      "day_time_seconds": 165.199997,
+      "cost": 0.383907,
+      "confidence": 0.422543,
+      "review": false
+    },
+    {
+      "night_sample_index": 855,
+      "night_time_seconds": 171.0,
+      "day_sample_index": 827,
+      "day_time_seconds": 165.399994,
+      "cost": 0.409033,
+      "confidence": 0.323859,
+      "review": true
+    },
+    {
+      "night_sample_index": 856,
+      "night_time_seconds": 171.199997,
+      "day_sample_index": 829,
+      "day_time_seconds": 165.800003,
+      "cost": 0.406456,
+      "confidence": 0.333982,
+      "review": true
+    },
+    {
+      "night_sample_index": 857,
+      "night_time_seconds": 171.399994,
+      "day_sample_index": 831,
+      "day_time_seconds": 166.199997,
+      "cost": 0.403078,
+      "confidence": 0.347247,
+      "review": true
+    },
+    {
+      "night_sample_index": 859,
+      "night_time_seconds": 171.800003,
+      "day_sample_index": 832,
+      "day_time_seconds": 166.399994,
+      "cost": 0.380231,
+      "confidence": 0.43698,
+      "review": false
+    },
+    {
+      "night_sample_index": 860,
+      "night_time_seconds": 172.0,
+      "day_sample_index": 834,
+      "day_time_seconds": 166.800003,
+      "cost": 0.356805,
+      "confidence": 0.528986,
+      "review": false
+    },
+    {
+      "night_sample_index": 862,
+      "night_time_seconds": 172.399994,
+      "day_sample_index": 835,
+      "day_time_seconds": 167.0,
+      "cost": 0.4231,
+      "confidence": 0.268612,
+      "review": true
+    },
+    {
+      "night_sample_index": 864,
+      "night_time_seconds": 172.800003,
+      "day_sample_index": 836,
+      "day_time_seconds": 167.199997,
+      "cost": 0.39315,
+      "confidence": 0.386242,
+      "review": false
+    },
+    {
+      "night_sample_index": 865,
+      "night_time_seconds": 173.0,
+      "day_sample_index": 837,
+      "day_time_seconds": 167.399994,
+      "cost": 0.473079,
+      "confidence": 0.072317,
+      "review": true
+    },
+    {
+      "night_sample_index": 867,
+      "night_time_seconds": 173.399994,
+      "day_sample_index": 838,
+      "day_time_seconds": 167.600006,
+      "cost": 0.380364,
+      "confidence": 0.436457,
+      "review": false
+    },
+    {
+      "night_sample_index": 869,
+      "night_time_seconds": 173.800003,
+      "day_sample_index": 839,
+      "day_time_seconds": 167.800003,
+      "cost": 0.445576,
+      "confidence": 0.180336,
+      "review": true
+    },
+    {
+      "night_sample_index": 871,
+      "night_time_seconds": 174.199997,
+      "day_sample_index": 840,
+      "day_time_seconds": 168.0,
+      "cost": 0.388622,
+      "confidence": 0.404026,
+      "review": false
+    },
+    {
+      "night_sample_index": 873,
+      "night_time_seconds": 174.600006,
+      "day_sample_index": 841,
+      "day_time_seconds": 168.199997,
+      "cost": 0.449928,
+      "confidence": 0.163244,
+      "review": true
+    },
+    {
+      "night_sample_index": 875,
+      "night_time_seconds": 175.0,
+      "day_sample_index": 842,
+      "day_time_seconds": 168.399994,
+      "cost": 0.384845,
+      "confidence": 0.418859,
+      "review": false
+    },
+    {
+      "night_sample_index": 877,
+      "night_time_seconds": 175.399994,
+      "day_sample_index": 843,
+      "day_time_seconds": 168.600006,
+      "cost": 0.422728,
+      "confidence": 0.270071,
+      "review": true
+    },
+    {
+      "night_sample_index": 879,
+      "night_time_seconds": 175.800003,
+      "day_sample_index": 844,
+      "day_time_seconds": 168.800003,
+      "cost": 0.432523,
+      "confidence": 0.231601,
+      "review": true
+    },
+    {
+      "night_sample_index": 881,
+      "night_time_seconds": 176.199997,
+      "day_sample_index": 845,
+      "day_time_seconds": 169.0,
+      "cost": 0.413708,
+      "confidence": 0.3055,
+      "review": true
+    },
+    {
+      "night_sample_index": 883,
+      "night_time_seconds": 176.600006,
+      "day_sample_index": 846,
+      "day_time_seconds": 169.199997,
+      "cost": 0.419467,
+      "confidence": 0.282881,
+      "review": true
+    },
+    {
+      "night_sample_index": 884,
+      "night_time_seconds": 176.800003,
+      "day_sample_index": 848,
+      "day_time_seconds": 169.600006,
+      "cost": 0.422775,
+      "confidence": 0.269887,
+      "review": true
+    },
+    {
+      "night_sample_index": 886,
+      "night_time_seconds": 177.199997,
+      "day_sample_index": 849,
+      "day_time_seconds": 169.800003,
+      "cost": 0.417715,
+      "confidence": 0.28976,
+      "review": true
+    },
+    {
+      "night_sample_index": 888,
+      "night_time_seconds": 177.600006,
+      "day_sample_index": 850,
+      "day_time_seconds": 170.0,
+      "cost": 0.407334,
+      "confidence": 0.330535,
+      "review": true
+    },
+    {
+      "night_sample_index": 889,
+      "night_time_seconds": 177.800003,
+      "day_sample_index": 852,
+      "day_time_seconds": 170.399994,
+      "cost": 0.399505,
+      "confidence": 0.361283,
+      "review": false
+    },
+    {
+      "night_sample_index": 890,
+      "night_time_seconds": 178.0,
+      "day_sample_index": 854,
+      "day_time_seconds": 170.800003,
+      "cost": 0.379054,
+      "confidence": 0.441603,
+      "review": false
+    },
+    {
+      "night_sample_index": 892,
+      "night_time_seconds": 178.399994,
+      "day_sample_index": 855,
+      "day_time_seconds": 171.0,
+      "cost": 0.454616,
+      "confidence": 0.144834,
+      "review": true
+    },
+    {
+      "night_sample_index": 894,
+      "night_time_seconds": 178.800003,
+      "day_sample_index": 856,
+      "day_time_seconds": 171.199997,
+      "cost": 0.373823,
+      "confidence": 0.462149,
+      "review": false
+    },
+    {
+      "night_sample_index": 896,
+      "night_time_seconds": 179.199997,
+      "day_sample_index": 857,
+      "day_time_seconds": 171.399994,
+      "cost": 0.398427,
+      "confidence": 0.365514,
+      "review": false
+    },
+    {
+      "night_sample_index": 898,
+      "night_time_seconds": 179.600006,
+      "day_sample_index": 858,
+      "day_time_seconds": 171.600006,
+      "cost": 0.411515,
+      "confidence": 0.314111,
+      "review": true
+    },
+    {
+      "night_sample_index": 899,
+      "night_time_seconds": 179.800003,
+      "day_sample_index": 860,
+      "day_time_seconds": 172.0,
+      "cost": 0.410994,
+      "confidence": 0.316157,
+      "review": true
+    },
+    {
+      "night_sample_index": 901,
+      "night_time_seconds": 180.199997,
+      "day_sample_index": 861,
+      "day_time_seconds": 172.199997,
+      "cost": 0.424677,
+      "confidence": 0.262418,
+      "review": true
+    },
+    {
+      "night_sample_index": 903,
+      "night_time_seconds": 180.600006,
+      "day_sample_index": 862,
+      "day_time_seconds": 172.399994,
+      "cost": 0.395304,
+      "confidence": 0.377781,
+      "review": false
+    },
+    {
+      "night_sample_index": 904,
+      "night_time_seconds": 180.800003,
+      "day_sample_index": 864,
+      "day_time_seconds": 172.800003,
+      "cost": 0.455874,
+      "confidence": 0.139893,
+      "review": true
+    },
+    {
+      "night_sample_index": 906,
+      "night_time_seconds": 181.199997,
+      "day_sample_index": 865,
+      "day_time_seconds": 173.0,
+      "cost": 0.462283,
+      "confidence": 0.114721,
+      "review": true
+    },
+    {
+      "night_sample_index": 908,
+      "night_time_seconds": 181.600006,
+      "day_sample_index": 866,
+      "day_time_seconds": 173.199997,
+      "cost": 0.442753,
+      "confidence": 0.191425,
+      "review": true
+    },
+    {
+      "night_sample_index": 909,
+      "night_time_seconds": 181.800003,
+      "day_sample_index": 868,
+      "day_time_seconds": 173.600006,
+      "cost": 0.397711,
+      "confidence": 0.368329,
+      "review": false
+    },
+    {
+      "night_sample_index": 911,
+      "night_time_seconds": 182.199997,
+      "day_sample_index": 869,
+      "day_time_seconds": 173.800003,
+      "cost": 0.430876,
+      "confidence": 0.238072,
+      "review": true
+    },
+    {
+      "night_sample_index": 913,
+      "night_time_seconds": 182.600006,
+      "day_sample_index": 870,
+      "day_time_seconds": 174.0,
+      "cost": 0.404673,
+      "confidence": 0.340983,
+      "review": true
+    },
+    {
+      "night_sample_index": 915,
+      "night_time_seconds": 183.0,
+      "day_sample_index": 871,
+      "day_time_seconds": 174.199997,
+      "cost": 0.411701,
+      "confidence": 0.31338,
+      "review": true
+    },
+    {
+      "night_sample_index": 917,
+      "night_time_seconds": 183.399994,
+      "day_sample_index": 872,
+      "day_time_seconds": 174.399994,
+      "cost": 0.364029,
+      "confidence": 0.500616,
+      "review": false
+    },
+    {
+      "night_sample_index": 918,
+      "night_time_seconds": 183.600006,
+      "day_sample_index": 874,
+      "day_time_seconds": 174.800003,
+      "cost": 0.387042,
+      "confidence": 0.410229,
+      "review": false
+    },
+    {
+      "night_sample_index": 919,
+      "night_time_seconds": 183.800003,
+      "day_sample_index": 876,
+      "day_time_seconds": 175.199997,
+      "cost": 0.365502,
+      "confidence": 0.494827,
+      "review": false
+    },
+    {
+      "night_sample_index": 920,
+      "night_time_seconds": 184.0,
+      "day_sample_index": 878,
+      "day_time_seconds": 175.600006,
+      "cost": 0.376031,
+      "confidence": 0.453478,
+      "review": false
+    },
+    {
+      "night_sample_index": 921,
+      "night_time_seconds": 184.199997,
+      "day_sample_index": 880,
+      "day_time_seconds": 176.0,
+      "cost": 0.415461,
+      "confidence": 0.298614,
+      "review": true
+    },
+    {
+      "night_sample_index": 922,
+      "night_time_seconds": 184.399994,
+      "day_sample_index": 882,
+      "day_time_seconds": 176.399994,
+      "cost": 0.384226,
+      "confidence": 0.421292,
+      "review": false
+    },
+    {
+      "night_sample_index": 923,
+      "night_time_seconds": 184.600006,
+      "day_sample_index": 884,
+      "day_time_seconds": 176.800003,
+      "cost": 0.324795,
+      "confidence": 0.654705,
+      "review": false
+    },
+    {
+      "night_sample_index": 924,
+      "night_time_seconds": 184.800003,
+      "day_sample_index": 886,
+      "day_time_seconds": 177.199997,
+      "cost": 0.37858,
+      "confidence": 0.443464,
+      "review": false
+    },
+    {
+      "night_sample_index": 925,
+      "night_time_seconds": 185.0,
+      "day_sample_index": 888,
+      "day_time_seconds": 177.600006,
+      "cost": 0.355458,
+      "confidence": 0.534277,
+      "review": false
+    },
+    {
+      "night_sample_index": 926,
+      "night_time_seconds": 185.199997,
+      "day_sample_index": 890,
+      "day_time_seconds": 178.0,
+      "cost": 0.362704,
+      "confidence": 0.505818,
+      "review": false
+    },
+    {
+      "night_sample_index": 927,
+      "night_time_seconds": 185.399994,
+      "day_sample_index": 892,
+      "day_time_seconds": 178.399994,
+      "cost": 0.392797,
+      "confidence": 0.387626,
+      "review": false
+    },
+    {
+      "night_sample_index": 928,
+      "night_time_seconds": 185.600006,
+      "day_sample_index": 894,
+      "day_time_seconds": 178.800003,
+      "cost": 0.358054,
+      "confidence": 0.52408,
+      "review": false
+    },
+    {
+      "night_sample_index": 929,
+      "night_time_seconds": 185.800003,
+      "day_sample_index": 896,
+      "day_time_seconds": 179.199997,
+      "cost": 0.353456,
+      "confidence": 0.542141,
+      "review": false
+    },
+    {
+      "night_sample_index": 930,
+      "night_time_seconds": 186.0,
+      "day_sample_index": 898,
+      "day_time_seconds": 179.600006,
+      "cost": 0.379733,
+      "confidence": 0.438938,
+      "review": false
+    },
+    {
+      "night_sample_index": 931,
+      "night_time_seconds": 186.199997,
+      "day_sample_index": 900,
+      "day_time_seconds": 180.0,
+      "cost": 0.399957,
+      "confidence": 0.359507,
+      "review": false
+    },
+    {
+      "night_sample_index": 932,
+      "night_time_seconds": 186.399994,
+      "day_sample_index": 902,
+      "day_time_seconds": 180.399994,
+      "cost": 0.375198,
+      "confidence": 0.456747,
+      "review": false
+    },
+    {
+      "night_sample_index": 933,
+      "night_time_seconds": 186.600006,
+      "day_sample_index": 904,
+      "day_time_seconds": 180.800003,
+      "cost": 0.411185,
+      "confidence": 0.31541,
+      "review": true
+    },
+    {
+      "night_sample_index": 934,
+      "night_time_seconds": 186.800003,
+      "day_sample_index": 906,
+      "day_time_seconds": 181.199997,
+      "cost": 0.459858,
+      "confidence": 0.124245,
+      "review": true
+    },
+    {
+      "night_sample_index": 935,
+      "night_time_seconds": 187.0,
+      "day_sample_index": 908,
+      "day_time_seconds": 181.600006,
+      "cost": 0.296042,
+      "confidence": 0.706275,
+      "review": false
+    },
+    {
+      "night_sample_index": 936,
+      "night_time_seconds": 187.199997,
+      "day_sample_index": 910,
+      "day_time_seconds": 182.0,
+      "cost": 0.332826,
+      "confidence": 0.623165,
+      "review": false
+    },
+    {
+      "night_sample_index": 937,
+      "night_time_seconds": 187.399994,
+      "day_sample_index": 912,
+      "day_time_seconds": 182.399994,
+      "cost": 0.378316,
+      "confidence": 0.4445,
+      "review": false
+    },
+    {
+      "night_sample_index": 938,
+      "night_time_seconds": 187.600006,
+      "day_sample_index": 914,
+      "day_time_seconds": 182.800003,
+      "cost": 0.365232,
+      "confidence": 0.495891,
+      "review": false
+    },
+    {
+      "night_sample_index": 939,
+      "night_time_seconds": 187.800003,
+      "day_sample_index": 916,
+      "day_time_seconds": 183.199997,
+      "cost": 0.400882,
+      "confidence": 0.355875,
+      "review": false
+    },
+    {
+      "night_sample_index": 940,
+      "night_time_seconds": 188.0,
+      "day_sample_index": 918,
+      "day_time_seconds": 183.600006,
+      "cost": 0.38377,
+      "confidence": 0.423079,
+      "review": false
+    },
+    {
+      "night_sample_index": 941,
+      "night_time_seconds": 188.199997,
+      "day_sample_index": 920,
+      "day_time_seconds": 184.0,
+      "cost": 0.497686,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 942,
+      "night_time_seconds": 188.399994,
+      "day_sample_index": 922,
+      "day_time_seconds": 184.399994,
+      "cost": 0.473491,
+      "confidence": 0.070701,
+      "review": true
+    },
+    {
+      "night_sample_index": 943,
+      "night_time_seconds": 188.600006,
+      "day_sample_index": 924,
+      "day_time_seconds": 184.800003,
+      "cost": 0.508086,
+      "confidence": 0.0,
+      "review": true
+    },
+    {
+      "night_sample_index": 944,
+      "night_time_seconds": 188.800003,
+      "day_sample_index": 926,
+      "day_time_seconds": 185.199997,
+      "cost": 0.410385,
+      "confidence": 0.31855,
+      "review": true
+    },
+    {
+      "night_sample_index": 945,
+      "night_time_seconds": 189.0,
+      "day_sample_index": 928,
+      "day_time_seconds": 185.600006,
+      "cost": 0.378747,
+      "confidence": 0.44281,
+      "review": false
+    },
+    {
+      "night_sample_index": 946,
+      "night_time_seconds": 189.199997,
+      "day_sample_index": 930,
+      "day_time_seconds": 186.0,
+      "cost": 0.386537,
+      "confidence": 0.412214,
+      "review": false
+    },
+    {
+      "night_sample_index": 947,
+      "night_time_seconds": 189.399994,
+      "day_sample_index": 932,
+      "day_time_seconds": 186.399994,
+      "cost": 0.321663,
+      "confidence": 0.667006,
+      "review": false
+    },
+    {
+      "night_sample_index": 948,
+      "night_time_seconds": 189.600006,
+      "day_sample_index": 934,
+      "day_time_seconds": 186.800003,
+      "cost": 0.362546,
+      "confidence": 0.50644,
+      "review": false
+    },
+    {
+      "night_sample_index": 949,
+      "night_time_seconds": 189.800003,
+      "day_sample_index": 936,
+      "day_time_seconds": 187.199997,
+      "cost": 0.338905,
+      "confidence": 0.599288,
+      "review": false
+    },
+    {
+      "night_sample_index": 950,
+      "night_time_seconds": 190.0,
+      "day_sample_index": 938,
+      "day_time_seconds": 187.600006,
+      "cost": 0.431087,
+      "confidence": 0.237243,
+      "review": true
+    },
+    {
+      "night_sample_index": 951,
+      "night_time_seconds": 190.199997,
+      "day_sample_index": 940,
+      "day_time_seconds": 188.0,
+      "cost": 0.455886,
+      "confidence": 0.139846,
+      "review": true
+    },
+    {
+      "night_sample_index": 952,
+      "night_time_seconds": 190.399994,
+      "day_sample_index": 942,
+      "day_time_seconds": 188.399994,
+      "cost": 0.471267,
+      "confidence": 0.079436,
+      "review": true
+    },
+    {
+      "night_sample_index": 953,
+      "night_time_seconds": 190.600006,
+      "day_sample_index": 944,
+      "day_time_seconds": 188.800003,
+      "cost": 0.40063,
+      "confidence": 0.356863,
+      "review": false
+    },
+    {
+      "night_sample_index": 954,
+      "night_time_seconds": 190.800003,
+      "day_sample_index": 946,
+      "day_time_seconds": 189.199997,
+      "cost": 0.503829,
+      "confidence": 0.0,
+      "review": true
+    }
+  ],
+  "outputs": {
+    "alignment_json": "day_night_alignment/use_computer_split/use_computer_day_night_rgb_alignment.json",
+    "night_to_day_csv": "day_night_alignment/use_computer_split/use_computer_night_to_day_frames.csv",
+    "day_to_night_csv": "day_night_alignment/use_computer_split/use_computer_day_to_night_frames.csv",
+    "preview": "day_night_alignment/use_computer_split/use_computer_day_night_rgb_alignment_preview.mp4",
+    "preview_frames": 1910
+  }
+}

@@ -62,6 +62,7 @@ from annotation_feature.temporal_alignment import (
     run_and_export_check_mailbox_day_rgb_event_feature_alignment,
     run_and_export_cut_carrot_aligned_dataset_segments,
     run_and_export_source_rgb_with_audio_segments_for_aligned_dataset,
+    run_all_day_night_rgb_pair_alignments,
     run_check_mailbox_day_night_rgb_alignment,
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_cut_carrot_day_night_rgb_alignment,
@@ -646,9 +647,10 @@ def main():
         print("79. Align wash_cup day/night RGB pair")
         print("80. Align cut_carrot day/night RGB pair")
         print("81. Align check_mailbox day/night RGB pair")
+        print("82. Align all day/night RGB pairs")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-81 or action id): ").strip()
+        choice = input("\nEnter choice (1-82 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1426,6 +1428,28 @@ def main():
             print(f"Day-to-night mapping: {outputs.get('day_to_night_csv')}")
             print(f"Preview: {outputs.get('preview')}")
             print(f"Review intervals: {len(summary.get('review_intervals', []))}")
+
+        elif choice == "82":
+            print("\n" + "-" * 60)
+            print("Running: all day/night RGB pair alignments")
+            print("-" * 60)
+            print("Discovers every split containing both *_day_rgb.mp4 and *_night_rgb.mp4.")
+            print("Writes mappings, diagnostics, and a side-by-side preview for every pair.")
+            print("This can take a long time, but completed feature caches are reused.\n")
+            if _confirm():
+                summary = run_all_day_night_rgb_pair_alignments(
+                    dataset_folder="dataset",
+                    output_folder="day_night_alignment",
+                    write_preview=True,
+                )
+                print(f"Discovered pairs: {summary.get('discovered_count', 0)}")
+                print(f"Aligned pairs: {summary.get('aligned_count', 0)}")
+                print(f"Failed pairs: {summary.get('failed_count', 0)}")
+                print(f"Summary: {summary.get('summary_file')}")
+                for item in summary.get("failed", []):
+                    print(f"- failed {item.get('sample')}: {item.get('reason')}")
+            else:
+                print("Cancelled.")
 
         elif choice == "63":
             print("\nExiting.")
