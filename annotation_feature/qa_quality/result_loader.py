@@ -21,6 +21,11 @@ class EvaluationRecord:
     modality: str
     section: str
     pair_key: str
+    source_qa_id: str
+    source_modality: str
+    input_modality: str
+    source_section: str
+    source_pair_key: str
     question: str
     ground_truth_answer: str
     model_answer: str
@@ -148,6 +153,17 @@ def load_result_file(path: Path | str) -> list[EvaluationRecord]:
                 modality=str(row.get("modality") or "unknown").lower(),
                 section=str(row.get("section") or "unknown").lower(),
                 pair_key=str(row.get("pair_key") or ""),
+                source_qa_id=str(row.get("source_qa_id") or qa_id),
+                source_modality=str(
+                    row.get("source_modality") or row.get("modality") or "unknown"
+                ).lower(),
+                input_modality=str(
+                    row.get("input_modality") or row.get("modality") or "unknown"
+                ).lower(),
+                source_section=str(
+                    row.get("source_section") or row.get("section") or "unknown"
+                ).lower(),
+                source_pair_key=str(row.get("source_pair_key") or row.get("pair_key") or ""),
                 question=str(row.get("question") or ""),
                 ground_truth_answer=str(
                     row.get("ground_truth_answer")
