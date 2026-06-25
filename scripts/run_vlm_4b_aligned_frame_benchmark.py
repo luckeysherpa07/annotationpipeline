@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import gc
 import hashlib
+import inspect
 import json
 import os
 import sys
@@ -391,10 +392,21 @@ def _ensure_molmo2_mask_compatibility(model: Any) -> None:
         return
 
     def wrap_mask_function(function: Any) -> Any:
+        try:
+            parameters = set(inspect.signature(function).parameters)
+        except (TypeError, ValueError):
+            parameters = set()
+
         def compatible_mask(*args: Any, **kwargs: Any) -> Any:
-            if "input_embeds" in kwargs and "inputs_embeds" not in kwargs:
+            if (
+                "input_embeds" in kwargs
+                and "input_embeds" not in parameters
+                and "inputs_embeds" in parameters
+                and "inputs_embeds" not in kwargs
+            ):
                 kwargs["inputs_embeds"] = kwargs.pop("input_embeds")
-            kwargs.pop("cache_position", None)
+            if parameters:
+                kwargs = {key: value for key, value in kwargs.items() if key in parameters}
             return function(*args, **kwargs)
 
         return compatible_mask
