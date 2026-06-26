@@ -40,12 +40,13 @@ except ImportError:
     Image = None
 
 try:
-    from transformers import AutoModelForImageTextToText, AutoProcessor
+    from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
     from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
     from transformers.processing_utils import ProcessorMixin
 except ImportError:
     AutoModelForImageTextToText = None
     AutoProcessor = None
+    BitsAndBytesConfig = None
     ROPE_INIT_FUNCTIONS = None
     ProcessorMixin = None
 
@@ -87,7 +88,13 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = sorted({key for row in rows for key in row})
     with open(path, "w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=fieldnames,
+            quoting=csv.QUOTE_ALL,
+            escapechar="\\",
+            lineterminator="\n",
+        )
         writer.writeheader()
         for row in rows:
             converted = dict(row)
@@ -418,6 +425,94 @@ def _ensure_molmo2_mask_compatibility(model: Any) -> None:
     module._aligned_benchmark_mask_compat = True
 
 
+def _ensure_molmo2_quantized_vision_dtype(model: Any) -> None:
+    vision_backbone = getattr(model, "vision_backbone", None)
+    if vision_backbone is None or getattr(vision_backbone, "_aligned_benchmark_dtype_compat", False):
+        return
+    current_dtype = getattr(vision_backbone, "dtype", None)
+    if current_dtype not in {getattr(torch, "int8", None), getattr(torch, "uint8", None)}:
+        return
+    vision_class = vision_backbone.__class__
+    compute_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+    try:
+        vision_class.dtype = property(lambda self: compute_dtype)
+    except Exception:
+        return
+    vision_backbone._aligned_benchmark_dtype_compat = True
+
+
+def _model_input_device(model: Any) -> Any:
+    """Return a real device for model inputs, avoiding meta devices from device_map loaders."""
+    device = getattr(model, "device", None)
+    if device is not None and getattr(device, "type", None) != "meta":
+        return device
+
+    hf_device_map = getattr(model, "hf_device_map", None)
+    if isinstance(hf_device_map, dict):
+        for mapped_device in hf_device_map.values():
+            if mapped_device in {"cpu", "disk", "meta"}:
+                continue
+            try:
+                candidate = torch.device(mapped_device)
+            except Exception:
+                continue
+            if candidate.type != "meta":
+                return candidate
+
+    for iterator_factory in (getattr(model, "parameters", None), getattr(model, "buffers", None)):
+        if not callable(iterator_factory):
+            continue
+        try:
+            iterator = iterator_factory()
+        except Exception:
+            continue
+        for tensor in iterator:
+            tensor_device = getattr(tensor, "device", None)
+            if tensor_device is not None and getattr(tensor_device, "type", None) != "meta":
+                return tensor_device
+
+    if torch is not None and torch.cuda.is_available():
+        return torch.device("cuda:0")
+    return torch.device("cpu") if torch is not None else None
+
+
+def _load_molmo2_model(model_name: str) -> tuple[Any, str]:
+    if AutoModelForImageTextToText is None or torch is None:
+        raise RuntimeError("Molmo2 requires Transformers and PyTorch.")
+
+    common_kwargs = {
+        "trust_remote_code": True,
+        "local_files_only": True,
+    }
+    if torch.cuda.is_available() and BitsAndBytesConfig is not None:
+        try:
+            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+            model = AutoModelForImageTextToText.from_pretrained(
+                model_name,
+                **common_kwargs,
+                quantization_config=quantization_config,
+                device_map={"": 0},
+                low_cpu_mem_usage=True,
+            ).eval()
+            return model, "8bit;device_map=cuda:0"
+        except Exception as exc:
+            print(
+                "WARNING: Failed to load Molmo2 in 8-bit CUDA mode; "
+                f"falling back to full-precision load. Original error: {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+
+    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+    model = AutoModelForImageTextToText.from_pretrained(
+        model_name,
+        **common_kwargs,
+        dtype=dtype,
+        low_cpu_mem_usage=False,
+    ).to(device).eval()
+    return model, f"{dtype};device={device}"
+
+
 class CachedQwenVLFrameAnswerAdapter(_SingleRGBFrameSetCache, QwenVLFrameAnswerAdapter):
     """Qwen-VL adapter that keeps one decoded RGB frame set in memory."""
 
@@ -521,14 +616,8 @@ class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
             raise RuntimeError("Molmo2 requires Transformers.")
         self.processor = _load_molmo2_processor(model_name)
         _ensure_molmo2_rope_compatibility()
-        self.model = AutoModelForImageTextToText.from_pretrained(
-            model_name,
-            trust_remote_code=True,
-            local_files_only=True,
-            dtype=torch.bfloat16,
-            device_map="auto",
-            low_cpu_mem_usage=True,
-        ).eval()
+        self.model, self.quantization = _load_molmo2_model(model_name)
+        _ensure_molmo2_quantized_vision_dtype(self.model)
         _ensure_molmo2_mask_compatibility(self.model)
         _ensure_molmo2_generation_compatibility(self.model)
 
@@ -561,12 +650,9 @@ class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
             "input_tokens": int(inputs["input_ids"].shape[-1]),
             "pixel_values_shape": list(inputs["pixel_values"].shape),
         }
-        device = getattr(self.model, "device", None)
-        if device is None:
-            try:
-                device = next(self.model.parameters()).device
-            except Exception:
-                device = None
+        device = _model_input_device(self.model)
+        if device is not None:
+            self.last_input_stats["input_device"] = str(device)
         inputs = {
             key: value.to(device) if device is not None and hasattr(value, "to") else value
             for key, value in inputs.items()
