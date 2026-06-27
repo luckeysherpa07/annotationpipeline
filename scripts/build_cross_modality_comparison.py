@@ -23,6 +23,7 @@ METRICS = (
     "judge_strict_accuracy",
     "judge_soft_accuracy",
 )
+PAIR_MODALITIES = ("rgb", "ir")
 
 
 def discover_json(inputs: Iterable[Path]) -> list[Path]:
@@ -172,6 +173,126 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return summary
 
 
+def semantic_section(section: Any) -> str:
+    """Merge source-specific section prefixes into one QA-type label."""
+    normalized = str(section or "unknown").lower()
+    for prefix in ("event_", "depth_"):
+        if normalized.startswith(prefix):
+            return normalized[len(prefix) :]
+    return normalized
+
+
+def source_qa_key(row: dict[str, Any]) -> str:
+    source_qa_id = str(row.get("source_qa_id", "")).strip()
+    if source_qa_id:
+        return source_qa_id
+    return str(row.get("qa_id", "")).split("__input_", maxsplit=1)[0]
+
+
+def build_rgb_ir_pairs(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Join RGB and IR scores for each model's identical source QA."""
+    grouped: dict[tuple[str, str, str], dict[str, dict[str, Any]]] = defaultdict(dict)
+    for row in rows:
+        modality = str(row.get("input_modality", "")).lower()
+        if modality not in PAIR_MODALITIES:
+            continue
+        key = (
+            str(row.get("provider", "")),
+            str(row.get("model_name", "")),
+            source_qa_key(row),
+        )
+        grouped[key][modality] = row
+
+    pairs: list[dict[str, Any]] = []
+    for (provider, model_name, qa_id), modalities in grouped.items():
+        rgb = modalities.get("rgb")
+        ir = modalities.get("ir")
+        if rgb is None or ir is None:
+            continue
+        pairs.append(
+            {
+                "provider": provider,
+                "model_name": model_name,
+                "source_qa_id": qa_id,
+                "source_modality": str(rgb.get("source_modality", "unknown")).lower(),
+                "source_section": str(rgb.get("source_section", "unknown")).lower(),
+                "semantic_section": semantic_section(rgb.get("source_section")),
+                "rgb_judge_label": str(rgb.get("judge_label", "")).lower(),
+                "ir_judge_label": str(ir.get("judge_label", "")).lower(),
+                "rgb_judge_score": optional_float(rgb.get("judge_score")),
+                "ir_judge_score": optional_float(ir.get("judge_score")),
+            }
+        )
+    return pairs
+
+
+def summarize_rgb_ir_pairs(pairs: list[dict[str, Any]]) -> dict[str, Any]:
+    judged = [
+        pair
+        for pair in pairs
+        if pair["rgb_judge_label"] and pair["ir_judge_label"]
+        and pair["rgb_judge_label"] != "unjudgeable"
+        and pair["ir_judge_label"] != "unjudgeable"
+    ]
+    rgb_strict = [float(pair["rgb_judge_label"] == "correct") for pair in judged]
+    ir_strict = [float(pair["ir_judge_label"] == "correct") for pair in judged]
+    rgb_soft = [pair["rgb_judge_score"] for pair in judged if pair["rgb_judge_score"] is not None]
+    ir_soft = [pair["ir_judge_score"] for pair in judged if pair["ir_judge_score"] is not None]
+    rgb_accuracy = mean(rgb_strict)
+    ir_accuracy = mean(ir_strict)
+    rgb_soft_accuracy = mean(rgb_soft)
+    ir_soft_accuracy = mean(ir_soft)
+    return {
+        "paired_total": len(pairs),
+        "paired_judgeable": len(judged),
+        "paired_excluded": len(pairs) - len(judged),
+        "rgb_strict_accuracy": rgb_accuracy,
+        "ir_strict_accuracy": ir_accuracy,
+        "rgb_minus_ir_strict_pp": (
+            (rgb_accuracy - ir_accuracy) * 100
+            if rgb_accuracy is not None and ir_accuracy is not None
+            else None
+        ),
+        "rgb_soft_accuracy": rgb_soft_accuracy,
+        "ir_soft_accuracy": ir_soft_accuracy,
+        "rgb_minus_ir_soft_pp": (
+            (rgb_soft_accuracy - ir_soft_accuracy) * 100
+            if rgb_soft_accuracy is not None and ir_soft_accuracy is not None
+            else None
+        ),
+        "both_correct": sum(
+            pair["rgb_judge_label"] == "correct" and pair["ir_judge_label"] == "correct"
+            for pair in judged
+        ),
+        "rgb_only_correct": sum(
+            pair["rgb_judge_label"] == "correct" and pair["ir_judge_label"] != "correct"
+            for pair in judged
+        ),
+        "ir_only_correct": sum(
+            pair["ir_judge_label"] == "correct" and pair["rgb_judge_label"] != "correct"
+            for pair in judged
+        ),
+        "both_not_correct": sum(
+            pair["rgb_judge_label"] != "correct" and pair["ir_judge_label"] != "correct"
+            for pair in judged
+        ),
+    }
+
+
+def grouped_rgb_ir_pairs(
+    pairs: list[dict[str, Any]], keys: tuple[str, ...]
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
+    for pair in pairs:
+        grouped[tuple(str(pair.get(key, "unknown")) for key in keys)].append(pair)
+    rows: list[dict[str, Any]] = []
+    for key_values, values in sorted(grouped.items()):
+        row = dict(zip(keys, key_values))
+        row.update(summarize_rgb_ir_pairs(values))
+        rows.append(row)
+    return rows
+
+
 def grouped_rows(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[dict[str, Any]]:
     grouped: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -234,6 +355,51 @@ def write_report(path: Path, input_rows: list[dict[str, Any]], matrix_rows: list
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_rgb_ir_pair_report(
+    path: Path,
+    overall_rows: list[dict[str, Any]],
+    section_rows: list[dict[str, Any]],
+) -> None:
+    lines = [
+        "# RGB vs IR Paired LLM-Judge Comparison",
+        "",
+        "Each pair contains the RGB and IR answers for the same model and `source_qa_id`. "
+        "Pairs with an `unjudgeable` or missing label are excluded from strict and soft accuracy.",
+        "",
+        "## Overall",
+        "",
+        "| Model | N | RGB strict | IR strict | RGB - IR (pp) | RGB-only correct | IR-only correct |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in overall_rows:
+        lines.append(
+            f"| {Path(row['model_name']).name} | {row['paired_judgeable']} | "
+            f"{fmt(row.get('rgb_strict_accuracy'))} | {fmt(row.get('ir_strict_accuracy'))} | "
+            f"{fmt(row.get('rgb_minus_ir_strict_pp'))} | {row['rgb_only_correct']} | "
+            f"{row['ir_only_correct']} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## By QA Section",
+            "",
+            "`semantic_section` removes the `event_` and `depth_` prefixes, so sections with the same QA "
+            "purpose are combined across their source modalities.",
+            "",
+            "| Model | QA section | N | RGB strict | IR strict | RGB - IR (pp) | RGB-only correct | IR-only correct |",
+            "|---|---|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for row in section_rows:
+        lines.append(
+            f"| {Path(row['model_name']).name} | {row['semantic_section']} | {row['paired_judgeable']} | "
+            f"{fmt(row.get('rgb_strict_accuracy'))} | {fmt(row.get('ir_strict_accuracy'))} | "
+            f"{fmt(row.get('rgb_minus_ir_strict_pp'))} | {row['rgb_only_correct']} | "
+            f"{row['ir_only_correct']} |"
+        )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results", nargs="+", type=Path, default=[DEFAULT_RESULTS])
@@ -262,12 +428,25 @@ def main() -> None:
         rows,
         ("provider", "model_name", "source_modality", "source_section", "input_modality"),
     )
+    rgb_ir_pairs = build_rgb_ir_pairs(rows)
+    rgb_ir_overall_rows = grouped_rgb_ir_pairs(rgb_ir_pairs, ("provider", "model_name"))
+    rgb_ir_section_rows = grouped_rgb_ir_pairs(
+        rgb_ir_pairs,
+        ("provider", "model_name", "semantic_section"),
+    )
 
     args.output.mkdir(parents=True, exist_ok=True)
     write_csv(args.output / "input_modality_summary.csv", input_rows)
     write_csv(args.output / "source_input_modality_matrix.csv", matrix_rows)
     write_csv(args.output / "source_section_input_modality_matrix.csv", section_rows)
+    write_csv(args.output / "rgb_ir_paired_overall.csv", rgb_ir_overall_rows)
+    write_csv(args.output / "rgb_ir_paired_by_section.csv", rgb_ir_section_rows)
     write_report(args.output / "cross_modality_report.md", input_rows, matrix_rows)
+    write_rgb_ir_pair_report(
+        args.output / "rgb_ir_paired_report.md",
+        rgb_ir_overall_rows,
+        rgb_ir_section_rows,
+    )
     print(f"report: {args.output / 'cross_modality_report.md'}")
 
 
