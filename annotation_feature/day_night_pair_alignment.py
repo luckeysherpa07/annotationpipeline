@@ -500,6 +500,30 @@ def _read_frame(cap: cv2.VideoCapture, frame_index: int) -> np.ndarray | None:
     return frame if ok else None
 
 
+def _read_mapping_csv(path: Path, source_label: str, target_label: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    with open(path, newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            source_frame = row.get(f"{source_label}_frame", "")
+            target_frame = row.get(f"{target_label}_frame", "")
+            rows.append(
+                {
+                    "source_frame": int(source_frame) if source_frame != "" else "",
+                    "source_time_seconds": float(row.get(f"{source_label}_time_seconds") or 0.0),
+                    "target_frame": int(target_frame) if target_frame != "" else "",
+                    "target_time_seconds": (
+                        float(row[f"{target_label}_time_seconds"])
+                        if row.get(f"{target_label}_time_seconds") not in ("", None)
+                        else ""
+                    ),
+                    "confidence": float(row.get("confidence") or 0.0),
+                    "status": row.get("status") or "",
+                }
+            )
+    return rows
+
+
 def _preview_panel(frame: np.ndarray, size: tuple[int, int], label: str, detail: str, color: tuple[int, int, int]) -> np.ndarray:
     panel = cv2.resize(frame, size, interpolation=cv2.INTER_AREA)
     cv2.rectangle(panel, (0, 0), (size[0], 56), (0, 0, 0), thickness=-1)
@@ -561,6 +585,171 @@ def _write_preview(
         day_cap.release()
         writer.release()
     return written
+
+
+def export_check_mailbox_day_night_robustness_qa_1fps_frames(
+    dataset_folder: Path | str = "dataset",
+    alignment_folder: Path | str = "day_night_alignment/check_mailbox_split",
+    output_folder: Path | str | None = None,
+    sample_fps: float = 1.0,
+) -> dict[str, Any]:
+    """Export aligned 1 FPS day/night RGB frame pairs for check_mailbox QA review."""
+    if sample_fps <= 0:
+        raise ValueError("sample_fps must be positive.")
+
+    sample_name = "check_mailbox"
+    split_folder_name = "check_mailbox_split"
+    dataset_folder = Path(dataset_folder)
+    split_folder = dataset_folder / split_folder_name
+    day_path = split_folder / f"{sample_name}_day_rgb.mp4"
+    night_path = split_folder / f"{sample_name}_night_rgb.mp4"
+    for path in (day_path, night_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"Required check_mailbox RGB video does not exist: {path}")
+
+    alignment_folder = Path(alignment_folder)
+    mapping_csv = alignment_folder / f"{sample_name}_night_to_day_frames.csv"
+    if not mapping_csv.is_file():
+        raise FileNotFoundError(f"Required night-to-day mapping CSV does not exist: {mapping_csv}")
+
+    output_folder = Path(output_folder or alignment_folder / "day_night_robustness_qa_1fps_frames")
+    night_output = output_folder / "night"
+    day_output = output_folder / "day"
+    side_by_side_output = output_folder / "side_by_side"
+    night_output.mkdir(parents=True, exist_ok=True)
+    day_output.mkdir(parents=True, exist_ok=True)
+    side_by_side_output.mkdir(parents=True, exist_ok=True)
+
+    night_meta = _video_metadata(night_path)
+    day_meta = _video_metadata(day_path)
+    mapping_rows = _read_mapping_csv(mapping_csv, "night", "day")
+    night_cap = cv2.VideoCapture(str(night_path))
+    day_cap = cv2.VideoCapture(str(day_path))
+    if not night_cap.isOpened() or not day_cap.isOpened():
+        night_cap.release()
+        day_cap.release()
+        raise ValueError("Could not open check_mailbox day/night RGB videos for frame export.")
+
+    manifest_rows: list[dict[str, Any]] = []
+    skipped_rows: list[dict[str, Any]] = []
+    step_seconds = 1.0 / sample_fps
+    sample_times = np.arange(0.0, float(night_meta["duration_seconds"]), step_seconds, dtype=np.float64)
+    try:
+        for export_index, night_time in enumerate(sample_times):
+            night_frame_index = min(
+                int(round(float(night_time) * float(night_meta["fps"]))),
+                int(night_meta["frame_count"]) - 1,
+            )
+            if night_frame_index >= len(mapping_rows):
+                skipped_rows.append(
+                    {
+                        "sample_index": export_index,
+                        "night_frame": night_frame_index,
+                        "night_time_seconds": round(float(night_time), 6),
+                        "reason": "missing_mapping_row",
+                    }
+                )
+                continue
+            mapping = mapping_rows[night_frame_index]
+            if mapping["target_frame"] == "":
+                skipped_rows.append(
+                    {
+                        "sample_index": export_index,
+                        "night_frame": night_frame_index,
+                        "night_time_seconds": round(float(night_time), 6),
+                        "reason": "unmatched_mapping_row",
+                    }
+                )
+                continue
+
+            day_frame_index = int(mapping["target_frame"])
+            night_frame = _read_frame(night_cap, night_frame_index)
+            day_frame = _read_frame(day_cap, day_frame_index)
+            if night_frame is None or day_frame is None:
+                skipped_rows.append(
+                    {
+                        "sample_index": export_index,
+                        "night_frame": night_frame_index,
+                        "day_frame": day_frame_index,
+                        "night_time_seconds": round(float(night_time), 6),
+                        "reason": "frame_read_failed",
+                    }
+                )
+                continue
+
+            frame_name = f"frame_{len(manifest_rows):06d}.png"
+            night_frame_path = night_output / frame_name
+            day_frame_path = day_output / frame_name
+            side_by_side_frame_path = side_by_side_output / frame_name
+            if day_frame.shape[:2] != night_frame.shape[:2]:
+                day_frame_for_pair = cv2.resize(
+                    day_frame,
+                    (night_frame.shape[1], night_frame.shape[0]),
+                    interpolation=cv2.INTER_AREA,
+                )
+            else:
+                day_frame_for_pair = day_frame
+            side_by_side_frame = np.hstack((night_frame, day_frame_for_pair))
+            cv2.imwrite(str(night_frame_path), night_frame)
+            cv2.imwrite(str(day_frame_path), day_frame)
+            cv2.imwrite(str(side_by_side_frame_path), side_by_side_frame)
+            manifest_rows.append(
+                {
+                    "pair_index": len(manifest_rows),
+                    "night_frame_path": str(night_frame_path),
+                    "day_frame_path": str(day_frame_path),
+                    "side_by_side_frame_path": str(side_by_side_frame_path),
+                    "night_frame": night_frame_index,
+                    "night_time_seconds": round(night_frame_index / float(night_meta["fps"]), 6),
+                    "day_frame": day_frame_index,
+                    "day_time_seconds": round(day_frame_index / float(day_meta["fps"]), 6),
+                    "confidence": round(float(mapping["confidence"]), 6),
+                    "status": mapping["status"],
+                }
+            )
+    finally:
+        night_cap.release()
+        day_cap.release()
+
+    manifest_path = output_folder / "manifest.json"
+    csv_path = output_folder / "manifest.csv"
+    summary = {
+        "sample": sample_name,
+        "split_folder_name": split_folder_name,
+        "sample_fps": sample_fps,
+        "reference_side": "night",
+        "alignment_mapping_csv": str(mapping_csv),
+        "sources": {"night": night_meta, "day": day_meta},
+        "output_folder": str(output_folder),
+        "night_frame_folder": str(night_output),
+        "day_frame_folder": str(day_output),
+        "side_by_side_frame_folder": str(side_by_side_output),
+        "exported_pair_count": len(manifest_rows),
+        "skipped_count": len(skipped_rows),
+        "skipped": skipped_rows,
+        "frames": manifest_rows,
+        "manifest_json": str(manifest_path),
+        "manifest_csv": str(csv_path),
+    }
+    with open(manifest_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    with open(csv_path, "w", newline="", encoding="utf-8") as handle:
+        fieldnames = [
+            "pair_index",
+            "night_frame_path",
+            "day_frame_path",
+            "side_by_side_frame_path",
+            "night_frame",
+            "night_time_seconds",
+            "day_frame",
+            "day_time_seconds",
+            "confidence",
+            "status",
+        ]
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(manifest_rows)
+    return summary
 
 
 def run_day_night_rgb_pair_alignment(

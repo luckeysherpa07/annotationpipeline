@@ -51,6 +51,7 @@ from annotation_feature.pipeline.modalities.marigold import (
 )
 from annotation_feature.temporal_alignment import (
     export_check_mailbox_day_rgb_event_optical_flow_alignment,
+    export_check_mailbox_day_night_robustness_qa_1fps_frames,
     export_day_night_rgb_event_depth_ir_alignment_grids,
     run_and_export_aligned_rgb_with_audio_segments,
     run_and_export_all_aligned_dataset_segments,
@@ -648,9 +649,11 @@ def main():
         print("80. Align cut_carrot day/night RGB pair")
         print("81. Align check_mailbox day/night RGB pair")
         print("82. Align all day/night RGB pairs")
+        print("\n--- DAY NIGHT ROBUSTNESS QA ---")
+        print("83. Export check_mailbox aligned day/night RGB frames at 1 FPS")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-82 or action id): ").strip()
+        choice = input("\nEnter choice (1-83 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1450,6 +1453,26 @@ def main():
                     print(f"- failed {item.get('sample')}: {item.get('reason')}")
             else:
                 print("Cancelled.")
+
+        elif choice == "83":
+            print("\n" + "-" * 60)
+            print("Running: check_mailbox day/night robustness QA 1 FPS frame export")
+            print("-" * 60)
+            print("Samples the night RGB timeline at 1 FPS and uses the existing night-to-day mapping.")
+            print("Writes paired PNG frames and a manifest under day_night_alignment/check_mailbox_split/.")
+            print("Does not modify the source dataset videos.\n")
+            summary = export_check_mailbox_day_night_robustness_qa_1fps_frames(
+                dataset_folder="dataset",
+                alignment_folder="day_night_alignment/check_mailbox_split",
+                sample_fps=1.0,
+            )
+            print(f"Exported frame pairs: {summary.get('exported_pair_count', 0)}")
+            print(f"Skipped samples: {summary.get('skipped_count', 0)}")
+            print(f"Night frames: {summary.get('night_frame_folder')}")
+            print(f"Day frames: {summary.get('day_frame_folder')}")
+            print(f"Side-by-side frames: {summary.get('side_by_side_frame_folder')}")
+            print(f"Manifest JSON: {summary.get('manifest_json')}")
+            print(f"Manifest CSV: {summary.get('manifest_csv')}")
 
         elif choice == "63":
             print("\nExiting.")

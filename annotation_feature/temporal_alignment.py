@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 
 from .day_night_pair_alignment import (
+    export_check_mailbox_day_night_robustness_qa_1fps_frames,
     run_all_day_night_rgb_pair_alignments,
     run_check_mailbox_day_night_rgb_alignment,
     run_cut_carrot_day_night_rgb_alignment,

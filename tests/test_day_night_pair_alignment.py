@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import cv2
 import numpy as np
 
 from annotation_feature import day_night_pair_alignment as alignment
@@ -162,6 +163,73 @@ class DayNightPairAlignmentTests(unittest.TestCase):
                     rows = list(csv.DictReader(handle))
                 self.assertEqual(len(rows), 40)
 
+    def test_check_mailbox_robustness_export_writes_aligned_1fps_pairs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            split = root / "dataset" / "check_mailbox_split"
+            split.mkdir(parents=True)
+            day_path = split / "check_mailbox_day_rgb.mp4"
+            night_path = split / "check_mailbox_night_rgb.mp4"
+
+            writer = cv2.VideoWriter(str(day_path), cv2.VideoWriter_fourcc(*"mp4v"), 2.0, (16, 16))
+            for index in range(6):
+                writer.write(np.full((16, 16, 3), index * 20, dtype=np.uint8))
+            writer.release()
+            writer = cv2.VideoWriter(str(night_path), cv2.VideoWriter_fourcc(*"mp4v"), 2.0, (16, 16))
+            for index in range(6):
+                writer.write(np.full((16, 16, 3), 255 - index * 20, dtype=np.uint8))
+            writer.release()
+
+            alignment_folder = root / "day_night_alignment" / "check_mailbox_split"
+            alignment_folder.mkdir(parents=True)
+            with open(alignment_folder / "check_mailbox_night_to_day_frames.csv", "w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle,
+                    fieldnames=[
+                        "night_frame",
+                        "night_time_seconds",
+                        "day_frame",
+                        "day_time_seconds",
+                        "confidence",
+                        "status",
+                    ],
+                )
+                writer.writeheader()
+                for index in range(6):
+                    writer.writerow(
+                        {
+                            "night_frame": index,
+                            "night_time_seconds": index / 2.0,
+                            "day_frame": 5 - index,
+                            "day_time_seconds": (5 - index) / 2.0,
+                            "confidence": 0.9,
+                            "status": "matched",
+                        }
+                    )
+
+            summary = alignment.export_check_mailbox_day_night_robustness_qa_1fps_frames(
+                dataset_folder=root / "dataset",
+                alignment_folder=alignment_folder,
+                sample_fps=1.0,
+            )
+
+            self.assertEqual(summary["exported_pair_count"], 3)
+            self.assertTrue((alignment_folder / "day_night_robustness_qa_1fps_frames" / "night" / "frame_000000.png").is_file())
+            self.assertTrue((alignment_folder / "day_night_robustness_qa_1fps_frames" / "day" / "frame_000000.png").is_file())
+            self.assertTrue(
+                (alignment_folder / "day_night_robustness_qa_1fps_frames" / "side_by_side" / "frame_000000.png").is_file()
+            )
+            self.assertEqual(
+                summary["frames"][0]["side_by_side_frame_path"],
+                str(alignment_folder / "day_night_robustness_qa_1fps_frames" / "side_by_side" / "frame_000000.png"),
+            )
+            self.assertEqual(
+                summary["side_by_side_frame_folder"],
+                str(alignment_folder / "day_night_robustness_qa_1fps_frames" / "side_by_side"),
+            )
+            self.assertTrue(Path(summary["manifest_json"]).is_file())
+            self.assertTrue(Path(summary["manifest_csv"]).is_file())
+
     def test_main_menu_contains_option_79_and_heading(self):
         source = (Path(__file__).resolve().parents[1] / "main.py").read_text(encoding="utf-8")
         self.assertIn("--- DAY NIGHT PAIR ALIGNMENT ---", source)
@@ -169,11 +237,14 @@ class DayNightPairAlignmentTests(unittest.TestCase):
         self.assertIn("80. Align cut_carrot day/night RGB pair", source)
         self.assertIn("81. Align check_mailbox day/night RGB pair", source)
         self.assertIn("82. Align all day/night RGB pairs", source)
+        self.assertIn("--- DAY NIGHT ROBUSTNESS QA ---", source)
+        self.assertIn("83. Export check_mailbox aligned day/night RGB frames at 1 FPS", source)
         self.assertIn('elif choice == "79":', source)
         self.assertIn('elif choice == "80":', source)
         self.assertIn('elif choice == "81":', source)
         self.assertIn('elif choice == "82":', source)
-        self.assertIn("Enter choice (1-82 or action id)", source)
+        self.assertIn('elif choice == "83":', source)
+        self.assertIn("Enter choice (1-83 or action id)", source)
 
 
 if __name__ == "__main__":
