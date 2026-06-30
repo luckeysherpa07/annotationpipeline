@@ -220,6 +220,19 @@ def _canonical_pair(pair: tuple[str, str]) -> tuple[str, str]:
 
 
 def _segment_pairs(segment: dict[str, Any]) -> tuple[tuple[str, str], ...]:
+    explicit_pairs = segment.get("modality_pairs")
+    if isinstance(explicit_pairs, list):
+        pairs: list[tuple[str, str]] = []
+        for raw_pair in explicit_pairs:
+            if not isinstance(raw_pair, (list, tuple)) or len(raw_pair) != 2:
+                continue
+            first = str(raw_pair[0] or "").strip().lower()
+            second = str(raw_pair[1] or "").strip().lower()
+            if first and second and first != second:
+                pairs.append((first, second))
+        if pairs:
+            return tuple(pairs)
+
     side = str(segment.get("side") or "").lower()
     if side == "night":
         return NIGHT_COMBINATIONS
@@ -418,6 +431,8 @@ def _build_role_bundles(
                 {
                     "segment_id": segment.get("segment_id"),
                     "source_prefix": segment.get("source_prefix"),
+                    "split_dir": segment.get("split_dir"),
+                    "segment_name": segment.get("segment_name"),
                     "side": segment.get("side"),
                     "task_label": segment.get("task_label"),
                     "start_seconds": segment.get("start_seconds"),
@@ -425,6 +440,12 @@ def _build_role_bundles(
                     "start_timestamp": segment.get("start_timestamp"),
                     "end_timestamp": segment.get("end_timestamp"),
                     "modalities": list(pair),
+                    "media_by_modality": {
+                        modality: segment.get("media_by_modality", {}).get(modality)
+                        for modality in pair
+                        if isinstance(segment.get("media_by_modality"), dict)
+                        and segment.get("media_by_modality", {}).get(modality) is not None
+                    },
                     "capability": spec["capability"],
                     "qa_style": QA_STYLE,
                     "context_modality": context_modality,
@@ -620,6 +641,8 @@ def _normalize_raw_qa(raw_item: dict[str, Any], bundle: dict[str, Any], index: i
         "qa_id": qa_id,
         "segment_id": bundle.get("segment_id"),
         "source_prefix": bundle.get("source_prefix"),
+        "split_dir": bundle.get("split_dir"),
+        "segment_name": bundle.get("segment_name"),
         "side": bundle.get("side"),
         "task_label": bundle.get("task_label"),
         "start_seconds": bundle.get("start_seconds"),
@@ -627,6 +650,7 @@ def _normalize_raw_qa(raw_item: dict[str, Any], bundle: dict[str, Any], index: i
         "start_timestamp": bundle.get("start_timestamp"),
         "end_timestamp": bundle.get("end_timestamp"),
         "modalities": bundle["modalities"],
+        "media_by_modality": bundle.get("media_by_modality", {}),
         "qa_style": QA_STYLE,
         "capability": bundle["capability"],
         "context_modality": context,
@@ -764,6 +788,8 @@ def _build_gemini_prompt(bundle: dict[str, Any]) -> str:
             "The answer must rely on an answer cue supplied by the decisive evidence.",
             "Do not ask a question whose target and answer are both fully specified by decisive evidence alone.",
             "Prefer questions where decisive evidence gives the cue, but context evidence is needed to bind the cue to the asked target.",
+            "Avoid yes/no questions, counting questions, anomaly or non-common-object questions, and questions whose answer is only a number, truth value, or single color word.",
+            "Prefer answers that name an object-action relation, spatial relation, action phase, scene transition, text cue, visibility cue, or motion cue.",
             "Do not write questions like 'what RGB and audio evidence together...'.",
             "Do not explicitly mention modality names in the question unless there is no natural alternative.",
             "The question should sound like a natural question about the scene.",
@@ -855,6 +881,8 @@ def _build_gemini_batch_prompt(tasks: list[dict[str, Any]]) -> str:
             "Each answer must rely on an answer cue supplied by the decisive evidence.",
             "Do not ask questions whose target and answer are both fully specified by decisive evidence alone.",
             "Prefer questions where decisive evidence gives the cue, but context evidence is needed to bind the cue to the asked target.",
+            "Avoid yes/no questions, counting questions, anomaly or non-common-object questions, and questions whose answer is only a number, truth value, or single color word.",
+            "Prefer answers that name an object-action relation, spatial relation, action phase, scene transition, text cue, visibility cue, or motion cue.",
             "Do not write questions like 'what RGB and audio evidence together...'.",
             "Do not explicitly mention modality names in the question unless there is no natural alternative.",
             "The question should sound like a natural question about the scene.",
@@ -1222,6 +1250,8 @@ async def _run_multimodal_qa_pipeline_async(
     model_name: str,
 ) -> Path:
     data = _load_json(input_path)
+    if isinstance(data.get("segments"), dict):
+        data = data["segments"]
     client = create_gemini_client() if generation_mode == "gemini" else None
 
     qa_items: list[dict[str, Any]] = []
