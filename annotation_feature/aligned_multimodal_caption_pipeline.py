@@ -497,8 +497,8 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
-            "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
+            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also avoid all sensor/imaging words.",
+            "FIELD RULES (violations cause rejection): (1) every missing_key_attributes[].recoverable_from must be a non-empty list — always include at least one recoverable source string. (2) every information_gain[].entity_id and ambiguity_events[].target_entity must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence.",
             "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
             "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
             "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. Identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
@@ -572,118 +572,6 @@ def _build_caption_prompt(task: CaptionTask) -> str:
         ]
     )
 
-
-def _build_batch_caption_prompt(tasks: list[CaptionTask]) -> str:
-    item_specs: list[str] = []
-    image_index = 1
-    for task in tasks:
-        frame_range = f"images {image_index}-{image_index + len(task.composite_frames) - 1}"
-        image_index += len(task.composite_frames)
-        item_specs.append(
-            "\n".join(
-                [
-                    "{",
-                    f'  "caption_id": "{task.caption_id}",',
-                    f'  "segment_id": "{task.segment_id}",',
-                    f'  "side": "{task.side}",',
-                    f'  "helper_modality": "{task.helper_modality}",',
-                    f'  "victim_modality": "{task.victim_modality}",',
-                    f'  "composite_images": "{frame_range}",',
-                    f'  "frame_names": "{", ".join(path.name for path in task.composite_frames)}"',
-                    "}",
-                ]
-            )
-        )
-    return "\n".join(
-        [
-            "You are an expert multimodal perception analyst.",
-            "You will receive side-by-side composite frames for multiple independent caption items.",
-            "For every item, Video 1 (left) and Video 2 (right) observe the same physical scene using different sensing modalities.",
-            "Neither video is considered the reference or the ground truth.",
-            "Process each item independently. Do not mix observations across caption_id values.",
-            "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
-            "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
-            "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
-            "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
-            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
-            "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
-            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. Identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
-            "INFORMATION GAIN: Explain what Video 1 alone can/cannot determine, what Video 2 alone can/cannot determine, and what combination additionally reveals. Rate gain as low/medium/high.",
-            "AMBIGUITY RESOLUTION: Create an ambiguity event ONLY when Video 1 resolves Video 2 OR Video 2 resolves Video 1.",
-            "QUESTION-WORTHINESS: Estimate usefulness for generating difficult reasoning questions. Provide difficulty, qa_potential, and supported_question_types.",
-            "FRAME-BY-FRAME ANALYSIS: Describe newly appearing/disappearing entities, motion/interaction changes, and newly introduced/resolved uncertainty across frames.",
-            "Return ONLY valid JSON with this exact top-level structure:",
-            "{",
-            '  "items": [',
-            '    {',
-            '      "caption_id": "must exactly match one input caption_id",',
-            f'      "schema_version": "{CAPTION_SCHEMA_VERSION}",',
-            '      "global_scene": {',
-            '        "scene_summary": "Detailed physical-scene summary independent of sensor artifacts.",',
-            '        "physical_entities": [',
-            '          {"entity_id": "stable_snake_case_id", "category": "...", "appearance_or_state": "...", "location": "...", "motion_or_action": "...", "spatial_relations": ["..."]}',
-            '        ],',
-            '        "environment": "Objective environment or recording condition if evident.",',
-            '        "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
-            '      },',
-            '      "video1_analysis": {',
-            '        "modality": "left video 1 modality name",',
-            '        "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
-            '        "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
-            '        "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
-            '        "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '        "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
-            '        "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video1_analysis.observable_facts"]}]',
-            '      },',
-            '      "video2_analysis": {',
-            '        "modality": "right video 2 modality name",',
-            '        "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
-            '        "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
-            '        "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
-            '        "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '        "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
-            '        "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video2_analysis.observable_facts"]}]',
-            '      },',
-            '      "cross_modal_evidence_links": [',
-            '        {"entity_id": "...", "shared_evidence": "...", "unique_to_video1": "...", "unique_to_video2": "...", "how_video1_improves_video2": "...", "how_video2_improves_video1": "..."}',
-            '      ],',
-            '      "information_gain": [',
-            '        {"entity_id": "...", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."], "gain_rating": "low|medium|high"}',
-            '      ],',
-            '      "ambiguity_events": [',
-            '        {',
-            '          "target_entity": "entity_id from global_scene.physical_entities",',
-            '          "approx_time_range": "early sampled frame|middle sampled frame|late sampled frame|specific frame names",',
-            '          "direction": "video1_resolves_video2|video2_resolves_video1",',
-            '          "ambiguous_video": "video1|video2",',
-            '          "resolving_video": "video2|video1",',
-            '          "low_confidence_observation": "What the ambiguous video shows by itself.",',
-            '          "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
-            '          "candidate_hypotheses": [{"hypothesis": "...", "support_from_victim": "..."}],',
-            '          "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
-            '          "eliminated_hypotheses": [{"hypothesis": "...", "why_eliminated": "..."}],',
-            '          "fusion_conclusion": "Final physical fact after combining both modalities.",',
-            '          "missing_attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend",',
-            '          "question_worthiness": {"difficulty": "easy|medium|hard", "qa_potential": "high|medium|low", "supported_question_types": ["cross_modal_reasoning", "spatial_reasoning"]}',
-            '        }',
-            '      ],',
-            '      "frame_by_frame_analysis": [',
-            '        {"frame_key": "frame_000000", "newly_appearing_entities": ["..."], "disappearing_entities": ["..."], "motion_changes": "...", "interaction_changes": "...", "newly_introduced_uncertainty": "...", "resolved_uncertainty": "..."}',
-            '      ],',
-            '      "rejected_observations": [',
-            '        {"observation": "...", "reason": "Why this was not a valid ambiguity_event."}',
-            '      ]',
-            '    }',
-            '  ]',
-            '}',
-            "Return exactly one item for every input caption_id, in the same order as listed below.",
-            "Only include an item in ambiguity_events when one video genuinely disambiguates the other.",
-            "If no valid ambiguity_event exists for an item, return an empty ambiguity_events list and explain each rejected case in rejected_observations.",
-            "Input items:",
-            "\n\n".join(item_specs),
-        ]
-    )
 
 
 def _encode_images(paths: tuple[Path, ...]) -> list[str]:
@@ -962,7 +850,8 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
     encoded = _encode_images(task.composite_frames)
     if not encoded:
         raise ValueError("No composite frames found for Gemini call")
-    contents = build_image_parts(encoded) + [_build_caption_prompt(task)]
+    base_contents = build_image_parts(encoded) + [_build_caption_prompt(task)]
+    contents = base_contents
     for attempt in range(1, max_retries + 1):
         try:
             response = await asyncio.to_thread(
@@ -980,65 +869,13 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
                 f"retrying in {wait_seconds}s: {exc}"
             )
             await asyncio.sleep(wait_seconds)
+            # Error-guided retry: tell the model exactly what went wrong
+            error_feedback = (
+                f"Your previous response was REJECTED due to this validation error: [{exc}]. "
+                f"Fix ONLY that specific issue and return the corrected full JSON."
+            )
+            contents = base_contents + [error_feedback]
     raise RuntimeError("Gemini caption call failed")
-
-
-def _validate_batch_caption_schema(parsed: dict[str, Any], tasks: list[CaptionTask]) -> dict[str, dict[str, Any]]:
-    items = parsed.get("items")
-    if not isinstance(items, list):
-        raise ValueError("Batch Gemini response must contain an items list")
-    expected_ids = [task.caption_id for task in tasks]
-    if len(items) != len(expected_ids):
-        raise ValueError(f"Batch Gemini response must contain {len(expected_ids)} item(s), got {len(items)}")
-    captions_by_id: dict[str, dict[str, Any]] = {}
-    for expected_id, item in zip(expected_ids, items):
-        if not isinstance(item, dict):
-            raise ValueError("Each batch caption item must be an object")
-        caption_id = item.get("caption_id")
-        if caption_id != expected_id:
-            raise ValueError(f"Expected caption_id {expected_id!r}, got {caption_id!r}")
-        caption = dict(item)
-        caption.pop("caption_id", None)
-        captions_by_id[expected_id] = _validate_caption_schema(caption)
-    return captions_by_id
-
-
-def _chunk_tasks(tasks: list[CaptionTask], batch_size: int) -> list[list[CaptionTask]]:
-    return [tasks[index : index + batch_size] for index in range(0, len(tasks), batch_size)]
-
-
-async def _call_gemini_caption_batch(
-    client,
-    tasks: list[CaptionTask],
-    model_name: str,
-    max_retries: int,
-) -> dict[str, dict[str, Any]]:
-    encoded: list[str] = []
-    for task in tasks:
-        _ensure_composite_frames(task)
-        task_encoded = _encode_images(task.composite_frames)
-        if not task_encoded:
-            raise ValueError(f"No composite frames found for Gemini call: {task.caption_id}")
-        encoded.extend(task_encoded)
-    contents = build_image_parts(encoded) + [_build_batch_caption_prompt(tasks)]
-    for attempt in range(1, max_retries + 1):
-        try:
-            response = await asyncio.to_thread(
-                client.models.generate_content,
-                model=model_name,
-                contents=contents,
-            )
-            return _validate_batch_caption_schema(_parse_json_response(response.text), tasks)
-        except Exception as exc:
-            if attempt == max_retries:
-                raise
-            wait_seconds = 30 * attempt if "429" in str(exc) or "quota" in str(exc).lower() else 2 * attempt
-            print(
-                f"    Batch caption Gemini call failed on attempt {attempt}/{max_retries}; "
-                f"retrying in {wait_seconds}s: {exc}"
-            )
-            await asyncio.sleep(wait_seconds)
-    raise RuntimeError("Batch Gemini caption call failed")
 
 
 def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, reason: str | None = None) -> dict[str, Any]:
@@ -1158,7 +995,6 @@ def _build_output_payload(
     model_name: str,
     generation_mode: str,
     num_frames: int,
-    max_caption_items_per_gemini_call: int,
     items: list[dict[str, Any]],
     skipped: list[dict[str, Any]],
     planned_total: int,
@@ -1175,7 +1011,6 @@ def _build_output_payload(
             "generation_mode": generation_mode,
             "model_name": model_name,
             "num_frames": num_frames,
-            "max_caption_items_per_gemini_call": max_caption_items_per_gemini_call,
             "planned_items": planned_total,
             "completed_items": len(items),
             "skipped_items": len(skipped),
@@ -1216,7 +1051,6 @@ async def run_caption_pipeline_async(
     max_retries: int,
     delay_between_calls: int,
     checkpoint_every: int,
-    max_caption_items_per_gemini_call: int,
     resume: bool,
 ) -> Path:
     allowed_pairs = _parse_pairs(pairs)
@@ -1240,8 +1074,6 @@ async def run_caption_pipeline_async(
     skipped = existing_skipped + skipped
     existing_ids = {str(item.get("caption_id")) for item in items if item.get("caption_id")}
     pending_tasks = [task for task in tasks if task.caption_id not in existing_ids]
-    batch_size = max(1, max_caption_items_per_gemini_call if generation_mode == "gemini" else 1)
-    pending_batches = _chunk_tasks(pending_tasks, batch_size)
 
     client = create_gemini_client() if generation_mode == "gemini" else None
     gemini_calls = 0
@@ -1249,8 +1081,7 @@ async def run_caption_pipeline_async(
 
     print(
         f"Generating cross-modal captions: {len(tasks)} planned item(s), "
-        f"{len(pending_tasks)} pending, {len(pending_batches)} batch(es), "
-        f"mode={generation_mode}, model={model_name}, batch_size={batch_size}."
+        f"{len(pending_tasks)} pending, mode={generation_mode}, model={model_name}."
     )
 
     def save_checkpoint() -> None:
@@ -1263,7 +1094,6 @@ async def run_caption_pipeline_async(
                 model_name=model_name,
                 generation_mode=generation_mode,
                 num_frames=num_frames,
-                max_caption_items_per_gemini_call=batch_size,
                 items=items,
                 skipped=skipped,
                 planned_total=len(tasks),
@@ -1272,57 +1102,40 @@ async def run_caption_pipeline_async(
             output_path,
         )
 
-    for index, task_batch in enumerate(pending_batches, start=1):
-        batch_label = ", ".join(task.caption_id for task in task_batch)
+    for index, task in enumerate(pending_tasks, start=1):
         print(
-            f"  Caption batch [{index}/{len(pending_batches)}] "
-            f"{len(task_batch)} item(s): {batch_label}"
+            f"  Caption item [{index}/{len(pending_tasks)}] "
+            f"{task.caption_id}"
         )
         try:
             if generation_mode == "gemini":
                 assert client is not None
-                if len(task_batch) == 1:
-                    task = task_batch[0]
-                    caption = await _call_gemini_caption(client, task, model_name, max_retries=max_retries)
-                    captions_by_id = {task.caption_id: caption}
-                else:
-                    captions_by_id = await _call_gemini_caption_batch(
-                        client,
-                        task_batch,
-                        model_name,
-                        max_retries=max_retries,
-                    )
+                caption = await _call_gemini_caption(client, task, model_name, max_retries=max_retries)
                 gemini_calls += 1
                 status = "generated"
             else:
-                for task in task_batch:
-                    _ensure_composite_frames(task)
-                captions_by_id = {
-                    task.caption_id: _template_caption(task)
-                    for task in task_batch
-                }
+                _ensure_composite_frames(task)
+                caption = _template_caption(task)
                 status = "template"
-            for task in task_batch:
-                items.append(_task_to_item(task, status=status, caption=captions_by_id[task.caption_id]))
+            items.append(_task_to_item(task, status=status, caption=caption))
         except Exception as exc:
-            for task in task_batch:
-                skipped.append(
-                    {
-                        "caption_id": task.caption_id,
-                        "segment_id": task.segment_id,
-                        "side": task.side,
-                        "helper_modality": task.helper_modality,
-                        "victim_modality": task.victim_modality,
-                        "reason": str(exc),
-                    }
-                )
-            print(f"WARNING: Caption generation failed for batch containing {batch_label}: {exc}")
+            skipped.append(
+                {
+                    "caption_id": task.caption_id,
+                    "segment_id": task.segment_id,
+                    "side": task.side,
+                    "helper_modality": task.helper_modality,
+                    "victim_modality": task.victim_modality,
+                    "reason": str(exc),
+                }
+            )
+            print(f"WARNING: Caption generation failed for {task.caption_id}: {exc}")
 
         checkpoint_counter += 1
         if checkpoint_every > 0 and checkpoint_counter >= checkpoint_every:
             checkpoint_counter = 0
             save_checkpoint()
-        if generation_mode == "gemini" and delay_between_calls > 0 and index < len(pending_batches):
+        if generation_mode == "gemini" and delay_between_calls > 0 and index < len(pending_tasks):
             await asyncio.sleep(delay_between_calls)
 
     save_checkpoint()
@@ -1347,7 +1160,6 @@ def run_caption_pipeline(
     max_retries: int = 3,
     delay_between_calls: int = 5,
     checkpoint_every: int = 1,
-    max_caption_items_per_gemini_call: int = 1,
     resume: bool = True,
 ) -> Path:
     return asyncio.run(
@@ -1368,7 +1180,6 @@ def run_caption_pipeline(
             max_retries=max_retries,
             delay_between_calls=delay_between_calls,
             checkpoint_every=checkpoint_every,
-            max_caption_items_per_gemini_call=max_caption_items_per_gemini_call,
             resume=resume,
         )
     )
@@ -1423,12 +1234,6 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-retries", type=int, default=3)
     parser.add_argument("--delay-between-calls", type=int, default=5)
     parser.add_argument("--checkpoint-every", type=int, default=1)
-    parser.add_argument(
-        "--max-caption-items-per-gemini-call",
-        type=int,
-        default=1,
-        help="Batch this many caption items into one Gemini request. Use 1 for safest parsing.",
-    )
     parser.add_argument("--no-resume", action="store_true")
     return parser
 
@@ -1452,7 +1257,6 @@ def main() -> None:
         max_retries=max(1, args.max_retries),
         delay_between_calls=max(0, args.delay_between_calls),
         checkpoint_every=max(0, args.checkpoint_every),
-        max_caption_items_per_gemini_call=max(1, args.max_caption_items_per_gemini_call),
         resume=not args.no_resume,
     )
 
