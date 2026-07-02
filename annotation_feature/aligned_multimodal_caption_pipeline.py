@@ -22,7 +22,36 @@ DEFAULT_OUTPUT_PATH = Path("outputs/aligned_cross_modal_disambiguation_captions_
 DEFAULT_COMPOSITE_ROOT = Path("outputs/composite_frames")
 DEFAULT_DATASET_ROOT = Path("aligned_dataset")
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
-CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v2"
+CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v5"
+ALLOWED_MISSING_ATTRIBUTE_TYPES = {
+    "existence",
+    "target_category",
+    "spatial_distance",
+    "surface_attribute",
+    "motion_trend",
+}
+ALLOWED_QA_POTENTIAL = {"high", "medium", "low"}
+ALLOWED_QUESTION_TYPES = {
+    "object_identity", "attribute_reasoning", "temporal_reasoning",
+    "spatial_reasoning", "interaction_reasoning", "cross_modal_reasoning",
+    "counterfactual_reasoning",
+}
+ALLOWED_GAIN_RATINGS = {"low", "medium", "high"}
+ALLOWED_AMBIGUITY_DIRECTIONS = {"video1_resolves_video2", "video2_resolves_video1"}
+FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
+    r"\b(modality|thermal|rgb|event|depth|infrared|ir|visible|invisible|"
+    r"blurry|noisy|pixels?|grayscale|heat|edge|sparse|contrast)\b", re.I
+)
+MIN_DETAILED_CAPTION_WORDS = 30
+MIN_SCENE_SUMMARY_WORDS = 35
+MIN_FRAME_DETAIL_WORDS = 8
+MIN_OBSERVABLE_FACTS = 3
+GENERIC_SENSOR_EXPLANATION_PATTERNS = (
+    re.compile(r"\bevent cameras?\s+(capture|detect|record|respond)", re.I),
+    re.compile(r"\b(depth|rgb|infrared|ir)\s+(camera|sensor)s?\s+(capture|detect|record|measure)", re.I),
+    re.compile(r"\bthis modality\s+(captures|detects|records|measures)", re.I),
+    re.compile(r"\bdesigned to\s+(capture|detect|record|measure)", re.I),
+)
 VISUAL_PAIRS = (
     ("rgb", "event"),
     ("rgb", "depth"),
@@ -45,12 +74,12 @@ class CaptionTask:
     split_dir: str
     segment_name: str
     side: str
-    context_modality: str
-    decisive_modality: str
-    context_frame_dir: Path
-    decisive_frame_dir: Path
-    context_frames: tuple[Path, ...]
-    decisive_frames: tuple[Path, ...]
+    helper_modality: str
+    victim_modality: str
+    helper_frame_dir: Path
+    victim_frame_dir: Path
+    helper_frames: tuple[Path, ...]
+    victim_frames: tuple[Path, ...]
     composite_frames: tuple[Path, ...]
 
 
@@ -153,34 +182,34 @@ def _load_frame_dirs(
 
 
 def _pair_frame_dirs(
-    context_dirs: dict[str, Path],
-    decisive_dirs: dict[str, Path],
+    helper_dirs: dict[str, Path],
+    victim_dirs: dict[str, Path],
 ) -> list[tuple[str, Path, Path]]:
-    sides = [side for side in SIDE_ORDER if side in context_dirs and side in decisive_dirs]
+    sides = [side for side in SIDE_ORDER if side in helper_dirs and side in victim_dirs]
     sides.extend(
         sorted(
             side
-            for side in set(context_dirs) & set(decisive_dirs)
+            for side in set(helper_dirs) & set(victim_dirs)
             if side not in SIDE_ORDER
         )
     )
-    return [(side, context_dirs[side], decisive_dirs[side]) for side in sides]
+    return [(side, helper_dirs[side], victim_dirs[side]) for side in sides]
 
 
 def _select_paired_frames(
-    context_dir: Path,
-    decisive_dir: Path,
-    context_modality: str,
-    decisive_modality: str,
+    helper_dir: Path,
+    victim_dir: Path,
+    helper_modality: str,
+    victim_modality: str,
     num_frames: int,
 ) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
-    context_by_index = _frames_by_index(context_dir, context_modality)
-    decisive_by_index = _frames_by_index(decisive_dir, decisive_modality)
-    shared_indexes = sorted(set(context_by_index) & set(decisive_by_index))
+    helper_by_index = _frames_by_index(helper_dir, helper_modality)
+    victim_by_index = _frames_by_index(victim_dir, victim_modality)
+    shared_indexes = sorted(set(helper_by_index) & set(victim_by_index))
     selected_indexes = _evenly_sample(shared_indexes, num_frames)
     return (
-        tuple(context_by_index[index] for index in selected_indexes),
-        tuple(decisive_by_index[index] for index in selected_indexes),
+        tuple(helper_by_index[index] for index in selected_indexes),
+        tuple(victim_by_index[index] for index in selected_indexes),
     )
 
 
@@ -188,11 +217,16 @@ def _safe_name(value: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_.-]+", "_", value).strip("_")
 
 
+_FONT_CACHE: dict[int, ImageFont.ImageFont] = {}
+
+
 def _load_font(size: int = 28) -> ImageFont.ImageFont:
-    try:
-        return ImageFont.truetype("arial.ttf", size=size)
-    except OSError:
-        return ImageFont.load_default()
+    if size not in _FONT_CACHE:
+        try:
+            _FONT_CACHE[size] = ImageFont.truetype("arial.ttf", size=size)
+        except OSError:
+            _FONT_CACHE[size] = ImageFont.load_default()
+    return _FONT_CACHE[size]
 
 
 def _resize_to_height(image: Image.Image, height: int) -> Image.Image:
@@ -202,25 +236,26 @@ def _resize_to_height(image: Image.Image, height: int) -> Image.Image:
     return image.resize((width, height), Image.Resampling.LANCZOS)
 
 
-def _draw_label(image: Image.Image, label: str) -> None:
+def _draw_label(image: Image.Image, label: str, xy: tuple[int, int]) -> None:
     draw = ImageDraw.Draw(image)
     font = _load_font()
+    x, y = xy
     padding = 10
-    bbox = draw.textbbox((0, 0), label, font=font)
+    bbox = draw.textbbox((x, y), label, font=font)
     width = bbox[2] - bbox[0]
     height = bbox[3] - bbox[1]
     draw.rectangle(
-        (0, 0, width + padding * 2, height + padding * 2),
+        (x, y, x + width + padding * 2, y + height + padding * 2),
         fill=(0, 0, 0),
     )
-    draw.text((padding, padding), label, fill=(255, 255, 255), font=font)
+    draw.text((x + padding, y + padding), label, fill=(255, 255, 255), font=font)
 
 
 def _compose_frame(
     context_frame: Path,
     decisive_frame: Path,
-    context_modality: str,
-    decisive_modality: str,
+    helper_modality: str,
+    victim_modality: str,
     output_path: Path,
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -233,22 +268,52 @@ def _compose_frame(
         canvas = Image.new("RGB", (left.width + right.width, target_height), (0, 0, 0))
         canvas.paste(left, (0, 0))
         canvas.paste(right, (left.width, 0))
-        _draw_label(canvas, f"LEFT: {context_modality.upper()} context")
-        right_label = Image.new("RGB", (right.width, target_height), (0, 0, 0))
-        right_label.paste(right, (0, 0))
-        _draw_label(right_label, f"RIGHT: {decisive_modality.upper()} decisive")
-        canvas.paste(right_label, (left.width, 0))
+        _draw_label(canvas, f"LEFT: {helper_modality.upper()} helper", (0, 0))
+        _draw_label(canvas, f"RIGHT: {victim_modality.upper()} victim", (left.width, 0))
         canvas.save(output_path)
     return output_path
 
 
-def _caption_id(segment_id: str, side: str, context_modality: str, decisive_modality: str) -> str:
+def _ensure_composite_frame(
+    context_frame: Path,
+    decisive_frame: Path,
+    helper_modality: str,
+    victim_modality: str,
+    output_path: Path,
+) -> Path:
+    if not output_path.exists():
+        _compose_frame(
+            context_frame,
+            decisive_frame,
+            helper_modality,
+            victim_modality,
+            output_path,
+        )
+    return output_path
+
+
+def _ensure_composite_frames(task: CaptionTask) -> None:
+    for context_frame, decisive_frame, composite_frame in zip(
+        task.helper_frames,
+        task.victim_frames,
+        task.composite_frames,
+    ):
+        _ensure_composite_frame(
+            context_frame,
+            decisive_frame,
+            task.helper_modality,
+            task.victim_modality,
+            composite_frame,
+        )
+
+
+def _caption_id(segment_id: str, side: str, helper_modality: str, victim_modality: str) -> str:
     return "__".join(
         [
             _safe_name(segment_id).lower(),
             _safe_name(side).lower(),
-            f"{context_modality}_context",
-            f"{decisive_modality}_decisive",
+            f"{helper_modality}_helper",
+            f"{victim_modality}_victim",
         ]
     )
 
@@ -324,52 +389,52 @@ def build_caption_tasks(
             pair_tuple = (str(pair[0]).lower(), str(pair[1]).lower())
             if allowed_pairs is not None and pair_tuple not in allowed_pairs and pair_tuple[::-1] not in allowed_pairs:
                 continue
-            for context_modality, decisive_modality in _directions_for_pair(pair, allowed_directions):
-                context_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, context_modality)
-                decisive_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, decisive_modality)
-                if not context_dirs or not decisive_dirs:
+            for helper_modality, victim_modality in _directions_for_pair(pair, allowed_directions):
+                helper_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, helper_modality)
+                victim_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, victim_modality)
+                if not helper_dirs or not victim_dirs:
                     skipped.append(
                         {
                             "segment_id": segment_id,
                             "split_dir": split_dir,
                             "segment_name": segment_name,
-                            "context_modality": context_modality,
-                            "decisive_modality": decisive_modality,
+                            "helper_modality": helper_modality,
+                            "victim_modality": victim_modality,
                             "reason": "missing frame cache directory",
                         }
                     )
                     continue
-                for side, context_dir, decisive_dir in _pair_frame_dirs(context_dirs, decisive_dirs):
-                    context_frames, decisive_frames = _select_paired_frames(
-                        context_dir,
-                        decisive_dir,
-                        context_modality,
-                        decisive_modality,
+                for side, helper_dir, victim_dir in _pair_frame_dirs(helper_dirs, victim_dirs):
+                    helper_frames, victim_frames = _select_paired_frames(
+                        helper_dir,
+                        victim_dir,
+                        helper_modality,
+                        victim_modality,
                         num_frames,
                     )
-                    if not context_frames:
+                    if not helper_frames:
                         skipped.append(
                             {
                                 "segment_id": segment_id,
                                 "side": side,
-                                "context_modality": context_modality,
-                                "decisive_modality": decisive_modality,
-                                "context_frame_dir": context_dir.as_posix(),
-                                "decisive_frame_dir": decisive_dir.as_posix(),
+                                "helper_modality": helper_modality,
+                                "victim_modality": victim_modality,
+                                "helper_frame_dir": helper_dir.as_posix(),
+                                "victim_frame_dir": victim_dir.as_posix(),
                                 "reason": "no shared frame indexes",
                             }
                         )
                         continue
-                    caption_id = _caption_id(str(segment_id), side, context_modality, decisive_modality)
+                    caption_id = _caption_id(str(segment_id), side, helper_modality, victim_modality)
                     output_dir = (
                         composite_root
                         / _safe_name(split_dir)
                         / _safe_name(segment_name)
                         / _safe_name(side)
-                        / f"{context_modality}_context__{decisive_modality}_decisive"
+                        / f"{helper_modality}_helper__{victim_modality}_victim"
                     )
                     composite_frames: list[Path] = []
-                    for index, (context_frame, decisive_frame) in enumerate(zip(context_frames, decisive_frames), start=1):
+                    for index, (context_frame, decisive_frame) in enumerate(zip(helper_frames, victim_frames), start=1):
                         frame_number = _frame_index(context_frame)
                         suffix = f"{frame_number:06d}" if frame_number is not None else f"{index:03d}"
                         output_path = output_dir / f"frame_{suffix}.png"
@@ -377,8 +442,8 @@ def build_caption_tasks(
                             _compose_frame(
                                 context_frame,
                                 decisive_frame,
-                                context_modality,
-                                decisive_modality,
+                                helper_modality,
+                                victim_modality,
                                 output_path,
                             )
                         composite_frames.append(output_path)
@@ -389,12 +454,12 @@ def build_caption_tasks(
                             split_dir=split_dir,
                             segment_name=segment_name,
                             side=side,
-                            context_modality=context_modality,
-                            decisive_modality=decisive_modality,
-                            context_frame_dir=context_dir,
-                            decisive_frame_dir=decisive_dir,
-                            context_frames=context_frames,
-                            decisive_frames=decisive_frames,
+                            helper_modality=helper_modality,
+                            victim_modality=victim_modality,
+                            helper_frame_dir=helper_dir,
+                            victim_frame_dir=victim_dir,
+                            helper_frames=helper_frames,
+                            victim_frames=victim_frames,
                             composite_frames=tuple(composite_frames),
                         )
                     )
@@ -408,50 +473,88 @@ def build_caption_tasks(
 
 def _build_caption_prompt(task: CaptionTask) -> str:
     frame_names = ", ".join(path.name for path in task.composite_frames)
+    frame_keys = ", ".join(f'"{path.stem}"' for path in task.composite_frames)
     return "\n".join(
         [
-            "You are a cross-modal video captioning assistant.",
-            "You will receive side-by-side composite frames from one aligned video segment.",
-            f"Left side is the context modality: {task.context_modality}.",
-            f"Right side is the decisive modality: {task.decisive_modality}.",
-            "The goal is not ordinary captioning. Find observations where the decisive modality alone contains an ambiguous cue, and the context modality disambiguates it.",
-            "First describe what is visible from each side alone. Then use those one-sided captions to decide whether a true cross-modal disambiguation exists.",
-            "Only use cues visible in the supplied frames. Do not invent objects, actions, text, or intentions.",
-            "The context and decisive observations must refer to the same scene, object, action, or event.",
-            "Reject observations if the decisive side is already unambiguous, if the context side does not help, or if the two sides do not refer to the same target.",
-            "Reject observations if the decisive-only caption already contains the final disambiguated fact or enough information to answer the likely QA target.",
-            "Reject observations where the context modality only confirms, repeats, or labels a fact already directly visible in the decisive modality.",
-            "A valid observation must have at least two plausible interpretations from the decisive side alone, and the context side must remove that ambiguity.",
-            "The context_only_caption and decisive_only_caption are mandatory because they will be used later to filter false disambiguation cases.",
-            "Write the one-sided captions before deciding the cross-modal caption. If the decisive-only caption already states the final fact, reject that observation.",
-            "Prefer high-entropy facts about object identity, action phase, spatial relation, motion, interaction, location, or text/semantic identity.",
-            "Avoid yes/no facts, simple counting, single-color answers, and anomaly/non-common-object judgments.",
+            "You are an expert multimodal perception analyst.",
+            "You will receive multiple synchronized composite frames sampled from one aligned video segment.",
+            f"Video 1 (left): {task.helper_modality} modality.",
+            f"Video 2 (right): {task.victim_modality} modality.",
+            "These two videos observe the same physical scene using different sensing modalities.",
+            "Neither video is considered the reference or the ground truth.",
+            "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
+            "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
+            "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
+            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. Trace the scene chronologically.",
+            "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
+            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
+            "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
+            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. Identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
+            "INFORMATION GAIN: Explain what Video 1 alone can/cannot determine, what Video 2 alone can/cannot determine, and what combination additionally reveals. Rate gain as low/medium/high.",
+            "AMBIGUITY RESOLUTION: Create an ambiguity event ONLY when Video 1 resolves Video 2 OR Video 2 resolves Video 1.",
+            "QUESTION-WORTHINESS: Estimate usefulness for generating difficult reasoning questions. Provide difficulty, qa_potential, and supported_question_types.",
+            "FRAME-BY-FRAME ANALYSIS: Describe newly appearing/disappearing entities, motion/interaction changes, and newly introduced/resolved uncertainty across frames.",
             "Return ONLY valid JSON with this exact structure:",
             "{",
             f'  "schema_version": "{CAPTION_SCHEMA_VERSION}",',
-            f'  "context_only_caption": "Caption using only the LEFT {task.context_modality} context side. Do not mention the right side.",',
-            f'  "decisive_only_caption": "Caption using only the RIGHT {task.decisive_modality} decisive side. Do not mention the left side.",',
-            '  "segment_caption": "Brief caption of the shared scene/action across both modalities.",',
-            '  "decisive_only_ambiguous_observations": [',
-            "    {",
-            '      "decisive_observation": "What the decisive modality shows by itself.",',
-            '      "why_ambiguous_without_context": "Why that cue cannot be uniquely interpreted from the decisive side alone.",',
-            '      "possible_interpretations": ["...", "..."],',
-            '      "context_disambiguating_cue": "Specific cue from the context modality that resolves the ambiguity.",',
-            '      "disambiguated_fact": "The fact that becomes clear only after combining both modalities.",',
-            '      "decisive_alone_contains_final_fact": false,',
-            '      "context_role": "disambiguates|confirms_only|irrelevant",',
-            '      "qa_potential": "high|medium|low"',
-            "    }",
-            "  ],",
-            '  "cross_modal_caption": "A concise caption focused on context-assisted disambiguation.",',
+            '  "global_scene": {',
+            '    "scene_summary": "Detailed physical-scene summary independent of sensor artifacts.",',
+            '    "physical_entities": [',
+            '      {"entity_id": "stable_snake_case_id", "category": "...", "appearance_or_state": "...", "location": "...", "motion_or_action": "...", "spatial_relations": ["..."]}',
+            '    ],',
+            '    "environment": "Objective environment or recording condition if evident.",',
+            '    "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
+            '  },',
+            '  "video1_analysis": {',
+            f'    "modality": "{task.helper_modality}",',
+            '    "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
+            '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
+            '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
+            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
+            '    "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video1_analysis.observable_facts"]}]',
+            '  },',
+            '  "video2_analysis": {',
+            f'    "modality": "{task.victim_modality}",',
+            '    "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
+            '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
+            '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
+            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
+            '    "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video2_analysis.observable_facts"]}]',
+            '  },',
+            '  "cross_modal_evidence_links": [',
+            '    {"entity_id": "...", "shared_evidence": "...", "unique_to_video1": "...", "unique_to_video2": "...", "how_video1_improves_video2": "...", "how_video2_improves_video1": "..."}',
+            '  ],',
+            '  "information_gain": [',
+            '    {"entity_id": "...", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."], "gain_rating": "low|medium|high"}',
+            '  ],',
+            '  "ambiguity_events": [',
+            '    {',
+            '      "target_entity": "entity_id from global_scene.physical_entities",',
+            '      "approx_time_range": "early sampled frame|middle sampled frame|late sampled frame|specific frame names",',
+            '      "direction": "video1_resolves_video2|video2_resolves_video1",',
+            '      "ambiguous_video": "video1|video2",',
+            '      "resolving_video": "video2|video1",',
+            '      "low_confidence_observation": "What the ambiguous video shows by itself.",',
+            '      "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
+            '      "candidate_hypotheses": [{"hypothesis": "...", "support_from_victim": "..."}],',
+            '      "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
+            '      "eliminated_hypotheses": [{"hypothesis": "...", "why_eliminated": "..."}],',
+            '      "fusion_conclusion": "Final physical fact after combining both modalities.",',
+            '      "missing_attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend",',
+            '      "question_worthiness": {"difficulty": "easy|medium|hard", "qa_potential": "high|medium|low", "supported_question_types": ["cross_modal_reasoning", "spatial_reasoning"]}',
+            '    }',
+            '  ],',
+            '  "frame_by_frame_analysis": [',
+            '    {"frame_key": "frame_000000", "newly_appearing_entities": ["..."], "disappearing_entities": ["..."], "motion_changes": "...", "interaction_changes": "...", "newly_introduced_uncertainty": "...", "resolved_uncertainty": "..."}',
+            '  ],',
             '  "rejected_observations": [',
-            '    {"observation": "...", "reason": "..."}',
-            "  ]",
-            "}",
-            "Only include an item in decisive_only_ambiguous_observations when decisive_alone_contains_final_fact is false and context_role is disambiguates.",
-            "If the context_only_caption and decisive_only_caption both independently support the same final fact, reject it as confirms_only.",
-            "If no valid ambiguity/disambiguation observation exists, return an empty decisive_only_ambiguous_observations list and explain why in rejected_observations.",
+            '    {"observation": "...", "reason": "Why this was not a valid ambiguity_event."}',
+            '  ]',
+            '}',
+            "Only include an item in ambiguity_events when one video genuinely disambiguates the other.",
+            "If no valid ambiguity_event exists, return an empty ambiguity_events list and explain each rejected case in rejected_observations.",
             f"Segment: {task.segment_id}; side: {task.side}.",
             f"Composite frames ({len(task.composite_frames)} images): {frame_names}",
         ]
@@ -471,8 +574,8 @@ def _build_batch_caption_prompt(tasks: list[CaptionTask]) -> str:
                     f'  "caption_id": "{task.caption_id}",',
                     f'  "segment_id": "{task.segment_id}",',
                     f'  "side": "{task.side}",',
-                    f'  "context_modality": "{task.context_modality}",',
-                    f'  "decisive_modality": "{task.decisive_modality}",',
+                    f'  "helper_modality": "{task.helper_modality}",',
+                    f'  "victim_modality": "{task.victim_modality}",',
                     f'  "composite_images": "{frame_range}",',
                     f'  "frame_names": "{", ".join(path.name for path in task.composite_frames)}"',
                     "}",
@@ -481,53 +584,90 @@ def _build_batch_caption_prompt(tasks: list[CaptionTask]) -> str:
         )
     return "\n".join(
         [
-            "You are a cross-modal video captioning assistant.",
+            "You are an expert multimodal perception analyst.",
             "You will receive side-by-side composite frames for multiple independent caption items.",
-            "For every item, the left side of each composite image is the context modality and the right side is the decisive modality.",
+            "For every item, Video 1 (left) and Video 2 (right) observe the same physical scene using different sensing modalities.",
+            "Neither video is considered the reference or the ground truth.",
             "Process each item independently. Do not mix observations across caption_id values.",
-            "The goal is not ordinary captioning. Find observations where the decisive modality alone contains an ambiguous cue, and the context modality disambiguates it.",
-            "First describe what is visible from each side alone. Then use those one-sided captions to decide whether a true cross-modal disambiguation exists.",
-            "Only use cues visible in the supplied frames. Do not invent objects, actions, text, or intentions.",
-            "The context and decisive observations must refer to the same scene, object, action, or event.",
-            "Reject observations if the decisive side is already unambiguous, if the context side does not help, or if the two sides do not refer to the same target.",
-            "Reject observations if the decisive-only caption already contains the final disambiguated fact or enough information to answer the likely QA target.",
-            "Reject observations where the context modality only confirms, repeats, or labels a fact already directly visible in the decisive modality.",
-            "A valid observation must have at least two plausible interpretations from the decisive side alone, and the context side must remove that ambiguity.",
-            "The context_only_caption and decisive_only_caption are mandatory because they will be used later to filter false disambiguation cases.",
-            "Prefer high-entropy facts about object identity, action phase, spatial relation, motion, interaction, location, or text/semantic identity.",
-            "Avoid yes/no facts, simple counting, single-color answers, and anomaly/non-common-object judgments.",
+            "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
+            "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
+            "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
+            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. Trace the scene chronologically.",
+            "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
+            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
+            "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
+            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. Identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
+            "INFORMATION GAIN: Explain what Video 1 alone can/cannot determine, what Video 2 alone can/cannot determine, and what combination additionally reveals. Rate gain as low/medium/high.",
+            "AMBIGUITY RESOLUTION: Create an ambiguity event ONLY when Video 1 resolves Video 2 OR Video 2 resolves Video 1.",
+            "QUESTION-WORTHINESS: Estimate usefulness for generating difficult reasoning questions. Provide difficulty, qa_potential, and supported_question_types.",
+            "FRAME-BY-FRAME ANALYSIS: Describe newly appearing/disappearing entities, motion/interaction changes, and newly introduced/resolved uncertainty across frames.",
             "Return ONLY valid JSON with this exact top-level structure:",
             "{",
             '  "items": [',
-            "    {",
+            '    {',
             '      "caption_id": "must exactly match one input caption_id",',
             f'      "schema_version": "{CAPTION_SCHEMA_VERSION}",',
-            '      "context_only_caption": "Caption using only the LEFT context side. Do not mention the right side.",',
-            '      "decisive_only_caption": "Caption using only the RIGHT decisive side. Do not mention the left side.",',
-            '      "segment_caption": "Brief caption of the shared scene/action across both modalities.",',
-            '      "decisive_only_ambiguous_observations": [',
-            "        {",
-            '          "decisive_observation": "What the decisive modality shows by itself.",',
-            '          "why_ambiguous_without_context": "Why that cue cannot be uniquely interpreted from the decisive side alone.",',
-            '          "possible_interpretations": ["...", "..."],',
-            '          "context_disambiguating_cue": "Specific cue from the context modality that resolves the ambiguity.",',
-            '          "disambiguated_fact": "The fact that becomes clear only after combining both modalities.",',
-            '          "decisive_alone_contains_final_fact": false,',
-            '          "context_role": "disambiguates|confirms_only|irrelevant",',
-            '          "qa_potential": "high|medium|low"',
-            "        }",
-            "      ],",
-            '      "cross_modal_caption": "A concise caption focused on context-assisted disambiguation.",',
+            '      "global_scene": {',
+            '        "scene_summary": "Detailed physical-scene summary independent of sensor artifacts.",',
+            '        "physical_entities": [',
+            '          {"entity_id": "stable_snake_case_id", "category": "...", "appearance_or_state": "...", "location": "...", "motion_or_action": "...", "spatial_relations": ["..."]}',
+            '        ],',
+            '        "environment": "Objective environment or recording condition if evident.",',
+            '        "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
+            '      },',
+            '      "video1_analysis": {',
+            '        "modality": "left video 1 modality name",',
+            '        "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
+            '        "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '        "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
+            '        "sensor_limitations": ["Specific limitations that affect interpretation."],',
+            '        "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
+            '        "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video1_analysis.observable_facts"]}]',
+            '      },',
+            '      "video2_analysis": {',
+            '        "modality": "right video 2 modality name",',
+            '        "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
+            '        "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '        "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
+            '        "sensor_limitations": ["Specific limitations that affect interpretation."],',
+            '        "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
+            '        "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video2_analysis.observable_facts"]}]',
+            '      },',
+            '      "cross_modal_evidence_links": [',
+            '        {"entity_id": "...", "shared_evidence": "...", "unique_to_video1": "...", "unique_to_video2": "...", "how_video1_improves_video2": "...", "how_video2_improves_video1": "..."}',
+            '      ],',
+            '      "information_gain": [',
+            '        {"entity_id": "...", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."], "gain_rating": "low|medium|high"}',
+            '      ],',
+            '      "ambiguity_events": [',
+            '        {',
+            '          "target_entity": "entity_id from global_scene.physical_entities",',
+            '          "approx_time_range": "early sampled frame|middle sampled frame|late sampled frame|specific frame names",',
+            '          "direction": "video1_resolves_video2|video2_resolves_video1",',
+            '          "ambiguous_video": "video1|video2",',
+            '          "resolving_video": "video2|video1",',
+            '          "low_confidence_observation": "What the ambiguous video shows by itself.",',
+            '          "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
+            '          "candidate_hypotheses": [{"hypothesis": "...", "support_from_victim": "..."}],',
+            '          "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
+            '          "eliminated_hypotheses": [{"hypothesis": "...", "why_eliminated": "..."}],',
+            '          "fusion_conclusion": "Final physical fact after combining both modalities.",',
+            '          "missing_attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend",',
+            '          "question_worthiness": {"difficulty": "easy|medium|hard", "qa_potential": "high|medium|low", "supported_question_types": ["cross_modal_reasoning", "spatial_reasoning"]}',
+            '        }',
+            '      ],',
+            '      "frame_by_frame_analysis": [',
+            '        {"frame_key": "frame_000000", "newly_appearing_entities": ["..."], "disappearing_entities": ["..."], "motion_changes": "...", "interaction_changes": "...", "newly_introduced_uncertainty": "...", "resolved_uncertainty": "..."}',
+            '      ],',
             '      "rejected_observations": [',
-            '        {"observation": "...", "reason": "..."}',
-            "      ]",
-            "    }",
-            "  ]",
-            "}",
+            '        {"observation": "...", "reason": "Why this was not a valid ambiguity_event."}',
+            '      ]',
+            '    }',
+            '  ]',
+            '}',
             "Return exactly one item for every input caption_id, in the same order as listed below.",
-            "Only include an observation in decisive_only_ambiguous_observations when decisive_alone_contains_final_fact is false and context_role is disambiguates.",
-            "If the context_only_caption and decisive_only_caption both independently support the same final fact, reject it as confirms_only.",
-            "If no valid ambiguity/disambiguation observation exists for an item, return an empty decisive_only_ambiguous_observations list and explain why in rejected_observations.",
+            "Only include an item in ambiguity_events when one video genuinely disambiguates the other.",
+            "If no valid ambiguity_event exists for an item, return an empty ambiguity_events list and explain each rejected case in rejected_observations.",
             "Input items:",
             "\n\n".join(item_specs),
         ]
@@ -559,14 +699,158 @@ def _parse_json_response(text: str) -> dict[str, Any]:
     return parsed
 
 
+def _require_object(value: Any, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"Gemini response field {field} must be an object")
+    return value
+
+
+def _require_list(value: Any, field: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise ValueError(f"Gemini response field {field} must be a list")
+    return value
+
+
+def _require_string(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Gemini response field {field} must be a non-empty string")
+    return value
+
+
+def _word_count(text: str) -> int:
+    return len(re.findall(r"\b[\w'-]+\b", text))
+
+
+def _validate_min_words(text: Any, field: str, minimum: int) -> str:
+    value = _require_string(text, field)
+    if _word_count(value) < minimum:
+        raise ValueError(f"{field} is too short; expected at least {minimum} words")
+    return value
+
+
+def _validate_no_generic_sensor_explanation(text: str, field: str) -> None:
+    for pattern in GENERIC_SENSOR_EXPLANATION_PATTERNS:
+        if pattern.search(text):
+            raise ValueError(f"{field} contains generic sensor-theory wording instead of segment-specific evidence")
+
+
+def _validate_uncertain_observations(values: Any, field: str) -> None:
+    for index, item in enumerate(_require_list(values, field), start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field}[{index}] must be an object")
+        _require_string(item.get("observed_evidence"), f"{field}[{index}].observed_evidence")
+        _require_string(item.get("missing_evidence"), f"{field}[{index}].missing_evidence")
+        hypotheses = _require_list(item.get("hypotheses"), f"{field}[{index}].hypotheses")
+        if not hypotheses:
+            raise ValueError(f"{field}[{index}].hypotheses must not be empty")
+        for hyp_index, hyp in enumerate(hypotheses, start=1):
+            if not isinstance(hyp, dict):
+                raise ValueError(f"{field}[{index}].hypotheses[{hyp_index}] must be an object")
+            _require_string(hyp.get("hypothesis"), f"{field}[{index}].hypotheses[{hyp_index}].hypothesis")
+            conf = hyp.get("confidence")
+            if conf not in ALLOWED_GAIN_RATINGS:
+                raise ValueError(f"{field}[{index}].hypotheses[{hyp_index}].confidence must be high, medium, or low")
+
+def _validate_missing_key_attributes(values: Any, field: str) -> None:
+    for index, item in enumerate(_require_list(values, field), start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field}[{index}] must be an object")
+        attribute_type = item.get("attribute_type")
+        if attribute_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
+            raise ValueError(
+                f"{field}[{index}].attribute_type must be one of "
+                f"{sorted(ALLOWED_MISSING_ATTRIBUTE_TYPES)}, got {attribute_type!r}"
+            )
+        for key in ("missing_attribute", "why_missing"):
+            _require_string(item.get(key), f"{field}[{index}].{key}")
+        recoverable_from = item.get("recoverable_from")
+        if not isinstance(recoverable_from, list) or not recoverable_from:
+            raise ValueError(f"{field}[{index}].recoverable_from must be a non-empty list")
+
+def _validate_video_analysis(parsed: dict[str, Any], field: str) -> None:
+    analysis = _require_object(parsed.get(field), field)
+    _require_string(analysis.get("modality"), f"{field}.modality")
+    detailed_caption = _validate_min_words(
+        analysis.get("detailed_caption"),
+        f"{field}.detailed_caption",
+        MIN_DETAILED_CAPTION_WORDS,
+    )
+    _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
+    for key in ("observable_facts", "sensor_specific_cues", "sensor_limitations"):
+        values = _require_list(analysis.get(key), f"{field}.{key}")
+        if not values:
+            raise ValueError(f"{field}.{key} must not be empty")
+        if key == "observable_facts" and len(values) < MIN_OBSERVABLE_FACTS:
+            raise ValueError(f"{field}.{key} must contain at least {MIN_OBSERVABLE_FACTS} facts")
+        for value_index, value in enumerate(values, start=1):
+            text = _require_string(value, f"{field}.{key}[{value_index}]")
+            _validate_no_generic_sensor_explanation(text, f"{field}.{key}[{value_index}]")
+    _validate_uncertain_observations(analysis.get("uncertain_observations"), f"{field}.uncertain_observations")
+    _validate_missing_key_attributes(analysis.get("missing_key_attributes"), f"{field}.missing_key_attributes")
+
+def _validate_cross_modal_evidence_links(values: Any, entity_ids: set[str], field: str) -> None:
+    links = _require_list(values, field)
+    if not links:
+        raise ValueError(f"{field} must not be empty")
+    for index, item in enumerate(links, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field}[{index}] must be an object")
+        entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
+        if entity_id not in entity_ids:
+            raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
+        for key in ("shared_evidence", "unique_to_video1", "unique_to_video2", "how_video1_improves_video2", "how_video2_improves_video1"):
+            _require_string(item.get(key), f"{field}[{index}].{key}")
+
+def _validate_information_gain(values: Any, entity_ids: set[str], field: str) -> None:
+    gains = _require_list(values, field)
+    if not gains:
+        raise ValueError(f"{field} must not be empty")
+    for index, item in enumerate(gains, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field}[{index}] must be an object")
+        entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
+        if entity_id not in entity_ids:
+            raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
+        for key in ("video1_can_determine", "video1_cannot_determine", "video2_can_determine", "video2_cannot_determine", "fusion_additionally_reveals"):
+            _require_list(item.get(key), f"{field}[{index}].{key}")
+        rating = item.get("gain_rating")
+        if rating not in ALLOWED_GAIN_RATINGS:
+            raise ValueError(f"{field}[{index}].gain_rating must be high, medium, or low")
+
+def _validate_question_worthiness(value: Any, field: str) -> None:
+    qw = _require_object(value, field)
+    _require_string(qw.get("difficulty"), f"{field}.difficulty")
+    qa_pot = qw.get("qa_potential")
+    if qa_pot not in ALLOWED_QA_POTENTIAL:
+        raise ValueError(f"{field}.qa_potential must be high, medium, or low")
+    q_types = _require_list(qw.get("supported_question_types"), f"{field}.supported_question_types")
+    for qt in q_types:
+        if qt not in ALLOWED_QUESTION_TYPES:
+            raise ValueError(f"{field}.supported_question_types contains invalid type: {qt}")
+
+def _validate_frame_by_frame_analysis(values: Any, field: str) -> None:
+    frames = _require_list(values, field)
+    if not frames:
+        raise ValueError(f"{field} must not be empty")
+    for index, item in enumerate(frames, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field}[{index}] must be an object")
+        _require_string(item.get("frame_key"), f"{field}[{index}].frame_key")
+        _require_list(item.get("newly_appearing_entities"), f"{field}[{index}].newly_appearing_entities")
+        _require_list(item.get("disappearing_entities"), f"{field}[{index}].disappearing_entities")
+        for key in ("motion_changes", "interaction_changes", "newly_introduced_uncertainty", "resolved_uncertainty"):
+            _require_string(item.get(key), f"{field}[{index}].{key}")
+
 def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
     required_fields = (
         "schema_version",
-        "context_only_caption",
-        "decisive_only_caption",
-        "segment_caption",
-        "decisive_only_ambiguous_observations",
-        "cross_modal_caption",
+        "global_scene",
+        "video1_analysis",
+        "video2_analysis",
+        "cross_modal_evidence_links",
+        "information_gain",
+        "ambiguity_events",
+        "frame_by_frame_analysis",
         "rejected_observations",
     )
     missing = [field for field in required_fields if field not in parsed]
@@ -577,28 +861,92 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
             f"Gemini response schema_version must be {CAPTION_SCHEMA_VERSION!r}, "
             f"got {parsed['schema_version']!r}"
         )
-    for field in ("context_only_caption", "decisive_only_caption", "segment_caption", "cross_modal_caption"):
-        if not isinstance(parsed[field], str):
-            raise ValueError(f"Gemini response field {field} must be a string")
-    for field in ("decisive_only_ambiguous_observations", "rejected_observations"):
-        if not isinstance(parsed[field], list):
-            raise ValueError(f"Gemini response field {field} must be a list")
-    for index, observation in enumerate(parsed["decisive_only_ambiguous_observations"], start=1):
-        if not isinstance(observation, dict):
-            raise ValueError(f"Ambiguous observation #{index} must be an object")
-        if observation.get("decisive_alone_contains_final_fact") is not False:
+    global_scene = _require_object(parsed["global_scene"], "global_scene")
+    scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
+    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(scene_summary):
+        raise ValueError("global_scene.scene_summary contains forbidden sensor-quality words")
+    _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
+    _require_string(global_scene.get("environment"), "global_scene.environment")
+    temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
+    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(temporal_progression):
+        raise ValueError("global_scene.temporal_progression contains forbidden sensor-quality words")
+    _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
+    physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
+    if not physical_entities:
+        raise ValueError("global_scene.physical_entities must not be empty")
+    entity_ids: set[str] = set()
+    for index, entity in enumerate(physical_entities, start=1):
+        if not isinstance(entity, dict):
+            raise ValueError(f"global_scene.physical_entities[{index}] must be an object")
+        entity_id = _require_string(entity.get("entity_id"), f"global_scene.physical_entities[{index}].entity_id")
+        entity_ids.add(entity_id)
+        for key in ("category", "appearance_or_state", "location", "motion_or_action"):
+            _require_string(entity.get(key), f"global_scene.physical_entities[{index}].{key}")
+        _require_list(entity.get("spatial_relations"), f"global_scene.physical_entities[{index}].spatial_relations")
+
+    _validate_video_analysis(parsed, "video1_analysis")
+    _validate_video_analysis(parsed, "video2_analysis")
+    
+    _validate_cross_modal_evidence_links(parsed.get("cross_modal_evidence_links"), entity_ids, "cross_modal_evidence_links")
+    _validate_information_gain(parsed.get("information_gain"), entity_ids, "information_gain")
+
+    ambiguity_events = _require_list(parsed["ambiguity_events"], "ambiguity_events")
+    for index, event in enumerate(ambiguity_events, start=1):
+        if not isinstance(event, dict):
+            raise ValueError(f"ambiguity_events[{index}] must be an object")
+        target_entity = _require_string(event.get("target_entity"), f"ambiguity_events[{index}].target_entity")
+        if target_entity not in entity_ids:
+            raise ValueError(f"ambiguity_events[{index}].target_entity must match a global_scene entity_id")
+        direction = event.get("direction")
+        if direction not in ALLOWED_AMBIGUITY_DIRECTIONS:
+            raise ValueError(f"ambiguity_events[{index}].direction must be video1_resolves_video2 or video2_resolves_video1")
+        for key in (
+            "approx_time_range",
+            "ambiguous_video",
+            "resolving_video",
+            "low_confidence_observation",
+            "why_ambiguous_video_cannot_resolve",
+            "resolving_discriminative_evidence",
+            "fusion_conclusion",
+        ):
+            _require_string(event.get(key), f"ambiguity_events[{index}].{key}")
+        missing_type = event.get("missing_attribute_type")
+        if missing_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
             raise ValueError(
-                "Ambiguous observations must set decisive_alone_contains_final_fact to false"
+                f"ambiguity_events[{index}].missing_attribute_type must be one of "
+                f"{sorted(ALLOWED_MISSING_ATTRIBUTE_TYPES)}, got {missing_type!r}"
             )
-        if observation.get("context_role") != "disambiguates":
-            raise ValueError("Ambiguous observations must set context_role to disambiguates")
-        interpretations = observation.get("possible_interpretations")
-        if not isinstance(interpretations, list) or len(interpretations) < 2:
-            raise ValueError("Ambiguous observations must include at least two possible_interpretations")
+        _validate_question_worthiness(event.get("question_worthiness"), f"ambiguity_events[{index}].question_worthiness")
+        hypotheses = _require_list(event.get("candidate_hypotheses"), f"ambiguity_events[{index}].candidate_hypotheses")
+        if len(hypotheses) < 2:
+            raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses must include at least two hypotheses")
+        for hyp_index, hypothesis in enumerate(hypotheses, start=1):
+            if not isinstance(hypothesis, dict):
+                raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}] must be an object")
+            _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].hypothesis")
+            _require_string(
+                hypothesis.get("support_from_victim"),
+                f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].support_from_victim",
+            )
+        eliminated = _require_list(event.get("eliminated_hypotheses"), f"ambiguity_events[{index}].eliminated_hypotheses")
+        if not eliminated:
+            raise ValueError(f"ambiguity_events[{index}].eliminated_hypotheses must not be empty")
+        for elim_index, hypothesis in enumerate(eliminated, start=1):
+            if not isinstance(hypothesis, dict):
+                raise ValueError(f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}] must be an object")
+            _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].hypothesis")
+            _require_string(
+                hypothesis.get("why_eliminated"),
+                f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].why_eliminated",
+            )
+    
+    _validate_frame_by_frame_analysis(parsed.get("frame_by_frame_analysis"), "frame_by_frame_analysis")
+    _require_list(parsed["rejected_observations"], "rejected_observations")
     return parsed
 
 
 async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_retries: int) -> dict[str, Any]:
+    _ensure_composite_frames(task)
     encoded = _encode_images(task.composite_frames)
     if not encoded:
         raise ValueError("No composite frames found for Gemini call")
@@ -655,6 +1003,7 @@ async def _call_gemini_caption_batch(
 ) -> dict[str, dict[str, Any]]:
     encoded: list[str] = []
     for task in tasks:
+        _ensure_composite_frames(task)
         task_encoded = _encode_images(task.composite_frames)
         if not task_encoded:
             raise ValueError(f"No composite frames found for Gemini call: {task.caption_id}")
@@ -687,16 +1036,105 @@ def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None
         "split_dir": task.split_dir,
         "segment_name": task.segment_name,
         "side": task.side,
-        "context_modality": task.context_modality,
-        "decisive_modality": task.decisive_modality,
-        "context_frame_dir": task.context_frame_dir.as_posix(),
-        "decisive_frame_dir": task.decisive_frame_dir.as_posix(),
-        "context_frames": [path.as_posix() for path in task.context_frames],
-        "decisive_frames": [path.as_posix() for path in task.decisive_frames],
+        "helper_modality": task.helper_modality,
+        "victim_modality": task.victim_modality,
+        "helper_frame_dir": task.helper_frame_dir.as_posix(),
+        "victim_frame_dir": task.victim_frame_dir.as_posix(),
+        "helper_frames": [path.as_posix() for path in task.helper_frames],
+        "victim_frames": [path.as_posix() for path in task.victim_frames],
         "composite_frames": [path.as_posix() for path in task.composite_frames],
         "status": status,
         "reason": reason,
         "caption": caption,
+    }
+
+
+def _template_caption(task: CaptionTask) -> dict[str, Any]:
+    target_entity = "unresolved_target"
+    return {
+        "schema_version": CAPTION_SCHEMA_VERSION,
+        "global_scene": {
+            "scene_summary": "Template mode placeholder; Gemini was not called.",
+            "physical_entities": [
+                {
+                    "entity_id": target_entity,
+                    "category": "unknown",
+                    "appearance_or_state": "Template mode placeholder.",
+                    "location": "unknown",
+                    "motion_or_action": "unknown",
+                    "spatial_relations": [],
+                }
+            ],
+            "environment": "unknown",
+            "temporal_progression": "Template mode placeholder; no visual reasoning was performed.",
+        },
+        "video1_analysis": {
+            "modality": task.helper_modality,
+            "detailed_caption": "Template mode placeholder; Gemini was not called.",
+            "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
+            "sensor_specific_cues": ["Template mode placeholder."],
+            "sensor_limitations": ["Template mode placeholder."],
+            "uncertain_observations": [
+                {
+                    "observed_evidence": "Template placeholder",
+                    "hypotheses": [{"hypothesis": "Placeholder", "confidence": "low"}],
+                    "missing_evidence": "Placeholder"
+                }
+            ],
+            "missing_key_attributes": [],
+        },
+        "video2_analysis": {
+            "modality": task.victim_modality,
+            "detailed_caption": "Template mode placeholder; Gemini was not called.",
+            "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
+            "sensor_specific_cues": ["Template mode placeholder."],
+            "sensor_limitations": ["Template mode placeholder."],
+            "uncertain_observations": [
+                {
+                    "observed_evidence": "Template placeholder",
+                    "hypotheses": [{"hypothesis": "Placeholder", "confidence": "low"}],
+                    "missing_evidence": "Placeholder"
+                }
+            ],
+            "missing_key_attributes": [],
+        },
+        "cross_modal_evidence_links": [
+            {
+                "entity_id": target_entity,
+                "shared_evidence": "Placeholder",
+                "unique_to_video1": "Placeholder",
+                "unique_to_video2": "Placeholder",
+                "how_video1_improves_video2": "Placeholder",
+                "how_video2_improves_video1": "Placeholder",
+            }
+        ],
+        "information_gain": [
+            {
+                "entity_id": target_entity,
+                "video1_can_determine": ["Placeholder"],
+                "video1_cannot_determine": ["Placeholder"],
+                "video2_can_determine": ["Placeholder"],
+                "video2_cannot_determine": ["Placeholder"],
+                "fusion_additionally_reveals": ["Placeholder"],
+                "gain_rating": "low",
+            }
+        ],
+        "ambiguity_events": [],
+        "frame_by_frame_analysis": [
+            {
+                "frame_key": path.stem,
+                "newly_appearing_entities": [],
+                "disappearing_entities": [],
+                "motion_changes": "Placeholder",
+                "interaction_changes": "Placeholder",
+                "newly_introduced_uncertainty": "Placeholder",
+                "resolved_uncertainty": "Placeholder"
+            }
+            for path in task.composite_frames
+        ],
+        "rejected_observations": [
+            {"observation": "", "reason": "template mode; Gemini was not called"}
+        ],
     }
 
 
@@ -780,7 +1218,7 @@ async def run_caption_pipeline_async(
         limit=limit,
         limit_scenes=limit_scenes,
         limit_scene_folders=limit_scene_folders,
-        write_composites=True,
+        write_composites=False,
     )
     existing_items, existing_skipped = _load_resume(output_path) if resume else ([], [])
     items = existing_items
@@ -842,18 +1280,10 @@ async def run_caption_pipeline_async(
                 gemini_calls += 1
                 status = "generated"
             else:
+                for task in task_batch:
+                    _ensure_composite_frames(task)
                 captions_by_id = {
-                    task.caption_id: {
-                        "schema_version": CAPTION_SCHEMA_VERSION,
-                        "context_only_caption": "",
-                        "decisive_only_caption": "",
-                        "segment_caption": "",
-                        "decisive_only_ambiguous_observations": [],
-                        "cross_modal_caption": "",
-                        "rejected_observations": [
-                            {"observation": "", "reason": "template mode; Gemini was not called"}
-                        ],
-                    }
+                    task.caption_id: _template_caption(task)
                     for task in task_batch
                 }
                 status = "template"
@@ -866,8 +1296,8 @@ async def run_caption_pipeline_async(
                         "caption_id": task.caption_id,
                         "segment_id": task.segment_id,
                         "side": task.side,
-                        "context_modality": task.context_modality,
-                        "decisive_modality": task.decisive_modality,
+                        "helper_modality": task.helper_modality,
+                        "victim_modality": task.victim_modality,
                         "reason": str(exc),
                     }
                 )
@@ -949,7 +1379,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--directions",
         default=None,
-        help="Comma-separated context->decisive directions such as rgb->depth,event->ir. Defaults to both directions.",
+        help="Comma-separated helper->victim directions such as rgb->depth,event->ir. Defaults to both directions.",
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
