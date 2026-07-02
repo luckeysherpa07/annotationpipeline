@@ -43,7 +43,7 @@ FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
     r"blurry|noisy|pixels?|grayscale|heat|edge|sparse|contrast)\b", re.I
 )
 MIN_DETAILED_CAPTION_WORDS = 30
-MIN_SCENE_SUMMARY_WORDS = 35
+MIN_SCENE_SUMMARY_WORDS = 20
 MIN_FRAME_DETAIL_WORDS = 8
 MIN_OBSERVABLE_FACTS = 3
 GENERIC_SENSOR_EXPLANATION_PATTERNS = (
@@ -318,6 +318,12 @@ def _caption_id(segment_id: str, side: str, helper_modality: str, victim_modalit
     )
 
 
+def _parse_sides(values: str | None) -> set[str] | None:
+    if not values:
+        return None
+    return {val.strip().lower() for val in values.split(",") if val.strip()}
+
+
 def _parse_pairs(values: str | None) -> set[tuple[str, str]] | None:
     if not values:
         return None
@@ -338,10 +344,13 @@ def _parse_pairs(values: str | None) -> set[tuple[str, str]] | None:
 
 def _directions_for_pair(pair: list[str] | tuple[str, str], allowed: set[tuple[str, str]] | None) -> list[tuple[str, str]]:
     first, second = str(pair[0]).lower(), str(pair[1]).lower()
-    directions = [(first, second), (second, first)]
+    # v5 schema captures bidirectional reasoning in a single call (video1 helps video2 AND
+    # video2 helps video1 are both present in the output). So by default we only generate one
+    # canonical task per pair (the ordering from the input data) to avoid calling Gemini twice
+    # on the same pair. Use --directions to explicitly override the ordering.
     if allowed is None:
-        return directions
-    return [direction for direction in directions if direction in allowed]
+        return [(first, second)]
+    return [(d_first, d_second) for d_first, d_second in [(first, second), (second, first)] if (d_first, d_second) in allowed]
 
 
 def build_caption_tasks(
@@ -351,6 +360,7 @@ def build_caption_tasks(
     num_frames: int,
     allowed_pairs: set[tuple[str, str]] | None = None,
     allowed_directions: set[tuple[str, str]] | None = None,
+    allowed_sides: set[str] | None = None,
     limit: int | None = None,
     limit_scenes: int | None = None,
     limit_scene_folders: int | None = None,
@@ -405,6 +415,8 @@ def build_caption_tasks(
                     )
                     continue
                 for side, helper_dir, victim_dir in _pair_frame_dirs(helper_dirs, victim_dirs):
+                    if allowed_sides is not None and side.lower() not in allowed_sides:
+                        continue
                     helper_frames, victim_frames = _select_paired_frames(
                         helper_dir,
                         victim_dir,
@@ -485,7 +497,7 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. Trace the scene chronologically.",
+            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
             "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
             "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
             "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
@@ -592,7 +604,7 @@ def _build_batch_caption_prompt(tasks: list[CaptionTask]) -> str:
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. Trace the scene chronologically.",
+            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT mention words like modality, thermal, RGB, event, depth, infrared, visible, invisible, blurry, noisy, pixels, grayscale, heat, edge, sparse, contrast. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
             "Then, for VIDEO 1 and VIDEO 2 separately, describe ONLY evidence observable from that specific video: appearance, motion, interaction, spatial relation, confidence, uncertainty. Do not use information from the other video.",
             "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
             "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
@@ -1197,6 +1209,7 @@ async def run_caption_pipeline_async(
     num_frames: int,
     pairs: str | None,
     directions: str | None,
+    sides: str | None,
     limit: int | None,
     limit_scenes: int | None,
     limit_scene_folders: int | None,
@@ -1208,6 +1221,7 @@ async def run_caption_pipeline_async(
 ) -> Path:
     allowed_pairs = _parse_pairs(pairs)
     allowed_directions = _parse_pairs(directions)
+    allowed_sides = _parse_sides(sides)
     tasks, skipped = build_caption_tasks(
         input_path=input_path,
         dataset_root=dataset_root,
@@ -1218,6 +1232,7 @@ async def run_caption_pipeline_async(
         limit=limit,
         limit_scenes=limit_scenes,
         limit_scene_folders=limit_scene_folders,
+        allowed_sides=allowed_sides,
         write_composites=False,
     )
     existing_items, existing_skipped = _load_resume(output_path) if resume else ([], [])
@@ -1325,6 +1340,7 @@ def run_caption_pipeline(
     num_frames: int = 6,
     pairs: str | None = None,
     directions: str | None = None,
+    sides: str | None = None,
     limit: int | None = None,
     limit_scenes: int | None = None,
     limit_scene_folders: int | None = None,
@@ -1345,6 +1361,7 @@ def run_caption_pipeline(
             num_frames=num_frames,
             pairs=pairs,
             directions=directions,
+            sides=sides,
             limit=limit,
             limit_scenes=limit_scenes,
             limit_scene_folders=limit_scene_folders,
@@ -1375,6 +1392,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--pairs",
         default=None,
         help="Comma-separated modality pairs such as rgb+depth,rgb+event. Defaults to input modality_pairs.",
+    )
+    parser.add_argument(
+        "--sides",
+        default=None,
+        help="Comma-separated sides to process, such as day,night,aligned. Defaults to all available.",
     )
     parser.add_argument(
         "--directions",
@@ -1423,6 +1445,7 @@ def main() -> None:
         num_frames=max(1, args.num_frames),
         pairs=args.pairs,
         directions=args.directions,
+        sides=args.sides,
         limit=args.limit,
         limit_scenes=args.limit_scenes,
         limit_scene_folders=args.limit_scene_folders,
