@@ -1132,6 +1132,10 @@ async def run_caption_pipeline_async(
                 status = "template"
             items.append(_task_to_item(task, status=status, caption=caption))
         except Exception as exc:
+            exc_str = str(exc).lower()
+            if "429" in exc_str or "quota" in exc_str:
+                print(f"FATAL: Quota exhausted or rate limit hit. Stopping execution to preserve state: {exc}")
+                break
             skipped.append(
                 {
                     "caption_id": task.caption_id,
