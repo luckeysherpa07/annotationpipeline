@@ -40,7 +40,8 @@ ALLOWED_GAIN_RATINGS = {"low", "medium", "high"}
 ALLOWED_AMBIGUITY_DIRECTIONS = {"video1_resolves_video2", "video2_resolves_video1"}
 FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
     r"\b(modality|thermal|rgb|event|depth|infrared|ir|visible|invisible|"
-    r"blurry|noisy|pixels?|grayscale|heat|edge|sparse|contrast)\b", re.I
+    r"blurry|noisy|pixels?|grayscale|greyscale|heat|edge|edge-based|sparse|contrast|"
+    r"monochrome|overexposed|saturated|contour|silhouette)\b", re.I
 )
 MIN_DETAILED_CAPTION_WORDS = 30
 MIN_SCENE_SUMMARY_WORDS = 20
@@ -498,7 +499,7 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
             "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",
-            "FIELD RULES (violations cause rejection): (1) every missing_key_attributes[].recoverable_from must be a non-empty list — always include at least one recoverable source string. (2) every information_gain[].entity_id, ambiguity_events[].target_entity, AND cross_modal_evidence_links[].entity_id must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence. (4) detailed_caption must describe WHAT IS PHYSICALLY HAPPENING in the scene (objects, motion, actions, spatial layout), not HOW the sensor captures it. Do NOT use words like monochrome, greyscale, thermal, edge-based, overexposed, saturated, blurry, contour, silhouette, ir, or pixel in detailed_caption. Those words belong in sensor_specific_cues and sensor_limitations instead. (5) fusion_additionally_reveals must be a list of descriptive observation strings ONLY. Do NOT include rating words like 'low', 'medium', or 'high' inside this list — those belong in the separate gain_rating field. (6) ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one. (7) NEVER use generic sensor-theory wording like 'this modality captures', 'event cameras detect', or 'designed to measure' in any video analysis fields. Describe ONLY specific evidence from the current frames. (8) supported_question_types MUST only use values from the provided template list. Do NOT use attribute_type values (like surface_attribute, motion_trend) as question types. (9) In missing_key_attributes[].why_missing, explain the specific physical reason the attribute is unobservable in this exact segment, NOT generic sensor capabilities (e.g., say 'The sunlit brick and asphalt appear visually identical in color here' instead of 'Color cameras do not capture thermal energy'). (10) frame_by_frame_analysis[].frame_key must be exactly the frame name WITHOUT the file extension (e.g., 'frame_000000', NOT 'frame_000000.png').",
+            "FIELD RULES (violations cause rejection): (1) every missing_key_attributes[].recoverable_from must be a non-empty list — always include at least one recoverable source string. (2) every information_gain[].entity_id, ambiguity_events[].target_entity, AND cross_modal_evidence_links[].entity_id must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence. (4) detailed_caption must describe WHAT IS PHYSICALLY HAPPENING in the scene (objects, motion, actions, spatial layout), not HOW the sensor captures it. Do NOT use words like monochrome, greyscale, thermal, edge-based, overexposed, saturated, blurry, contour, silhouette, ir, or pixel in detailed_caption. Those words belong in sensor_specific_cues and sensor_limitations instead. (5) fusion_additionally_reveals must be a list of descriptive observation strings ONLY. Do NOT include rating words like 'low', 'medium', or 'high' inside this list — those belong in the separate gain_rating field. (6) ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one. (7) NEVER use generic sensor-theory wording like 'this modality captures', 'event cameras detect', or 'designed to measure' in any video analysis fields. Describe ONLY specific evidence from the current frames. (8) supported_question_types MUST only use values from the provided template list. Do NOT use attribute_type values (like surface_attribute, motion_trend) as question types. (9) In missing_key_attributes[].why_missing, explain the specific physical reason the attribute is unobservable in this exact segment, NOT generic sensor capabilities (e.g., say 'The sunlit brick and asphalt appear visually identical in color here' instead of 'Color cameras do not capture thermal energy'). (10) frame_by_frame_analysis[].frame_key must be exactly the frame name WITHOUT the file extension (e.g., 'frame_000000', NOT 'frame_000000.png'). (11) cross_modal_evidence_links and information_gain must include an entry for EVERY entity listed in global_scene.physical_entities. Do not skip any entities.",
             "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
             "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
             "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. For EVERY entity listed in global_scene.physical_entities, identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
@@ -675,6 +676,8 @@ def _validate_video_analysis(parsed: dict[str, Any], field: str) -> None:
         f"{field}.detailed_caption",
         MIN_DETAILED_CAPTION_WORDS,
     )
+    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(detailed_caption):
+        raise ValueError(f"{field}.detailed_caption contains forbidden sensor-quality words")
     _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
     for key in ("observable_facts", "sensor_specific_cues", "sensor_limitations"):
         values = _require_list(analysis.get(key), f"{field}.{key}")
@@ -692,30 +695,40 @@ def _validate_cross_modal_evidence_links(values: Any, entity_ids: set[str], fiel
     links = _require_list(values, field)
     if not links:
         raise ValueError(f"{field} must not be empty")
+    seen_entities = set()
     for index, item in enumerate(links, start=1):
         if not isinstance(item, dict):
             raise ValueError(f"{field}[{index}] must be an object")
         entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
         if entity_id not in entity_ids:
             raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
+        seen_entities.add(entity_id)
         for key in ("shared_evidence", "unique_to_video1", "unique_to_video2", "how_video1_improves_video2", "how_video2_improves_video1"):
             _require_string(item.get(key), f"{field}[{index}].{key}")
+    missing_entities = entity_ids - seen_entities
+    if missing_entities:
+        raise ValueError(f"{field} is missing entries for these entities: {', '.join(sorted(missing_entities))}")
 
 def _validate_information_gain(values: Any, entity_ids: set[str], field: str) -> None:
     gains = _require_list(values, field)
     if not gains:
         raise ValueError(f"{field} must not be empty")
+    seen_entities = set()
     for index, item in enumerate(gains, start=1):
         if not isinstance(item, dict):
             raise ValueError(f"{field}[{index}] must be an object")
         entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
         if entity_id not in entity_ids:
             raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
+        seen_entities.add(entity_id)
         for key in ("video1_can_determine", "video1_cannot_determine", "video2_can_determine", "video2_cannot_determine", "fusion_additionally_reveals"):
             _require_list(item.get(key), f"{field}[{index}].{key}")
         rating = item.get("gain_rating")
         if rating not in ALLOWED_GAIN_RATINGS:
             raise ValueError(f"{field}[{index}].gain_rating must be high, medium, or low")
+    missing_entities = entity_ids - seen_entities
+    if missing_entities:
+        raise ValueError(f"{field} is missing entries for these entities: {', '.join(sorted(missing_entities))}")
 
 def _validate_question_worthiness(value: Any, field: str) -> None:
     qw = _require_object(value, field)
