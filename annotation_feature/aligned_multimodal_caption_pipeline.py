@@ -677,7 +677,7 @@ def _validate_video_analysis(parsed: dict[str, Any], field: str) -> None:
         MIN_DETAILED_CAPTION_WORDS,
     )
     if FORBIDDEN_GLOBAL_SCENE_WORDS.search(detailed_caption):
-        raise ValueError(f"{field}.detailed_caption contains forbidden sensor-quality words")
+        raise ValueError(f"{field}.detailed_caption contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
     _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
     for key in ("observable_facts", "sensor_specific_cues", "sensor_limitations"):
         values = _require_list(analysis.get(key), f"{field}.{key}")
@@ -777,12 +777,12 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
     global_scene = _require_object(parsed["global_scene"], "global_scene")
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
     if FORBIDDEN_GLOBAL_SCENE_WORDS.search(scene_summary):
-        raise ValueError("global_scene.scene_summary contains forbidden sensor-quality words")
+        raise ValueError("global_scene.scene_summary contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
     temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
     if FORBIDDEN_GLOBAL_SCENE_WORDS.search(temporal_progression):
-        raise ValueError("global_scene.temporal_progression contains forbidden sensor-quality words")
+        raise ValueError("global_scene.temporal_progression contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
     if not physical_entities:
@@ -874,9 +874,13 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
             )
             return _validate_caption_schema(_parse_json_response(response.text))
         except Exception as exc:
+            exc_str = str(exc).lower()
+            # Quota / rate-limit errors are permanent for the current key — don't waste retries
+            if "429" in exc_str or "quota" in exc_str:
+                raise
             if attempt == max_retries:
                 raise
-            wait_seconds = 30 * attempt if "429" in str(exc) or "quota" in str(exc).lower() else 2 * attempt
+            wait_seconds = 2 * attempt
             print(
                 f"    Caption Gemini call failed on attempt {attempt}/{max_retries}; "
                 f"retrying in {wait_seconds}s: {exc}"
