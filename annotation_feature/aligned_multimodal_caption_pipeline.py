@@ -7,11 +7,17 @@ import asyncio
 import base64
 import json
 import re
+import datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
+
+try:
+    from google.genai import types as genai_types
+except ImportError:
+    genai_types = None
 
 from annotation_feature.pipeline.client import create_gemini_client
 from annotation_feature.pipeline.utils import build_image_parts, infer_recording_side
@@ -67,6 +73,69 @@ FRAME_CACHE_SUBDIRS = {
 }
 SIDE_ORDER = ("day", "night", "unknown")
 
+MODALITY_CAPABILITIES = {
+    "rgb":   {"color": True,  "thermal": False, "structure_edge": False, "depth": False},
+    "event": {"color": False, "thermal": False, "structure_edge": True,  "depth": False},
+    "ir":    {"color": False, "thermal": True,  "structure_edge": False, "depth": False},
+    "depth": {"color": False, "thermal": False, "structure_edge": False, "depth": True},
+}
+
+def build_modality_constraint_block(mod1: str, mod2: str) -> str:
+    h = MODALITY_CAPABILITIES.get(mod1, {"color": True, "thermal": True, "structure_edge": True, "depth": True})
+    v = MODALITY_CAPABILITIES.get(mod2, {"color": True, "thermal": True, "structure_edge": True, "depth": True})
+    
+    lines = []
+    for attr, cap_name in [
+        ("color/paint", "color"), 
+        ("thermal/heat", "thermal"), 
+        ("structural edges/motion boundaries", "structure_edge"), 
+        ("metric depth/distance", "depth")
+    ]:
+        h_can = h[cap_name]
+        v_can = v[cap_name]
+        if not h_can and not v_can:
+            lines.append(f"- {attr}: NEITHER modality can provide this. Do NOT list it as recoverable_from either video.")
+        elif h_can and not v_can:
+            lines.append(f"- {attr}: Only video1 ({mod1}) can provide this.")
+        elif not h_can and v_can:
+            lines.append(f"- {attr}: Only video2 ({mod2}) can provide this.")
+        else:
+            lines.append(f"- {attr}: Both modalities can provide this.")
+    
+    return "MODALITY CAPABILITY CONSTRAINTS:\n" + "\n".join(lines)
+
+def _validate_recoverable_from(parsed: dict[str, Any]) -> None:
+    mod1 = parsed.get("video1_analysis", {}).get("modality", "")
+    mod2 = parsed.get("video2_analysis", {}).get("modality", "")
+    cap = MODALITY_CAPABILITIES
+
+    def check_video(video_key: str, ref_video_key: str, ref_modality: str) -> None:
+        analysis = parsed.get(video_key, {})
+        for attr in analysis.get("missing_key_attributes", []):
+            attr_type = attr.get("attribute_type")
+            for ref in attr.get("recoverable_from", []):
+                if ref_video_key in ref:
+                    if attr_type == "surface_attribute" and "color" in attr.get("missing_attribute", "").lower():
+                        if ref_modality in cap and not cap[ref_modality]["color"]:
+                            raise ValueError(
+                                f"{video_key}.missing_key_attributes: "
+                                f"'{attr.get('missing_attribute')}' marked recoverable from {ref}, "
+                                f"but {ref_modality} has no color capability."
+                            )
+
+    check_video("video1_analysis", "video2", mod2)
+    check_video("video2_analysis", "video1", mod1)
+
+def _normalize_license_plates(data: Any) -> Any:
+    if isinstance(data, str):
+        pattern = r'\b([A-Z]{1,3})[\s\-]+([A-Z]{1,2})[\s\-]*(\d{1,4})\b'
+        return re.sub(pattern, r'\1-\2 \3', data)
+    elif isinstance(data, list):
+        return [_normalize_license_plates(item) for item in data]
+    elif isinstance(data, dict):
+        return {k: _normalize_license_plates(v) for k, v in data.items()}
+    return data
+
 
 @dataclass(frozen=True)
 class CaptionTask:
@@ -75,12 +144,12 @@ class CaptionTask:
     split_dir: str
     segment_name: str
     side: str
-    helper_modality: str
-    victim_modality: str
-    helper_frame_dir: Path
-    victim_frame_dir: Path
-    helper_frames: tuple[Path, ...]
-    victim_frames: tuple[Path, ...]
+    modality1: str
+    modality2: str
+    frame_dir1: Path
+    frame_dir2: Path
+    frames1: tuple[Path, ...]
+    frames2: tuple[Path, ...]
     composite_frames: tuple[Path, ...]
 
 
@@ -198,19 +267,19 @@ def _pair_frame_dirs(
 
 
 def _select_paired_frames(
-    helper_dir: Path,
-    victim_dir: Path,
-    helper_modality: str,
-    victim_modality: str,
+    dir1: Path,
+    dir2: Path,
+    modality1: str,
+    modality2: str,
     num_frames: int,
 ) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
-    helper_by_index = _frames_by_index(helper_dir, helper_modality)
-    victim_by_index = _frames_by_index(victim_dir, victim_modality)
-    shared_indexes = sorted(set(helper_by_index) & set(victim_by_index))
+    by_index1 = _frames_by_index(dir1, modality1)
+    by_index2 = _frames_by_index(dir2, modality2)
+    shared_indexes = sorted(set(by_index1) & set(by_index2))
     selected_indexes = _evenly_sample(shared_indexes, num_frames)
     return (
-        tuple(helper_by_index[index] for index in selected_indexes),
-        tuple(victim_by_index[index] for index in selected_indexes),
+        tuple(by_index1[index] for index in selected_indexes),
+        tuple(by_index2[index] for index in selected_indexes),
     )
 
 
@@ -253,14 +322,14 @@ def _draw_label(image: Image.Image, label: str, xy: tuple[int, int]) -> None:
 
 
 def _compose_frame(
-    context_frame: Path,
-    decisive_frame: Path,
-    helper_modality: str,
-    victim_modality: str,
+    frame1: Path,
+    frame2: Path,
+    modality1: str,
+    modality2: str,
     output_path: Path,
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with Image.open(context_frame) as left_raw, Image.open(decisive_frame) as right_raw:
+    with Image.open(frame1) as left_raw, Image.open(frame2) as right_raw:
         left = left_raw.convert("RGB")
         right = right_raw.convert("RGB")
         target_height = min(left.height, right.height)
@@ -269,52 +338,52 @@ def _compose_frame(
         canvas = Image.new("RGB", (left.width + right.width, target_height), (0, 0, 0))
         canvas.paste(left, (0, 0))
         canvas.paste(right, (left.width, 0))
-        _draw_label(canvas, f"LEFT: {helper_modality.upper()} helper", (0, 0))
-        _draw_label(canvas, f"RIGHT: {victim_modality.upper()} victim", (left.width, 0))
+        _draw_label(canvas, f"LEFT: {modality1.upper()}", (0, 0))
+        _draw_label(canvas, f"RIGHT: {modality2.upper()}", (left.width, 0))
         canvas.save(output_path)
     return output_path
 
 
 def _ensure_composite_frame(
-    context_frame: Path,
-    decisive_frame: Path,
-    helper_modality: str,
-    victim_modality: str,
+    frame1: Path,
+    frame2: Path,
+    modality1: str,
+    modality2: str,
     output_path: Path,
 ) -> Path:
     if not output_path.exists():
         _compose_frame(
-            context_frame,
-            decisive_frame,
-            helper_modality,
-            victim_modality,
+            frame1,
+            frame2,
+            modality1,
+            modality2,
             output_path,
         )
     return output_path
 
 
 def _ensure_composite_frames(task: CaptionTask) -> None:
-    for context_frame, decisive_frame, composite_frame in zip(
-        task.helper_frames,
-        task.victim_frames,
+    for frame1, frame2, composite_frame in zip(
+        task.frames1,
+        task.frames2,
         task.composite_frames,
     ):
         _ensure_composite_frame(
-            context_frame,
-            decisive_frame,
-            task.helper_modality,
-            task.victim_modality,
+            frame1,
+            frame2,
+            task.modality1,
+            task.modality2,
             composite_frame,
         )
 
 
-def _caption_id(segment_id: str, side: str, helper_modality: str, victim_modality: str) -> str:
+def _caption_id(segment_id: str, side: str, modality1: str, modality2: str) -> str:
     return "__".join(
         [
             _safe_name(segment_id).lower(),
             _safe_name(side).lower(),
-            f"{helper_modality}_helper",
-            f"{victim_modality}_victim",
+            modality1,
+            modality2,
         ]
     )
 
@@ -400,63 +469,63 @@ def build_caption_tasks(
             pair_tuple = (str(pair[0]).lower(), str(pair[1]).lower())
             if allowed_pairs is not None and pair_tuple not in allowed_pairs and pair_tuple[::-1] not in allowed_pairs:
                 continue
-            for helper_modality, victim_modality in _directions_for_pair(pair, allowed_directions):
-                helper_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, helper_modality)
-                victim_dirs = _load_frame_dirs(dataset_root, split_dir, segment_name, victim_modality)
-                if not helper_dirs or not victim_dirs:
+            for modality1, modality2 in _directions_for_pair(pair, allowed_directions):
+                dirs1 = _load_frame_dirs(dataset_root, split_dir, segment_name, modality1)
+                dirs2 = _load_frame_dirs(dataset_root, split_dir, segment_name, modality2)
+                if not dirs1 or not dirs2:
                     skipped.append(
                         {
                             "segment_id": segment_id,
                             "split_dir": split_dir,
                             "segment_name": segment_name,
-                            "helper_modality": helper_modality,
-                            "victim_modality": victim_modality,
+                            "modality1": modality1,
+                            "modality2": modality2,
                             "reason": "missing frame cache directory",
                         }
                     )
                     continue
-                for side, helper_dir, victim_dir in _pair_frame_dirs(helper_dirs, victim_dirs):
+                for side, dir1, dir2 in _pair_frame_dirs(dirs1, dirs2):
                     if allowed_sides is not None and side.lower() not in allowed_sides:
                         continue
-                    helper_frames, victim_frames = _select_paired_frames(
-                        helper_dir,
-                        victim_dir,
-                        helper_modality,
-                        victim_modality,
+                    frames1, frames2 = _select_paired_frames(
+                        dir1,
+                        dir2,
+                        modality1,
+                        modality2,
                         num_frames,
                     )
-                    if not helper_frames:
+                    if not frames1:
                         skipped.append(
                             {
                                 "segment_id": segment_id,
                                 "side": side,
-                                "helper_modality": helper_modality,
-                                "victim_modality": victim_modality,
-                                "helper_frame_dir": helper_dir.as_posix(),
-                                "victim_frame_dir": victim_dir.as_posix(),
+                                "modality1": modality1,
+                                "modality2": modality2,
+                                "frame_dir1": dir1.as_posix(),
+                                "frame_dir2": dir2.as_posix(),
                                 "reason": "no shared frame indexes",
                             }
                         )
                         continue
-                    caption_id = _caption_id(str(segment_id), side, helper_modality, victim_modality)
+                    caption_id = _caption_id(str(segment_id), side, modality1, modality2)
                     output_dir = (
                         composite_root
                         / _safe_name(split_dir)
                         / _safe_name(segment_name)
                         / _safe_name(side)
-                        / f"{helper_modality}_helper__{victim_modality}_victim"
+                        / f"{modality1}__{modality2}"
                     )
                     composite_frames: list[Path] = []
-                    for index, (context_frame, decisive_frame) in enumerate(zip(helper_frames, victim_frames), start=1):
-                        frame_number = _frame_index(context_frame)
+                    for index, (f1, f2) in enumerate(zip(frames1, frames2), start=1):
+                        frame_number = _frame_index(f1)
                         suffix = f"{frame_number:06d}" if frame_number is not None else f"{index:03d}"
                         output_path = output_dir / f"frame_{suffix}.png"
                         if write_composites:
                             _compose_frame(
-                                context_frame,
-                                decisive_frame,
-                                helper_modality,
-                                victim_modality,
+                                f1,
+                                f2,
+                                modality1,
+                                modality2,
                                 output_path,
                             )
                         composite_frames.append(output_path)
@@ -467,12 +536,12 @@ def build_caption_tasks(
                             split_dir=split_dir,
                             segment_name=segment_name,
                             side=side,
-                            helper_modality=helper_modality,
-                            victim_modality=victim_modality,
-                            helper_frame_dir=helper_dir,
-                            victim_frame_dir=victim_dir,
-                            helper_frames=helper_frames,
-                            victim_frames=victim_frames,
+                            modality1=modality1,
+                            modality2=modality2,
+                            frame_dir1=dir1,
+                            frame_dir2=dir2,
+                            frames1=frames1,
+                            frames2=frames2,
                             composite_frames=tuple(composite_frames),
                         )
                     )
@@ -487,19 +556,22 @@ def build_caption_tasks(
 def _build_caption_prompt(task: CaptionTask) -> str:
     frame_names = ", ".join(path.name for path in task.composite_frames)
     frame_keys = ", ".join(f'"{path.stem}"' for path in task.composite_frames)
+    constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
     return "\n".join(
         [
             "You are an expert multimodal perception analyst.",
             "You will receive multiple synchronized composite frames sampled from one aligned video segment.",
-            f"Video 1 (left): {task.helper_modality} modality.",
-            f"Video 2 (right): {task.victim_modality} modality.",
+            f"Video 1 (left): {task.modality1}.",
+            f"Video 2 (right): {task.modality2}.",
             "These two videos observe the same physical scene using different sensing modalities.",
+            constraint_block,
             "Neither video is considered the reference or the ground truth.",
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL INSTRUCTION: First write the GLOBAL PHYSICAL SCENE. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",
-            "FIELD RULES (violations cause rejection): (1) every missing_key_attributes[].recoverable_from must be a non-empty list — always include at least one recoverable source string. (2) every information_gain[].entity_id, ambiguity_events[].target_entity, AND cross_modal_evidence_links[].entity_id must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence. (4) detailed_caption must describe WHAT IS PHYSICALLY HAPPENING in the scene (objects, motion, actions, spatial layout), not HOW the sensor captures it. Do NOT use words like monochrome, greyscale, thermal, edge-based, overexposed, saturated, blurry, contour, silhouette, ir, or pixel in detailed_caption. Those words belong in sensor_specific_cues and sensor_limitations instead. (5) fusion_additionally_reveals must be a list of descriptive observation strings ONLY. Do NOT include rating words like 'low', 'medium', or 'high' inside this list — those belong in the separate gain_rating field. (6) ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one. (7) NEVER use generic sensor-theory wording like 'this modality captures', 'event cameras detect', or 'designed to measure' in any video analysis fields. Describe ONLY specific evidence from the current frames. (8) supported_question_types MUST only use values from the provided template list. Do NOT use attribute_type values (like surface_attribute, motion_trend) as question types. (9) In missing_key_attributes[].why_missing, explain the specific physical reason the attribute is unobservable in this exact segment, NOT generic sensor capabilities (e.g., say 'The sunlit brick and asphalt appear visually identical in color here' instead of 'Color cameras do not capture thermal energy'). (10) frame_by_frame_analysis[].frame_key must be exactly the frame name WITHOUT the file extension (e.g., 'frame_000000', NOT 'frame_000000.png'). (11) cross_modal_evidence_links and information_gain must include an entry for EVERY entity listed in global_scene.physical_entities. Do not skip any entities. (12) observable_facts for each video must contain AT LEAST 3 distinct facts.",
+            "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",
+            "ENTITY SELECTION: physical_entities should include: (1) entities that are central to the scene action, (2) entities where the two modalities give meaningfully different information, and (3) any entity explicitly mentioned in scene_summary. Background details (e.g., distant road markings, generic sky) may be omitted. Aim for 3-8 entities per scene.",
+            "FIELD RULES (violations cause rejection): (1) If an attribute is truly unrecoverable from the other video, DO NOT include it in missing_key_attributes at all. The recoverable_from list MUST NOT be empty. (2) every information_gain[].entity_id, ambiguity_events[].target_entity, AND cross_modal_evidence_links[].entity_id must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence. (4) CRITICAL RULE for detailed_caption: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. You MUST STRICTLY AVOID these exact words: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. (5) fusion_additionally_reveals must be a list of descriptive observation strings ONLY. Do NOT include rating words like 'low', 'medium', or 'high' inside this list — those belong in the separate gain_rating field. (6) ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one. (7) NEVER use generic sensor-theory wording like 'this modality captures', 'event cameras detect', or 'designed to measure' in any video analysis fields. Describe ONLY specific evidence from the current frames. (8) supported_question_types MUST ONLY choose from the EXACT following values: [object_identity, attribute_reasoning, temporal_reasoning, spatial_reasoning, interaction_reasoning, cross_modal_reasoning, counterfactual_reasoning]. DO NOT invent your own types like causal_reasoning. Do NOT use attribute_type values as question types. (9) In missing_key_attributes[].why_missing, explain the specific physical reason the attribute is unobservable in this exact segment, NOT generic sensor capabilities (e.g., say 'The sunlit brick and asphalt appear visually identical in color here' instead of 'Color cameras do not capture thermal energy'). (10) frame_by_frame_analysis[].frame_key must be exactly the frame name WITHOUT the file extension (e.g., 'frame_000000', NOT 'frame_000000.png'). (11) cross_modal_evidence_links and information_gain must include an entry for EVERY entity listed in global_scene.physical_entities. Do not skip any entities. (12) observable_facts for each video must contain AT LEAST 3 distinct facts. (13) disappearing_entities rule: Only mark an entity as disappearing_entities if it genuinely exits the field of view. Note that the camera is typically mounted on a vehicle/person (e.g. bicycle handlebars remain in frame throughout the sequence). (14) gain_rating guidelines: 'high': fusion reveals information that neither modality alone could determine; 'medium': fusion confirms or marginally extends what one modality already shows; 'low': fusion adds minimal new insight. Special rule: if a modality is effectively 'out-of-range' (like a blank depth map), cap the gain_rating at 'medium' unless fusion provides a qualitatively new safety-critical insight.",
             "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
             "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
             "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. For EVERY entity listed in global_scene.physical_entities, identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
@@ -519,7 +591,7 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             '    "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
             '  },',
             '  "video1_analysis": {',
-            f'    "modality": "{task.helper_modality}",',
+            f'    "modality": "{task.modality1}",',
             '    "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
             '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
             '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
@@ -528,7 +600,8 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             '    "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video1_analysis.observable_facts"]}]',
             '  },',
             '  "video2_analysis": {',
-            f'    "modality": "{task.victim_modality}",',
+            f'    "modality": "{task.modality2}",',
+
             '    "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
             '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
             '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
@@ -551,7 +624,8 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             '      "resolving_video": "video2|video1",',
             '      "low_confidence_observation": "What the ambiguous video shows by itself.",',
             '      "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
-            '      "candidate_hypotheses": [{"hypothesis": "hypothesis 1...", "support_from_victim": "..."}, {"hypothesis": "hypothesis 2...", "support_from_victim": "..."}],',
+            '      "candidate_hypotheses": [{"hypothesis": "hypothesis 1...", "support_from_resolving": "..."}, {"hypothesis": "hypothesis 2...", "support_from_resolving": "..."}],',
+
             '      "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
             '      "eliminated_hypotheses": [{"hypothesis": "...", "why_eliminated": "..."}],',
             '      "fusion_conclusion": "Final physical fact after combining both modalities.",',
@@ -838,8 +912,8 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
                 raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}] must be an object")
             _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].hypothesis")
             _require_string(
-                hypothesis.get("support_from_victim"),
-                f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].support_from_victim",
+                hypothesis.get("support_from_resolving") or hypothesis.get("support_from_victim"),
+                f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].support_from_resolving",
             )
         eliminated = _require_list(event.get("eliminated_hypotheses"), f"ambiguity_events[{index}].eliminated_hypotheses")
         if not eliminated:
@@ -855,6 +929,10 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
     
     _validate_frame_by_frame_analysis(parsed.get("frame_by_frame_analysis"), "frame_by_frame_analysis")
     _require_list(parsed["rejected_observations"], "rejected_observations")
+    
+    _validate_recoverable_from(parsed)
+    parsed = _normalize_license_plates(parsed)
+    
     return parsed
 
 
@@ -909,12 +987,12 @@ def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None
         "split_dir": task.split_dir,
         "segment_name": task.segment_name,
         "side": task.side,
-        "helper_modality": task.helper_modality,
-        "victim_modality": task.victim_modality,
-        "helper_frame_dir": task.helper_frame_dir.as_posix(),
-        "victim_frame_dir": task.victim_frame_dir.as_posix(),
-        "helper_frames": [path.as_posix() for path in task.helper_frames],
-        "victim_frames": [path.as_posix() for path in task.victim_frames],
+        "modality1": task.modality1,
+        "modality2": task.modality2,
+        "frame_dir1": task.frame_dir1.as_posix(),
+        "frame_dir2": task.frame_dir2.as_posix(),
+        "frames1": [path.as_posix() for path in task.frames1],
+        "frames2": [path.as_posix() for path in task.frames2],
         "composite_frames": [path.as_posix() for path in task.composite_frames],
         "status": status,
         "reason": reason,
@@ -942,7 +1020,7 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
             "temporal_progression": "Template mode placeholder; no visual reasoning was performed.",
         },
         "video1_analysis": {
-            "modality": task.helper_modality,
+            "modality": task.modality1,
             "detailed_caption": "Template mode placeholder; Gemini was not called.",
             "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
             "sensor_specific_cues": ["Template mode placeholder."],
@@ -957,7 +1035,7 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
             "missing_key_attributes": [],
         },
         "video2_analysis": {
-            "modality": task.victim_modality,
+            "modality": task.modality2,
             "detailed_caption": "Template mode placeholder; Gemini was not called.",
             "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
             "sensor_specific_cues": ["Template mode placeholder."],
@@ -1009,6 +1087,171 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
             {"observation": "", "reason": "template mode; Gemini was not called"}
         ],
     }
+
+
+def _batch_state_path(output_path: Path | str) -> Path:
+    out = Path(output_path)
+    return out.with_name(f".{out.stem}_batch_state.json")
+
+def _build_batch_request(task: CaptionTask, model_name: str, req_id: str) -> "genai_types.InlinedRequest":
+    if genai_types is None:
+        raise ImportError("google.genai is not installed")
+    _ensure_composite_frames(task)
+    encoded = _encode_images(task.composite_frames)
+    if not encoded:
+        raise ValueError("No composite frames found for Gemini batch call")
+    prompt_part = genai_types.Part.from_text(text=_build_caption_prompt(task))
+    base_contents = build_image_parts(encoded) + [prompt_part]
+    return genai_types.InlinedRequest(
+        model=model_name,
+        contents=[genai_types.Content(role="user", parts=base_contents)],
+        metadata={"id": req_id}
+    )
+
+def _submit_batch(client, tasks: list[CaptionTask], model_name: str, output_path: Path | str) -> None:
+    if not tasks:
+        print("No pending tasks to submit in batch mode.")
+        return
+    print(f"Building batch request for {len(tasks)} tasks...")
+    requests = [_build_batch_request(t, model_name, str(i)) for i, t in enumerate(tasks)]
+    print(f"Submitting batch job to Gemini API...")
+    job = client.batches.create(model=model_name, src=requests)
+    print(f"Batch job submitted successfully! Job Name: {job.name}")
+    
+    state_path = _batch_state_path(output_path)
+    state = {
+        "job_name": job.name,
+        "model_name": model_name,
+        "output_path": str(output_path),
+        "submitted_at": datetime.datetime.now().isoformat(),
+        "pending_tasks": [
+            {
+                "caption_id": t.caption_id,
+                "segment_id": t.segment_id,
+                "split_dir": t.split_dir,
+                "segment_name": t.segment_name,
+                "side": t.side,
+                "modality1": t.modality1,
+                "modality2": t.modality2,
+                "frame_dir1": t.frame_dir1.as_posix(),
+                "frame_dir2": t.frame_dir2.as_posix(),
+                "frames1": [p.as_posix() for p in t.frames1],
+                "frames2": [p.as_posix() for p in t.frames2],
+                "composite_frames": [p.as_posix() for p in t.composite_frames],
+            } for t in tasks
+        ]
+    }
+    _save_json(state, state_path)
+    print(f"Saved batch state to {state_path}")
+    print("You can exit the script now. Check status later using --fetch-batch.")
+
+def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str | None = None) -> None:
+    out_path = Path(output_path)
+    state_path = Path(batch_state_path) if batch_state_path else _batch_state_path(out_path)
+    if not state_path.exists():
+        print(f"Batch state file not found: {state_path}. Cannot fetch.")
+        return
+    with open(state_path, "r", encoding="utf-8") as f:
+        state = json.load(f)
+        
+    if "fetched_at" in state:
+        print(f"Batch state file {state_path} was already fetched at {state['fetched_at']}.")
+        return
+
+    job_name = state["job_name"]
+    print(f"Checking status for batch job: {job_name}")
+    job = client.batches.get(name=job_name)
+    
+    if job.state.name in ("JOB_STATE_PENDING", "JOB_STATE_RUNNING", "JOB_STATE_CANCELLING", "JOB_STATE_PARTIALLY_SUCCEEDED"):
+        print(f"Job is still running. Current state: {job.state.name}")
+        return
+    elif job.state.name in ("JOB_STATE_FAILED", "JOB_STATE_CANCELLED"):
+        print(f"Job finished with state: {job.state.name}")
+        print(f"Error details: {job.error}")
+        return
+        
+    print(f"Job succeeded! Fetching results...")
+    
+    existing_items, existing_skipped = _load_resume(out_path)
+    items = existing_items
+    skipped = existing_skipped
+    existing_ids = {
+        str(item.get("caption_id")) for item in (items + skipped) 
+        if item.get("caption_id")
+    }
+    
+    pending_tasks_list = state.get("pending_tasks", [])
+    pending_tasks_map = {str(i): t for i, t in enumerate(pending_tasks_list)}
+    
+    seen_in_this_fetch = set()
+    
+    for resp_entry in job.dest.inlined_responses:
+        req_id = resp_entry.metadata.get("id") if resp_entry.metadata else None
+        if req_id is None:
+            continue
+        
+        task_dict = pending_tasks_map.get(req_id)
+        if not task_dict:
+            continue
+            
+        caption_id = task_dict.get("caption_id")
+        if not caption_id or caption_id in existing_ids:
+            continue
+            
+        if caption_id in seen_in_this_fetch:
+            continue
+        seen_in_this_fetch.add(caption_id)
+        base_item = {
+            "caption_id": caption_id,
+            "segment_id": task_dict.get("segment_id"),
+            "split_dir": task_dict.get("split_dir"),
+            "segment_name": task_dict.get("segment_name"),
+            "side": task_dict.get("side"),
+            "modality1": task_dict.get("modality1"),
+            "modality2": task_dict.get("modality2"),
+            "frame_dir1": task_dict.get("frame_dir1"),
+            "frame_dir2": task_dict.get("frame_dir2"),
+            "frames1": task_dict.get("frames1", []),
+            "frames2": task_dict.get("frames2", []),
+            "composite_frames": task_dict.get("composite_frames", []),
+        }
+        
+        if resp_entry.error:
+            base_item["reason"] = f"Batch API Error: {resp_entry.error}"
+            skipped.append(base_item)
+            continue
+            
+        try:
+            raw_text = resp_entry.response.candidates[0].content.parts[0].text
+            caption = _validate_caption_schema(_parse_json_response(raw_text))
+            base_item["status"] = "generated_batch"
+            base_item["caption"] = caption
+            items.append(base_item)
+        except Exception as exc:
+            base_item["reason"] = f"Validation Error: {exc}"
+            skipped.append(base_item)
+            
+    _save_json(
+        _build_output_payload(
+            input_path=Path("batch_mode"),
+            dataset_root=Path("batch_mode"),
+            composite_root=Path("batch_mode"),
+            output_path=out_path,
+            model_name=state.get("model_name", "unknown"),
+            generation_mode="batch",
+            num_frames=len(pending_tasks_list[0].get("frames1", [])) if pending_tasks_list else 0,
+            items=items,
+            skipped=skipped,
+            planned_total=len(items) + len(skipped),
+            gemini_calls=len(job.dest.inlined_responses),
+        ),
+        out_path,
+    )
+    
+    state["fetched_at"] = datetime.datetime.now().isoformat()
+    _save_json(state, state_path)
+    
+    print(f"Wrote batch fetched results to {out_path}")
 
 
 def _build_output_payload(
@@ -1065,6 +1308,7 @@ async def run_caption_pipeline_async(
     composite_root: Path,
     model_name: str,
     generation_mode: str,
+    api_key_source: str,
     num_frames: int,
     pairs: str | None,
     directions: str | None,
@@ -1099,7 +1343,7 @@ async def run_caption_pipeline_async(
     existing_ids = {str(item.get("caption_id")) for item in items if item.get("caption_id")}
     pending_tasks = [task for task in tasks if task.caption_id not in existing_ids]
 
-    client = create_gemini_client() if generation_mode == "gemini" else None
+    client = create_gemini_client(api_key_source=api_key_source) if generation_mode in ("gemini", "batch") else None
     gemini_calls = 0
     checkpoint_counter = 0
 
@@ -1107,6 +1351,11 @@ async def run_caption_pipeline_async(
         f"Generating cross-modal captions: {len(tasks)} planned item(s), "
         f"{len(pending_tasks)} pending, mode={generation_mode}, model={model_name}."
     )
+    
+    if generation_mode == "batch":
+        assert client is not None
+        _submit_batch(client, pending_tasks, model_name, output_path)
+        return output_path
 
     def save_checkpoint() -> None:
         _save_json(
@@ -1126,9 +1375,11 @@ async def run_caption_pipeline_async(
             output_path,
         )
 
-    for index, task in enumerate(pending_tasks, start=1):
+    task_index = 0
+    while task_index < len(pending_tasks):
+        task = pending_tasks[task_index]
         print(
-            f"  Caption item [{index}/{len(pending_tasks)}] "
+            f"  Caption item [{task_index + 1}/{len(pending_tasks)}] "
             f"{task.caption_id}"
         )
         try:
@@ -1145,15 +1396,21 @@ async def run_caption_pipeline_async(
         except Exception as exc:
             exc_str = str(exc).lower()
             if "429" in exc_str or "quota" in exc_str:
-                print(f"FATAL: Quota exhausted or rate limit hit. Stopping execution to preserve state: {exc}")
-                break
+                print(f"WARNING: Quota exhausted or rate limit hit. Attempting to rotate API key...")
+                try:
+                    client = create_gemini_client(api_key_source=api_key_source)
+                    # Retry the current task seamlessly
+                    continue
+                except Exception as rotate_exc:
+                    print(f"FATAL: All API keys exhausted or failed to rotate: {rotate_exc}")
+                    break
             skipped.append(
                 {
                     "caption_id": task.caption_id,
                     "segment_id": task.segment_id,
                     "side": task.side,
-                    "helper_modality": task.helper_modality,
-                    "victim_modality": task.victim_modality,
+                    "modality1": task.modality1,
+                    "modality2": task.modality2,
                     "reason": str(exc),
                 }
             )
@@ -1163,8 +1420,10 @@ async def run_caption_pipeline_async(
         if checkpoint_every > 0 and checkpoint_counter >= checkpoint_every:
             checkpoint_counter = 0
             save_checkpoint()
-        if generation_mode == "gemini" and delay_between_calls > 0 and index < len(pending_tasks):
+        if generation_mode == "gemini" and delay_between_calls > 0 and task_index < len(pending_tasks) - 1:
             await asyncio.sleep(delay_between_calls)
+            
+        task_index += 1
 
     save_checkpoint()
     print(f"Wrote cross-modal caption output to {output_path}")
@@ -1178,6 +1437,7 @@ def run_caption_pipeline(
     composite_root: Path | str = DEFAULT_COMPOSITE_ROOT,
     model_name: str = DEFAULT_MODEL_NAME,
     generation_mode: str = "template",
+    api_key_source: str = "list",
     num_frames: int = 6,
     pairs: str | None = None,
     directions: str | None = None,
@@ -1198,6 +1458,7 @@ def run_caption_pipeline(
             composite_root=Path(composite_root),
             model_name=model_name,
             generation_mode=generation_mode,
+            api_key_source=api_key_source,
             num_frames=num_frames,
             pairs=pairs,
             directions=directions,
@@ -1222,10 +1483,13 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-name", default=DEFAULT_MODEL_NAME)
     parser.add_argument(
         "--generation-mode",
-        choices=("template", "gemini"),
+        choices=("template", "gemini", "batch"),
         default="template",
-        help="Use template to build composite frames without calling Gemini.",
+        help="Use template to build composite frames without calling Gemini. Use batch for async batch API.",
     )
+    parser.add_argument("--fetch-batch", action="store_true", help="Fetch results for a pending batch job instead of creating tasks.")
+    parser.add_argument("--batch-state", default=None, help="Path to batch state file (optional).")
+    parser.add_argument("--api-key-source", choices=("env", "list"), default="list", help="Source for Gemini API keys.")
     parser.add_argument("--num-frames", type=int, default=6)
     parser.add_argument(
         "--pairs",
@@ -1240,7 +1504,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--directions",
         default=None,
-        help="Comma-separated helper->victim directions such as rgb->depth,event->ir. Defaults to both directions.",
+        help="Comma-separated modality1->modality2 directions such as rgb->depth,event->ir. Defaults to both directions.",
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
@@ -1268,6 +1532,12 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = _build_arg_parser().parse_args()
+    
+    if args.fetch_batch:
+        client = create_gemini_client(api_key_source=args.api_key_source)
+        _fetch_batch(client, args.output, args.batch_state)
+        return
+
     run_caption_pipeline(
         input_path=args.input,
         output_path=args.output,
@@ -1275,6 +1545,7 @@ def main() -> None:
         composite_root=args.composite_root,
         model_name=args.model_name,
         generation_mode=args.generation_mode,
+        api_key_source=args.api_key_source,
         num_frames=max(1, args.num_frames),
         pairs=args.pairs,
         directions=args.directions,
