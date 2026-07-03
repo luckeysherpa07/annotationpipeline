@@ -865,6 +865,7 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
         raise ValueError("No composite frames found for Gemini call")
     base_contents = build_image_parts(encoded) + [_build_caption_prompt(task)]
     contents = base_contents
+    raw_text = None
     for attempt in range(1, max_retries + 1):
         try:
             response = await asyncio.to_thread(
@@ -872,7 +873,8 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
                 model=model_name,
                 contents=contents,
             )
-            return _validate_caption_schema(_parse_json_response(response.text))
+            raw_text = response.text
+            return _validate_caption_schema(_parse_json_response(raw_text))
         except Exception as exc:
             exc_str = str(exc).lower()
             # Quota / rate-limit errors are permanent for the current key — don't waste retries
@@ -887,9 +889,14 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
             )
             await asyncio.sleep(wait_seconds)
             # Error-guided retry: tell the model exactly what went wrong
+            previous_context = ""
+            if raw_text:
+                previous_context = f"\n\nHere is your previous invalid response:\n```json\n{raw_text}\n```\n\n"
             error_feedback = (
+                f"{previous_context}"
                 f"Your previous response was REJECTED due to this validation error: [{exc}]. "
-                f"Fix ONLY that specific issue and return the corrected full JSON."
+                f"Please fix ONLY this specific issue, maintain strict semantic consistency "
+                f"with all other fields, and return the complete updated JSON."
             )
             contents = base_contents + [error_feedback]
     raise RuntimeError("Gemini caption call failed")
