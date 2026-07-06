@@ -6,11 +6,15 @@ import argparse
 import asyncio
 import base64
 import json
+import hashlib
+import os
 import re
 import datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import numpy as np
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -22,13 +26,41 @@ except ImportError:
 from annotation_feature.pipeline.client import create_gemini_client
 from annotation_feature.pipeline.utils import build_image_parts, infer_recording_side
 
+from annotation_feature.aligned_multimodal_sampling import (
+    MultimodalSamplingJob,
+    load_frame_dirs,
+    pair_frame_dirs,
+    select_paired_frames,
+    frame_index,
+    frames_by_index,
+    ADAPTIVE_CHANGE_WEIGHT,
+    ADAPTIVE_COVERAGE_WEIGHT
+)
+
+SELECTION_ALGORITHM_VERSION = "uniform_adaptive_v1"
+
+def build_selection_config_fingerprint(
+    num_uniform_frames: int,
+    num_adaptive_frames: int,
+) -> str:
+    payload = {
+        "algorithm": "uniform_adaptive",
+        "algorithm_version": SELECTION_ALGORITHM_VERSION,
+        "num_uniform_frames": num_uniform_frames,
+        "num_adaptive_frames": num_adaptive_frames,
+        "adaptive_change_weight": ADAPTIVE_CHANGE_WEIGHT,
+        "adaptive_coverage_weight": ADAPTIVE_COVERAGE_WEIGHT,
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+
 
 DEFAULT_INPUT_PATH = Path("outputs/aligned_multimodal_visual_evidence_units_filtered.json")
 DEFAULT_OUTPUT_PATH = Path("outputs/aligned_cross_modal_disambiguation_captions_gemini.json")
 DEFAULT_COMPOSITE_ROOT = Path("outputs/composite_frames")
 DEFAULT_DATASET_ROOT = Path("aligned_dataset")
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
-CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v5"
+CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v7"
 ALLOWED_MISSING_ATTRIBUTE_TYPES = {
     "existence",
     "target_category",
@@ -36,13 +68,40 @@ ALLOWED_MISSING_ATTRIBUTE_TYPES = {
     "surface_attribute",
     "motion_trend",
 }
-ALLOWED_QA_POTENTIAL = {"high", "medium", "low"}
-ALLOWED_QUESTION_TYPES = {
-    "object_identity", "attribute_reasoning", "temporal_reasoning",
-    "spatial_reasoning", "interaction_reasoning", "cross_modal_reasoning",
-    "counterfactual_reasoning",
-}
 ALLOWED_GAIN_RATINGS = {"low", "medium", "high"}
+ALLOWED_FOCUS_REASONS = {
+    "cross_modal_complementarity", "fusion_gain", "temporal_change", 
+    "interaction", "occlusion_change", "spatial_transition", "joint_fusion", "ambiguity_resolution"
+}
+FOCUS_REASON_SECTION_MAP = {
+    "cross_modal_complementarity": {"cross_modal_evidence_links"},
+    "fusion_gain": {"information_gain"},
+    "temporal_change": {"reasoning_events"},
+    "interaction": {"reasoning_events"},
+    "occlusion_change": {"reasoning_events"},
+    "spatial_transition": {"reasoning_events"},
+    "joint_fusion": {"reasoning_events", "information_gain"},
+    "ambiguity_resolution": {"ambiguity_events"}
+}
+FOCUS_REASON_EVENT_TYPE_MAP = {
+    "temporal_change": {"temporal_change"},
+    "interaction": {"interaction"},
+    "occlusion_change": {"occlusion_change"},
+    "spatial_transition": {"spatial_transition"},
+    "joint_fusion": {"joint_fusion"},
+}
+ALLOWED_QA_REASONING_PATTERNS = {
+    "cross_modal_disambiguation", "temporal_integration", "occlusion_reasoning", 
+    "interaction_reasoning", "spatial_transition", "hypothesis_elimination", 
+    "multi_hop_composition", "joint_fusion"
+}
+ALLOWED_REASONING_EVENT_TYPES = {
+    "temporal_change",
+    "interaction",
+    "occlusion_change",
+    "spatial_transition",
+    "joint_fusion",
+}
 ALLOWED_AMBIGUITY_DIRECTIONS = {"video1_resolves_video2", "video2_resolves_video1"}
 FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
     r"\b(modality|thermal|rgb|event|depth|infrared|ir|visible|invisible|"
@@ -52,7 +111,6 @@ FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
 MIN_DETAILED_CAPTION_WORDS = 30
 MIN_SCENE_SUMMARY_WORDS = 20
 MIN_FRAME_DETAIL_WORDS = 8
-MIN_OBSERVABLE_FACTS = 3
 GENERIC_SENSOR_EXPLANATION_PATTERNS = (
     re.compile(r"\bevent cameras?\s+(capture|detect|record|respond)", re.I),
     re.compile(r"\b(depth|rgb|infrared|ir)\s+(camera|sensor)s?\s+(capture|detect|record|measure)", re.I),
@@ -66,13 +124,6 @@ VISUAL_PAIRS = (
     ("event", "ir"),
     ("event", "depth"),
 )
-FRAME_CACHE_SUBDIRS = {
-    "rgb": ".frames_cache",
-    "ir": ".frames_cache_ir",
-    "event": ".frames_cache_event",
-}
-SIDE_ORDER = ("day", "night", "unknown")
-
 MODALITY_CAPABILITIES = {
     "rgb":   {"color": True,  "thermal": False, "structure_edge": False, "depth": False},
     "event": {"color": False, "thermal": False, "structure_edge": True,  "depth": False},
@@ -94,7 +145,7 @@ def build_modality_constraint_block(mod1: str, mod2: str) -> str:
         h_can = h[cap_name]
         v_can = v[cap_name]
         if not h_can and not v_can:
-            lines.append(f"- {attr}: NEITHER modality can provide this. Do NOT list it as recoverable_from either video.")
+            lines.append(f"- {attr}: NEITHER modality can provide this. Do NOT list it as recoverable_evidence_refs from either video.")
         elif h_can and not v_can:
             lines.append(f"- {attr}: Only video1 ({mod1}) can provide this.")
         elif not h_can and v_can:
@@ -103,28 +154,6 @@ def build_modality_constraint_block(mod1: str, mod2: str) -> str:
             lines.append(f"- {attr}: Both modalities can provide this.")
     
     return "MODALITY CAPABILITY CONSTRAINTS:\n" + "\n".join(lines)
-
-def _validate_recoverable_from(parsed: dict[str, Any]) -> None:
-    mod1 = parsed.get("video1_analysis", {}).get("modality", "")
-    mod2 = parsed.get("video2_analysis", {}).get("modality", "")
-    cap = MODALITY_CAPABILITIES
-
-    def check_video(video_key: str, ref_video_key: str, ref_modality: str) -> None:
-        analysis = parsed.get(video_key, {})
-        for attr in analysis.get("missing_key_attributes", []):
-            attr_type = attr.get("attribute_type")
-            for ref in attr.get("recoverable_from", []):
-                if ref_video_key in ref:
-                    if attr_type == "surface_attribute" and "color" in attr.get("missing_attribute", "").lower():
-                        if ref_modality in cap and not cap[ref_modality]["color"]:
-                            raise ValueError(
-                                f"{video_key}.missing_key_attributes: "
-                                f"'{attr.get('missing_attribute')}' marked recoverable from {ref}, "
-                                f"but {ref_modality} has no color capability."
-                            )
-
-    check_video("video1_analysis", "video2", mod2)
-    check_video("video2_analysis", "video1", mod1)
 
 def _normalize_license_plates(data: Any) -> Any:
     if isinstance(data, str):
@@ -151,6 +180,15 @@ class CaptionTask:
     frames1: tuple[Path, ...]
     frames2: tuple[Path, ...]
     composite_frames: tuple[Path, ...]
+    sampling_strategy: str
+    uniform_anchor_indexes: tuple[int, ...]
+    adaptive_frame_indexes: tuple[int, ...]
+    selected_frame_indexes: tuple[int, ...]
+    candidate_frame_indexes: tuple[int, ...]
+    selection_config_fingerprint: str
+
+
+
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -165,122 +203,6 @@ def _save_json(data: dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2, ensure_ascii=False)
-
-
-def _frame_index(path: Path) -> int | None:
-    match = re.search(r"frame_(\d+)", path.name)
-    return int(match.group(1)) if match else None
-
-
-def _frames_by_index(frame_dir: Path, modality: str) -> dict[int, Path]:
-    pattern = "frame_*_depth.png" if modality == "depth" else "frame_*.png"
-    frames: dict[int, Path] = {}
-    for path in sorted(frame_dir.glob(pattern)):
-        index = _frame_index(path)
-        if index is not None:
-            frames[index] = path
-    return frames
-
-
-def _evenly_sample(values: list[int], count: int) -> list[int]:
-    if count <= 0 or not values:
-        return []
-    if len(values) <= count:
-        return values
-    if count == 1:
-        return [values[len(values) // 2]]
-    last = len(values) - 1
-    selected = [values[round(i * last / (count - 1))] for i in range(count)]
-    return list(dict.fromkeys(selected))
-
-
-def _side_key(path: Path) -> str:
-    return infer_recording_side(path.name) or "unknown"
-
-
-def _load_standard_frame_dirs(
-    dataset_root: Path,
-    split_dir: str,
-    segment_name: str,
-    modality: str,
-) -> dict[str, Path]:
-    cache_subdir = FRAME_CACHE_SUBDIRS[modality]
-    base = dataset_root / cache_subdir / split_dir / segment_name
-    if not base.exists():
-        return {}
-    dirs: dict[str, Path] = {}
-    for path in sorted(base.iterdir()):
-        if not path.is_dir():
-            continue
-        name = path.name.lower()
-        if not name.endswith(f"_{modality}"):
-            continue
-        side = _side_key(path)
-        dirs.setdefault(side, path)
-    return dirs
-
-
-def _load_depth_frame_dirs(dataset_root: Path, split_dir: str, segment_name: str) -> dict[str, Path]:
-    base = dataset_root / ".frames_cache_marigold" / split_dir / segment_name
-    if not base.exists():
-        return {}
-    dirs: dict[str, Path] = {}
-    for pair_dir in sorted(base.iterdir()):
-        if not pair_dir.is_dir():
-            continue
-        for side_dir in sorted(pair_dir.iterdir()):
-            if not side_dir.is_dir():
-                continue
-            side = _side_key(side_dir)
-            if side == "unknown" and side_dir.name.lower() in {"day", "night"}:
-                side = side_dir.name.lower()
-            dirs.setdefault(side, side_dir)
-    return dirs
-
-
-def _load_frame_dirs(
-    dataset_root: Path,
-    split_dir: str,
-    segment_name: str,
-    modality: str,
-) -> dict[str, Path]:
-    if modality == "depth":
-        return _load_depth_frame_dirs(dataset_root, split_dir, segment_name)
-    if modality not in FRAME_CACHE_SUBDIRS:
-        return {}
-    return _load_standard_frame_dirs(dataset_root, split_dir, segment_name, modality)
-
-
-def _pair_frame_dirs(
-    helper_dirs: dict[str, Path],
-    victim_dirs: dict[str, Path],
-) -> list[tuple[str, Path, Path]]:
-    sides = [side for side in SIDE_ORDER if side in helper_dirs and side in victim_dirs]
-    sides.extend(
-        sorted(
-            side
-            for side in set(helper_dirs) & set(victim_dirs)
-            if side not in SIDE_ORDER
-        )
-    )
-    return [(side, helper_dirs[side], victim_dirs[side]) for side in sides]
-
-
-def _select_paired_frames(
-    dir1: Path,
-    dir2: Path,
-    modality1: str,
-    modality2: str,
-    num_frames: int,
-) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
-    by_index1 = _frames_by_index(dir1, modality1)
-    by_index2 = _frames_by_index(dir2, modality2)
-    shared_indexes = sorted(set(by_index1) & set(by_index2))
-    selected_indexes = _evenly_sample(shared_indexes, num_frames)
-    return (
-        tuple(by_index1[index] for index in selected_indexes),
-        tuple(by_index2[index] for index in selected_indexes),
-    )
 
 
 def _safe_name(value: str) -> str:
@@ -427,7 +349,10 @@ def build_caption_tasks(
     input_path: Path,
     dataset_root: Path,
     composite_root: Path,
-    num_frames: int,
+    sampling_strategy: str,
+    num_uniform_frames: int,
+    num_adaptive_frames: int,
+    existing_items: list[dict[str, Any]],
     allowed_pairs: set[tuple[str, str]] | None = None,
     allowed_directions: set[tuple[str, str]] | None = None,
     allowed_sides: set[str] | None = None,
@@ -435,127 +360,172 @@ def build_caption_tasks(
     limit_scenes: int | None = None,
     limit_scene_folders: int | None = None,
     write_composites: bool = True,
-) -> tuple[list[CaptionTask], list[dict[str, Any]]]:
+) -> tuple[list[CaptionTask], list[dict[str, Any]], int]:
     data = _load_json(input_path)
     segments = data.get("segments")
     if not isinstance(segments, dict):
         raise ValueError(f"Expected {input_path} to contain a segments object")
 
-    tasks: list[CaptionTask] = []
     skipped: list[dict[str, Any]] = []
-    selected_scenes: set[str] = set()
-    selected_scene_folders: set[str] = set()
+    all_jobs: list[MultimodalSamplingJob] = []
+    
     for segment_id, segment in sorted(segments.items()):
-        if limit_scenes is not None and len(selected_scenes) >= limit_scenes:
-            break
         if not isinstance(segment, dict):
             continue
-        task_count_before_segment = len(tasks)
+            
         split_dir = str(segment.get("split_dir") or "")
         segment_name = str(segment.get("segment_name") or "")
-        if (
-            limit_scene_folders is not None
-            and split_dir not in selected_scene_folders
-            and len(selected_scene_folders) >= limit_scene_folders
-        ):
-            break
         if not split_dir or not segment_name:
             skipped.append({"segment_id": segment_id, "reason": "missing split_dir or segment_name"})
             continue
+            
         pairs = segment.get("modality_pairs") or []
         for pair in pairs:
             if not isinstance(pair, list | tuple) or len(pair) != 2:
                 continue
+            
             pair_tuple = (str(pair[0]).lower(), str(pair[1]).lower())
             if allowed_pairs is not None and pair_tuple not in allowed_pairs and pair_tuple[::-1] not in allowed_pairs:
                 continue
-            for modality1, modality2 in _directions_for_pair(pair, allowed_directions):
-                dirs1 = _load_frame_dirs(dataset_root, split_dir, segment_name, modality1)
-                dirs2 = _load_frame_dirs(dataset_root, split_dir, segment_name, modality2)
+            pair_directions = _directions_for_pair(pair, allowed_directions)
+                
+            for modality1, modality2 in pair_directions:
+                dirs1 = load_frame_dirs(dataset_root, split_dir, segment_name, modality1)
+                dirs2 = load_frame_dirs(dataset_root, split_dir, segment_name, modality2)
                 if not dirs1 or not dirs2:
-                    skipped.append(
-                        {
-                            "segment_id": segment_id,
-                            "split_dir": split_dir,
-                            "segment_name": segment_name,
-                            "modality1": modality1,
-                            "modality2": modality2,
-                            "reason": "missing frame cache directory",
-                        }
-                    )
+                    skipped.append({
+                        "segment_id": segment_id, "split_dir": split_dir, "segment_name": segment_name,
+                        "modality1": modality1, "modality2": modality2, "reason": "missing frame cache directory",
+                    })
                     continue
-                for side, dir1, dir2 in _pair_frame_dirs(dirs1, dirs2):
+                for side, dir1, dir2 in pair_frame_dirs(dirs1, dirs2):
                     if allowed_sides is not None and side.lower() not in allowed_sides:
                         continue
-                    frames1, frames2 = _select_paired_frames(
-                        dir1,
-                        dir2,
-                        modality1,
-                        modality2,
-                        num_frames,
-                    )
-                    if not frames1:
-                        skipped.append(
-                            {
-                                "segment_id": segment_id,
-                                "side": side,
-                                "modality1": modality1,
-                                "modality2": modality2,
-                                "frame_dir1": dir1.as_posix(),
-                                "frame_dir2": dir2.as_posix(),
-                                "reason": "no shared frame indexes",
-                            }
-                        )
+                        
+                    by_index1 = frames_by_index(dir1, modality1)
+                    by_index2 = frames_by_index(dir2, modality2)
+                    shared_indexes = tuple(sorted(set(by_index1) & set(by_index2)))
+                    
+                    if not shared_indexes:
+                        skipped.append({
+                            "segment_id": segment_id, "side": side, "modality1": modality1, "modality2": modality2,
+                            "frame_dir1": dir1.as_posix(), "frame_dir2": dir2.as_posix(), "reason": "no shared frame indexes",
+                        })
                         continue
-                    caption_id = _caption_id(str(segment_id), side, modality1, modality2)
-                    output_dir = (
-                        composite_root
-                        / _safe_name(split_dir)
-                        / _safe_name(segment_name)
-                        / _safe_name(side)
-                        / f"{modality1}__{modality2}"
-                    )
-                    composite_frames: list[Path] = []
-                    for index, (f1, f2) in enumerate(zip(frames1, frames2), start=1):
-                        frame_number = _frame_index(f1)
-                        suffix = f"{frame_number:06d}" if frame_number is not None else f"{index:03d}"
-                        output_path = output_dir / f"frame_{suffix}.png"
-                        if write_composites:
-                            _compose_frame(
-                                f1,
-                                f2,
-                                modality1,
-                                modality2,
-                                output_path,
-                            )
-                        composite_frames.append(output_path)
-                    tasks.append(
-                        CaptionTask(
-                            caption_id=caption_id,
-                            segment_id=str(segment_id),
-                            split_dir=split_dir,
-                            segment_name=segment_name,
-                            side=side,
-                            modality1=modality1,
-                            modality2=modality2,
-                            frame_dir1=dir1,
-                            frame_dir2=dir2,
-                            frames1=frames1,
-                            frames2=frames2,
-                            composite_frames=tuple(composite_frames),
-                        )
-                    )
-                    if limit is not None and len(tasks) >= limit:
-                        return tasks, skipped
-        if len(tasks) > task_count_before_segment:
-            selected_scenes.add(str(segment_id))
-            selected_scene_folders.add(split_dir)
-    return tasks, skipped
+                    
+                    if len(shared_indexes) != 30:
+                        skipped.append({
+                            "segment_id": segment_id, "side": side, "modality1": modality1, "modality2": modality2,
+                            "frame_dir1": dir1.as_posix(), "frame_dir2": dir2.as_posix(), "reason": f"expected 30 frames, got {len(shared_indexes)}",
+                        })
+                        continue
+
+                    all_jobs.append(MultimodalSamplingJob(
+                        segment_id=segment_id, split_dir=split_dir, segment_name=segment_name,
+                        side=side, modality1=modality1, modality2=modality2, dir1=dir1, dir2=dir2,
+                        shared_indexes=shared_indexes, by_index1=by_index1, by_index2=by_index2,
+                    ))
+
+    selection_config_fingerprint = build_selection_config_fingerprint(num_uniform_frames, num_adaptive_frames)
+
+    completed_keys = {
+        (item.get("caption_id"), item.get("selection_config_fingerprint"))
+        for item in existing_items
+    }
+
+    selected_jobs = []
+    selected_scenes = set()
+    selected_scene_folders = set()
+    
+    for job in all_jobs:
+        if limit_scenes is not None and len(selected_scenes) >= limit_scenes and job.segment_id not in selected_scenes:
+            continue
+        if limit_scene_folders is not None and len(selected_scene_folders) >= limit_scene_folders and job.split_dir not in selected_scene_folders:
+            continue
+            
+        selected_jobs.append(job)
+        selected_scenes.add(job.segment_id)
+        selected_scene_folders.add(job.split_dir)
+
+    if limit is not None:
+        selected_jobs = selected_jobs[:limit]
+
+    total_selected_jobs = len(selected_jobs)
+
+    pending_jobs = []
+    for job in selected_jobs:
+        caption_id = _caption_id(str(job.segment_id), job.side, job.modality1, job.modality2)
+        if (caption_id, selection_config_fingerprint) not in completed_keys:
+            pending_jobs.append(job)
+
+
+
+    tasks: list[CaptionTask] = []
+    
+    for job in pending_jobs:
+        frames1, frames2, strategy, anchors, adaptive, selected = select_paired_frames(
+            job.dir1,
+            job.dir2,
+            job.modality1,
+            job.modality2,
+            sampling_strategy,
+            num_uniform_frames,
+            num_adaptive_frames,
+        )
+
+        caption_id = _caption_id(str(job.segment_id), job.side, job.modality1, job.modality2)
+        output_dir = (
+            composite_root
+            / _safe_name(job.split_dir)
+            / _safe_name(job.segment_name)
+            / _safe_name(job.side)
+            / f"{job.modality1}__{job.modality2}"
+        )
+        composite_frames: list[Path] = []
+        for index, (f1, f2) in enumerate(zip(frames1, frames2), start=1):
+            frame_number = frame_index(f1)
+            suffix = f"{frame_number:06d}" if frame_number is not None else f"{index:03d}"
+            output_path = output_dir / f"frame_{suffix}.png"
+            if write_composites:
+                _compose_frame(
+                    f1,
+                    f2,
+                    job.modality1,
+                    job.modality2,
+                    output_path,
+                )
+            composite_frames.append(output_path)
+            
+        tasks.append(
+            CaptionTask(
+                caption_id=caption_id,
+                segment_id=str(job.segment_id),
+                split_dir=job.split_dir,
+                segment_name=job.segment_name,
+                side=job.side,
+                modality1=job.modality1,
+                modality2=job.modality2,
+                frame_dir1=job.dir1,
+                frame_dir2=job.dir2,
+                frames1=frames1,
+                frames2=frames2,
+                composite_frames=tuple(composite_frames),
+                sampling_strategy=strategy,
+                uniform_anchor_indexes=tuple(anchors),
+                adaptive_frame_indexes=tuple(adaptive),
+                selected_frame_indexes=tuple(selected),
+                candidate_frame_indexes=tuple(job.shared_indexes),
+                selection_config_fingerprint=selection_config_fingerprint,
+            )
+        )
+        
+    return tasks, skipped, total_selected_jobs
 
 
 def _build_caption_prompt(task: CaptionTask) -> str:
-    frame_names = ", ".join(path.name for path in task.composite_frames)
     frame_keys = ", ".join(f'"{path.stem}"' for path in task.composite_frames)
+    frame_names = ", ".join(path.name for path in task.composite_frames)
+    example_frame_key = task.composite_frames[0].stem if task.composite_frames else "frame_key_from_valid_list"
     constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
     return "\n".join(
         [
@@ -569,23 +539,44 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",
-            "ENTITY SELECTION: physical_entities should include: (1) entities that are central to the scene action, (2) entities where the two modalities give meaningfully different information, and (3) any entity explicitly mentioned in scene_summary. Background details (e.g., distant road markings, generic sky) may be omitted. Aim for 3-8 entities per scene.",
-            "FIELD RULES (violations cause rejection): (1) If an attribute is truly unrecoverable from the other video, DO NOT include it in missing_key_attributes at all. The recoverable_from list MUST NOT be empty. (2) every information_gain[].entity_id, ambiguity_events[].target_entity, AND cross_modal_evidence_links[].entity_id must exactly match an entity_id from global_scene.physical_entities. (3) detailed_caption for each video must be a full descriptive paragraph, not a single sentence. (4) CRITICAL RULE for detailed_caption: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. You MUST STRICTLY AVOID these exact words: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. (5) fusion_additionally_reveals must be a list of descriptive observation strings ONLY. Do NOT include rating words like 'low', 'medium', or 'high' inside this list — those belong in the separate gain_rating field. (6) ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one. (7) NEVER use generic sensor-theory wording like 'this modality captures', 'event cameras detect', or 'designed to measure' in any video analysis fields. Describe ONLY specific evidence from the current frames. (8) supported_question_types MUST ONLY choose from the EXACT following values: [object_identity, attribute_reasoning, temporal_reasoning, spatial_reasoning, interaction_reasoning, cross_modal_reasoning, counterfactual_reasoning]. DO NOT invent your own types like causal_reasoning. Do NOT use attribute_type values as question types. (9) In missing_key_attributes[].why_missing, explain the specific physical reason the attribute is unobservable in this exact segment, NOT generic sensor capabilities (e.g., say 'The sunlit brick and asphalt appear visually identical in color here' instead of 'Color cameras do not capture thermal energy'). (10) frame_by_frame_analysis[].frame_key must be exactly the frame name WITHOUT the file extension (e.g., 'frame_000000', NOT 'frame_000000.png'). (11) cross_modal_evidence_links and information_gain must include an entry for EVERY entity listed in global_scene.physical_entities. Do not skip any entities. (12) observable_facts for each video must contain AT LEAST 3 distinct facts. (13) disappearing_entities rule: Only mark an entity as disappearing_entities if it genuinely exits the field of view. Note that the camera is typically mounted on a vehicle/person (e.g. bicycle handlebars remain in frame throughout the sequence). (14) gain_rating guidelines: 'high': fusion reveals information that neither modality alone could determine; 'medium': fusion confirms or marginally extends what one modality already shows; 'low': fusion adds minimal new insight. Special rule: if a modality is effectively 'out-of-range' (like a blank depth map), cap the gain_rating at 'medium' unless fusion provides a qualitatively new safety-critical insight.",
-            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous (observed evidence, multiple plausible hypotheses, confidence for each hypothesis, missing evidence).",
-            "MISSING INFORMATION: List attributes that cannot be determined from each individual video (existence, target_category, spatial_distance, surface_attribute, motion_trend) and whether they can be recovered after combining both.",
-            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. For EVERY entity listed in global_scene.physical_entities, identify evidence shared, unique to Video 1, unique to Video 2, and exactly how one improves understanding of the other.",
-            "INFORMATION GAIN: For EVERY entity listed in global_scene.physical_entities, explain what Video 1 alone can/cannot determine, what Video 2 alone can/cannot determine, and what the combination additionally reveals. Each entity must have exactly one information_gain entry. Rate gain as low/medium/high.",
-            "AMBIGUITY RESOLUTION: Actively search for ambiguities in BOTH directions. Direction A (video1_resolves_video2): Does Video 1 resolve something Video 2 cannot determine alone? Direction B (video2_resolves_video1): Does Video 2 resolve something Video 1 cannot determine alone? For example, an event camera may reveal rapid motion that a depth camera cannot capture; an IR camera may reveal heat signatures that RGB cannot distinguish. You MUST check both directions independently and report any valid events found in either.",
-            "QUESTION-WORTHINESS: Estimate usefulness for generating difficult reasoning questions. Provide difficulty, qa_potential, and supported_question_types.",
-            "FRAME-BY-FRAME ANALYSIS: Describe newly appearing/disappearing entities, motion/interaction changes, and newly introduced/resolved uncertainty across frames.",
+            "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",            "ENTITY SELECTION: physical_entities should include entities central to the scene action or where modalities differ.",
+            "DEEP REASONING ANALYSIS: When analyzing the scene, you MUST follow these paradigms to support difficult QA generation: (1) Information Atoms: Must contain directly observable, source-local facts. Each atom should express one minimal factual claim grounded in its referenced frames. Do not place intentions, causal explanations, fusion conclusions, or multi-step inferences inside atoms; those belong in reasoning_events or ambiguity_events. (2) Visibility & Occlusion: Track entity occlusion states chronologically. (3) Interaction Graph: Build human-object and object-object causality. (4) QA-Relevant Details: Focus on non-obvious discriminative features that require cross-modal thinking. (5) UNCERTAINTY HONESTY GUARDRAIL: Do NOT hallucinate physical attributes. Honestly record uncertainty. Do not guess.",
+            "FIELD RULES (violations cause rejection):",
+            "1. GLOBAL NAMESPACES & REFERENCE IDs: All referenceable structures must use exact ID prefixes and be globally unique across the entire JSON to prevent collisions. information_atoms must use 'v1_atom_' or 'v2_atom_'. reasoning_events must use 'evt_'. ambiguity_events must use 'amb_'. qa_relevant_details must use 'qa_detail_'.",
+            "2. SINGLE PROVENANCE TRUTH: Information atoms are the ONLY structures that contain frame_keys. reasoning_events and ambiguity_events must point strictly to atom IDs to indicate their frame source.",
+            "3. NO SELF-REFERENCE: qa_relevant_details.supporting_refs MUST NOT reference another qa_detail. It can only reference v1_atom_, v2_atom_, evt_, and amb_.",
+            "4. MISSING KEY ATTRIBUTES: The recoverable_evidence_refs list MUST ONLY contain atom IDs, and it must not be empty. If an attribute is missing from video1, its recovery MUST reference at least one v2_atom. If missing from video2, it MUST reference at least one v1_atom.",
+            "5. CONDITIONAL EVIDENCE PROFILE: evidence_profile fields (identity_evidence, observable_attributes, spatial_context) must be completely omitted from the JSON if there is no meaningful non-dynamic evidence for them. DO NOT return empty lists or empty strings.",
+            f"VALID FRAME KEYS: [{frame_keys}]. information_atoms[].frame_keys MUST choose only from these exact values.",
+            "6. REASON-DRIVEN COVERAGE: DO NOT force every entity into cross_modal_evidence_links or information_gain. You must only include an entity in a section if its focus_reasons justify it. Static occluders should only be in occlusion_change if their occlusion state actually changes.",
+            "7. CRITICAL RULE for detailed_caption & global_scene: Describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. You MUST STRICTLY AVOID these exact words: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette.",
+            "8. ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one.",
+            "9. NEVER use generic sensor-theory wording like 'this modality captures' or 'event cameras detect'. Describe ONLY specific evidence from the current frames.",
+            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous.",
+            "MISSING INFORMATION: List attributes that cannot be determined from each individual video and which cross-modal atoms recover them.",
+            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. For entities where focus_reason includes cross_modal_complementarity, identify shared and unique evidence.",
+            "INFORMATION GAIN: For entities where focus_reason includes fusion_gain or joint_fusion, explain what each video can/cannot determine and the fusion reveal.",
+            "AMBIGUITY RESOLUTION: Actively search for ambiguities in BOTH directions. You MUST check both directions independently and report any valid events.",
+            "REASONING EVENTS: Document dynamic changes (temporal_change, interaction, occlusion_change, spatial_transition, joint_fusion). These MUST be supported by atom references.",
+            "QA RELEVANT DETAILS: Document facts that are particularly useful for downstream QA by pointing to the relevant atoms/events/ambiguities.",
             "Return ONLY valid JSON with this exact structure:",
             "{",
             f'  "schema_version": "{CAPTION_SCHEMA_VERSION}",',
             '  "global_scene": {',
             '    "scene_summary": "Detailed physical-scene summary independent of sensor artifacts.",',
             '    "physical_entities": [',
-            '      {"entity_id": "stable_snake_case_id", "category": "...", "appearance_or_state": "...", "location": "...", "motion_or_action": "...", "spatial_relations": ["..."]}',
+            '      {',
+            '        "entity_id": "stable_snake_case_id",',
+            '        "category": "...",',
+            '        "evidence_profile": {',
+            '          "identity_evidence": ["Why do we think it is this category?"],',
+            '          "observable_attributes": ["Current observable non-pure-appearance attributes/states (exclude dynamic changes)."],',
+            '          "spatial_context": ["Base location or stable contextual placement."]',
+            '        }',
+            '      }',
+            '    ],',
+            '    "reasoning_focus_entities": [',
+            '      {"entity_id": "pedestrian_1", "focus_reasons": ["temporal_change", "occlusion_change"]}',
             '    ],',
             '    "environment": "Objective environment or recording condition if evident.",',
             '    "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
@@ -593,53 +584,79 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             '  "video1_analysis": {',
             f'    "modality": "{task.modality1}",',
             '    "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
-            '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '    "information_atoms": [',
+            f'      {{"atom_id": "v1_atom_001", "frame_keys": ["{example_frame_key}"], "fact": "Discrete atomic observation. Must be a direct factual claim, NO inferences or causality."}}',
+            '    ],',
             '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
             '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
-            '    "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video1_analysis.observable_facts"]}]',
+            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "low"}], "missing_evidence": "..."}],',
+            '    "missing_key_attributes": [{"attribute_type": "existence", "missing_attribute": "...", "why_missing": "...", "recoverable_evidence_refs": ["v2_atom_001"]}]',
             '  },',
             '  "video2_analysis": {',
             f'    "modality": "{task.modality2}",',
-
             '    "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
-            '    "observable_facts": ["Concrete fact 1", "Concrete fact 2", "Concrete fact 3"],',
+            '    "information_atoms": [',
+            f'      {{"atom_id": "v2_atom_001", "frame_keys": ["{example_frame_key}"], "fact": "Discrete atomic observation. Must be a direct factual claim, NO inferences or causality."}}',
+            '    ],',
             '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
             '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "high|medium|low"}], "missing_evidence": "..."}],',
-            '    "missing_key_attributes": [{"attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend", "missing_attribute": "...", "why_missing": "...", "recoverable_from": ["video2_analysis.observable_facts"]}]',
+            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "...", "confidence": "low"}], "missing_evidence": "..."}],',
+            '    "missing_key_attributes": [{"attribute_type": "existence", "missing_attribute": "...", "why_missing": "...", "recoverable_evidence_refs": ["v1_atom_001"]}]',
             '  },',
             '  "cross_modal_evidence_links": [',
             '    {"entity_id": "...", "shared_evidence": "...", "unique_to_video1": "...", "unique_to_video2": "...", "how_video1_improves_video2": "...", "how_video2_improves_video1": "..."}',
             '  ],',
             '  "information_gain": [',
-            '    {"entity_id": "...", "gain_rating": "low|medium|high", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."]}',
+            '    {"entity_id": "...", "gain_rating": "low", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."]}',
+            '  ],',
+            '  "reasoning_events": [',
+            '    {',
+            '      "event_id": "evt_001",',
+            '      "event_type": "temporal_change",',
+            '      "participating_entities": ["entity_id"],',
+            '      "supporting_atom_refs": ["v1_atom_001", "v2_atom_001"],',
+            '      "description": "Non-trivial inference or dynamic behavior based on the supporting atoms."',
+            '    }',
             '  ],',
             '  "ambiguity_events": [',
             '    {',
-            '      "target_entity": "entity_id from global_scene.physical_entities",',
-            '      "approx_time_range": "early sampled frame|middle sampled frame|late sampled frame|specific frame names",',
-            '      "direction": "video1_resolves_video2|video2_resolves_video1",',
-            '      "ambiguous_video": "video1|video2",',
-            '      "resolving_video": "video2|video1",',
+            '      "ambiguity_id": "amb_001",',
+            '      "target_entity": "entity_id",',
+            '      "direction": "video1_resolves_video2",',
+            '      "ambiguous_video": "video2",',
+            '      "resolving_video": "video1",',
             '      "low_confidence_observation": "What the ambiguous video shows by itself.",',
             '      "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
             '      "candidate_hypotheses": [{"hypothesis": "hypothesis 1...", "support_from_resolving": "..."}, {"hypothesis": "hypothesis 2...", "support_from_resolving": "..."}],',
-
             '      "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
             '      "eliminated_hypotheses": [{"hypothesis": "...", "why_eliminated": "..."}],',
             '      "fusion_conclusion": "Final physical fact after combining both modalities.",',
-            '      "missing_attribute_type": "existence|target_category|spatial_distance|surface_attribute|motion_trend",',
-            '      "question_worthiness": {"difficulty": "easy|medium|hard", "qa_potential": "high|medium|low", "supported_question_types": ["object_identity|attribute_reasoning|temporal_reasoning|spatial_reasoning|interaction_reasoning|cross_modal_reasoning|counterfactual_reasoning"]}',
+            '      "missing_attribute_type": "existence",',
+            '      "ambiguous_evidence_refs": ["v1_atom_001"],',
+            '      "resolving_evidence_refs": ["v2_atom_001"]',
             '    }',
             '  ],',
-            '  "frame_by_frame_analysis": [',
-            '    {"frame_key": "frame_000000", "newly_appearing_entities": ["..."], "disappearing_entities": ["..."], "motion_changes": "...", "interaction_changes": "...", "newly_introduced_uncertainty": "...", "resolved_uncertainty": "..."}',
+            '  "qa_relevant_details": [',
+            '    {',
+            '      "detail_id": "qa_detail_001",',
+            '      "reasoning_pattern": "cross_modal_disambiguation",',
+            '      "supporting_refs": ["evt_001", "amb_001"],',
+            '      "why_question_worthy": "Why this grounded fact structure makes a good downstream question."',
+            '    }',
             '  ],',
             '  "rejected_observations": [',
             '    {"observation": "...", "reason": "Why this was not a valid ambiguity_event."}',
             '  ]',
             '}',
+            "ALLOWED enum values for fields:",
+            "- confidence: high, medium, low",
+            "- attribute_type / missing_attribute_type: existence, target_category, spatial_distance, surface_attribute, motion_trend",
+            "- gain_rating: high, medium, low",
+            "- event_type: temporal_change, interaction, occlusion_change, spatial_transition, joint_fusion",
+            "- direction: video1_resolves_video2, video2_resolves_video1",
+            "- ambiguous_video / resolving_video: video1, video2",
+            "- reasoning_pattern: cross_modal_disambiguation, temporal_integration, occlusion_reasoning, interaction_reasoning, spatial_transition, hypothesis_elimination, multi_hop_composition, joint_fusion",
+            "FOCUS REASON NOTE: The example reasoning_focus_entities is illustrative only. Select only genuinely supported reasons and never list all enum values merely because they are allowed.",
             "Only include an item in ambiguity_events when one video genuinely disambiguates the other.",
             "If no valid ambiguity_event exists, return an empty ambiguity_events list and explain each rejected case in rejected_observations.",
             f"Segment: {task.segment_id}; side: {task.side}.",
@@ -692,6 +709,15 @@ def _require_string(value: Any, field: str) -> str:
     return value
 
 
+def _validate_string_list(value: Any, field: str, *, allow_empty: bool = True) -> list[str]:
+    items = _require_list(value, field)
+    if not allow_empty and not items:
+        raise ValueError(f"{field} must not be empty")
+    for i, item in enumerate(items, start=1):
+        _require_string(item, f"{field}[{i}]")
+    return items
+
+
 def _word_count(text: str) -> int:
     return len(re.findall(r"\b[\w'-]+\b", text))
 
@@ -716,8 +742,11 @@ def _validate_uncertain_observations(values: Any, field: str) -> None:
         _require_string(item.get("observed_evidence"), f"{field}[{index}].observed_evidence")
         _require_string(item.get("missing_evidence"), f"{field}[{index}].missing_evidence")
         hypotheses = _require_list(item.get("hypotheses"), f"{field}[{index}].hypotheses")
-        if not hypotheses:
-            raise ValueError(f"{field}[{index}].hypotheses must not be empty")
+        if len(hypotheses) < 2:
+            raise ValueError(f"{field}[{index}].hypotheses must contain at least 2 hypotheses")
+        normalized_hyps = {h.get("hypothesis", "").strip().casefold() for h in hypotheses if isinstance(h, dict)}
+        if len(normalized_hyps) < 2:
+            raise ValueError(f"{field}[{index}].hypotheses must contain at least 2 distinct hypotheses")
         for hyp_index, hyp in enumerate(hypotheses, start=1):
             if not isinstance(hyp, dict):
                 raise ValueError(f"{field}[{index}].hypotheses[{hyp_index}] must be an object")
@@ -726,109 +755,52 @@ def _validate_uncertain_observations(values: Any, field: str) -> None:
             if conf not in ALLOWED_GAIN_RATINGS:
                 raise ValueError(f"{field}[{index}].hypotheses[{hyp_index}].confidence must be high, medium, or low")
 
-def _validate_missing_key_attributes(values: Any, field: str) -> None:
-    for index, item in enumerate(_require_list(values, field), start=1):
-        if not isinstance(item, dict):
-            raise ValueError(f"{field}[{index}] must be an object")
-        attribute_type = item.get("attribute_type")
-        if attribute_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
-            raise ValueError(
-                f"{field}[{index}].attribute_type must be one of "
-                f"{sorted(ALLOWED_MISSING_ATTRIBUTE_TYPES)}, got {attribute_type!r}"
-            )
-        for key in ("missing_attribute", "why_missing"):
-            _require_string(item.get(key), f"{field}[{index}].{key}")
-        recoverable_from = item.get("recoverable_from")
-        if not isinstance(recoverable_from, list) or not recoverable_from:
-            raise ValueError(f"{field}[{index}].recoverable_from must be a non-empty list")
-
-def _validate_video_analysis(parsed: dict[str, Any], field: str) -> None:
-    analysis = _require_object(parsed.get(field), field)
-    _require_string(analysis.get("modality"), f"{field}.modality")
-    detailed_caption = _validate_min_words(
-        analysis.get("detailed_caption"),
-        f"{field}.detailed_caption",
-        MIN_DETAILED_CAPTION_WORDS,
-    )
-    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(detailed_caption):
-        raise ValueError(f"{field}.detailed_caption contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
-    _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
-    for key in ("observable_facts", "sensor_specific_cues", "sensor_limitations"):
-        values = _require_list(analysis.get(key), f"{field}.{key}")
-        if not values:
-            raise ValueError(f"{field}.{key} must not be empty")
-        if key == "observable_facts" and len(values) < MIN_OBSERVABLE_FACTS:
-            raise ValueError(f"{field}.{key} must contain at least {MIN_OBSERVABLE_FACTS} facts")
-        for value_index, value in enumerate(values, start=1):
-            text = _require_string(value, f"{field}.{key}[{value_index}]")
-            _validate_no_generic_sensor_explanation(text, f"{field}.{key}[{value_index}]")
-    _validate_uncertain_observations(analysis.get("uncertain_observations"), f"{field}.uncertain_observations")
-    _validate_missing_key_attributes(analysis.get("missing_key_attributes"), f"{field}.missing_key_attributes")
-
-def _validate_cross_modal_evidence_links(values: Any, entity_ids: set[str], field: str) -> None:
-    links = _require_list(values, field)
-    if not links:
-        raise ValueError(f"{field} must not be empty")
+def _validate_cross_modal_evidence_links(values: Any, entity_ids: set[str], entity_focus_reasons: dict[str, set[str]], field: str) -> None:
     seen_entities = set()
+    links = _require_list(values, field)
     for index, item in enumerate(links, start=1):
         if not isinstance(item, dict):
             raise ValueError(f"{field}[{index}] must be an object")
         entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
+        if entity_id in seen_entities:
+            raise ValueError(f"{field} contains duplicate entry for entity_id: {entity_id}")
+        seen_entities.add(entity_id)
         if entity_id not in entity_ids:
             raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
-        seen_entities.add(entity_id)
+        if "cross_modal_complementarity" not in entity_focus_reasons.get(entity_id, set()):
+            raise ValueError(f"{field}[{index}] entity {entity_id} lacks 'cross_modal_complementarity' focus reason")
         for key in ("shared_evidence", "unique_to_video1", "unique_to_video2", "how_video1_improves_video2", "how_video2_improves_video1"):
             _require_string(item.get(key), f"{field}[{index}].{key}")
-    missing_entities = entity_ids - seen_entities
-    if missing_entities:
-        raise ValueError(f"{field} is missing entries for these entities: {', '.join(sorted(missing_entities))}")
 
-def _validate_information_gain(values: Any, entity_ids: set[str], field: str) -> None:
-    gains = _require_list(values, field)
-    if not gains:
-        raise ValueError(f"{field} must not be empty")
+def _validate_information_gain(values: Any, entity_ids: set[str], entity_focus_reasons: dict[str, set[str]], field: str) -> None:
     seen_entities = set()
+    gains = _require_list(values, field)
     for index, item in enumerate(gains, start=1):
         if not isinstance(item, dict):
             raise ValueError(f"{field}[{index}] must be an object")
         entity_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
+        if entity_id in seen_entities:
+            raise ValueError(f"{field} contains duplicate entry for entity_id: {entity_id}")
+        seen_entities.add(entity_id)
         if entity_id not in entity_ids:
             raise ValueError(f"{field}[{index}].entity_id must match a global_scene entity_id")
-        seen_entities.add(entity_id)
+        reasons = entity_focus_reasons.get(entity_id, set())
+        if "fusion_gain" not in reasons and "joint_fusion" not in reasons:
+            raise ValueError(f"{field}[{index}].entity_id {entity_id} lacks 'fusion_gain' or 'joint_fusion' focus_reason")
+            
         for key in ("video1_can_determine", "video1_cannot_determine", "video2_can_determine", "video2_cannot_determine", "fusion_additionally_reveals"):
-            _require_list(item.get(key), f"{field}[{index}].{key}")
-        rating = item.get("gain_rating")
+            _validate_string_list(item.get(key), f"{field}[{index}].{key}", allow_empty=(key != "fusion_additionally_reveals"))
+            
+        rating = _require_string(item.get("gain_rating"), f"{field}[{index}].gain_rating")
         if rating not in ALLOWED_GAIN_RATINGS:
             raise ValueError(f"{field}[{index}].gain_rating must be high, medium, or low")
-    missing_entities = entity_ids - seen_entities
-    if missing_entities:
-        raise ValueError(f"{field} is missing entries for these entities: {', '.join(sorted(missing_entities))}")
 
-def _validate_question_worthiness(value: Any, field: str) -> None:
-    qw = _require_object(value, field)
-    _require_string(qw.get("difficulty"), f"{field}.difficulty")
-    qa_pot = qw.get("qa_potential")
-    if qa_pot not in ALLOWED_QA_POTENTIAL:
-        raise ValueError(f"{field}.qa_potential must be high, medium, or low")
-    q_types = _require_list(qw.get("supported_question_types"), f"{field}.supported_question_types")
-    for qt in q_types:
-        if qt not in ALLOWED_QUESTION_TYPES:
-            raise ValueError(f"{field}.supported_question_types contains invalid type: {qt}")
+def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str], expected_modality1: str, expected_modality2: str) -> dict[str, Any]:
+    if not valid_frame_keys:
+        raise ValueError("valid_frame_keys must not be empty for validation")
 
-def _validate_frame_by_frame_analysis(values: Any, field: str) -> None:
-    frames = _require_list(values, field)
-    if not frames:
-        raise ValueError(f"{field} must not be empty")
-    for index, item in enumerate(frames, start=1):
-        if not isinstance(item, dict):
-            raise ValueError(f"{field}[{index}] must be an object")
-        _require_string(item.get("frame_key"), f"{field}[{index}].frame_key")
-        _require_list(item.get("newly_appearing_entities"), f"{field}[{index}].newly_appearing_entities")
-        _require_list(item.get("disappearing_entities"), f"{field}[{index}].disappearing_entities")
-        for key in ("motion_changes", "interaction_changes", "newly_introduced_uncertainty", "resolved_uncertainty"):
-            _require_string(item.get(key), f"{field}[{index}].{key}")
+    atom_frame_keys: dict[str, set[str]] = {}
 
-def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
     required_fields = (
         "schema_version",
         "global_scene",
@@ -836,18 +808,32 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
         "video2_analysis",
         "cross_modal_evidence_links",
         "information_gain",
+        "reasoning_events",
         "ambiguity_events",
-        "frame_by_frame_analysis",
+        "qa_relevant_details",
         "rejected_observations",
     )
     missing = [field for field in required_fields if field not in parsed]
     if missing:
         raise ValueError(f"Gemini response missing required caption field(s): {', '.join(missing)}")
+        
+    unexpected_fields = set(parsed.keys()) - set(required_fields)
+    if unexpected_fields:
+        raise ValueError(f"Gemini response contains unknown top-level fields: {', '.join(sorted(unexpected_fields))}. Allowed fields are only: {', '.join(required_fields)}")
+
     if parsed["schema_version"] != CAPTION_SCHEMA_VERSION:
         raise ValueError(
             f"Gemini response schema_version must be {CAPTION_SCHEMA_VERSION!r}, "
             f"got {parsed['schema_version']!r}"
         )
+        
+    evidence_namespace: set[str] = set()
+
+    def _register_evidence_id(eid: str) -> None:
+        if eid in evidence_namespace:
+            raise ValueError(f"Duplicate evidence ID found: {eid}. Evidence IDs must be globally unique.")
+        evidence_namespace.add(eid)
+
     global_scene = _require_object(parsed["global_scene"], "global_scene")
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
     if FORBIDDEN_GLOBAL_SCENE_WORDS.search(scene_summary):
@@ -858,6 +844,7 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
     if FORBIDDEN_GLOBAL_SCENE_WORDS.search(temporal_progression):
         raise ValueError("global_scene.temporal_progression contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
+    
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
     if not physical_entities:
         raise ValueError("global_scene.physical_entities must not be empty")
@@ -866,73 +853,405 @@ def _validate_caption_schema(parsed: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(entity, dict):
             raise ValueError(f"global_scene.physical_entities[{index}] must be an object")
         entity_id = _require_string(entity.get("entity_id"), f"global_scene.physical_entities[{index}].entity_id")
+        if entity_id in entity_ids:
+            raise ValueError(f"Duplicate entity_id: {entity_id}")
         entity_ids.add(entity_id)
-        for key in ("category", "appearance_or_state", "location", "motion_or_action"):
-            _require_string(entity.get(key), f"global_scene.physical_entities[{index}].{key}")
-        _require_list(entity.get("spatial_relations"), f"global_scene.physical_entities[{index}].spatial_relations")
+        _require_string(entity.get("category"), f"global_scene.physical_entities[{index}].category")
+        if "evidence_profile" in entity:
+            prof = _require_object(entity.get("evidence_profile"), f"global_scene.physical_entities[{index}].evidence_profile")
+            if not prof:
+                raise ValueError("evidence_profile must not be empty if present.")
+            for prof_key in ("identity_evidence", "observable_attributes", "spatial_context"):
+                if prof_key in prof:
+                    ev_list = _require_list(prof[prof_key], f"global_scene.physical_entities[{index}].evidence_profile.{prof_key}")
+                    if not ev_list:
+                        raise ValueError(f"evidence_profile.{prof_key} must not be empty if present.")
+                    for j, s in enumerate(ev_list, start=1):
+                        _require_string(s, f"evidence_profile.{prof_key}[{j}]")
 
-    _validate_video_analysis(parsed, "video1_analysis")
-    _validate_video_analysis(parsed, "video2_analysis")
+    focus_entities = _require_list(global_scene.get("reasoning_focus_entities"), "global_scene.reasoning_focus_entities")
+    entity_focus_reasons: dict[str, set[str]] = {}
+    for index, fe in enumerate(focus_entities, start=1):
+        if not isinstance(fe, dict):
+            raise ValueError(f"global_scene.reasoning_focus_entities[{index}] must be an object")
+        fe_id = _require_string(fe.get("entity_id"), f"global_scene.reasoning_focus_entities[{index}].entity_id")
+        if fe_id in entity_focus_reasons:
+            raise ValueError(f"Duplicate reasoning_focus_entities entity_id: {fe_id}")
+        if fe_id not in entity_ids:
+            raise ValueError(f"reasoning_focus_entities[{index}] entity_id {fe_id} does not exist in physical_entities")
+        reasons = _require_list(fe.get("focus_reasons"), f"global_scene.reasoning_focus_entities[{index}].focus_reasons")
+        if not reasons:
+            raise ValueError(f"global_scene.reasoning_focus_entities[{index}].focus_reasons must not be empty")
+        reasons_set = set()
+        for r in reasons:
+            if r not in ALLOWED_FOCUS_REASONS:
+                raise ValueError(f"Invalid focus_reason: {r}")
+            reasons_set.add(r)
+        entity_focus_reasons[fe_id] = reasons_set
+        
+    actual_section_entities = {
+        "cross_modal_evidence_links": set(),
+        "information_gain": set(),
+        "reasoning_events": set(),
+        "ambiguity_events": set()
+    }
+    for link in parsed.get("cross_modal_evidence_links", []):
+        if isinstance(link, dict) and link.get("entity_id"):
+            actual_section_entities["cross_modal_evidence_links"].add(link["entity_id"])
+    for gain in parsed.get("information_gain", []):
+        if isinstance(gain, dict) and gain.get("entity_id"):
+            actual_section_entities["information_gain"].add(gain["entity_id"])
+    for event in parsed.get("reasoning_events", []):
+        if isinstance(event, dict):
+            for ent in event.get("participating_entities", []):
+                actual_section_entities["reasoning_events"].add(ent)
+    for amb in parsed.get("ambiguity_events", []):
+        if isinstance(amb, dict) and amb.get("target_entity"):
+            actual_section_entities["ambiguity_events"].add(amb["target_entity"])
+
+    for fe_id, reasons in entity_focus_reasons.items():
+        expected_sections = set()
+        for r in reasons:
+            expected_sections.update(FOCUS_REASON_SECTION_MAP.get(r, set()))
+        for section in expected_sections:
+            if fe_id not in actual_section_entities.get(section, set()):
+                raise ValueError(f"Entity {fe_id} declared focus reasons requiring {section}, but it is missing from that section.")
+
+    modality1 = parsed.get("video1_analysis", {}).get("modality", "")
+    if modality1 != expected_modality1:
+        raise ValueError(f"video1_analysis.modality {modality1!r} does not match expected {expected_modality1!r}")
+    modality2 = parsed.get("video2_analysis", {}).get("modality", "")
+    if modality2 != expected_modality2:
+        raise ValueError(f"video2_analysis.modality {modality2!r} does not match expected {expected_modality2!r}")
+
+    def _validate_v7_video_analysis(parsed: dict[str, Any], field: str, atom_prefix: str) -> None:
+        analysis = _require_object(parsed.get(field), field)
+        _require_string(analysis.get("modality"), f"{field}.modality")
+        detailed_caption = _validate_min_words(
+            analysis.get("detailed_caption"),
+            f"{field}.detailed_caption",
+            MIN_DETAILED_CAPTION_WORDS,
+        )
+        if FORBIDDEN_GLOBAL_SCENE_WORDS.search(detailed_caption):
+            raise ValueError(f"{field}.detailed_caption contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
+        _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
+        
+        atoms = _require_list(analysis.get("information_atoms"), f"{field}.information_atoms")
+        if not atoms:
+            raise ValueError(f"{field}.information_atoms must not be empty")
+            
+        for i, atom in enumerate(atoms, start=1):
+            if not isinstance(atom, dict):
+                raise ValueError(f"{field}.information_atoms[{i}] must be an object")
+            atom_id = _require_string(atom.get("atom_id"), f"{field}.information_atoms[{i}].atom_id")
+            if not atom_id.startswith(atom_prefix):
+                raise ValueError(f"atom_id {atom_id} must start with {atom_prefix}")
+            _register_evidence_id(atom_id)
+            f_keys = _require_list(atom.get("frame_keys"), f"{field}.information_atoms[{i}].frame_keys")
+            if not f_keys:
+                raise ValueError(f"{field}.information_atoms[{i}].frame_keys cannot be empty")
+            for fk in f_keys:
+                if fk not in valid_frame_keys:
+                    raise ValueError(f"Unknown frame_key '{fk}' in {atom_id}")
+            atom_frame_keys[atom_id] = set(f_keys)
+            _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
+
+        for key in ("sensor_specific_cues", "sensor_limitations"):
+            values = _require_list(analysis.get(key), f"{field}.{key}")
+            for value_index, value in enumerate(values, start=1):
+                text = _require_string(value, f"{field}.{key}[{value_index}]")
+                _validate_no_generic_sensor_explanation(text, f"{field}.{key}[{value_index}]")
+        _validate_uncertain_observations(analysis.get("uncertain_observations"), f"{field}.uncertain_observations")
+        
+        missing_attrs = _require_list(analysis.get("missing_key_attributes"), f"{field}.missing_key_attributes")
+        for i, attr in enumerate(missing_attrs, start=1):
+            if not isinstance(attr, dict):
+                raise ValueError(f"{field}.missing_key_attributes[{i}] must be an object")
+            attr_type = attr.get("attribute_type")
+            if attr_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
+                raise ValueError(f"{field}.missing_key_attributes[{i}].attribute_type invalid: {attr_type}")
+            _require_string(attr.get("missing_attribute"), f"{field}.missing_key_attributes[{i}].missing_attribute")
+            _require_string(attr.get("why_missing"), f"{field}.missing_key_attributes[{i}].why_missing")
+            rec_refs = _require_list(attr.get("recoverable_evidence_refs"), f"{field}.missing_key_attributes[{i}].recoverable_evidence_refs")
+            if not rec_refs:
+                raise ValueError(f"{field}.missing_key_attributes[{i}].recoverable_evidence_refs must not be empty")
+            # Defer cross-modal rule check until all atoms are registered
+
+    _validate_v7_video_analysis(parsed, "video1_analysis", "v1_atom_")
+    _validate_v7_video_analysis(parsed, "video2_analysis", "v2_atom_")
     
-    _validate_cross_modal_evidence_links(parsed.get("cross_modal_evidence_links"), entity_ids, "cross_modal_evidence_links")
-    _validate_information_gain(parsed.get("information_gain"), entity_ids, "information_gain")
+    _validate_cross_modal_evidence_links(parsed.get("cross_modal_evidence_links"), entity_ids, entity_focus_reasons, "cross_modal_evidence_links")
+    _validate_information_gain(parsed.get("information_gain"), entity_ids, entity_focus_reasons, "information_gain")
 
-    ambiguity_events = _require_list(parsed["ambiguity_events"], "ambiguity_events")
-    for index, event in enumerate(ambiguity_events, start=1):
+    events = _require_list(parsed["reasoning_events"], "reasoning_events")
+    for index, event in enumerate(events, start=1):
+        if not isinstance(event, dict):
+            raise ValueError(f"reasoning_events[{index}] must be an object")
+        evt_id = _require_string(event.get("event_id"), f"reasoning_events[{index}].event_id")
+        if not evt_id.startswith("evt_"):
+            raise ValueError(f"reasoning_events[{index}].event_id must start with evt_")
+        _register_evidence_id(evt_id)
+        evt_type = _require_string(event.get("event_type"), f"reasoning_events[{index}].event_type")
+        if evt_type not in ALLOWED_REASONING_EVENT_TYPES:
+            raise ValueError(f"reasoning_events[{index}].event_type {evt_type} is not a valid reasoning event type")
+        part_ents = _require_list(event.get("participating_entities"), f"reasoning_events[{index}].participating_entities")
+        if not part_ents:
+            raise ValueError(f"reasoning_events[{index}].participating_entities must not be empty")
+        for pe in part_ents:
+            if pe not in entity_ids:
+                raise ValueError(f"reasoning_events[{index}] entity {pe} not found in physical_entities")
+        
+        compatible_focus_participants = [
+            pe for pe in part_ents
+            if any(
+                evt_type in FOCUS_REASON_EVENT_TYPE_MAP.get(r, set())
+                for r in entity_focus_reasons.get(pe, set())
+            )
+        ]
+        if not compatible_focus_participants:
+            raise ValueError(f"reasoning_events[{index}] event_type {evt_type} requires at least one participating_entity to have a compatible focus reason")
+        
+        atom_refs = _require_list(event.get("supporting_atom_refs"), f"reasoning_events[{index}].supporting_atom_refs")
+        if not atom_refs:
+            raise ValueError(f"reasoning_events[{index}] must have supporting_atom_refs")
+        for ref in atom_refs:
+            if not (ref.startswith("v1_atom_") or ref.startswith("v2_atom_")):
+                raise ValueError(f"reasoning_events[{index}].supporting_atom_refs must only point to atoms. Invalid: {ref}")
+            if ref not in evidence_namespace:
+                raise ValueError(f"reasoning_events[{index}] references unknown atom: {ref}")
+                
+        dynamic_event_types = {"temporal_change", "occlusion_change", "spatial_transition"}
+        if evt_type in dynamic_event_types:
+            supporting_frames = set()
+            for ref in atom_refs:
+                supporting_frames.update(atom_frame_keys.get(ref, set()))
+            if len(supporting_frames) < 2:
+                raise ValueError(f"reasoning_events[{index}] {evt_type} requires evidence spanning at least 2 distinct frames")
+                
+        if evt_type == "joint_fusion":
+            has_v1 = any(r.startswith("v1_atom_") for r in atom_refs)
+            has_v2 = any(r.startswith("v2_atom_") for r in atom_refs)
+            if not (has_v1 and has_v2):
+                raise ValueError(f"reasoning_events[{index}] joint_fusion requires at least one V1 atom and one V2 atom")
+        _require_string(event.get("description"), f"reasoning_events[{index}].description")
+
+    for fe_id, reasons in entity_focus_reasons.items():
+        for r in reasons:
+            allowed_event_types = FOCUS_REASON_EVENT_TYPE_MAP.get(r)
+            if not allowed_event_types:
+                continue
+            
+            matched = any(
+                isinstance(event, dict)
+                and event.get("event_type") in allowed_event_types
+                and fe_id in event.get("participating_entities", [])
+                for event in events
+            )
+            
+            if not matched:
+                raise ValueError(f"Entity {fe_id} declares focus reason {r!r} but has no compatible reasoning_event")
+
+    ambiguities = _require_list(parsed["ambiguity_events"], "ambiguity_events")
+    for index, event in enumerate(ambiguities, start=1):
         if not isinstance(event, dict):
             raise ValueError(f"ambiguity_events[{index}] must be an object")
-        target_entity = _require_string(event.get("target_entity"), f"ambiguity_events[{index}].target_entity")
-        if target_entity not in entity_ids:
-            raise ValueError(f"ambiguity_events[{index}].target_entity must match a global_scene entity_id")
+        amb_id = _require_string(event.get("ambiguity_id"), f"ambiguity_events[{index}].ambiguity_id")
+        if not amb_id.startswith("amb_"):
+            raise ValueError(f"ambiguity_events[{index}].ambiguity_id must start with amb_")
+        _register_evidence_id(amb_id)
+        target = _require_string(event.get("target_entity"), f"ambiguity_events[{index}].target_entity")
+        if target not in entity_ids:
+            raise ValueError(f"ambiguity_events[{index}] target_entity {target} not found in physical_entities")
+        if "ambiguity_resolution" not in entity_focus_reasons.get(target, set()):
+            raise ValueError(f"ambiguity_events[{index}] target {target} lacks ambiguity_resolution focus_reason")
+        
         direction = event.get("direction")
         if direction not in ALLOWED_AMBIGUITY_DIRECTIONS:
             raise ValueError(f"ambiguity_events[{index}].direction must be video1_resolves_video2 or video2_resolves_video1")
+        
+        amb_video = _require_string(event.get("ambiguous_video"), f"ambiguity_events[{index}].ambiguous_video")
+        res_video = _require_string(event.get("resolving_video"), f"ambiguity_events[{index}].resolving_video")
+        if direction == "video1_resolves_video2":
+            if amb_video != "video2" or res_video != "video1":
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} contradicts video fields")
+        elif direction == "video2_resolves_video1":
+            if amb_video != "video1" or res_video != "video2":
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} contradicts video fields")
+
         for key in (
-            "approx_time_range",
-            "ambiguous_video",
-            "resolving_video",
-            "low_confidence_observation",
-            "why_ambiguous_video_cannot_resolve",
-            "resolving_discriminative_evidence",
-            "fusion_conclusion",
+            "low_confidence_observation", "why_ambiguous_video_cannot_resolve", 
+            "resolving_discriminative_evidence", "fusion_conclusion",
         ):
             _require_string(event.get(key), f"ambiguity_events[{index}].{key}")
+            
         missing_type = event.get("missing_attribute_type")
         if missing_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
-            raise ValueError(
-                f"ambiguity_events[{index}].missing_attribute_type must be one of "
-                f"{sorted(ALLOWED_MISSING_ATTRIBUTE_TYPES)}, got {missing_type!r}"
-            )
-        _validate_question_worthiness(event.get("question_worthiness"), f"ambiguity_events[{index}].question_worthiness")
+            raise ValueError(f"ambiguity_events[{index}].missing_attribute_type invalid: {missing_type}")
+
         hypotheses = _require_list(event.get("candidate_hypotheses"), f"ambiguity_events[{index}].candidate_hypotheses")
         if len(hypotheses) < 2:
             raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses must include at least two hypotheses")
+            
+        normalized_hyps = {h.get("hypothesis", "").strip().casefold() for h in hypotheses if isinstance(h, dict)}
+        if len(normalized_hyps) < 2:
+            raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses must contain at least two distinct hypotheses")
+            
         for hyp_index, hypothesis in enumerate(hypotheses, start=1):
             if not isinstance(hypothesis, dict):
                 raise ValueError(f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}] must be an object")
             _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].hypothesis")
-            _require_string(
-                hypothesis.get("support_from_resolving") or hypothesis.get("support_from_victim"),
-                f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].support_from_resolving",
-            )
+            _require_string(hypothesis.get("support_from_resolving"), f"ambiguity_events[{index}].candidate_hypotheses[{hyp_index}].support_from_resolving")
+            
         eliminated = _require_list(event.get("eliminated_hypotheses"), f"ambiguity_events[{index}].eliminated_hypotheses")
         if not eliminated:
             raise ValueError(f"ambiguity_events[{index}].eliminated_hypotheses must not be empty")
+            
+        candidate_names = {h["hypothesis"].strip().casefold() for h in hypotheses if isinstance(h, dict) and "hypothesis" in h}
+            
         for elim_index, hypothesis in enumerate(eliminated, start=1):
             if not isinstance(hypothesis, dict):
                 raise ValueError(f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}] must be an object")
-            _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].hypothesis")
-            _require_string(
-                hypothesis.get("why_eliminated"),
-                f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].why_eliminated",
-            )
+            elim_name = _require_string(hypothesis.get("hypothesis"), f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].hypothesis")
+            if elim_name.strip().casefold() not in candidate_names:
+                raise ValueError(f"ambiguity_events[{index}] eliminated hypothesis must appear in candidate_hypotheses")
+            _require_string(hypothesis.get("why_eliminated"), f"ambiguity_events[{index}].eliminated_hypotheses[{elim_index}].why_eliminated")
+        
+        amb_refs = _require_list(event.get("ambiguous_evidence_refs"), f"ambiguity_events[{index}].ambiguous_evidence_refs")
+        if not amb_refs:
+            raise ValueError(f"ambiguity_events[{index}].ambiguous_evidence_refs must not be empty")
+        res_refs = _require_list(event.get("resolving_evidence_refs"), f"ambiguity_events[{index}].resolving_evidence_refs")
+        if not res_refs:
+            raise ValueError(f"ambiguity_events[{index}].resolving_evidence_refs must not be empty")
+            
+        if direction == "video1_resolves_video2":
+            if not all(r.startswith("v2_atom_") for r in amb_refs):
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} requires ambiguous_evidence_refs to be v2_atom_")
+            if not all(r.startswith("v1_atom_") for r in res_refs):
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} requires resolving_evidence_refs to be v1_atom_")
+        elif direction == "video2_resolves_video1":
+            if not all(r.startswith("v1_atom_") for r in amb_refs):
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} requires ambiguous_evidence_refs to be v1_atom_")
+            if not all(r.startswith("v2_atom_") for r in res_refs):
+                raise ValueError(f"ambiguity_events[{index}] direction {direction} requires resolving_evidence_refs to be v2_atom_")
+
+        for ref in amb_refs + res_refs:
+            if not (ref.startswith("v1_atom_") or ref.startswith("v2_atom_")):
+                raise ValueError(f"ambiguity_events[{index}] evidence_refs must only point to atoms. Invalid: {ref}")
+            if ref not in evidence_namespace:
+                raise ValueError(f"ambiguity_events[{index}] references unknown atom: {ref}")
+
+    QA_PATTERN_EVENT_TYPE_MAP = {
+        "temporal_integration": {"temporal_change"},
+        "occlusion_reasoning": {"occlusion_change"},
+        "interaction_reasoning": {"interaction"},
+        "spatial_transition": {"spatial_transition"},
+        "joint_fusion": {"joint_fusion"},
+    }
+
+    qa_details = _require_list(parsed["qa_relevant_details"], "qa_relevant_details")
+    for index, qa in enumerate(qa_details, start=1):
+        if not isinstance(qa, dict):
+            raise ValueError(f"qa_relevant_details[{index}] must be an object")
+        qa_id = _require_string(qa.get("detail_id"), f"qa_relevant_details[{index}].detail_id")
+        if not qa_id.startswith("qa_detail_"):
+            raise ValueError(f"qa_relevant_details[{index}].detail_id must start with qa_detail_")
+        _register_evidence_id(qa_id)
+        pat = _require_string(qa.get("reasoning_pattern"), f"qa_relevant_details[{index}].reasoning_pattern")
+        if pat not in ALLOWED_QA_REASONING_PATTERNS:
+            raise ValueError(f"qa_relevant_details[{index}].reasoning_pattern invalid: {pat}")
+        refs = _require_list(qa.get("supporting_refs"), f"qa_relevant_details[{index}].supporting_refs")
+        if not refs:
+            raise ValueError(f"qa_relevant_details[{index}].supporting_refs must not be empty")
+        for ref in refs:
+            if ref.startswith("qa_detail_"):
+                raise ValueError(f"qa_relevant_details[{index}] illegally references another qa_detail: {ref}")
+            if ref not in evidence_namespace:
+                raise ValueError(f"qa_relevant_details[{index}] references unknown ID: {ref}")
+                
+        expected_types = QA_PATTERN_EVENT_TYPE_MAP.get(pat)
+        if expected_types:
+            referenced_event_types = {
+                evt["event_type"] for evt in events if evt["event_id"] in refs
+            }
+            if not (referenced_event_types & expected_types):
+                raise ValueError(f"qa_relevant_details[{index}] pattern '{pat}' requires at least one supporting event of type: {', '.join(expected_types)}")
+            
+        def _resolve_atoms(ref_id: str) -> set[str]:
+            if ref_id.startswith("v1_atom_") or ref_id.startswith("v2_atom_"):
+                return {ref_id}
+            atoms = set()
+            if ref_id.startswith("evt_"):
+                evt = next(e for e in events if e.get("event_id") == ref_id)
+                atoms.update(evt.get("supporting_atom_refs", []))
+            elif ref_id.startswith("amb_"):
+                amb = next(a for a in ambiguities if a.get("ambiguity_id") == ref_id)
+                atoms.update(amb.get("ambiguous_evidence_refs", []))
+                atoms.update(amb.get("resolving_evidence_refs", []))
+            return atoms
+
+        resolved_atoms = set()
+        for ref in refs:
+            resolved_atoms.update(_resolve_atoms(ref))
+            
+        if pat == "multi_hop_composition" and len(resolved_atoms) < 2:
+            raise ValueError(f"qa_relevant_details[{index}] multi_hop_composition requires at least 2 underlying atoms")
+        if pat in ("cross_modal_disambiguation", "hypothesis_elimination"):
+            if not any(r.startswith("amb_") for r in refs):
+                raise ValueError(f"qa_relevant_details[{index}] {pat} MUST reference at least one amb_ event directly")
+        if pat == "joint_fusion":
+            has_v1 = any(a.startswith("v1_atom_") for a in resolved_atoms)
+            has_v2 = any(a.startswith("v2_atom_") for a in resolved_atoms)
+            if not (has_v1 and has_v2):
+                raise ValueError(f"qa_relevant_details[{index}] joint_fusion requires at least one V1 atom and one V2 atom in its resolved tree")
+        
+        _require_string(qa.get("why_question_worthy"), f"qa_relevant_details[{index}].why_question_worthy")
+
+    rejected = _require_list(parsed["rejected_observations"], "rejected_observations")
+    for index, item in enumerate(rejected, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"rejected_observations[{index}] must be an object")
+        _require_string(item.get("observation"), f"rejected_observations[{index}].observation")
+        _require_string(item.get("reason"), f"rejected_observations[{index}].reason")
+
+    def _check_missing_attrs(analysis_key: str, required_prefix: str, ref_modality: str):
+        analysis = parsed.get(analysis_key, {})
+        for i, attr in enumerate(analysis.get("missing_key_attributes", []), start=1):
+            refs = attr.get("recoverable_evidence_refs", [])
+            has_required = False
+            for ref in refs:
+                if not (ref.startswith("v1_atom_") or ref.startswith("v2_atom_")):
+                    raise ValueError(f"{analysis_key}.missing_key_attributes[{i}] recoverable_evidence_refs MUST only reference atoms. Invalid: {ref}")
+                if ref not in evidence_namespace:
+                    raise ValueError(f"{analysis_key}.missing_key_attributes[{i}] references unknown atom: {ref}")
+                if ref.startswith(required_prefix):
+                    has_required = True
+            if not has_required:
+                raise ValueError(f"{analysis_key}.missing_key_attributes[{i}] MUST reference at least one {required_prefix} atom to prove cross-modal recovery")
+            
+            attr_type = attr.get("attribute_type")
+            if attr_type == "surface_attribute" and "color" in attr.get("missing_attribute", "").lower():
+                cap = MODALITY_CAPABILITIES.get(ref_modality, {})
+                if not cap.get("color", True):
+                    raise ValueError(
+                        f"{analysis_key}.missing_key_attributes[{i}]: "
+                        f"'{attr.get('missing_attribute')}' marked recoverable from {ref_modality}, "
+                        f"but {ref_modality} has no color capability."
+                    )
+
+    _check_missing_attrs("video1_analysis", "v2_atom_", modality2)
+    _check_missing_attrs("video2_analysis", "v1_atom_", modality1)
     
-    _validate_frame_by_frame_analysis(parsed.get("frame_by_frame_analysis"), "frame_by_frame_analysis")
-    _require_list(parsed["rejected_observations"], "rejected_observations")
-    
-    _validate_recoverable_from(parsed)
+    has_reasoning_content = any([
+        parsed.get("cross_modal_evidence_links"),
+        parsed.get("information_gain"),
+        parsed.get("reasoning_events"),
+        parsed.get("ambiguity_events"),
+        parsed.get("qa_relevant_details"),
+    ])
+    if not has_reasoning_content:
+        raise ValueError("Caption contains no reasoning-relevant graph content (all evidence/reasoning sections are empty).")
+        
     parsed = _normalize_license_plates(parsed)
-    
     return parsed
 
 
@@ -952,7 +1271,8 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
                 contents=contents,
             )
             raw_text = response.text
-            return _validate_caption_schema(_parse_json_response(raw_text))
+            valid_frame_keys = {path.stem for path in task.composite_frames}
+            return _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task.modality1, task.modality2)
         except Exception as exc:
             exc_str = str(exc).lower()
             # Quota / rate-limit errors are permanent for the current key — don't waste retries
@@ -980,7 +1300,7 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
     raise RuntimeError("Gemini caption call failed")
 
 
-def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, reason: str | None = None) -> dict[str, Any]:
+def _task_metadata(task: CaptionTask) -> dict[str, Any]:
     return {
         "caption_id": task.caption_id,
         "segment_id": task.segment_id,
@@ -993,11 +1313,20 @@ def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None
         "frame_dir2": task.frame_dir2.as_posix(),
         "frames1": [path.as_posix() for path in task.frames1],
         "frames2": [path.as_posix() for path in task.frames2],
-        "composite_frames": [path.as_posix() for path in task.composite_frames],
+        "composite_frames": [f.name for f in task.composite_frames],
+        "sampling_strategy": task.sampling_strategy,
+        "uniform_anchor_indexes": list(task.uniform_anchor_indexes),
+        "num_selected_frames": len(task.selected_frame_indexes),
+    }
+
+def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, reason: str | None = None) -> dict[str, Any]:
+    item = _task_metadata(task)
+    item.update({
         "status": status,
         "reason": reason,
         "caption": caption,
-    }
+    })
+    return item
 
 
 def _template_caption(task: CaptionTask) -> dict[str, Any]:
@@ -1005,60 +1334,84 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
     return {
         "schema_version": CAPTION_SCHEMA_VERSION,
         "global_scene": {
-            "scene_summary": "Template mode placeholder; Gemini was not called.",
+            "scene_summary": "Template mode placeholder for scene summary. " * 5,
             "physical_entities": [
                 {
                     "entity_id": target_entity,
                     "category": "unknown",
-                    "appearance_or_state": "Template mode placeholder.",
-                    "location": "unknown",
-                    "motion_or_action": "unknown",
-                    "spatial_relations": [],
+                    "evidence_profile": {
+                        "identity_evidence": ["Placeholder evidence"],
+                        "observable_attributes": ["Placeholder attribute"],
+                        "spatial_context": ["Placeholder context"]
+                    }
+                }
+            ],
+            "reasoning_focus_entities": [
+                {
+                    "entity_id": target_entity,
+                    "focus_reasons": ["joint_fusion", "ambiguity_resolution"]
                 }
             ],
             "environment": "unknown",
-            "temporal_progression": "Template mode placeholder; no visual reasoning was performed.",
+            "temporal_progression": "Template mode placeholder for temporal progression. " * 3,
         },
         "video1_analysis": {
             "modality": task.modality1,
-            "detailed_caption": "Template mode placeholder; Gemini was not called.",
-            "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
+            "detailed_caption": "Template mode placeholder for detailed caption. " * 6,
+            "information_atoms": [
+                {
+                    "atom_id": "v1_atom_001",
+                    "frame_keys": [task.composite_frames[0].stem] if task.composite_frames else [],
+                    "fact": "Template placeholder fact"
+                }
+            ],
             "sensor_specific_cues": ["Template mode placeholder."],
             "sensor_limitations": ["Template mode placeholder."],
             "uncertain_observations": [
                 {
                     "observed_evidence": "Template placeholder",
-                    "hypotheses": [{"hypothesis": "Placeholder", "confidence": "low"}],
+                    "hypotheses": [{"hypothesis": "Placeholder 1", "confidence": "low"}, {"hypothesis": "Placeholder 2", "confidence": "low"}],
                     "missing_evidence": "Placeholder"
                 }
             ],
-            "missing_key_attributes": [],
+            "missing_key_attributes": [
+                {
+                    "attribute_type": "existence",
+                    "missing_attribute": "Template placeholder",
+                    "why_missing": "Template placeholder",
+                    "recoverable_evidence_refs": ["v2_atom_001"]
+                }
+            ],
         },
         "video2_analysis": {
             "modality": task.modality2,
-            "detailed_caption": "Template mode placeholder; Gemini was not called.",
-            "observable_facts": ["Template mode placeholder.", "Fact 2", "Fact 3"],
+            "detailed_caption": "Template mode placeholder for detailed caption. " * 6,
+            "information_atoms": [
+                {
+                    "atom_id": "v2_atom_001",
+                    "frame_keys": [task.composite_frames[0].stem] if task.composite_frames else [],
+                    "fact": "Template placeholder fact"
+                }
+            ],
             "sensor_specific_cues": ["Template mode placeholder."],
             "sensor_limitations": ["Template mode placeholder."],
             "uncertain_observations": [
                 {
                     "observed_evidence": "Template placeholder",
-                    "hypotheses": [{"hypothesis": "Placeholder", "confidence": "low"}],
+                    "hypotheses": [{"hypothesis": "Placeholder 1", "confidence": "low"}, {"hypothesis": "Placeholder 2", "confidence": "low"}],
                     "missing_evidence": "Placeholder"
                 }
             ],
-            "missing_key_attributes": [],
+            "missing_key_attributes": [
+                {
+                    "attribute_type": "existence",
+                    "missing_attribute": "Template placeholder",
+                    "why_missing": "Template placeholder",
+                    "recoverable_evidence_refs": ["v1_atom_001"]
+                }
+            ],
         },
-        "cross_modal_evidence_links": [
-            {
-                "entity_id": target_entity,
-                "shared_evidence": "Placeholder",
-                "unique_to_video1": "Placeholder",
-                "unique_to_video2": "Placeholder",
-                "how_video1_improves_video2": "Placeholder",
-                "how_video2_improves_video1": "Placeholder",
-            }
-        ],
+        "cross_modal_evidence_links": [],
         "information_gain": [
             {
                 "entity_id": target_entity,
@@ -1070,21 +1423,49 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
                 "gain_rating": "low",
             }
         ],
-        "ambiguity_events": [],
-        "frame_by_frame_analysis": [
+        "reasoning_events": [
             {
-                "frame_key": path.stem,
-                "newly_appearing_entities": [],
-                "disappearing_entities": [],
-                "motion_changes": "Placeholder",
-                "interaction_changes": "Placeholder",
-                "newly_introduced_uncertainty": "Placeholder",
-                "resolved_uncertainty": "Placeholder"
+                "event_id": "evt_001",
+                "event_type": "joint_fusion",
+                "participating_entities": [target_entity],
+                "supporting_atom_refs": ["v1_atom_001", "v2_atom_001"],
+                "description": "Template placeholder event"
             }
-            for path in task.composite_frames
+        ],
+        "ambiguity_events": [
+            {
+                "ambiguity_id": "amb_001",
+                "target_entity": target_entity,
+                "direction": "video1_resolves_video2",
+                "ambiguous_video": "video2",
+                "resolving_video": "video1",
+                "low_confidence_observation": "Placeholder",
+                "why_ambiguous_video_cannot_resolve": "Placeholder",
+                "candidate_hypotheses": [
+                    {"hypothesis": "Placeholder 1", "support_from_resolving": "Placeholder"},
+                    {"hypothesis": "Placeholder 2", "support_from_resolving": "Placeholder"}
+                ],
+                "resolving_discriminative_evidence": "Placeholder",
+                "eliminated_hypotheses": [{"hypothesis": "Placeholder 1", "why_eliminated": "Placeholder"}],
+                "fusion_conclusion": "Placeholder",
+                "missing_attribute_type": "existence",
+                "ambiguous_evidence_refs": ["v2_atom_001"],
+                "resolving_evidence_refs": ["v1_atom_001"]
+            }
+        ],
+        "qa_relevant_details": [
+            {
+                "detail_id": "qa_detail_001",
+                "reasoning_pattern": "joint_fusion",
+                "supporting_refs": ["evt_001", "amb_001"],
+                "why_question_worthy": "Placeholder"
+            }
         ],
         "rejected_observations": [
-            {"observation": "", "reason": "template mode; Gemini was not called"}
+            {
+                "observation": "No rejected observation was evaluated in template mode.",
+                "reason": "Gemini was not called in template mode."
+            }
         ],
     }
 
@@ -1108,38 +1489,47 @@ def _build_batch_request(task: CaptionTask, model_name: str, req_id: str) -> "ge
         metadata={"id": req_id}
     )
 
-def _submit_batch(client, tasks: list[CaptionTask], model_name: str, output_path: Path | str) -> None:
+def _submit_batch(client, tasks: list[CaptionTask], model_name: str, output_path: Path | str, api_key_source: str, planned_total: int) -> None:
     if not tasks:
         print("No pending tasks to submit in batch mode.")
         return
     print(f"Building batch request for {len(tasks)} tasks...")
     requests = [_build_batch_request(t, model_name, str(i)) for i, t in enumerate(tasks)]
-    print(f"Submitting batch job to Gemini API...")
-    job = client.batches.create(model=model_name, src=requests)
+    
+    MAX_ROTATIONS = 5
+    job = None
+    for attempt in range(MAX_ROTATIONS + 1):
+        print(f"Submitting batch job to Gemini API (Attempt {attempt+1}/{MAX_ROTATIONS+1})...")
+        try:
+            job = client.batches.create(model=model_name, src=requests)
+            break
+        except Exception as e:
+            err_str = str(e).lower()
+            if "429" in err_str or "quota" in err_str or "resource exhausted" in err_str or "resource_exhausted" in err_str or "resourceexhausted" in err_str:
+                if attempt == MAX_ROTATIONS:
+                    print(f"FATAL: Exceeded maximum API key rotations during batch submission: {e}")
+                    raise
+                print(f"WARNING: Quota exhausted or rate limit hit submitting batch. Rotating API key...")
+                try:
+                    from annotation_feature.pipeline.client import rotate_gemini_client
+                    client = rotate_gemini_client()
+                except Exception as rot_e:
+                    print(f"FATAL: All API keys exhausted or failed to rotate: {rot_e}")
+                    raise
+            else:
+                raise
+
     print(f"Batch job submitted successfully! Job Name: {job.name}")
     
     state_path = _batch_state_path(output_path)
     state = {
         "job_name": job.name,
         "model_name": model_name,
+        "api_key_source": api_key_source,
         "output_path": str(output_path),
+        "planned_total": planned_total,
         "submitted_at": datetime.datetime.now().isoformat(),
-        "pending_tasks": [
-            {
-                "caption_id": t.caption_id,
-                "segment_id": t.segment_id,
-                "split_dir": t.split_dir,
-                "segment_name": t.segment_name,
-                "side": t.side,
-                "modality1": t.modality1,
-                "modality2": t.modality2,
-                "frame_dir1": t.frame_dir1.as_posix(),
-                "frame_dir2": t.frame_dir2.as_posix(),
-                "frames1": [p.as_posix() for p in t.frames1],
-                "frames2": [p.as_posix() for p in t.frames2],
-                "composite_frames": [p.as_posix() for p in t.composite_frames],
-            } for t in tasks
-        ]
+        "pending_tasks": [_task_metadata(t) for t in tasks]
     }
     _save_json(state, state_path)
     print(f"Saved batch state to {state_path}")
@@ -1154,6 +1544,10 @@ def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str |
     with open(state_path, "r", encoding="utf-8") as f:
         state = json.load(f)
         
+    saved_api_key_source = state.get("api_key_source", "list")
+    if client is None:
+        client = create_gemini_client(api_key_source=saved_api_key_source)
+            
     if "fetched_at" in state:
         print(f"Batch state file {state_path} was already fetched at {state['fetched_at']}.")
         return
@@ -1175,8 +1569,9 @@ def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str |
     existing_items, existing_skipped = _load_resume(out_path)
     items = existing_items
     skipped = existing_skipped
-    existing_ids = {
-        str(item.get("caption_id")) for item in (items + skipped) 
+    existing_keys = {
+        (str(item.get("caption_id")), item.get("selection_config_fingerprint"))
+        for item in items 
         if item.get("caption_id")
     }
     
@@ -1195,40 +1590,35 @@ def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str |
             continue
             
         caption_id = task_dict.get("caption_id")
-        if not caption_id or caption_id in existing_ids:
+        fingerprint = task_dict.get("selection_config_fingerprint")
+        selection_key = (str(caption_id), str(fingerprint))
+        
+        if not caption_id or selection_key in existing_keys:
             continue
             
-        if caption_id in seen_in_this_fetch:
+        if selection_key in seen_in_this_fetch:
             continue
-        seen_in_this_fetch.add(caption_id)
-        base_item = {
-            "caption_id": caption_id,
-            "segment_id": task_dict.get("segment_id"),
-            "split_dir": task_dict.get("split_dir"),
-            "segment_name": task_dict.get("segment_name"),
-            "side": task_dict.get("side"),
-            "modality1": task_dict.get("modality1"),
-            "modality2": task_dict.get("modality2"),
-            "frame_dir1": task_dict.get("frame_dir1"),
-            "frame_dir2": task_dict.get("frame_dir2"),
-            "frames1": task_dict.get("frames1", []),
-            "frames2": task_dict.get("frames2", []),
-            "composite_frames": task_dict.get("composite_frames", []),
-        }
+        seen_in_this_fetch.add(selection_key)
+        base_item = task_dict.copy()
         
         if resp_entry.error:
             base_item["reason"] = f"Batch API Error: {resp_entry.error}"
+            skipped[:] = [item for item in skipped if item.get("caption_id") != caption_id]
             skipped.append(base_item)
             continue
             
         try:
-            raw_text = resp_entry.response.candidates[0].content.parts[0].text
-            caption = _validate_caption_schema(_parse_json_response(raw_text))
+            raw_text = "".join(part.text for part in resp_entry.response.candidates[0].content.parts)
+            valid_frame_keys = {Path(p).stem for p in task_dict.get("composite_frames", [])}
+            caption = _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task_dict.get("modality1", ""), task_dict.get("modality2", ""))
             base_item["status"] = "generated_batch"
             base_item["caption"] = caption
+            skipped[:] = [item for item in skipped if item.get("caption_id") != caption_id]
+            items[:] = [item for item in items if item.get("caption_id") != caption_id]
             items.append(base_item)
         except Exception as exc:
             base_item["reason"] = f"Validation Error: {exc}"
+            skipped[:] = [item for item in skipped if item.get("caption_id") != caption_id]
             skipped.append(base_item)
             
     _save_json(
@@ -1239,10 +1629,9 @@ def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str |
             output_path=out_path,
             model_name=state.get("model_name", "unknown"),
             generation_mode="batch",
-            num_frames=len(pending_tasks_list[0].get("frames1", [])) if pending_tasks_list else 0,
             items=items,
             skipped=skipped,
-            planned_total=len(items) + len(skipped),
+            planned_total=state.get("planned_total", len(items) + len(skipped)),
             gemini_calls=len(job.dest.inlined_responses),
         ),
         out_path,
@@ -1261,7 +1650,6 @@ def _build_output_payload(
     output_path: Path,
     model_name: str,
     generation_mode: str,
-    num_frames: int,
     items: list[dict[str, Any]],
     skipped: list[dict[str, Any]],
     planned_total: int,
@@ -1277,7 +1665,6 @@ def _build_output_payload(
             "composite_root": composite_root.as_posix(),
             "generation_mode": generation_mode,
             "model_name": model_name,
-            "num_frames": num_frames,
             "planned_items": planned_total,
             "completed_items": len(items),
             "skipped_items": len(skipped),
@@ -1298,7 +1685,16 @@ def _load_resume(output_path: Path) -> tuple[list[dict[str, Any]], list[dict[str
         return [], []
     items = data.get("items") if isinstance(data.get("items"), list) else []
     skipped = data.get("skipped") if isinstance(data.get("skipped"), list) else []
-    return list(items), list(skipped)
+    
+    # Filter out stale "llm semantic selection failed" errors from legacy pipeline
+    filtered_skipped = []
+    for item in skipped:
+        reason = str(item.get("reason", ""))
+        if "llm semantic selection failed" in reason or "additional_properties" in reason:
+            continue
+        filtered_skipped.append(item)
+        
+    return list(items), filtered_skipped
 
 
 async def run_caption_pipeline_async(
@@ -1309,7 +1705,8 @@ async def run_caption_pipeline_async(
     model_name: str,
     generation_mode: str,
     api_key_source: str,
-    num_frames: int,
+    num_uniform_frames: int,
+    num_adaptive_frames: int,
     pairs: str | None,
     directions: str | None,
     sides: str | None,
@@ -1324,11 +1721,21 @@ async def run_caption_pipeline_async(
     allowed_pairs = _parse_pairs(pairs)
     allowed_directions = _parse_pairs(directions)
     allowed_sides = _parse_sides(sides)
-    tasks, skipped = build_caption_tasks(
+    
+    client = create_gemini_client(api_key_source=api_key_source) if generation_mode in ("gemini", "batch") else None
+    
+    existing_items, existing_skipped = _load_resume(output_path) if resume else ([], [])
+    items = existing_items
+    skipped = existing_skipped
+    
+    tasks, new_skipped, total_selected_jobs = build_caption_tasks(
         input_path=input_path,
         dataset_root=dataset_root,
         composite_root=composite_root,
-        num_frames=num_frames,
+        sampling_strategy="uniform_adaptive",
+        num_uniform_frames=num_uniform_frames,
+        num_adaptive_frames=num_adaptive_frames,
+        existing_items=existing_items,
         allowed_pairs=allowed_pairs,
         allowed_directions=allowed_directions,
         limit=limit,
@@ -1337,13 +1744,18 @@ async def run_caption_pipeline_async(
         allowed_sides=allowed_sides,
         write_composites=False,
     )
-    existing_items, existing_skipped = _load_resume(output_path) if resume else ([], [])
-    items = existing_items
-    skipped = existing_skipped + skipped
-    existing_ids = {str(item.get("caption_id")) for item in items if item.get("caption_id")}
-    pending_tasks = [task for task in tasks if task.caption_id not in existing_ids]
+    
+    seen_skipped = set()
+    deduped_skipped = []
+    for s in skipped + new_skipped:
+        key = (s.get("segment_id"), s.get("side"), s.get("modality1"), s.get("modality2"), s.get("reason"), s.get("caption_id"))
+        if key not in seen_skipped:
+            seen_skipped.add(key)
+            deduped_skipped.append(s)
+    skipped = deduped_skipped
+    pending_tasks = tasks # Pending tasks are already filtered inside build_caption_tasks
 
-    client = create_gemini_client(api_key_source=api_key_source) if generation_mode in ("gemini", "batch") else None
+    # client already created if needed
     gemini_calls = 0
     checkpoint_counter = 0
 
@@ -1354,7 +1766,7 @@ async def run_caption_pipeline_async(
     
     if generation_mode == "batch":
         assert client is not None
-        _submit_batch(client, pending_tasks, model_name, output_path)
+        _submit_batch(client, pending_tasks, model_name, output_path, api_key_source, total_selected_jobs)
         return output_path
 
     def save_checkpoint() -> None:
@@ -1366,16 +1778,18 @@ async def run_caption_pipeline_async(
                 output_path=output_path,
                 model_name=model_name,
                 generation_mode=generation_mode,
-                num_frames=num_frames,
                 items=items,
                 skipped=skipped,
-                planned_total=len(tasks),
+                planned_total=total_selected_jobs,
                 gemini_calls=gemini_calls,
             ),
             output_path,
         )
 
     task_index = 0
+    MAX_KEY_ROTATIONS = 5
+    rotation_attempts = 0
+
     while task_index < len(pending_tasks):
         task = pending_tasks[task_index]
         print(
@@ -1390,12 +1804,19 @@ async def run_caption_pipeline_async(
                 status = "generated"
             else:
                 _ensure_composite_frames(task)
-                caption = _template_caption(task)
+                valid_frame_keys = {path.stem for path in task.composite_frames}
+                caption = _validate_caption_schema(_template_caption(task), valid_frame_keys, task.modality1, task.modality2)
                 status = "template"
+            skipped[:] = [item for item in skipped if item.get("caption_id") != task.caption_id]
+            items[:] = [item for item in items if item.get("caption_id") != task.caption_id]
             items.append(_task_to_item(task, status=status, caption=caption))
+            rotation_attempts = 0
         except Exception as exc:
             exc_str = str(exc).lower()
             if "429" in exc_str or "quota" in exc_str:
+                rotation_attempts += 1
+                if rotation_attempts > MAX_KEY_ROTATIONS:
+                    raise RuntimeError("Exceeded maximum API-key rotation attempts")
                 print(f"WARNING: Quota exhausted or rate limit hit. Attempting to rotate API key...")
                 try:
                     client = create_gemini_client(api_key_source=api_key_source)
@@ -1404,6 +1825,7 @@ async def run_caption_pipeline_async(
                 except Exception as rotate_exc:
                     print(f"FATAL: All API keys exhausted or failed to rotate: {rotate_exc}")
                     break
+            skipped[:] = [item for item in skipped if item.get("caption_id") != task.caption_id]
             skipped.append(
                 {
                     "caption_id": task.caption_id,
@@ -1438,7 +1860,8 @@ def run_caption_pipeline(
     model_name: str = DEFAULT_MODEL_NAME,
     generation_mode: str = "template",
     api_key_source: str = "list",
-    num_frames: int = 6,
+    num_uniform_frames: int = 8,
+    num_adaptive_frames: int = 2,
     pairs: str | None = None,
     directions: str | None = None,
     sides: str | None = None,
@@ -1459,7 +1882,8 @@ def run_caption_pipeline(
             model_name=model_name,
             generation_mode=generation_mode,
             api_key_source=api_key_source,
-            num_frames=num_frames,
+            num_uniform_frames=num_uniform_frames,
+            num_adaptive_frames=num_adaptive_frames,
             pairs=pairs,
             directions=directions,
             sides=sides,
@@ -1490,7 +1914,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fetch-batch", action="store_true", help="Fetch results for a pending batch job instead of creating tasks.")
     parser.add_argument("--batch-state", default=None, help="Path to batch state file (optional).")
     parser.add_argument("--api-key-source", choices=("env", "list"), default="list", help="Source for Gemini API keys.")
-    parser.add_argument("--num-frames", type=int, default=6)
+    parser.add_argument("--num-uniform-frames", type=int, default=8)
+    parser.add_argument("--num-adaptive-frames", type=int, default=2)
     parser.add_argument(
         "--pairs",
         default=None,
@@ -1504,7 +1929,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--directions",
         default=None,
-        help="Comma-separated modality1->modality2 directions such as rgb->depth,event->ir. Defaults to both directions.",
+        help="Comma-separated modality1->modality2 directions such as rgb->depth,event->ir. Defaults to the canonical ordering from input modality_pairs.",
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
@@ -1527,15 +1952,20 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--delay-between-calls", type=int, default=5)
     parser.add_argument("--checkpoint-every", type=int, default=1)
     parser.add_argument("--no-resume", action="store_true")
+    
     return parser
 
 
 def main() -> None:
+    import sys
+    import asyncio
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
     args = _build_arg_parser().parse_args()
     
     if args.fetch_batch:
-        client = create_gemini_client(api_key_source=args.api_key_source)
-        _fetch_batch(client, args.output, args.batch_state)
+        _fetch_batch(None, args.output, args.batch_state)
         return
 
     run_caption_pipeline(
@@ -1546,7 +1976,8 @@ def main() -> None:
         model_name=args.model_name,
         generation_mode=args.generation_mode,
         api_key_source=args.api_key_source,
-        num_frames=max(1, args.num_frames),
+        num_uniform_frames=max(1, args.num_uniform_frames),
+        num_adaptive_frames=max(0, args.num_adaptive_frames),
         pairs=args.pairs,
         directions=args.directions,
         sides=args.sides,

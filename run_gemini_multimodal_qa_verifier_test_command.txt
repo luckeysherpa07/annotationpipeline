@@ -1,2 +1,0 @@
-# Small verifier/filter test for the updated v2 test candidates file.
-powershell -ExecutionPolicy Bypass -Command "& .\.venv\Scripts\python.exe -m annotation_feature.multimodal_qa_verifier --input outputs/implicit_multimodal_qa_candidates_gemini_v2_test.json --output outputs/implicit_multimodal_qa_verified_gemini_v2_test.json --model-name gemini-3.1-flash-lite --batch-size 5 --max-concurrent-calls 1 --delay-between-calls 5 --checkpoint-every 1"
