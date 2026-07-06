@@ -95,10 +95,51 @@ ALLOWED_REASONING_EVENT_TYPES = {
     "joint_fusion",
 }
 ALLOWED_AMBIGUITY_DIRECTIONS = {"video1_resolves_video2", "video2_resolves_video1"}
-FORBIDDEN_GLOBAL_SCENE_WORDS = re.compile(
-    r"\b(modality|thermal|rgb|event|depth|infrared|ir|visible|invisible|"
-    r"blurry|noisy|pixels?|grayscale|greyscale|heat|edge|edge-based|sparse|contrast|"
-    r"monochrome|overexposed|saturated|contour|silhouette)\b", re.I
+FORBIDDEN_SENSOR_QUALITY_TERMS = (
+    "modality",
+    "rgb",
+    "infrared",
+    "ir",
+    "thermal camera",
+    "thermal image",
+    "thermal frame",
+    "thermal modality",
+    "event camera",
+    "event stream",
+    "event sensor",
+    "event frame",
+    "event modality",
+    "depth camera",
+    "depth sensor",
+    "depth map",
+    "depth frame",
+    "depth modality",
+    "edge map",
+    "edge-based",
+    "edge-like",
+    "heat signature",
+    "heat map",
+    "blurry",
+    "noisy",
+    "pixel",
+    "pixels",
+    "grayscale",
+    "greyscale",
+    "monochrome",
+    "overexposed",
+    "saturated",
+)
+FORBIDDEN_SENSOR_QUALITY_PATTERN = re.compile(
+    r"\b("
+    + "|".join(re.escape(term).replace(r"\ ", r"\s+") for term in FORBIDDEN_SENSOR_QUALITY_TERMS)
+    + r")\b",
+    re.I,
+)
+FORBIDDEN_SENSOR_QUALITY_MESSAGE = (
+    "EXACT BLOCKLIST: modality, rgb, infrared, ir, thermal camera/image/frame/modality, "
+    "event camera/stream/sensor/frame/modality, depth camera/sensor/map/frame/modality, "
+    "edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, "
+    "grayscale/greyscale, monochrome, overexposed, saturated. REMOVE THESE TERMS!"
 )
 MIN_DETAILED_CAPTION_WORDS = 30
 MIN_SCENE_SUMMARY_WORDS = 20
@@ -535,7 +576,7 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
-            "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use ANY of the following words (case-insensitive, including plural forms) in global_scene.scene_summary or global_scene.temporal_progression: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. This is an exact blocklist, not a suggestion list. Any match causes rejection. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically. global_scene.temporal_progression must also strictly follow the blocklist.",
+            "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use sensor/meta terms or image-quality terms in global_scene.scene_summary or global_scene.temporal_progression. Forbidden terms include: modality, rgb, infrared, ir, thermal camera/image/frame/modality, event camera/stream/sensor/frame/modality, depth camera/sensor/map/frame/modality, edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, grayscale/greyscale, monochrome, overexposed, saturated. The words event, depth, edge, and heat are only forbidden in those sensor-specific phrases. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
             "ENTITY SELECTION: physical_entities should include entities central to the scene action or where modalities differ. Do not force every object into an entity; create an entity only when it is needed as a stable target for downstream reasoning or repeated cross-field reference. Grouped entities (e.g., 'parked_vehicles') are allowed ONLY if members share the same broad object class and reasoning purpose. Broad containers (e.g., 'road_surface') MUST NOT absorb distinct nested objects (e.g., manhole covers, drainage grates) unless the reasoning genuinely concerns the container itself. Omit the entity entirely rather than creating an incoherent grouping.",
             "DEEP REASONING ANALYSIS: When analyzing the scene, you MUST follow these paradigms to support difficult QA generation: (1) Information Atoms: Must contain directly observable, source-local facts. Each atom should express one minimal factual claim grounded in its referenced frames. Do not place intentions, causal explanations, fusion conclusions, or multi-step inferences inside atoms; those belong in reasoning_events or ambiguity_events. (2) Visibility & Occlusion: Track entity occlusion states chronologically. (3) Interaction Graph: Build human-object and object-object causality. (4) QA-Relevant Details: Focus on non-obvious discriminative features that require cross-modal thinking. (5) UNCERTAINTY HONESTY GUARDRAIL: Do NOT hallucinate physical attributes. Honestly record uncertainty. Do not guess.",
             "FIELD RULES (violations cause rejection):",
@@ -546,7 +587,7 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "5. CONDITIONAL EVIDENCE PROFILE: evidence_profile fields (identity_evidence, observable_attributes, spatial_context) must be completely omitted from the JSON if there is no meaningful non-dynamic evidence for them. DO NOT return empty lists or empty strings.",
             f"VALID FRAME KEYS: [{frame_keys}]. information_atoms[].frame_keys MUST choose only from these exact values.",
             "6. REASON-DRIVEN COVERAGE: DO NOT force every entity into cross_modal_evidence_links or information_gain. Only include an entity in a section if the evidence justifies it. Static occluders should only be in occlusion_change if their occlusion state actually changes.",
-            "7. CRITICAL RULE for detailed_caption & global_scene: Describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. You MUST STRICTLY AVOID these exact words: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette.",
+            "7. CRITICAL RULE for detailed_caption & global_scene: Describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Avoid sensor/meta terms and image-quality terms such as: modality, rgb, infrared, ir, thermal camera/image/frame/modality, event camera/stream/sensor/frame/modality, depth camera/sensor/map/frame/modality, edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, grayscale/greyscale, monochrome, overexposed, saturated. The words event, depth, edge, and heat are allowed only when they are ordinary physical-scene words, not sensor or image-processing terms.",
             "8. ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one.",
             "9. SENSOR CUES & LIMITATIONS: sensor_specific_cues, sensor_limitations, and missing_key_attributes.why_missing MUST describe specific, currently-observed visual consequences in the frames (e.g., 'flat side panel has weak internal structure in frames 450-480'). NEVER write generic textbook modality theory (e.g., 'event cameras cannot capture static objects', 'loss of color'). Explain limitations in terms of the supplied segment.",
             "10. STRICT SOURCE-LOCAL INDEPENDENCE: EVERY field within video1_analysis and video2_analysis MUST be entirely independent. If Video 1 shows a bicycle but Video 2 does not, Video 2's analysis MUST NOT mention the bicycle at all (do not write 'bicycle frame is absent'). Cross-modal identity fusion MUST NOT occur inside any source-local video analysis field, and may occur ONLY in justified higher-level fusion structures including: cross_modal_evidence_links, information_gain, reasoning_events, and ambiguity_events.",
@@ -890,13 +931,13 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
 
     global_scene = _require_object(parsed["global_scene"], "global_scene")
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
-    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(scene_summary):
-        raise CaptionValidationError("global_scene.scene_summary contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
+    if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(scene_summary):
+        raise CaptionValidationError(f"global_scene.scene_summary contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
     temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
-    if FORBIDDEN_GLOBAL_SCENE_WORDS.search(temporal_progression):
-        raise CaptionValidationError("global_scene.temporal_progression contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
+    if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(temporal_progression):
+        raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
     
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
@@ -938,8 +979,8 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
             f"{field}.detailed_caption",
             MIN_DETAILED_CAPTION_WORDS,
         )
-        if FORBIDDEN_GLOBAL_SCENE_WORDS.search(detailed_caption):
-            raise CaptionValidationError(f"{field}.detailed_caption contains forbidden sensor-quality words. EXACT BLOCKLIST: modality, thermal, rgb, event, depth, infrared, ir, visible, invisible, blurry, noisy, pixel, pixels, grayscale, heat, edge, sparse, contrast, monochrome, overexposed, saturated, contour, silhouette. REMOVE THESE WORDS!")
+        if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(detailed_caption):
+            raise CaptionValidationError(f"{field}.detailed_caption contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
         _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
         
         atoms = _require_list(analysis.get("information_atoms"), f"{field}.information_atoms")
@@ -1234,6 +1275,35 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
     return parsed
 
 
+def _build_validation_retry_hint(exc: Exception, category: str) -> str:
+    message = str(exc).lower()
+    hints: list[str] = []
+    if category == "blocklist_failure":
+        hints.append(
+            "Rewrite the reported field using physical-world wording only. "
+            "Do not mention sensor names, modality names, camera/frame/image-processing terms, "
+            "or image-quality descriptions. Keep detailed captions above the minimum word count."
+        )
+    if "too short" in message:
+        hints.append(
+            "Expand the reported detailed_caption into a complete source-local paragraph of at least "
+            f"{MIN_DETAILED_CAPTION_WORDS} words, while keeping forbidden sensor-quality wording out."
+        )
+    if "generic sensor-theory" in message:
+        hints.append(
+            "Rewrite sensor_specific_cues, sensor_limitations, or why_missing as segment-specific evidence. "
+            "Describe what is hard to tell in the supplied frames, not what a sensor type generally can or cannot capture."
+        )
+    if category in {"invalid_reference", "missing_attribute_recovery", "qa_mapping_failure"}:
+        hints.append(
+            "Re-check all IDs and references after the edit. Every referenced atom, entity, event, and ambiguity item "
+            "must exist and must keep the required prefix."
+        )
+    if not hints:
+        return ""
+    return " Targeted repair guidance: " + " ".join(hints)
+
+
 async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_retries: int, api_stats: list[int] | None = None) -> dict[str, Any]:
     _ensure_composite_frames(task)
     encoded = _encode_images(task.composite_frames)
@@ -1319,6 +1389,7 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
                 f"{previous_context}"
                 f"Your previous response failed validation. "
                 f"The first detected validation error was: [{exc}]. "
+                f"{_build_validation_retry_hint(exc, category)} "
                 f"Correct this issue and re-check the entire JSON for all related "
                 f"consistency constraints, references, entity IDs, event types, "
                 f"evidence links, and cross-field dependencies. "
