@@ -7,14 +7,11 @@ import asyncio
 import base64
 import json
 import hashlib
-import os
 import re
 import datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-import numpy as np
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -24,7 +21,7 @@ except ImportError:
     genai_types = None
 
 from annotation_feature.pipeline.client import create_gemini_client
-from annotation_feature.pipeline.utils import build_image_parts, infer_recording_side
+from annotation_feature.pipeline.utils import build_image_parts
 
 from annotation_feature.aligned_multimodal_sampling import (
     MultimodalSamplingJob,
@@ -63,31 +60,60 @@ def build_selection_config_fingerprint(
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
 
 
+
 DEFAULT_INPUT_PATH = Path("outputs/aligned_multimodal_visual_evidence_units_filtered.json")
 DEFAULT_OUTPUT_PATH = Path("outputs/aligned_cross_modal_disambiguation_captions_gemini.json")
 DEFAULT_COMPOSITE_ROOT = Path("outputs/composite_frames")
 DEFAULT_DATASET_ROOT = Path("aligned_dataset")
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
-CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v9"
+CAPTION_SCHEMA_VERSION = "cross_modal_disambiguation_caption_v11"
+CAPTION_REQUIRED_TOP_LEVEL_FIELDS = {
+    "schema_version",
+    "global_scene",
+    "video1_analysis",
+    "video2_analysis",
+    "cross_modal_evidence_links",
+    "information_gain",
+    "reasoning_events",
+    "ambiguity_events",
+    "qa_relevant_details",
+    "rejected_observations",
+}
 ALLOWED_MISSING_ATTRIBUTE_TYPES = {
     "existence",
-    "target_category",
-    "spatial_distance",
+    "semantic_identity",
+    "physical_cause",
     "surface_attribute",
-    "motion_trend",
+    "state_attribute",
+    "motion_state",
+    "spatial_relation",
+    "temporal_relation",
+    "count",
+    "fine_grained_category",
 }
 ALLOWED_GAIN_RATINGS = {"low", "medium", "high"}
-ALLOWED_FOCUS_REASONS = {
-    "cross_modal_complementarity", "fusion_gain", "temporal_change", 
-    "interaction", "occlusion_change", "spatial_transition", "joint_fusion", "ambiguity_resolution"
+ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS = {
+    "video1_improves_video2",
+    "video2_improves_video1",
+    "mutual_complementarity",
+    "confirmation_only",
 }
-
+ALLOWED_GAIN_TYPES = {
+    "semantic_emergence",
+    "disambiguation",
+    "complementarity",
+    "confirmation",
+    "confidence_gain",
+}
 ALLOWED_QA_REASONING_PATTERNS = {
     "cross_modal_disambiguation", "temporal_integration", "occlusion_reasoning", 
     "interaction_reasoning", "spatial_transition", "hypothesis_elimination", 
     "multi_hop_composition", "joint_fusion"
 }
 ALLOWED_REASONING_EVENT_TYPES = {
+    "confirmation",
+    "cross_modal_complementarity",
+    "unidirectional_disambiguation",
     "temporal_change",
     "interaction",
     "occlusion_change",
@@ -141,6 +167,7 @@ FORBIDDEN_SENSOR_QUALITY_MESSAGE = (
     "edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, "
     "grayscale/greyscale, monochrome, overexposed, saturated. REMOVE THESE TERMS!"
 )
+
 MIN_DETAILED_CAPTION_WORDS = 30
 MIN_SCENE_SUMMARY_WORDS = 20
 MIN_FRAME_DETAIL_WORDS = 8
@@ -154,43 +181,55 @@ GENERIC_SENSOR_EXPLANATION_PATTERNS = (
     re.compile(r"\bzero\s+response\s+on", re.I),
     re.compile(r"\bhigh\s+sensitivity\s+to", re.I),
 )
-VISUAL_PAIRS = (
-    ("rgb", "event"),
-    ("rgb", "depth"),
-    ("rgb", "ir"),
-    ("event", "ir"),
-    ("event", "depth"),
-)
+
 MODALITY_CAPABILITIES = {
-    "rgb":   {"color": True,  "thermal": False, "structure_edge": True,  "depth": False},
-    "event": {"color": False, "thermal": False, "structure_edge": True,  "depth": False},
-    "ir":    {"color": False, "thermal": True,  "structure_edge": False, "depth": False},
-    "depth": {"color": False, "thermal": False, "structure_edge": False, "depth": True},
+    "rgb":   {"color": "direct",       "visual_category": "direct",      "thermal": "not_direct", "structure_edge": "direct",      "depth": "conditional"},
+    "event": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "direct",      "depth": "not_direct"},
+    "ir":    {"color": "not_direct",   "visual_category": "conditional", "thermal": "direct",     "structure_edge": "conditional", "depth": "not_direct"},
+    "depth": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "conditional", "depth": "direct"},
 }
 
+def _describe_capability_pair(attr: str, mod1: str, state1: str, mod2: str, state2: str) -> str:
+    if state1 == "direct" and state2 == "direct":
+        return f"- {attr}: Both videos may provide direct evidence for this cue. Final claims must still be grounded in the supplied frames."
+    elif state1 == "direct" and state2 == "conditional":
+        return f"- {attr}: Video 1 ({mod1}) may provide direct evidence. Video 2 ({mod2}) may contribute only when the supplied frames visibly support the cue."
+    elif state1 == "conditional" and state2 == "direct":
+        return f"- {attr}: Video 2 ({mod2}) may provide direct evidence. Video 1 ({mod1}) may contribute only when the supplied frames visibly support the cue."
+    elif state1 == "direct" and state2 == "not_direct":
+        return f"- {attr}: Video 1 ({mod1}) may provide direct evidence. Do not infer this cue from Video 2 ({mod2}) alone."
+    elif state1 == "not_direct" and state2 == "direct":
+        return f"- {attr}: Video 2 ({mod2}) may provide direct evidence. Do not infer this cue from Video 1 ({mod1}) alone."
+    elif state1 == "conditional" and state2 == "conditional":
+        return f"- {attr}: Either video may contribute only when the supplied frames visibly support the cue. Do not assume the cue from modality type alone."
+    elif state1 == "conditional" and state2 == "not_direct":
+        return f"- {attr}: Video 1 ({mod1}) may provide conditional evidence when visibly supported. Do not infer this cue from Video 2 ({mod2}) alone."
+    elif state1 == "not_direct" and state2 == "conditional":
+        return f"- {attr}: Video 2 ({mod2}) may provide conditional evidence when visibly supported. Do not infer this cue from Video 1 ({mod1}) alone."
+    else:
+        return f"- {attr}: This cue is not directly supported by either modality according to the capability prior. Do not claim it unless the supplied frames provide exceptional directly observable evidence."
+
 def build_modality_constraint_block(mod1: str, mod2: str) -> str:
-    h = MODALITY_CAPABILITIES.get(mod1, {"color": True, "thermal": True, "structure_edge": True, "depth": True})
-    v = MODALITY_CAPABILITIES.get(mod2, {"color": True, "thermal": True, "structure_edge": True, "depth": True})
+    default_caps = {"color": "conditional", "visual_category": "conditional", "thermal": "conditional", "structure_edge": "conditional", "depth": "conditional"}
+    h = MODALITY_CAPABILITIES.get(mod1, default_caps)
+    v = MODALITY_CAPABILITIES.get(mod2, default_caps)
     
     lines = []
     for attr, cap_name in [
         ("color/paint", "color"), 
+        ("visually discernible vehicle types/categories", "visual_category"), 
         ("thermal/heat", "thermal"), 
         ("structural edges/motion boundaries", "structure_edge"), 
         ("metric depth/distance", "depth")
     ]:
         h_can = h[cap_name]
         v_can = v[cap_name]
-        if not h_can and not v_can:
-            lines.append(f"- {attr}: This cue is typically not directly measured by either modality. Do not assume it unless clearly observable.")
-        elif h_can and not v_can:
-            lines.append(f"- {attr}: Video 1 ({mod1}) may provide stronger or more direct evidence for this cue, but final conclusions must be based on the supplied frames.")
-        elif not h_can and v_can:
-            lines.append(f"- {attr}: Video 2 ({mod2}) may provide stronger or more direct evidence for this cue, but final conclusions must be based on the supplied frames.")
-        else:
-            lines.append(f"- {attr}: Both modalities can provide this.")
+        lines.append(_describe_capability_pair(attr, mod1, h_can, mod2, v_can))
     
     return "MODALITY CAPABILITY CONSTRAINTS:\n" + "\n".join(lines)
+
+def _enum_line(name: str, values: set[str]) -> str:
+    return f"- {name}: {', '.join(sorted(values))}"
 
 def _normalize_license_plates(data: Any) -> Any:
     if isinstance(data, str):
@@ -373,9 +412,10 @@ def _parse_pairs(values: str | None) -> set[tuple[str, str]] | None:
 
 def _directions_for_pair(pair: list[str] | tuple[str, str], allowed: set[tuple[str, str]] | None) -> list[tuple[str, str]]:
     first, second = str(pair[0]).lower(), str(pair[1]).lower()
-    # v5 schema captures bidirectional reasoning in a single call (video1 helps video2 AND
-    # video2 helps video1 are both present in the output). So by default we only generate one
-    # canonical task per pair (the ordering from the input data) to avoid calling Gemini twice
+    # A single caption call can represent cross-modal relations in either direction or both directions.
+    # This does not imply that both directions must provide gain.
+    # Asymmetric contribution, confirmation-only relations, unidirectional disambiguation, and mutual complementarity are all valid.
+    # By default we only generate one canonical task per pair (the ordering from the input data) to avoid calling Gemini twice
     # on the same pair. Use --directions to explicitly override the ordering.
     if allowed is None:
         return [(first, second)]
@@ -559,11 +599,148 @@ def build_caption_tasks(
     return tasks, skipped, total_selected_jobs
 
 
+def _build_prompt_schema_example(task: CaptionTask) -> dict[str, Any]:
+    frame_key = task.composite_frames[0].stem if task.composite_frames else "frame_000000"
+    return {
+        "schema_version": CAPTION_SCHEMA_VERSION,
+        "global_scene": {
+            "scene_summary": "This is a fully compliant scene summary paragraph that describes the physical environment and ongoing actions in sufficient detail to exceed the minimum word count requirement of twenty words.",
+            "environment": "urban",
+            "temporal_progression": "The scene unfolds chronologically, demonstrating clear progression of events from start to finish without referencing any sensor or image quality artifacts.",
+            "physical_entities": [
+                {
+                    "entity_id": "entity_001",
+                    "category": "vehicle",
+                    "evidence_profile": {
+                        "identity_evidence": ["Visual characteristics supporting identity."],
+                        "observable_attributes": ["Observable attributes such as speed or shape."],
+                        "spatial_context": ["Spatial layout relative to the environment."]
+                    }
+                }
+            ]
+        },
+        "video1_analysis": {
+            "modality": task.modality1,
+            "detailed_caption": "A vehicle remains in the roadway near the curb. Another visible entity occupies the surrounding street area. This is additional compliant text to strictly exceed the required thirty-word minimum for the detailed caption field.",
+            "information_atoms": [
+                {"atom_id": "v1_atom_001", "frame_keys": [frame_key], "fact": "A vehicle remains in the roadway near the curb."},
+                {"atom_id": "v1_atom_002", "frame_keys": [frame_key], "fact": "Another visible entity occupies the surrounding street area."},
+                {"atom_id": "v1_atom_003", "frame_keys": [frame_key], "fact": "This is additional compliant text to strictly exceed the required thirty-word minimum for the detailed caption field."}
+            ],
+            "sensor_specific_cues": ["Specific visual cue observed."],
+            "sensor_limitations": ["Limitation of visibility in this condition."],
+            "uncertain_observations": [
+                {
+                    "observed_evidence": "Partial visual evidence.", 
+                    "missing_evidence": "Missing details.", 
+                    "hypotheses": [
+                        {"hypothesis": "First possible explanation.", "confidence": "low"},
+                        {"hypothesis": "Second possible explanation.", "confidence": "low"}
+                    ]
+                }
+            ],
+            "missing_key_attributes": [
+                {
+                    "attribute_type": "existence", 
+                    "missing_attribute": "Certain attribute missing.", 
+                    "why_missing": "Not visible due to physical occlusion or condition.", 
+                    "recoverable_evidence_refs": []
+                }
+            ]
+        },
+        "video2_analysis": {
+            "modality": task.modality2,
+            "detailed_caption": "A vehicle remains in the roadway near the curb. Another visible entity occupies the surrounding street area. This is additional compliant text to strictly exceed the required thirty-word minimum for the detailed caption field.",
+            "information_atoms": [
+                {"atom_id": "v2_atom_001", "frame_keys": [frame_key], "fact": "A vehicle remains in the roadway near the curb."},
+                {"atom_id": "v2_atom_002", "frame_keys": [frame_key], "fact": "Another visible entity occupies the surrounding street area."},
+                {"atom_id": "v2_atom_003", "frame_keys": [frame_key], "fact": "This is additional compliant text to strictly exceed the required thirty-word minimum for the detailed caption field."}
+            ],
+            "sensor_specific_cues": ["Specific visual cue observed."],
+            "sensor_limitations": ["Limitation of visibility in this condition."],
+            "uncertain_observations": [],
+            "missing_key_attributes": []
+        },
+        "cross_modal_evidence_links": [
+            {
+                "entity_id": "entity_001",
+                "video1_evidence_refs": ["v1_atom_001", "v1_atom_002"],
+                "video2_evidence_refs": ["v2_atom_001", "v2_atom_002"],
+                "shared_evidence": ["Physical fact independently supported by both videos."],
+                "unique_to_video1": ["Evidence uniquely supported by Video 1."],
+                "unique_to_video2": [],
+                "directional_contributions": [
+                    {
+                        "direction": "video1_improves_video2", 
+                        "contribution": "Concrete grounded contribution."
+                    }
+                ]
+            }
+        ],
+        "information_gain": [
+            {
+                "entity_id": "entity_001",
+                "video1_evidence_refs": ["v1_atom_001", "v1_atom_002"],
+                "video2_evidence_refs": ["v2_atom_001", "v2_atom_002"],
+                "video1_can_determine": ["Attribute visible in video 1."],
+                "video1_cannot_determine": [],
+                "video2_can_determine": ["Attribute visible in video 2."],
+                "video2_cannot_determine": [],
+                "fusion_additionally_reveals": [],
+                "gain_type": "confirmation",
+                "gain_rating": "medium"
+            }
+        ],
+        "reasoning_events": [
+            {
+                "event_id": "evt_001",
+                "event_type": "confirmation",
+                "participating_entities": ["entity_001"],
+                "supporting_atom_refs": ["v1_atom_001", "v2_atom_001", "v1_atom_002", "v2_atom_002"],
+                "description": "Both videos independently support the same grounded physical conclusion."
+            }
+        ],
+        "ambiguity_events": [
+            {
+                "ambiguity_id": "amb_001",
+                "target_entity": "entity_001",
+                "direction": "video1_resolves_video2",
+                "ambiguous_video": "video2",
+                "resolving_video": "video1",
+                "low_confidence_observation": "Ambiguous evidence in video 2.",
+                "why_ambiguous_video_cannot_resolve": "Cannot resolve due to lack of detail.",
+                "candidate_hypotheses": [
+                    {"hypothesis": "hypothesis 1", "why_compatible_with_ambiguous": "Fits partial evidence.", "support_from_resolving": "Confirmed by video 1."},
+                    {"hypothesis": "hypothesis 2", "why_compatible_with_ambiguous": "Fits partial evidence.", "support_from_resolving": "Rejected by video 1."}
+                ],
+                "resolving_discriminative_evidence": "Clear evidence in video 1.",
+                "eliminated_hypotheses": [{"hypothesis": "hypothesis 2", "why_eliminated": "Contradicted by video 1."}],
+                "fusion_conclusion": "Conclusion after resolution.",
+                "missing_attribute_type": "existence",
+                "ambiguous_evidence_refs": ["v2_atom_001", "v2_atom_002"],
+                "resolving_evidence_refs": ["v1_atom_001", "v1_atom_002"]
+            }
+        ],
+        "qa_relevant_details": [
+            {
+                "detail_id": "qa_detail_001",
+                "reasoning_pattern": "cross_modal_disambiguation",
+                "supporting_refs": ["amb_001"],
+                "why_question_worthy": "Demonstrates cross-modal reasoning value."
+            }
+        ],
+        "rejected_observations": [
+            {"observation": "Observation without cross-modal value.", "reason": "Reason it was rejected."}
+        ]
+    }
+
+
 def _build_caption_prompt(task: CaptionTask) -> str:
     frame_keys = ", ".join(f'"{path.stem}"' for path in task.composite_frames)
     frame_names = ", ".join(path.name for path in task.composite_frames)
-    example_frame_key = task.composite_frames[0].stem if task.composite_frames else "frame_key_from_valid_list"
     constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
+    schema_example_text = json.dumps(_build_prompt_schema_example(task), indent=2, ensure_ascii=False)
+    
     return "\n".join(
         [
             "You are an expert multimodal perception analyst.",
@@ -573,12 +750,16 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "These two videos observe the same physical scene using different sensing modalities.",
             constraint_block,
             "Neither video is considered the reference or the ground truth.",
-            "The goal is not ordinary captioning. Build a dense bidirectional multimodal evidence graph that maximizes reasoning-relevant information.",
+            "The goal is not ordinary captioning. Build a dense cross-modal evidence graph that captures all grounded reasoning-relevant relations.",
+            "Bidirectional contributions are valid only when supported by the supplied frames.",
+            "Asymmetric contributions, unidirectional disambiguation, mutual complementarity, and confirmation-only relations are all valid.",
+            "Do not invent reverse-direction benefit merely to make the graph look symmetric.",
             "Only use evidence directly observable in the supplied frames. Do not invent objects, future events, intentions, identities, unreadable text, or unsupported actions.",
             "Always distinguish between physical reality, video observations, and reasoning uncertainty. Do not mix these concepts.",
             "CRITICAL RULE for global_scene: You must describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Do NOT use sensor/meta terms or image-quality terms in global_scene.scene_summary or global_scene.temporal_progression. Forbidden terms include: modality, rgb, infrared, ir, thermal camera/image/frame/modality, event camera/stream/sensor/frame/modality, depth camera/sensor/map/frame/modality, edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, grayscale/greyscale, monochrome, overexposed, saturated. The words event, depth, edge, and heat are only forbidden in those sensor-specific phrases. The global_scene.scene_summary must be a detailed paragraph covering: which entities are present and their appearance, their spatial layout, the environment/setting, and any ongoing actions. Do NOT write a single sentence — write a full descriptive paragraph. Trace the scene chronologically.",
             "ENTITY SELECTION: physical_entities should include entities central to the scene action or where modalities differ. Do not force every object into an entity; create an entity only when it is needed as a stable target for downstream reasoning or repeated cross-field reference. Grouped entities (e.g., 'parked_vehicles') are allowed ONLY if members share the same broad object class and reasoning purpose. Broad containers (e.g., 'road_surface') MUST NOT absorb distinct nested objects (e.g., manhole covers, drainage grates) unless the reasoning genuinely concerns the container itself. Omit the entity entirely rather than creating an incoherent grouping.",
             "DEEP REASONING ANALYSIS: When analyzing the scene, you MUST follow these paradigms to support difficult QA generation: (1) Information Atoms: Must contain directly observable, source-local facts. Each atom should express one minimal factual claim grounded in its referenced frames. Do not place intentions, causal explanations, fusion conclusions, or multi-step inferences inside atoms; those belong in reasoning_events or ambiguity_events. (2) Visibility & Occlusion: Track entity occlusion states chronologically. (3) Interaction Graph: Build human-object and object-object causality. (4) QA-Relevant Details: Focus on non-obvious discriminative features that require cross-modal thinking. (5) UNCERTAINTY HONESTY GUARDRAIL: Do NOT hallucinate physical attributes. Honestly record uncertainty. Do not guess.",
+            "TEMPORAL ALIGNMENT DOES NOT REQUIRE ANALYSIS SYMMETRY: The supplied composite frames are temporally aligned inputs, but Video 1 and Video 2 analyses do not need to cite identical frame subsets. For the same physical entity: Video 1 may cite frames 450 and 480. Video 2 may cite only frame 480. This is valid if each atom is grounded in its own cited evidence. Do not create artificial one-to-one atom pairs. Do not require equal numbers of atoms. Do not require every selected frame to be referenced. Do not create placeholder atoms for unused selected frames.",
             "FIELD RULES (violations cause rejection):",
             "1. GLOBAL NAMESPACES & REFERENCE IDs: All referenceable structures must use exact ID prefixes and be globally unique across the entire JSON to prevent collisions. information_atoms must use 'v1_atom_' or 'v2_atom_'. reasoning_events must use 'evt_'. ambiguity_events must use 'amb_'. qa_relevant_details must use 'qa_detail_'.",
             "2. SINGLE PROVENANCE TRUTH: Information atoms are the ONLY structures that contain frame_keys. reasoning_events and ambiguity_events must point strictly to atom IDs to indicate their frame source.",
@@ -587,119 +768,29 @@ def _build_caption_prompt(task: CaptionTask) -> str:
             "5. CONDITIONAL EVIDENCE PROFILE: evidence_profile fields (identity_evidence, observable_attributes, spatial_context) must be completely omitted from the JSON if there is no meaningful non-dynamic evidence for them. DO NOT return empty lists or empty strings.",
             f"VALID FRAME KEYS: [{frame_keys}]. information_atoms[].frame_keys MUST choose only from these exact values.",
             "6. REASON-DRIVEN COVERAGE: DO NOT force every entity into cross_modal_evidence_links or information_gain. Only include an entity in a section if the evidence justifies it. Static occluders should only be in occlusion_change if their occlusion state actually changes.",
-            "7. CRITICAL RULE for detailed_caption & global_scene: Describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts. Avoid sensor/meta terms and image-quality terms such as: modality, rgb, infrared, ir, thermal camera/image/frame/modality, event camera/stream/sensor/frame/modality, depth camera/sensor/map/frame/modality, edge map/edge-based/edge-like, heat signature/map, blurry, noisy, pixel/pixels, grayscale/greyscale, monochrome, overexposed, saturated. The words event, depth, edge, and heat are allowed only when they are ordinary physical-scene words, not sensor or image-processing terms.",
-            "8. ambiguity_events[].candidate_hypotheses must include AT LEAST TWO distinct hypotheses — never provide only one.",
-            "9. SENSOR CUES & LIMITATIONS: sensor_specific_cues, sensor_limitations, and missing_key_attributes.why_missing MUST describe specific, currently-observed visual consequences in the frames (e.g., 'flat side panel has weak internal structure in frames 450-480'). NEVER write generic textbook modality theory (e.g., 'event cameras cannot capture static objects', 'loss of color'). Explain limitations in terms of the supplied segment.",
-            "10. STRICT SOURCE-LOCAL INDEPENDENCE: EVERY field within video1_analysis and video2_analysis MUST be entirely independent. If Video 1 shows a bicycle but Video 2 does not, Video 2's analysis MUST NOT mention the bicycle at all (do not write 'bicycle frame is absent'). Cross-modal identity fusion MUST NOT occur inside any source-local video analysis field, and may occur ONLY in justified higher-level fusion structures including: cross_modal_evidence_links, information_gain, reasoning_events, and ambiguity_events.",
-            "11. GENUINE AMBIGUITY VS MISSING INFO: An ambiguity event is valid ONLY when the ambiguous-side observation itself provides positive evidence compatible with at least two distinct plausible hypotheses. If either candidate hypothesis lacks ambiguous-side support, or if the resolving video does not discriminate between candidates, the ambiguity event MUST be omitted and represented as 'missing_key_attributes' or 'rejected_observations' when appropriate.",
-            "12. AMBIGUOUS-SIDE GROUNDING: Candidate hypotheses in ambiguity_events MUST arise natively from the ambiguous video's observation, not be invented by the resolving video. You must explain why each hypothesis is visually compatible with the ambiguous side using 'why_compatible_with_ambiguous'.",
-            "13. SOURCE-LOCAL UNCERTAINTY CONSISTENCY: If an observation is listed in uncertain_observations with multiple hypotheses, all other source-local fields (detailed_caption, information_atoms, etc.) MUST describe it neutrally (e.g., 'dark pattern') and MUST NOT prematurely assert one hypothesis as fact.",
-            "14. CROSS-MODAL PROVENANCE: Every item in cross_modal_evidence_links and information_gain MUST be explicitly grounded in source-local atoms via video1_evidence_refs and video2_evidence_refs. Free-form claims must remain supported by these referenced atoms without introducing new unsupported details (e.g. do not invent exact text, manufacturer badges, or luxury status).",
-            "15. REASONING BOUNDS: A reasoning_events description may compose referenced facts, but MUST NOT strengthen them beyond what the supporting_atom_refs entail (e.g., do not upgrade 'white sedan' to 'white luxury sedan' without atom support).",
-            "16. ENTITY GRANULARITY AND TARGET CONSISTENCY: Entities must be physically or semantically coherent. The primary referenced evidence MUST concern the declared entity or coherent group. Contextual atoms may be included only when they directly support localization, relation, or interpretation, and MUST NOT justify merging unrelated entities. Do NOT group heterogeneous atom refs under an umbrella entity merely to satisfy provenance requirements. For ambiguity events, use the final resolved entity identity only when the entity graph represents fused physical reality; otherwise, use a neutral feature-level entity (e.g., 'circular_ground_feature') that does not encode the winning hypothesis in advance.",
-            "UNCERTAIN OBSERVATIONS: For BOTH videos independently, identify observations that are genuinely ambiguous. For each included uncertain observation, provide at least two distinct plausible hypotheses. If an observation is not genuinely ambiguous, do not include it.",
-            "MISSING INFORMATION: List attributes that cannot be determined from each individual video. When the other video genuinely recovers the missing information, provide the corresponding cross-modal atom references. Otherwise leave recoverable_evidence_refs empty.\n",
-            "CROSS-MODAL EVIDENCE LINKS: Jointly analyze both videos. Include an entity only when the supplied evidence shows meaningful shared, complementary, or mutually improving cross-modal evidence.\n",
-            "1. Identify concrete evidence from both video analyses whose combination provides a more complete understanding of the entity.\n",
-            "2. Explain what is independently observed in each video, and what is gained by the combination.\n\n",
-            "INFORMATION GAIN: Include an entity only when combining both videos provides meaningful additional information beyond either video alone. Explain what each video can and cannot determine and what fusion additionally reveals.",
-            "AMBIGUITY RESOLUTION: Actively search for ambiguities in BOTH directions. You MUST check both directions independently and report any valid events.",
-            "REASONING EVENTS: Document dynamic changes (temporal_change, interaction, occlusion_change, spatial_transition, joint_fusion). These MUST be supported by atom references.",
-            "QA RELEVANT DETAILS: Document facts that are particularly useful for downstream QA by pointing to the relevant atoms/events/ambiguities.",
-            "Return ONLY valid JSON with this exact structure:",
-            "{",
-            f'  "schema_version": "{CAPTION_SCHEMA_VERSION}",',
-            '  "global_scene": {',
-            '    "scene_summary": "Detailed physical-scene summary independent of sensor artifacts.",',
-            '    "physical_entities": [',
-            '      {',
-            '        "entity_id": "stable_snake_case_id",',
-            '        "category": "...",',
-            '        "evidence_profile": {',
-            '          "identity_evidence": ["Why do we think it is this category?"],',
-            '          "observable_attributes": ["Current observable non-pure-appearance attributes/states (exclude dynamic changes)."],',
-            '          "spatial_context": ["Base location or stable contextual placement."]',
-            '        }',
-            '      }',
-            '    ],',
-            '    "environment": "Objective physical environment, setting, weather, lighting, or scene context if directly evident.",',
-            '    "temporal_progression": "Dense chronological account of how the scene/action changes across supplied frames."',
-            '  },',
-            '  "video1_analysis": {',
-            f'    "modality": "{task.modality1}",',
-            '    "detailed_caption": "Detailed caption using only Video 1 (LEFT).",',
-            '    "information_atoms": [',
-            f'      {{"atom_id": "v1_atom_001", "frame_keys": ["{example_frame_key}"], "fact": "Discrete atomic observation. Must be a direct factual claim, NO inferences or causality."}}',
-            '    ],',
-            '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
-            '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "hypothesis 1", "confidence": "low"}, {"hypothesis": "hypothesis 2", "confidence": "low"}], "missing_evidence": "..."}],',
-            '    "missing_key_attributes": [{"attribute_type": "existence", "missing_attribute": "...", "why_missing": "...", "recoverable_evidence_refs": []}]',
-            '  },',
-            '  "video2_analysis": {',
-            f'    "modality": "{task.modality2}",',
-            '    "detailed_caption": "Detailed caption using only Video 2 (RIGHT).",',
-            '    "information_atoms": [',
-            f'      {{"atom_id": "v2_atom_001", "frame_keys": ["{example_frame_key}"], "fact": "Discrete atomic observation. Must be a direct factual claim, NO inferences or causality."}}',
-            '    ],',
-            '    "sensor_specific_cues": ["Imaging/measurement cues from this modality."],',
-            '    "sensor_limitations": ["Specific limitations that affect interpretation."],',
-            '    "uncertain_observations": [{"observed_evidence": "...", "hypotheses": [{"hypothesis": "hypothesis 1", "confidence": "low"}, {"hypothesis": "hypothesis 2", "confidence": "low"}], "missing_evidence": "..."}],',
-            '    "missing_key_attributes": [{"attribute_type": "existence", "missing_attribute": "...", "why_missing": "...", "recoverable_evidence_refs": ["v1_atom_001"]}]',
-            '  },',
-            '  "cross_modal_evidence_links": [',
-            '    {"entity_id": "...", "video1_evidence_refs": ["v1_atom_001"], "video2_evidence_refs": ["v2_atom_001"], "shared_evidence": "...", "unique_to_video1": "...", "unique_to_video2": "...", "how_video1_improves_video2": "...", "how_video2_improves_video1": "..."}',
-            '  ],',
-            '  "information_gain": [',
-            '    {"entity_id": "...", "video1_evidence_refs": ["v1_atom_001"], "video2_evidence_refs": ["v2_atom_001"], "gain_rating": "low", "video1_can_determine": ["..."], "video1_cannot_determine": ["..."], "video2_can_determine": ["..."], "video2_cannot_determine": ["..."], "fusion_additionally_reveals": ["..."]}',
-            '  ],',
-            '  "reasoning_events": [',
-            '    {',
-            '      "event_id": "evt_001",',
-            '      "event_type": "joint_fusion",',
-            '      "participating_entities": ["entity_id"],',
-            '      "supporting_atom_refs": ["v1_atom_001", "v2_atom_001"],',
-            '      "description": "Non-trivial inference or dynamic behavior based on the supporting atoms."',
-            '    }',
-            '  ],',
-            '  "ambiguity_events": [',
-            '    {',
-            '      "ambiguity_id": "amb_001",',
-            '      "target_entity": "entity_id",',
-            '      "direction": "video1_resolves_video2",',
-            '      "ambiguous_video": "video2",',
-            '      "resolving_video": "video1",',
-            '      "low_confidence_observation": "What the ambiguous video shows by itself.",',
-            '      "why_ambiguous_video_cannot_resolve": "Specific reason the ambiguous video cannot uniquely interpret the cue.",',
-            '      "candidate_hypotheses": [{"hypothesis": "hypothesis 1", "why_compatible_with_ambiguous": "...", "support_from_resolving": "..."}, {"hypothesis": "hypothesis 2", "why_compatible_with_ambiguous": "...", "support_from_resolving": "..."}],',
-            '      "resolving_discriminative_evidence": "Concrete cue from the resolving video that eliminates at least one hypothesis.",',
-            '      "eliminated_hypotheses": [{"hypothesis": "hypothesis 2", "why_eliminated": "..."}],',
-            '      "fusion_conclusion": "Final physical fact after combining both modalities.",',
-            '      "missing_attribute_type": "existence",',
-            '      "ambiguous_evidence_refs": ["v2_atom_001"],',
-            '      "resolving_evidence_refs": ["v1_atom_001"]',
-            '    }',
-            '  ],',
-            '  "qa_relevant_details": [',
-            '    {',
-            '      "detail_id": "qa_detail_001",',
-            '      "reasoning_pattern": "cross_modal_disambiguation",',
-            '      "supporting_refs": ["evt_001", "amb_001"],',
-            '      "why_question_worthy": "Why this grounded fact structure makes a good downstream question."',
-            '    }',
-            '  ],',
-            '  "rejected_observations": [',
-            '    {"observation": "...", "reason": "Why this was not a valid ambiguity_event."}',
-            '  ]',
-            '}',
+            "7. CRITICAL RULE for detailed_caption & global_scene: Describe the physical world as if you are standing there. NEVER mention the camera, the sensor type, or image quality artifacts.",
+            "8. CROSS-MODAL LINKS: cross_modal_evidence_links support asymmetric directional contributions. A single call can represent relations in either or both directions. This does not imply that both directions must contain gain. Do not invent bidirectional gain if one video purely confirms the other or adds no unique information.",
+            "OUTPUT SCHEMA: Return ONLY a valid JSON object matching this exact skeleton.",
+            schema_example_text,
             "ALLOWED enum values for fields:",
-            "- confidence: high, medium, low",
-            "- attribute_type / missing_attribute_type: existence, target_category, spatial_distance, surface_attribute, motion_trend",
-            "- gain_rating: high, medium, low",
-            "- event_type: temporal_change, interaction, occlusion_change, spatial_transition, joint_fusion",
-            "- direction: video1_resolves_video2, video2_resolves_video1",
+            "- confidence: " + ", ".join(sorted(ALLOWED_GAIN_RATINGS)),
+            _enum_line("attribute_type / missing_attribute_type", ALLOWED_MISSING_ATTRIBUTE_TYPES),
+            _enum_line("gain_rating", ALLOWED_GAIN_RATINGS),
+            _enum_line("gain_type", ALLOWED_GAIN_TYPES),
+            _enum_line("event_type", ALLOWED_REASONING_EVENT_TYPES),
+            _enum_line("direction", ALLOWED_AMBIGUITY_DIRECTIONS),
             "- ambiguous_video / resolving_video: video1, video2",
-            "- reasoning_pattern: cross_modal_disambiguation, temporal_integration, occlusion_reasoning, interaction_reasoning, spatial_transition, hypothesis_elimination, multi_hop_composition, joint_fusion",
+            _enum_line("reasoning_pattern", ALLOWED_QA_REASONING_PATTERNS),
+            _enum_line("cross_modal_evidence_links directional_contributions[].direction", ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS),
+            "REASONING EVENT TYPE DEFINITIONS:",
+            "- confirmation: Both videos independently support the same physical conclusion. Fusion mainly increases confidence.",
+            "- cross_modal_complementarity: Each video contributes different useful evidence, but neither necessarily resolves a strict ambiguity.",
+            "- unidirectional_disambiguation: One video resolves a concrete ambiguity present in the other.",
+            "- temporal_change: A grounded change across multiple selected timestamps.",
+            "- interaction: A grounded entity-entity or entity-object interaction.",
+            "- occlusion_change: An entity's visibility/occlusion state changes across time.",
+            "- spatial_transition: A grounded change in relative or absolute spatial configuration.",
+            "- joint_fusion: The conclusion genuinely requires evidence from both videos and cannot be reduced to one video simply resolving the other.",
             "Only include an item in ambiguity_events when one video genuinely disambiguates the other.",
             "If no valid ambiguity_event exists, return an empty ambiguity_events list and explain each rejected case in rejected_observations.",
             f"Segment: {task.segment_id}; side: {task.side}.",
@@ -824,8 +915,17 @@ def _validate_cross_modal_evidence_links(values: Any, entity_ids: set[str], evid
                 if ref not in evidence_namespace:
                     raise CaptionValidationError(f"{field}[{index}].{v_field} references unknown atom: {ref}")
 
-        for key in ("shared_evidence", "unique_to_video1", "unique_to_video2", "how_video1_improves_video2", "how_video2_improves_video1"):
-            _require_string(item.get(key), f"{field}[{index}].{key}")
+        for key in ("shared_evidence", "unique_to_video1", "unique_to_video2"):
+            _validate_string_list(item.get(key), f"{field}[{index}].{key}", allow_empty=True)
+        
+        directional = _require_list(item.get("directional_contributions", []), f"{field}[{index}].directional_contributions")
+        for j, dc in enumerate(directional, start=1):
+            if not isinstance(dc, dict):
+                raise CaptionValidationError(f"{field}[{index}].directional_contributions[{j}] must be an object")
+            direction = _require_string(dc.get("direction"), f"{field}[{index}].directional_contributions[{j}].direction")
+            if direction not in ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS:
+                raise CaptionValidationError(f"{field}[{index}].directional_contributions[{j}].direction must be one of {ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS}")
+            _require_string(dc.get("contribution"), f"{field}[{index}].directional_contributions[{j}].contribution")
 
 def _validate_information_gain(values: Any, entity_ids: set[str], evidence_namespace: set[str], field: str) -> None:
     seen_entities = set()
@@ -851,9 +951,12 @@ def _validate_information_gain(values: Any, entity_ids: set[str], evidence_names
                     raise CaptionValidationError(f"{field}[{index}].{v_field} references unknown atom: {ref}")
 
         for key in ("video1_can_determine", "video1_cannot_determine", "video2_can_determine", "video2_cannot_determine", "fusion_additionally_reveals"):
-            _validate_string_list(item.get(key), f"{field}[{index}].{key}", allow_empty=(key != "fusion_additionally_reveals"))
+            _validate_string_list(item.get(key), f"{field}[{index}].{key}", allow_empty=True)
             
         rating = _require_string(item.get("gain_rating"), f"{field}[{index}].gain_rating")
+        gain_type = _require_string(item.get("gain_type"), f"{field}[{index}].gain_type")
+        if gain_type not in ALLOWED_GAIN_TYPES:
+            raise CaptionValidationError(f"{field}[{index}].gain_type must be one of {', '.join(ALLOWED_GAIN_TYPES)}")
         if rating not in ALLOWED_GAIN_RATINGS:
             raise CaptionValidationError(f"{field}[{index}].gain_rating must be high, medium, or low")
 
@@ -862,11 +965,22 @@ def _derive_reasoning_focus_entities(parsed: dict[str, Any], entity_ids: set[str
     
     for link in parsed.get("cross_modal_evidence_links", []):
         if isinstance(link, dict) and link.get("entity_id") in entity_reasons:
-            entity_reasons[link["entity_id"]].add("cross_modal_complementarity")
+            eid = link["entity_id"]
+            for dc in link.get("directional_contributions", []):
+                direction = dc.get("direction")
+                if direction == "confirmation_only":
+                    entity_reasons[eid].add("confirmation")
+                elif direction == "mutual_complementarity":
+                    entity_reasons[eid].add("cross_modal_complementarity")
+                elif direction in ("video1_improves_video2", "video2_improves_video1"):
+                    entity_reasons[eid].add("directional_gain")
             
     for gain in parsed.get("information_gain", []):
         if isinstance(gain, dict) and gain.get("entity_id") in entity_reasons:
-            entity_reasons[gain["entity_id"]].add("fusion_gain")
+            eid = gain["entity_id"]
+            gain_type = gain.get("gain_type")
+            if gain_type in ALLOWED_GAIN_TYPES:
+                entity_reasons[eid].add(f"gain_{gain_type}")
             
     for event in parsed.get("reasoning_events", []):
         if not isinstance(event, dict): continue
@@ -890,31 +1004,104 @@ def _derive_reasoning_focus_entities(parsed: dict[str, Any], entity_ids: set[str
     derived.sort(key=lambda x: x["entity_id"])
     return derived
 
-def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str], expected_modality1: str, expected_modality2: str) -> dict[str, Any]:
+def _infer_required_capability(attribute_type: str, missing_attribute: str) -> str | None:
+    text = missing_attribute.casefold()
+    if _contains_any_term(text, ["color", "paint"]):
+        return "color"
+    if _contains_any_term(text, ["depth", "distance", "range"]):
+        return "depth"
+    if _contains_any_term(text, ["thermal", "temperature", "heat"]):
+        return "thermal"
+    if _contains_any_term(text, ["vehicle type", "vehicle category", "object category"]) or attribute_type in {"semantic_identity", "fine_grained_category"}:
+        return "visual_category"
+    return None
+
+def _contains_term(text: str, term: str) -> bool:
+    # Use \b for word boundaries. We want to match exact phrases
+    # optionally containing hyphens.
+    return re.search(
+        rf"\b{re.escape(term)}\b",
+        text,
+        flags=re.I,
+    ) is not None
+
+def _contains_any_term(text: str, terms: list[str] | tuple[str, ...]) -> bool:
+    return any(_contains_term(text, term) for term in terms)
+
+def _visual_category_support_status(missing_attribute: str, recovering_facts: str) -> str:
+    target = missing_attribute.casefold()
+    facts = recovering_facts.casefold()
+    
+    # Vehicle-oriented target
+    if _contains_any_term(target, ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile", "motor vehicle"]):
+        vehicle_support_terms = ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile", "hatchback", "pickup", "minivan", "box-shaped vehicle", "tall rear body", "four-wheeled vehicle"]
+        if _contains_any_term(facts, vehicle_support_terms):
+            return "accept"
+        person_support_terms = ["person", "human", "pedestrian", "worker", "walking figure", "cyclist", "rider"]
+        if _contains_any_term(facts, person_support_terms) and not _contains_any_term(facts, vehicle_support_terms + ["box-shaped", "road-going", "proportions", "wheel", "window", "door"]):
+            return "reject" # purely person evidence for vehicle target
+        return "warn"
+        
+    # Person/pedestrian-oriented target
+    if _contains_any_term(target, ["person", "pedestrian", "human", "worker", "cyclist"]):
+        person_support_terms = ["person", "pedestrian", "human", "worker", "walking figure", "cyclist", "rider"]
+        if _contains_any_term(facts, person_support_terms):
+            return "accept"
+        vehicle_support_terms = ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile"]
+        if _contains_any_term(facts, vehicle_support_terms) and not _contains_any_term(facts, person_support_terms + ["arm", "leg", "head", "body", "walking"]):
+            return "reject" # purely vehicle evidence for person target
+        return "warn"
+        
+    # Bicycle/motorcycle-oriented target
+    if _contains_any_term(target, ["bicycle", "bike", "motorcycle", "motorbike", "two-wheeler"]):
+        bike_support_terms = ["bicycle", "bike", "motorcycle", "motorbike", "two-wheeler", "rider"]
+        if _contains_any_term(facts, bike_support_terms):
+            return "accept"
+        return "warn"
+        
+    # Generic object-category target
+    return "warn"
+
+def _conditional_recovery_support_status(capability_name: str, missing_attribute: str, recovering_facts: str) -> str:
+    facts = recovering_facts.casefold()
+    if capability_name == "visual_category":
+        return _visual_category_support_status(missing_attribute, recovering_facts)
+    elif capability_name == "color":
+        if _contains_any_term(facts, ["red", "blue", "green", "yellow", "black", "white", "silver", "gray", "grey", "color", "paint"]):
+            return "accept"
+        if _contains_any_term(facts, ["depth", "distance"]):
+            return "reject"
+    elif capability_name == "depth":
+        if _contains_any_term(facts, ["depth", "distance", "range", "meters", "close", "far", "closer", "further", "metric"]):
+            return "accept"
+        if _contains_any_term(facts, ["color", "red"]):
+            return "reject"
+    elif capability_name == "thermal":
+        if _contains_any_term(facts, ["heat", "thermal", "temperature", "hot", "cold", "warm", "cool", "signature"]):
+            return "accept"
+        if _contains_any_term(facts, ["color", "red"]):
+            return "reject"
+    elif capability_name == "structure_edge":
+        if _contains_any_term(facts, ["edge", "boundary", "structure", "shape", "contour"]):
+            return "accept"
+            
+    return "warn"
+
+def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str], expected_modality1: str, expected_modality2: str) -> tuple[dict[str, Any], list[str]]:
     if not valid_frame_keys:
         raise CaptionValidationError("valid_frame_keys must not be empty for validation")
 
     atom_frame_keys: dict[str, set[str]] = {}
+    atom_facts: dict[str, str] = {}
+    local_warnings: list[str] = []
 
-    required_fields = (
-        "schema_version",
-        "global_scene",
-        "video1_analysis",
-        "video2_analysis",
-        "cross_modal_evidence_links",
-        "information_gain",
-        "reasoning_events",
-        "ambiguity_events",
-        "qa_relevant_details",
-        "rejected_observations",
-    )
-    missing = [field for field in required_fields if field not in parsed]
+    missing = [field for field in CAPTION_REQUIRED_TOP_LEVEL_FIELDS if field not in parsed]
     if missing:
         raise CaptionValidationError(f"Gemini response missing required caption field(s): {', '.join(missing)}")
         
-    unexpected_fields = set(parsed.keys()) - set(required_fields)
+    unexpected_fields = set(parsed.keys()) - CAPTION_REQUIRED_TOP_LEVEL_FIELDS
     if unexpected_fields:
-        raise CaptionValidationError(f"Gemini response contains unknown top-level fields: {', '.join(sorted(unexpected_fields))}. Allowed fields are only: {', '.join(required_fields)}")
+        raise CaptionValidationError(f"Gemini response contains unknown top-level fields: {', '.join(sorted(unexpected_fields))}. Allowed fields are only: {', '.join(CAPTION_REQUIRED_TOP_LEVEL_FIELDS)}")
 
     if parsed["schema_version"] != CAPTION_SCHEMA_VERSION:
         raise CaptionValidationError(
@@ -997,11 +1184,13 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
             f_keys = _require_list(atom.get("frame_keys"), f"{field}.information_atoms[{i}].frame_keys")
             if not f_keys:
                 raise CaptionValidationError(f"{field}.information_atoms[{i}].frame_keys cannot be empty")
+
             for fk in f_keys:
                 if fk not in valid_frame_keys:
                     raise CaptionValidationError(f"Unknown frame_key '{fk}' in {atom_id}")
             atom_frame_keys[atom_id] = set(f_keys)
-            _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
+            fact = _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
+            atom_facts[atom_id] = fact
 
         for key in ("sensor_specific_cues", "sensor_limitations"):
             values = _require_list(analysis.get(key), f"{field}.{key}")
@@ -1021,6 +1210,26 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
             _require_string(attr.get("why_missing"), f"{field}.missing_key_attributes[{i}].why_missing")
             _require_list(attr.get("recoverable_evidence_refs"), f"{field}.missing_key_attributes[{i}].recoverable_evidence_refs")
             # Defer cross-modal rule check until all atoms are registered
+
+        # Validator C: unimodal uncertainty consistency
+        for i, obs in enumerate(analysis.get("uncertain_observations") or [], start=1):
+            if not isinstance(obs, dict): continue
+            for hyp_dict in obs.get("hypotheses") or []:
+                if not isinstance(hyp_dict, dict): continue
+                hyp_text = str(hyp_dict.get("hypothesis", "")).strip()
+                if len(hyp_text.split()) >= 2 and hyp_text.lower() in detailed_caption.lower():
+                    raise CaptionValidationError(
+                        f"{field}.detailed_caption presents uncertain hypothesis '{hyp_text}' as fact. "
+                        "Rewrite the caption to use neutral perceptual language."
+                    )
+                    
+        # Validator D: caption-to-atom grounding (soft warning)
+        caption_words = set(re.findall(r'\b[a-zA-Z]{5,}\b', detailed_caption.lower()))
+        atom_text = " ".join([str(a.get("fact", "")) for a in atoms if isinstance(a, dict)]).lower()
+        atom_words = set(re.findall(r'\b[a-zA-Z]{5,}\b', atom_text))
+        ungrounded = caption_words - atom_words
+        if len(ungrounded) > 10:
+             local_warnings.append(f"{field}.detailed_caption may contain ungrounded claims. Words not in atoms: {', '.join(sorted(list(ungrounded))[:5])}...")
 
     _validate_video_analysis(parsed, "video1_analysis", "v1_atom_")
     _validate_video_analysis(parsed, "video2_analysis", "v2_atom_")
@@ -1068,6 +1277,15 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
             has_v2 = any(r.startswith("v2_atom_") for r in atom_refs)
             if not (has_v1 and has_v2):
                 raise CaptionValidationError(f"reasoning_events[{index}] joint_fusion requires at least one V1 atom and one V2 atom")
+            
+            # Validator B: Reasoning consistency
+            res_dir = event.get("resolution_direction")
+            if res_dir in ("video1_resolves_video2", "video2_resolves_video1"):
+                raise CaptionValidationError(
+                    f"reasoning_events[{index}] has event_type='joint_fusion' but resolution_direction='{res_dir}'. "
+                    "Use unidirectional_disambiguation instead, or remove the unidirectional direction if it is genuinely joint fusion."
+                )
+
         _require_string(event.get("description"), f"reasoning_events[{index}].description")
 
     ambiguities = _require_list(parsed["ambiguity_events"], "ambiguity_events")
@@ -1236,26 +1454,55 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
         for i, attr in enumerate(analysis.get("missing_key_attributes", []), start=1):
             refs = attr.get("recoverable_evidence_refs", [])
             if refs:
-                has_required = False
                 for ref in refs:
                     if not (ref.startswith("v1_atom_") or ref.startswith("v2_atom_")):
-                        raise CaptionValidationError(f"{analysis_key}.missing_key_attributes[{i}] recoverable_evidence_refs MUST only reference atoms. Invalid: {ref}")
+                        raise CaptionValidationError(
+                            f"{analysis_key}.missing_key_attributes[{i}] "
+                            f"recoverable_evidence_refs MUST only reference atoms. "
+                            f"Invalid: {ref}"
+                        )
+
                     if ref not in evidence_namespace:
-                        raise CaptionValidationError(f"{analysis_key}.missing_key_attributes[{i}] references unknown atom: {ref}")
-                    if ref.startswith(required_prefix):
-                        has_required = True
-                if not has_required:
-                    raise CaptionValidationError(f"{analysis_key}.missing_key_attributes[{i}] MUST reference at least one {required_prefix} atom to prove cross-modal recovery")
+                        raise CaptionValidationError(
+                            f"{analysis_key}.missing_key_attributes[{i}] "
+                            f"references unknown atom: {ref}"
+                        )
+
+                    if not ref.startswith(required_prefix):
+                        raise CaptionValidationError(
+                            f"{analysis_key}.missing_key_attributes[{i}] "
+                            f"recoverable_evidence_refs must only contain "
+                            f"{required_prefix} atom IDs. Invalid cross-side ref: {ref}"
+                        )
                 
-                attr_type = attr.get("attribute_type")
-                if attr_type == "surface_attribute" and "color" in attr.get("missing_attribute", "").lower():
-                    cap = MODALITY_CAPABILITIES.get(ref_modality, {})
-                    if not cap.get("color", True):
+                attr_type = attr.get("attribute_type", "")
+                missing_attr = attr.get("missing_attribute", "")
+                required_cap = _infer_required_capability(attr_type, missing_attr)
+                
+                if required_cap:
+                    cap_state = MODALITY_CAPABILITIES.get(ref_modality, {}).get(required_cap, "conditional")
+                    if cap_state == "not_direct":
                         raise CaptionValidationError(
                             f"{analysis_key}.missing_key_attributes[{i}]: "
-                            f"'{attr.get('missing_attribute')}' marked recoverable from {ref_modality}, "
-                            f"but {ref_modality} has no color capability."
+                            f"'{missing_attr}' marked recoverable from {ref_modality}, "
+                            f"but {ref_modality} has 'not_direct' capability for {required_cap}."
                         )
+                    elif cap_state == "conditional":
+                        recovering_facts = " ".join(atom_facts.get(r, "") for r in refs).casefold()
+                        support_status = _conditional_recovery_support_status(required_cap, missing_attr, recovering_facts)
+                                
+                        if support_status == "reject":
+                            raise CaptionValidationError(
+                                f"{analysis_key}.missing_key_attributes[{i}]: "
+                                f"'{missing_attr}' marked recoverable via {ref_modality} ({required_cap}), "
+                                f"but supporting atoms clearly do not contain relevant information."
+                            )
+                        elif support_status == "warn":
+                            local_warnings.append(
+                                f"{analysis_key}.missing_key_attributes[{i}]: "
+                                f"'{missing_attr}' recovered via conditional capability {required_cap}. "
+                                f"Check if referenced atoms actually support this."
+                            )
 
     _check_missing_attrs("video1_analysis", "v2_atom_", modality2)
     _check_missing_attrs("video2_analysis", "v1_atom_", modality1)
@@ -1270,9 +1517,27 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
     if not has_reasoning_content:
         raise CaptionValidationError("Caption contains no reasoning-relevant graph content (all evidence/reasoning sections are empty).")
         
+    # Validator E: Precision language
+    precision_warnings = [
+        "razor-sharp", "exact coordinates", "perfect boundaries", 
+        "extreme edge definition", "impossible to distinguish", "exact model"
+    ]
+
+    def _check_precision(obj: Any, path: str = "") -> None:
+        if isinstance(obj, str):
+            for w in precision_warnings:
+                if w in obj.lower():
+                    local_warnings.append(f"{path} contains unsupported precision language: '{w}'")
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                _check_precision(v, f"{path}.{k}" if path else k)
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                _check_precision(v, f"{path}[{i}]")
+    _check_precision(parsed)
     parsed["global_scene"]["reasoning_focus_entities"] = _derive_reasoning_focus_entities(parsed, entity_ids)
     parsed = _normalize_license_plates(parsed)
-    return parsed
+    return parsed, local_warnings
 
 
 def _build_validation_retry_hint(exc: Exception, category: str) -> str:
@@ -1304,7 +1569,7 @@ def _build_validation_retry_hint(exc: Exception, category: str) -> str:
     return " Targeted repair guidance: " + " ".join(hints)
 
 
-async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_retries: int, api_stats: list[int] | None = None) -> dict[str, Any]:
+async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_retries: int, api_stats: list[int] | None = None) -> tuple[dict[str, Any], list[str]]:
     _ensure_composite_frames(task)
     encoded = _encode_images(task.composite_frames)
     if not encoded:
@@ -1323,7 +1588,8 @@ async def _call_gemini_caption(client, task: CaptionTask, model_name: str, max_r
             )
             raw_text = response.text
             valid_frame_keys = {path.stem for path in task.composite_frames}
-            return _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task.modality1, task.modality2)
+            caption, warnings = _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task.modality1, task.modality2)
+            return caption, warnings
         except Exception as exc:
             exc_str = str(exc).lower()
             # Quota / rate-limit errors are permanent for the current key — don't waste retries
@@ -1422,7 +1688,7 @@ def _task_metadata(task: CaptionTask) -> dict[str, Any]:
         "selection_config_fingerprint": task.selection_config_fingerprint,
     }
 
-def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, reason: str | None = None, attempts: int | None = None, first_attempt_success: bool | None = None, final_error_category: str | None = None) -> dict[str, Any]:
+def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, validation_warnings: list[str] | None = None, reason: str | None = None, attempts: int | None = None, first_attempt_success: bool | None = None, final_error_category: str | None = None) -> dict[str, Any]:
     item = _task_metadata(task)
     item.update({
         "status": status,
@@ -1431,6 +1697,7 @@ def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None
         "first_attempt_success": first_attempt_success,
         "final_error_category": final_error_category,
         "caption": caption,
+        "validation_warnings": validation_warnings or [],
     })
     return item
 
@@ -1516,11 +1783,10 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
                 "entity_id": target_entity,
                 "video1_evidence_refs": ["v1_atom_001"],
                 "video2_evidence_refs": ["v2_atom_001"],
-                "shared_evidence": "Placeholder",
-                "unique_to_video1": "Placeholder",
-                "unique_to_video2": "Placeholder",
-                "how_video1_improves_video2": "Placeholder",
-                "how_video2_improves_video1": "Placeholder"
+                "shared_evidence": ["Placeholder"],
+                "unique_to_video1": ["Placeholder"],
+                "unique_to_video2": [],
+                "directional_contributions": [{"direction": "video1_improves_video2", "contribution": "Placeholder"}]
             }
         ],
         "information_gain": [
@@ -1533,6 +1799,7 @@ def _template_caption(task: CaptionTask) -> dict[str, Any]:
                 "video2_can_determine": ["Placeholder"],
                 "video2_cannot_determine": ["Placeholder"],
                 "fusion_additionally_reveals": ["Placeholder"],
+                "gain_type": "confirmation",
                 "gain_rating": "low",
             }
         ],
@@ -1723,9 +1990,10 @@ def _fetch_batch(client, output_path: Path | str, batch_state_path: Path | str |
         try:
             raw_text = "".join(part.text for part in resp_entry.response.candidates[0].content.parts)
             valid_frame_keys = {Path(p).stem for p in task_dict.get("composite_frames", [])}
-            caption = _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task_dict.get("modality1", ""), task_dict.get("modality2", ""))
+            caption, warnings = _validate_caption_schema(_parse_json_response(raw_text), valid_frame_keys, task_dict.get("modality1", ""), task_dict.get("modality2", ""))
             base_item["status"] = "generated_batch"
             base_item["caption"] = caption
+            base_item["validation_warnings"] = warnings
             skipped[:] = [item for item in skipped if item.get("caption_id") != caption_id]
             items[:] = [item for item in items if item.get("caption_id") != caption_id]
             items.append(base_item)
@@ -1802,7 +2070,11 @@ def _load_resume(output_path: Path) -> tuple[list[dict[str, Any]], list[dict[str
     valid_items = []
     for item in items:
         cap = item.get("caption")
-        if isinstance(cap, dict) and cap.get("schema_version") == CAPTION_SCHEMA_VERSION:
+        if (
+            isinstance(cap, dict) 
+            and cap.get("schema_version") == CAPTION_SCHEMA_VERSION
+            and set(cap.keys()) == CAPTION_REQUIRED_TOP_LEVEL_FIELDS
+        ):
             valid_items.append(item)
 
     # Filter out stale "llm semantic selection failed" errors from legacy pipeline
@@ -1919,7 +2191,7 @@ async def run_caption_pipeline_async(
         try:
             if generation_mode == "gemini":
                 assert client is not None
-                caption = await _call_gemini_caption(client, task, model_name, max_retries=max_retries, api_stats=api_stats)
+                caption, warnings = await _call_gemini_caption(client, task, model_name, max_retries=max_retries, api_stats=api_stats)
                 attempts_used = api_stats[0] - initial_api_stats
                 status = "generated"
                 
@@ -1929,6 +2201,7 @@ async def run_caption_pipeline_async(
                     task, 
                     status=status, 
                     caption=caption,
+                    validation_warnings=warnings,
                     attempts=attempts_used,
                     first_attempt_success=(attempts_used == 1),
                     final_error_category=None
@@ -1936,11 +2209,11 @@ async def run_caption_pipeline_async(
             else:
                 _ensure_composite_frames(task)
                 valid_frame_keys = {path.stem for path in task.composite_frames}
-                caption = _validate_caption_schema(_template_caption(task), valid_frame_keys, task.modality1, task.modality2)
+                caption, warnings = _validate_caption_schema(_template_caption(task), valid_frame_keys, task.modality1, task.modality2)
                 status = "template"
                 skipped[:] = [item for item in skipped if item.get("caption_id") != task.caption_id]
                 items[:] = [item for item in items if item.get("caption_id") != task.caption_id]
-                items.append(_task_to_item(task, status=status, caption=caption))
+                items.append(_task_to_item(task, status=status, caption=caption, validation_warnings=warnings))
             rotation_attempts = 0
         except Exception as exc:
             exc_str = str(exc).lower()
