@@ -42,7 +42,7 @@
 | `annotation_feature/reasoning/` | 将各模态 QA 归一化为 evidence units，并做分组、导出和融合 |
 | `prompts/` | 各模态 caption/question/answer prompt |
 | `scripts/` | 一次性实验脚本、benchmark 脚本、图表和报告生成脚本 |
-| `docs/` | 实验协议和项目说明文档 |
+| `docs/` | 实验协议、项目说明文档和 caption schema 语义定义 |
 | `qa_pairs/aligned/` | 对齐后的各模态 QA JSON |
 | `aligned_dataset/` | 对齐并切分后的多模态数据集，以及缓存帧 |
 | `segmented_outputs/` | 任务片段级 QA 结果 |
@@ -453,15 +453,16 @@ annotation_feature/pipeline/main.py
 新同学建议按以下顺序读代码：
 
 1. `docs/project_overview_cn.md`：先建立全局地图。
-2. `main.py`：看项目有哪些可运行动作。
-3. `annotation_feature/pipeline/main.py`：理解各模态 QA 生成如何串起来。
-4. `annotation_feature/video_preprocessor.py`：理解帧缓存。
-5. `annotation_feature/temporal_alignment.py`：理解对齐和 aligned dataset。
-6. `annotation_feature/pipeline/modalities/rgb/pipeline.py`：先看一个视觉模态的完整 QA 生成模板。
-7. `annotation_feature/pipeline/modalities/audio/pipeline.py`：看音频 HIA、timestamped caption 和 QA cascade。
-8. `annotation_feature/qa_quality/aligned_evaluator.py`：看 QA 质量规则。
-9. `annotation_feature/qa_quality/benchmark.py`：看 benchmark adapter、judge 和结果格式。
-10. `scripts/run_vlm_cross_modality_frame_benchmark.py` 和 `scripts/run_vlm_cross_modality_video_benchmark.py`：看正式实验如何扩展和运行。
+2. `docs/caption_entity_atom_semantics_cn.md`：理解 caption schema 中 Entity、Atom 和 evidence refs 的语义边界。
+3. `main.py`：看项目有哪些可运行动作。
+4. `annotation_feature/pipeline/main.py`：理解各模态 QA 生成如何串起来。
+5. `annotation_feature/video_preprocessor.py`：理解帧缓存。
+6. `annotation_feature/temporal_alignment.py`：理解对齐和 aligned dataset。
+7. `annotation_feature/pipeline/modalities/rgb/pipeline.py`：先看一个视觉模态的完整 QA 生成模板。
+8. `annotation_feature/pipeline/modalities/audio/pipeline.py`：看音频 HIA、timestamped caption 和 QA cascade。
+9. `annotation_feature/qa_quality/aligned_evaluator.py`：看 QA 质量规则。
+10. `annotation_feature/qa_quality/benchmark.py`：看 benchmark adapter、judge 和结果格式。
+11. `scripts/run_vlm_cross_modality_frame_benchmark.py` 和 `scripts/run_vlm_cross_modality_video_benchmark.py`：看正式实验如何扩展和运行。
 
 ## 12. 典型产物对照表
 

@@ -12,24 +12,28 @@ from pathlib import Path
 from typing import Any
 
 from annotation_feature.aligned_global_evidence_pipeline import GLOBAL_EVIDENCE_SCHEMA_VERSION
+from annotation_feature.aligned_caption_schema import ALLOWED_MISSING_ATTRIBUTE_TYPES
+from annotation_feature.aligned_caption_validation import (
+    _require_list,
+    _require_object,
+    _require_string,
+)
+from annotation_feature.aligned_multimodal_sampling import (
+    frame_index,
+)
 from annotation_feature.aligned_multimodal_caption_pipeline import (
-    ALLOWED_MISSING_ATTRIBUTE_TYPES,
-    ALLOWED_QA_POTENTIAL,
-    CAPTION_SCHEMA_VERSION,
     DEFAULT_COMPOSITE_ROOT,
     DEFAULT_DATASET_ROOT,
     DEFAULT_INPUT_PATH,
     DEFAULT_MODEL_NAME,
     CaptionTask,
     _compose_frame,
-    _frame_index,
     _parse_json_response,
-    _require_list,
-    _require_object,
-    _require_string,
     _safe_name,
     build_caption_tasks,
 )
+
+ALLOWED_QA_POTENTIAL = {"high", "medium", "low"}
 from annotation_feature.pipeline.client import create_gemini_client
 from annotation_feature.pipeline.utils import build_image_parts
 
@@ -82,7 +86,7 @@ class PairwiseAmbiguityTask:
         )
         composite_frames: list[Path] = []
         for index, (helper_frame, victim_frame) in enumerate(zip(task.context_frames, task.decisive_frames), start=1):
-            frame_number = _frame_index(helper_frame)
+            frame_number = frame_index(helper_frame)
             suffix = f"{frame_number:06d}" if frame_number is not None else f"{index:03d}"
             output_path = output_dir / f"frame_{suffix}.png"
             if write_composites:
@@ -375,7 +379,6 @@ def _caption_from_pairwise(
 ) -> dict[str, Any]:
     evidence = global_item["evidence"]
     return {
-        "schema_version": CAPTION_SCHEMA_VERSION,
         "global_scene": evidence.get("global_scene"),
         "helper_modality_analysis": _analysis_for_caption(global_item, task.helper_modality),
         "victim_modality_analysis": _analysis_for_caption(global_item, task.victim_modality),
@@ -455,7 +458,6 @@ def _build_output_payload(
         "metadata": {
             "task": "aligned_pairwise_ambiguity_generation",
             "schema_version": PAIRWISE_AMBIGUITY_SCHEMA_VERSION,
-            "caption_schema_version": CAPTION_SCHEMA_VERSION,
             "input": input_path.as_posix(),
             "global_evidence_input": global_evidence_path.as_posix(),
             "output": output_path.as_posix(),
@@ -755,3 +757,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

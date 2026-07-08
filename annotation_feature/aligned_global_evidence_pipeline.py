@@ -14,22 +14,22 @@ from typing import Any
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
+from annotation_feature.aligned_caption_schema import ALLOWED_MISSING_ATTRIBUTE_TYPES
+from annotation_feature.aligned_caption_validation import _require_list, _require_object, _require_string
 from annotation_feature.aligned_multimodal_caption_pipeline import (
-    ALLOWED_MISSING_ATTRIBUTE_TYPES,
     DEFAULT_DATASET_ROOT,
     DEFAULT_INPUT_PATH,
     DEFAULT_MODEL_NAME,
-    SIDE_ORDER,
-    VISUAL_PAIRS,
-    _evenly_sample,
-    _frame_index,
-    _frames_by_index,
-    _load_frame_dirs,
     _parse_json_response,
-    _require_list,
-    _require_object,
-    _require_string,
     _safe_name,
+)
+from annotation_feature.aligned_multimodal_evidence import VISUAL_PAIRS
+from annotation_feature.aligned_multimodal_sampling import (
+    SIDE_ORDER,
+    evenly_sample,
+    frame_index,
+    frames_by_index,
+    load_frame_dirs,
 )
 from annotation_feature.pipeline.client import create_gemini_client
 from annotation_feature.pipeline.utils import build_image_parts
@@ -62,7 +62,7 @@ class GlobalEvidenceTask:
     modalities: tuple[str, ...]
     frame_dirs: dict[str, Path]
     frames_by_modality: dict[str, tuple[Path, ...]]
-    shared_frame_indexes: tuple[int, ...]
+    sharedframe_indexes: tuple[int, ...]
     contact_sheet: Path
 
 
@@ -121,13 +121,13 @@ def _compose_contact_sheet(
     task_id: str,
     modalities: tuple[str, ...],
     frames_by_modality: dict[str, tuple[Path, ...]],
-    shared_frame_indexes: tuple[int, ...],
+    sharedframe_indexes: tuple[int, ...],
     output_path: Path,
     cell_size: tuple[int, int] = (360, 260),
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cell_width, cell_height = cell_size
-    rows = max(1, len(shared_frame_indexes))
+    rows = max(1, len(sharedframe_indexes))
     cols = len(modalities)
     header_height = 42
     canvas = Image.new(
@@ -141,7 +141,7 @@ def _compose_contact_sheet(
         x = col * cell_width
         draw.rectangle((x, 0, x + cell_width, header_height), fill=(38, 38, 38))
         draw.text((x + 10, 10), modality.upper(), fill=(255, 255, 255), font=font)
-    for row, frame_index in enumerate(shared_frame_indexes):
+    for row, frame_index in enumerate(sharedframe_indexes):
         y = header_height + row * cell_height
         for col, modality in enumerate(modalities):
             x = col * cell_width
@@ -223,7 +223,7 @@ def _hybrid_event_sample(
     uniform_count = max(1, remaining_count // 2)
     event_count = remaining_count - uniform_count
 
-    for index in _evenly_sample(shared_indexes[1:-1], uniform_count):
+    for index in evenly_sample(shared_indexes[1:-1], uniform_count):
         selected.add(index)
 
     if event_count > 0:
@@ -237,7 +237,7 @@ def _hybrid_event_sample(
             selected.add(index)
 
     if len(selected) < count:
-        for index in _evenly_sample(shared_indexes, count):
+        for index in evenly_sample(shared_indexes, count):
             selected.add(index)
             if len(selected) >= count:
                 break
@@ -253,7 +253,7 @@ def _select_shared_indexes(
     if sampling_strategy not in SAMPLING_STRATEGIES:
         raise ValueError(f"sampling_strategy must be one of {SAMPLING_STRATEGIES}, got {sampling_strategy!r}")
     if sampling_strategy == "uniform" or "event" not in by_modality:
-        return tuple(_evenly_sample(shared_indexes, num_frames))
+        return tuple(evenly_sample(shared_indexes, num_frames))
     event_by_index = by_modality["event"]
     if sampling_strategy == "event_activity":
         return tuple(_sample_by_event_activity(shared_indexes, event_by_index, num_frames))
@@ -266,7 +266,7 @@ def _collect_shared_frames(
     sampling_strategy: str = "uniform",
 ) -> tuple[dict[str, tuple[Path, ...]], tuple[int, ...]]:
     by_modality = {
-        modality: _frames_by_index(frame_dir, modality)
+        modality: frames_by_index(frame_dir, modality)
         for modality, frame_dir in frame_dirs.items()
     }
     shared_indexes: set[int] | None = None
@@ -326,7 +326,7 @@ def build_global_evidence_tasks(
             continue
 
         modality_dirs: dict[str, dict[str, Path]] = {
-            modality: _load_frame_dirs(dataset_root, split_dir, segment_name, modality)
+            modality: load_frame_dirs(dataset_root, split_dir, segment_name, modality)
             for modality in VISUAL_MODALITIES
         }
         sides = [
@@ -391,7 +391,7 @@ def build_global_evidence_tasks(
                 modalities=modalities,
                 frame_dirs=frame_dirs,
                 frames_by_modality=frames_by_modality,
-                shared_frame_indexes=selected_indexes,
+                sharedframe_indexes=selected_indexes,
                 contact_sheet=contact_sheet,
             )
             if write_contact_sheets:
@@ -399,7 +399,7 @@ def build_global_evidence_tasks(
                     task_id=evidence_id,
                     modalities=modalities,
                     frames_by_modality=frames_by_modality,
-                    shared_frame_indexes=selected_indexes,
+                    sharedframe_indexes=selected_indexes,
                     output_path=contact_sheet,
                 )
             tasks.append(task)
@@ -412,11 +412,11 @@ def build_global_evidence_tasks(
 
 
 def _build_global_prompt(task: GlobalEvidenceTask) -> str:
-    frame_indexes = ", ".join(f"frame_{index:06d}" for index in task.shared_frame_indexes)
-    frame_keys = ", ".join(f'"frame_{index:06d}"' for index in task.shared_frame_indexes)
+    frame_indexes = ", ".join(f"frame_{index:06d}" for index in task.sharedframe_indexes)
+    frame_keys = ", ".join(f'"frame_{index:06d}"' for index in task.sharedframe_indexes)
     frame_detail_example = ", ".join(
         f'"frame_{index:06d}": "..."'
-        for index in task.shared_frame_indexes
+        for index in task.sharedframe_indexes
     )
     modalities = ", ".join(task.modalities)
     return "\n".join(
@@ -479,7 +479,7 @@ def _ensure_contact_sheet(task: GlobalEvidenceTask) -> Path:
             task_id=task.evidence_id,
             modalities=task.modalities,
             frames_by_modality=task.frames_by_modality,
-            shared_frame_indexes=task.shared_frame_indexes,
+            sharedframe_indexes=task.sharedframe_indexes,
             output_path=task.contact_sheet,
         )
     return task.contact_sheet
@@ -573,12 +573,12 @@ def _validate_global_evidence_schema(parsed: dict[str, Any], task: GlobalEvidenc
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
-    temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS * max(1, len(task.shared_frame_indexes)))
+    temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS * max(1, len(task.sharedframe_indexes)))
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
     _validate_frame_by_frame_details(
         global_scene.get("frame_by_frame_details"),
         "global_scene.frame_by_frame_details",
-        task.shared_frame_indexes,
+        task.sharedframe_indexes,
     )
     entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
     if not entities:
@@ -620,7 +620,7 @@ def _validate_global_evidence_schema(parsed: dict[str, Any], task: GlobalEvidenc
         _validate_frame_by_frame_details(
             analysis.get("frame_by_frame_details"),
             f"modality_observations.{modality}.frame_by_frame_details",
-            task.shared_frame_indexes,
+            task.sharedframe_indexes,
         )
         for key in ("observable_facts", "sensor_specific_cues", "sensor_limitations"):
             values = _require_list(analysis.get(key), f"modality_observations.{modality}.{key}")
@@ -689,7 +689,7 @@ def _template_global_evidence(task: GlobalEvidenceTask) -> dict[str, Any]:
             "temporal_progression": "Template mode placeholder; no visual reasoning was performed.",
             "frame_by_frame_details": {
                 f"frame_{index:06d}": "Template mode placeholder; no frame-level visual reasoning was performed."
-                for index in task.shared_frame_indexes
+                for index in task.sharedframe_indexes
             },
         },
         "modality_observations": {
@@ -697,7 +697,7 @@ def _template_global_evidence(task: GlobalEvidenceTask) -> dict[str, Any]:
                 "detailed_caption": "Template mode placeholder; Gemini was not called.",
                 "frame_by_frame_details": {
                     f"frame_{index:06d}": "Template mode placeholder; no frame-level visual reasoning was performed."
-                    for index in task.shared_frame_indexes
+                    for index in task.sharedframe_indexes
                 },
                 "observable_facts": ["Template mode placeholder."],
                 "sensor_specific_cues": ["Template mode placeholder."],
@@ -728,7 +728,7 @@ def _task_to_item(
             modality: [path.as_posix() for path in frames]
             for modality, frames in task.frames_by_modality.items()
         },
-        "shared_frame_indexes": list(task.shared_frame_indexes),
+        "sharedframe_indexes": list(task.sharedframe_indexes),
         "contact_sheet": task.contact_sheet.as_posix(),
         "status": status,
         "reason": reason,
@@ -992,3 +992,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+

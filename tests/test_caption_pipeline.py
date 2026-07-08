@@ -14,6 +14,7 @@ from annotation_feature.aligned_multimodal_caption_pipeline import (
     _build_caption_prompt,
     _load_resume,
     build_caption_tasks,
+    _build_validation_retry_hint,
 )
 from annotation_feature.aligned_caption_prompt import _build_prompt_schema_example
 from annotation_feature.aligned_caption_validation import (
@@ -680,6 +681,143 @@ def run_tests():
         )
         assert any(item.get("segment_id") == "aaa_missing" for item in full_skipped)
     print("Test 45 (Limited run skipped accounting scoped) passed")
+
+    # Test 46: Empty reasoning graphs are allowed
+    empty_reasoning_cap = eval(repr(minimal_caption))
+    empty_reasoning_cap["cross_modal_evidence_links"] = []
+    empty_reasoning_cap["information_gain"] = []
+    empty_reasoning_cap["reasoning_events"] = []
+    empty_reasoning_cap["ambiguity_events"] = []
+    empty_reasoning_cap["qa_relevant_details"] = []
+    try:
+        validated, warn = _validate_caption_schema(empty_reasoning_cap, {"frame_0001"}, "rgb", "event")
+        # Empty reasoning should pass
+    except CaptionValidationError as e:
+        assert False, f"Empty reasoning graphs must be allowed, but got error: {e}"
+    print("Test 46 (Empty reasoning graphs allowed) passed")
+
+    # Test 47: Resumed limited run filters existing skipped
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        input_path = root / "input.json"
+        dataset_root = root / "dataset"
+        composite_root = root / "composite"
+        input_payload = {
+            "segments": {
+                "seg_selected": {
+                    "split_dir": "valid_split",
+                    "segment_name": "valid_segment",
+                    "modality_pairs": [["rgb", "event"]],
+                },
+            }
+        }
+        input_path.write_text(json.dumps(input_payload), encoding="utf-8")
+        rgb_dir = dataset_root / ".frames_cache" / "valid_split" / "valid_segment" / "valid_day_rgb"
+        event_dir = dataset_root / ".frames_cache_event" / "valid_split" / "valid_segment" / "valid_day_event"
+        rgb_dir.mkdir(parents=True)
+        event_dir.mkdir(parents=True)
+        for frame_number in range(1, 31):
+            (rgb_dir / f"frame_{frame_number:06d}.png").write_bytes(b"")
+            (event_dir / f"frame_{frame_number:06d}.png").write_bytes(b"")
+
+        existing_skipped = [
+            {"segment_id": "seg_selected", "reason": "Missing something"},
+            {"segment_id": "seg_other", "reason": "Missing something else"},
+        ]
+        
+        tasks, scoped_skipped, total_selected = build_caption_tasks(
+            input_path=input_path,
+            dataset_root=dataset_root,
+            composite_root=composite_root,
+            sampling_strategy="uniform_adaptive",
+            num_uniform_frames=1,
+            num_adaptive_frames=0,
+            existing_items=[],
+            existing_skipped=existing_skipped,
+            limit=1,
+            write_composites=False,
+        )
+        assert len(scoped_skipped) == 1, f"Expected 1, got {len(scoped_skipped)}: {scoped_skipped}"
+        assert scoped_skipped[0]["segment_id"] == "seg_selected"
+    print("Test 47 (Resumed limited run filters existing skipped) passed")
+
+    # Test 48: information_gain[].video1_can_determine as a string -> rejected
+    ig_cap = eval(repr(minimal_caption))
+    ig_cap["information_gain"][0]["video1_can_determine"] = "Color"
+    try:
+        _validate_caption_schema(ig_cap, {"frame_0001"}, "rgb", "event")
+        assert False, "Should have rejected video1_can_determine as string"
+    except CaptionValidationError as e:
+        assert "must be a list" in str(e).lower()
+    print("Test 48 (information_gain string field rejected) passed")
+
+    # Test 49: information_gain[].video1_can_determine as [] or list of strings -> accepted
+    ig_cap["information_gain"][0]["video1_can_determine"] = []
+    _validate_caption_schema(ig_cap, {"frame_0001"}, "rgb", "event")
+    ig_cap["information_gain"][0]["video1_can_determine"] = ["Color"]
+    _validate_caption_schema(ig_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 49 (information_gain list field accepted) passed")
+
+    # Test 50: non-empty qa_relevant_details missing detail_id -> rejected
+    qa_cap = eval(repr(minimal_caption))
+    del qa_cap["qa_relevant_details"][0]["detail_id"]
+    try:
+        _validate_caption_schema(qa_cap, {"frame_0001"}, "rgb", "event")
+        assert False, "Should have rejected QA detail missing detail_id"
+    except CaptionValidationError as e:
+        assert "detail_id" in str(e)
+    print("Test 50 (QA missing detail_id rejected) passed")
+
+    # Test 51: non-empty qa_relevant_details missing reasoning_pattern -> rejected
+    qa_cap = eval(repr(minimal_caption))
+    del qa_cap["qa_relevant_details"][0]["reasoning_pattern"]
+    try:
+        _validate_caption_schema(qa_cap, {"frame_0001"}, "rgb", "event")
+        assert False, "Should have rejected QA detail missing reasoning_pattern"
+    except CaptionValidationError as e:
+        assert "reasoning_pattern" in str(e)
+    print("Test 51 (QA missing reasoning_pattern rejected) passed")
+
+    # Test 52: complete valid QA item -> accepted
+    _validate_caption_schema(minimal_caption, {"frame_0001"}, "rgb", "event")
+    print("Test 52 (Complete valid QA item accepted) passed")
+
+    # Test 53: all optional reasoning lists empty -> accepted
+    empty_reasoning_cap = eval(repr(minimal_caption))
+    empty_reasoning_cap["cross_modal_evidence_links"] = []
+    empty_reasoning_cap["information_gain"] = []
+    empty_reasoning_cap["reasoning_events"] = []
+    empty_reasoning_cap["ambiguity_events"] = []
+    empty_reasoning_cap["qa_relevant_details"] = []
+    _validate_caption_schema(empty_reasoning_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 53 (All optional reasoning lists empty accepted) passed")
+
+    # Test 54: prompt contains non-empty item shape guidance while preserving empty canonical examples
+    prompt_text = _build_caption_prompt(task)
+    assert "OPTIONAL NON-EMPTY ITEM SHAPES:" in prompt_text
+    assert '"video1_can_determine": [],' in prompt_text
+    example = _build_prompt_schema_example(task)
+    assert example["information_gain"] == []
+    assert example["qa_relevant_details"] == []
+    assert example["ambiguity_events"] == []
+    print("Test 54 (Prompt shapes and empty examples) passed")
+
+    # Test 55: section-specific retry hint for information_gain
+    hint_ig = _build_validation_retry_hint(Exception("information_gain video1_can_determine must be a list"), "schema_validation_error")
+    assert "fusion_additionally_reveals" in hint_ig
+    print("Test 55 (Retry hint for information_gain) passed")
+
+    # Test 56: section-specific retry hint for qa_relevant_details
+    hint_qa = _build_validation_retry_hint(Exception("qa_relevant_details detail_id is missing"), "schema_validation_error")
+    assert "reasoning_pattern" in hint_qa
+    print("Test 56 (Retry hint for qa_relevant_details) passed")
+
+    # Test 57: final failed generation preserves the last invalid raw response for debugging
+    failed_exc = CaptionValidationError("failed")
+    failed_exc.last_invalid_response = '{"bad": "json"}'
+    item = _task_to_item(task, status="failed", reason="failed", attempts=6, first_attempt_success=False, final_error_category="schema_validation_error", last_invalid_response=getattr(failed_exc, "last_invalid_response", None))
+    assert item.get("last_invalid_response") == '{"bad": "json"}'
+    print("Test 57 (last_invalid_response preserved) passed")
 
     print("All tests passed!")
 

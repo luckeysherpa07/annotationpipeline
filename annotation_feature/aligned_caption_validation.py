@@ -199,6 +199,15 @@ def _validate_cross_modal_evidence_links(
             if direction not in ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS:
                 raise CaptionValidationError(f"{field}[{index}].directional_contributions[{j}].direction must be one of {ALLOWED_CROSS_MODAL_CONTRIBUTION_DIRECTIONS}")
             _require_string(dc.get("contribution"), f"{field}[{index}].directional_contributions[{j}].contribution")
+            
+            has_v1 = bool(refs_by_side["video1_evidence_refs"])
+            has_v2 = bool(refs_by_side["video2_evidence_refs"])
+            if direction == "video1_improves_video2" and not has_v1:
+                raise CaptionValidationError(f"{field}[{index}] direction='video1_improves_video2' requires Video 1 evidence")
+            elif direction == "video2_improves_video1" and not has_v2:
+                raise CaptionValidationError(f"{field}[{index}] direction='video2_improves_video1' requires Video 2 evidence")
+            elif direction in ("confirmation_only", "mutual_complementarity") and not (has_v1 and has_v2):
+                raise CaptionValidationError(f"{field}[{index}] direction='{direction}' requires evidence from both videos")
 
 def _validate_information_gain(
     values: Any,
@@ -247,9 +256,9 @@ def _validate_information_gain(
             raise CaptionValidationError(
                 f"{field}[{index}] must cite at least one source-local evidence atom"
             )
-        if gain_type == "confirmation" and not (has_v1_evidence and has_v2_evidence):
+        if gain_type in ("confirmation", "complementarity") and not (has_v1_evidence and has_v2_evidence):
             raise CaptionValidationError(
-                f"{field}[{index}] gain_type='confirmation' requires evidence from both videos"
+                f"{field}[{index}] gain_type='{gain_type}' requires evidence from both videos"
             )
 
 def _derive_reasoning_focus_entities(parsed: dict[str, Any], entity_ids: set[str]) -> list[dict[str, Any]]:
@@ -855,15 +864,7 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
     _check_missing_attrs("video1_analysis", "v2_atom_", modality2)
     _check_missing_attrs("video2_analysis", "v1_atom_", modality1)
     
-    has_reasoning_content = any([
-        parsed.get("cross_modal_evidence_links"),
-        parsed.get("information_gain"),
-        parsed.get("reasoning_events"),
-        parsed.get("ambiguity_events"),
-        parsed.get("qa_relevant_details"),
-    ])
-    if not has_reasoning_content:
-        raise CaptionValidationError("Caption contains no reasoning-relevant graph content (all evidence/reasoning sections are empty).")
+    # Honest empty reasoning graphs are allowed; no 'has_reasoning_content' check is enforced.
         
     # Validator E: Precision language
     precision_warnings = [

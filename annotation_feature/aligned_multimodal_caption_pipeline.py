@@ -261,6 +261,7 @@ def build_caption_tasks(
     num_uniform_frames: int,
     num_adaptive_frames: int,
     existing_items: list[dict[str, Any]],
+    existing_skipped: list[dict[str, Any]] | None = None,
     allowed_pairs: set[tuple[str, str]] | None = None,
     allowed_directions: set[tuple[str, str]] | None = None,
     allowed_sides: set[str] | None = None,
@@ -386,13 +387,17 @@ def build_caption_tasks(
                 str(modality2).lower(),
             ) in selected_job_keys
 
-        if limit_scenes is not None and str(item.get("segment_id")) in selected_scope_segments:
+        if str(item.get("segment_id")) in selected_scope_segments:
             return True
-        if limit_scene_folders is not None and str(item.get("split_dir")) in selected_scope_folders:
+        if str(item.get("split_dir")) in selected_scope_folders:
             return True
         return False
 
-    run_scoped_skipped = [item for item in skipped if _skip_matches_selected_scope(item)]
+    all_skipped = skipped
+    if existing_skipped:
+        all_skipped = existing_skipped + skipped
+
+    run_scoped_skipped = [item for item in all_skipped if _skip_matches_selected_scope(item)]
 
     pending_jobs = []
     for job in selected_jobs:
@@ -495,6 +500,35 @@ def _parse_json_response(text: str) -> dict[str, Any]:
 def _build_validation_retry_hint(exc: Exception, category: str) -> str:
     message = str(exc).lower()
     hints: list[str] = []
+    
+    if "information_gain" in message:
+        hints.append(
+            "For information_gain, if emitted, it must be fully populated. "
+            "All *_can_determine, *_cannot_determine, and fusion_additionally_reveals fields "
+            "must be JSON lists, even when empty. Required shape: "
+            '{"entity_id": "...", "video1_evidence_refs": [], "video2_evidence_refs": [], '
+            '"video1_can_determine": [], "video1_cannot_determine": [], "video2_can_determine": [], '
+            '"video2_cannot_determine": [], "fusion_additionally_reveals": [], '
+            '"gain_type": "...", "gain_rating": "..."}'
+        )
+        
+    if "qa_relevant_details" in message:
+        hints.append(
+            "For qa_relevant_details, if emitted, it must be fully populated. "
+            "Required shape: "
+            '{"detail_id": "qa_detail_...", "reasoning_pattern": "<allowed enum>", '
+            '"supporting_refs": ["..."], "why_question_worthy": "..."}'
+        )
+        
+    if "ambiguity_events" in message:
+        hints.append(
+            "For ambiguity_events, if emitted, it must contain all required fields: "
+            "ambiguity_id, target_entity, direction, ambiguous_video, resolving_video, "
+            "low_confidence_observation, why_ambiguous_video_cannot_resolve, candidate_hypotheses, "
+            "resolving_discriminative_evidence, eliminated_hypotheses, fusion_conclusion, "
+            "missing_attribute_type, ambiguous_evidence_refs, resolving_evidence_refs."
+        )
+
     if category == "blocklist_failure":
         hints.append(
             "Rewrite the reported field using physical-world wording only. "
@@ -512,7 +546,7 @@ def _build_validation_retry_hint(exc: Exception, category: str) -> str:
             "Describe what is directly observable or difficult to determine in the supplied frames, "
             "rather than stating general sensor theory."
         )
-    if category in {"invalid_reference", "missing_attribute_recovery", "qa_mapping_failure"}:
+    if category in {"invalid_reference", "missing_attribute_recovery"}:
         hints.append(
             "Re-check all IDs and references after the edit. Every referenced atom, entity, event, and ambiguity item "
             "must exist and must keep the required prefix."
@@ -648,6 +682,8 @@ async def _call_gemini_caption(
             print(f"    Failure: {json.dumps(log_msg)}")
 
             if validation_attempt == max_retries:
+                if raw_text:
+                    exc.last_invalid_response = raw_text
                 raise
 
             # Error-guided retry: tell the model exactly what went wrong
@@ -692,7 +728,7 @@ def _task_metadata(task: CaptionTask) -> dict[str, Any]:
         "selection_config_fingerprint": task.selection_config_fingerprint,
     }
 
-def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, validation_warnings: list[str] | None = None, reason: str | None = None, attempts: int | None = None, first_attempt_success: bool | None = None, final_error_category: str | None = None) -> dict[str, Any]:
+def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None = None, validation_warnings: list[str] | None = None, reason: str | None = None, attempts: int | None = None, first_attempt_success: bool | None = None, final_error_category: str | None = None, last_invalid_response: str | None = None) -> dict[str, Any]:
     item = _task_metadata(task)
     item.update({
         "status": status,
@@ -703,6 +739,8 @@ def _task_to_item(task: CaptionTask, status: str, caption: dict[str, Any] | None
         "caption": caption,
         "validation_warnings": validation_warnings or [],
     })
+    if last_invalid_response is not None:
+        item["last_invalid_response"] = last_invalid_response
     return item
 
 
@@ -985,9 +1023,8 @@ async def run_caption_pipeline_async(
     
     existing_items, existing_skipped = _load_resume(output_path) if resume else ([], [])
     items = existing_items
-    skipped = existing_skipped
     
-    tasks, new_skipped, total_selected_jobs = build_caption_tasks(
+    tasks, scoped_skipped, total_selected_jobs = build_caption_tasks(
         input_path=input_path,
         dataset_root=dataset_root,
         composite_root=composite_root,
@@ -995,6 +1032,7 @@ async def run_caption_pipeline_async(
         num_uniform_frames=num_uniform_frames,
         num_adaptive_frames=num_adaptive_frames,
         existing_items=existing_items,
+        existing_skipped=existing_skipped,
         allowed_pairs=allowed_pairs,
         allowed_directions=allowed_directions,
         limit=limit,
@@ -1006,7 +1044,7 @@ async def run_caption_pipeline_async(
     
     seen_skipped = set()
     deduped_skipped = []
-    for s in skipped + new_skipped:
+    for s in scoped_skipped:
         key = (s.get("segment_id"), s.get("side"), s.get("modality1"), s.get("modality2"), s.get("reason"), s.get("caption_id"))
         if key not in seen_skipped:
             seen_skipped.add(key)
@@ -1135,7 +1173,8 @@ async def run_caption_pipeline_async(
                     reason=str(exc),
                     attempts=api_stats[0] - initial_api_stats,
                     first_attempt_success=False,
-                    final_error_category=final_error_category
+                    final_error_category=final_error_category,
+                    last_invalid_response=getattr(exc, "last_invalid_response", None)
                 )
             )
             print(f"WARNING: Caption generation failed for {task.caption_id}: {exc}")
