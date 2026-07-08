@@ -1,0 +1,1715 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "input": "outputs/aligned_multimodal_visual_evidence_units_filtered.json",
+    "output": "outputs/temp_test_brew_tea_seg1.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 5,
+    "completed_items": 3,
+    "skipped_items": 2,
+    "gemini_calls": 11
+  },
+  "items": [
+    {
+      "caption_id": "make_coffee_split__seg3__night__rgb__event",
+      "segment_id": "make_coffee_split__Seg3",
+      "split_dir": "make_coffee_split",
+      "segment_name": "Seg3",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000180.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000810.png",
+        "aligned_dataset/.frames_cache/make_coffee_split/Seg3/make_coffee_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000180.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000810.png",
+        "aligned_dataset/.frames_cache_event/make_coffee_split/Seg3/make_coffee_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000180.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000810.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        180,
+        810
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        180,
+        240,
+        360,
+        510,
+        630,
+        750,
+        810,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 2,
+      "first_attempt_success": false,
+      "final_error_category": null,
+      "caption": {
+        "global_scene": {
+          "scene_summary": "The scene takes place inside a kitchen at night under extremely low-light conditions. A kitchen counter, cabinet structures, a waste bin, and a dish rack are present. A person's hands are actively working in the kitchen, moving a small utensil in a curved motion above the counter and then interacting with white ceramic plates and bowls stacked in a dish rack.",
+          "environment": "indoor",
+          "temporal_progression": "Initially, a utensil is moved in a curved sweep over the kitchen counter. Subsequently, the focus shifts towards a dish rack containing stacked white ceramic plates and bowls. A person's hands are observed reaching toward and adjusting the kitchenware in the dish rack before completing the task.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "person",
+              "referential_scope": "the person's hands actively working in the kitchen",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Visible reaching and moving objects in the room."
+                ],
+                "observable_attributes": [
+                  "The hands perform manual tasks such as moving a utensil and handling kitchenware."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "dish_rack",
+              "referential_scope": "the dish rack containing stacked white plates, bowls, and a mug",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Clearly visible holding multiple white plates and bowls stacked in slots."
+                ],
+                "observable_attributes": [
+                  "Contains white ceramic plates and bowls stacked vertically."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "utensil",
+              "referential_scope": "the utensil being moved rapidly across the counter area",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A stick-like utensil with a round head that moves in a clean arc."
+                ],
+                "observable_attributes": [
+                  "Features a round or circular end, used for stirring or carrying."
+                ]
+              }
+            }
+          ],
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "entity_001",
+              "focus_reasons": [
+                "interaction"
+              ]
+            },
+            {
+              "entity_id": "entity_002",
+              "focus_reasons": [
+                "directional_gain",
+                "gain_complementarity",
+                "interaction"
+              ]
+            },
+            {
+              "entity_id": "entity_003",
+              "focus_reasons": [
+                "directional_gain"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "The kitchen is mostly in darkness. A brief view shows a kitchen floor with a waste bin, a white vertical cabinet divider, and a portion of the counter. A clear visual reveals a dish rack holding several stacked white ceramic plates, multiple white bowls, and a round white ceramic container. In the other parts of the sequence, the scene is almost entirely dark.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000810"
+              ],
+              "entity_refs": [
+                "entity_001"
+              ],
+              "fact": "A person's hands are visible in the low light."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000630"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The dish rack is holding stacked white plates and bowls."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Directly reveals the white color of the ceramic plates and bowls in the dish rack under brief illumination."
+          ],
+          "sensor_limitations": [
+            "Struggles with extreme low-light (night-time) conditions, leaving most of the frames almost completely dark and obscuring the actions."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "The motion in the kitchen is visible throughout the sequence. A utensil with a circular tip is moved in a precise curved trajectory above the counter. A person's hand is visible holding the utensil. The outline of the stacked plates inside the dish rack is visible as motion occurs around them.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000180",
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "A utensil is moved rapidly in a curved trajectory."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The person's hand holds the utensil."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000750",
+                "frame_000810"
+              ],
+              "entity_refs": [
+                "entity_002",
+                "entity_001"
+              ],
+              "fact": "The person's hands move near the stacked plates."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Captures the continuous motion and path of the utensil and hand in extreme low-light where details are otherwise obscured."
+          ],
+          "sensor_limitations": [
+            "Does not capture the color or paint of the objects, rendering them as moving outlines without color context."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "entity_002",
+            "video1_evidence_refs": [
+              "v1_atom_002"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_003"
+            ],
+            "shared_evidence": [
+              "The presence of stacked plates in a dish rack."
+            ],
+            "unique_to_video1": [
+              "Shows that the stacked plates and bowls are white and ceramic."
+            ],
+            "unique_to_video2": [
+              "Shows the hand interacting with the stacked plates in the dish rack across dark intervals."
+            ],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 provides the precise white color and identity of the ceramic plates, which Video 2 only represents as moving structures."
+              },
+              {
+                "direction": "video2_improves_video1",
+                "contribution": "Video 2 shows the active handling of the plates in the dish rack when the scene is otherwise too dark in Video 1."
+              }
+            ]
+          },
+          {
+            "entity_id": "entity_003",
+            "video1_evidence_refs": [],
+            "video2_evidence_refs": [
+              "v2_atom_001",
+              "v2_atom_002"
+            ],
+            "shared_evidence": [],
+            "unique_to_video1": [],
+            "unique_to_video2": [
+              "Detects the motion trajectory and hand manipulation of the utensil."
+            ],
+            "directional_contributions": [
+              {
+                "direction": "video2_improves_video1",
+                "contribution": "Video 2 captures the shape and trajectory of the utensil, which is completely invisible in Video 1 due to extreme darkness."
+              }
+            ]
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "entity_002",
+            "video1_evidence_refs": [
+              "v1_atom_002"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_003"
+            ],
+            "video1_can_determine": [
+              "The white color of the plates",
+              "The materials of the objects (ceramic)"
+            ],
+            "video1_cannot_determine": [
+              "Continuous motion or action when it is completely dark"
+            ],
+            "video2_can_determine": [
+              "The shape structure and interaction timing of the stacked plates"
+            ],
+            "video2_cannot_determine": [
+              "The color or surface material of the plates"
+            ],
+            "fusion_additionally_reveals": [
+              "Enables tracking the user interacting with white ceramic kitchenware throughout the low-light period."
+            ],
+            "gain_type": "complementarity",
+            "gain_rating": "high"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "interaction",
+            "participating_entities": [
+              "entity_001",
+              "entity_002"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_002",
+              "v2_atom_003"
+            ],
+            "description": "Video 1 identifies the objects in the dish rack as white ceramic plates, while Video 2 tracks the user's hands manipulating these plates."
+          },
+          {
+            "event_id": "evt_002",
+            "event_type": "unidirectional_disambiguation",
+            "participating_entities": [
+              "entity_001",
+              "entity_003"
+            ],
+            "supporting_atom_refs": [
+              "v2_atom_001",
+              "v2_atom_002"
+            ],
+            "description": "Video 2 resolves the complete invisibility of the utensil and its motion in the dark frames of Video 1, revealing its arc-like path and manipulation by a hand."
+          }
+        ],
+        "ambiguity_events": [],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "interaction_reasoning",
+            "supporting_refs": [
+              "evt_001"
+            ],
+            "why_question_worthy": "The interaction with the kitchenware in the dish rack occurs mostly in total darkness, meaning it can only be successfully analyzed by combining the structural outline motion with the brief visual confirmation of the plates."
+          }
+        ],
+        "rejected_observations": []
+      },
+      "validation_warnings": [
+        "video1_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: almost, brief, cabinet, ceramic, clear...",
+        "video2_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: above, around, circular, counter, holding..."
+      ]
+    },
+    {
+      "caption_id": "pour_water_split__seg1__day__rgb__event",
+      "segment_id": "pour_water_split__Seg1",
+      "split_dir": "pour_water_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000090.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/pour_water_split/Seg1/pour_water_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000090.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/pour_water_split/Seg1/pour_water_day_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000090.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        90
+      ],
+      "selected_frame_indexes": [
+        0,
+        90,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 2,
+      "first_attempt_success": false,
+      "final_error_category": null,
+      "caption": {
+        "global_scene": {
+          "scene_summary": "In an indoor kitchen or office setting, a person prepares and pours water on a white desk. Several containers are situated on the tabletop, including a pink mug, a pink pitcher, a silver thermos, and an electric kettle with its heating base. The person unscrews the thermos lid, pours water from the thermos into the pink mug, pours water from the kettle into the silver thermos, places the kettle back on its base, and screws the thermos lid back on.",
+          "environment": "indoor",
+          "temporal_progression": "The sequence begins with the person standing by the white desk where the containers are located. They open the silver thermos by twisting off its lid. Then, they pour water from the silver thermos into the pink mug, followed by pouring water from the electric kettle into the opened silver thermos. Afterward, they place the kettle back down onto its heating base and finally close the silver thermos with its lid.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "person",
+              "referential_scope": "the person performing the actions, whose hands and feet are visible",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "The hands and feet belong to a single person manipulating the objects on the table."
+                ],
+                "observable_attributes": [
+                  "The person wears black pants and dark-colored sandals with socks."
+                ],
+                "spatial_context": [
+                  "The person stands directly in front of the white desk."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "container",
+              "referential_scope": "the silver thermos/flask with a twist-off lid",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A cylindrical silver metal bottle with a removable screw lid."
+                ],
+                "observable_attributes": [
+                  "The thermos is silver with a grey internal lid structure."
+                ],
+                "spatial_context": [
+                  "The thermos is located to the right of the pink mug on the desk."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "container",
+              "referential_scope": "the pink mug/cup on the desk",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A pink mug with a handle and a transparent lid."
+                ],
+                "observable_attributes": [
+                  "The mug is light pink, has a handle, and sits on the white table."
+                ],
+                "spatial_context": [
+                  "The mug is positioned near the pink pitcher on the desk."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_004",
+              "category": "appliances",
+              "referential_scope": "the electric water kettle",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A silver electric kettle with a black plastic handle, black lid, and black base."
+                ],
+                "observable_attributes": [
+                  "The kettle body is silver metal, and its handle and top are black."
+                ],
+                "spatial_context": [
+                  "The kettle is moved between its base on the right and the other containers on the left."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_005",
+              "category": "container",
+              "referential_scope": "the pink pitcher on the left",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A large pink water pitcher with a matching orange lid."
+                ],
+                "observable_attributes": [
+                  "The pitcher is pink with a solid orange-colored lid."
+                ],
+                "spatial_context": [
+                  "The pitcher remains stationary on the far left side of the white desk."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_006",
+              "category": "furniture_or_stationary_object",
+              "referential_scope": "the circular heating base for the electric kettle",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "The black circular base that connects to the electric kettle."
+                ],
+                "observable_attributes": [
+                  "The base is black and has an electrical cord running from it."
+                ],
+                "spatial_context": [
+                  "The base sits on the right-hand side of the white desk."
+                ]
+              }
+            }
+          ],
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "entity_001",
+              "focus_reasons": [
+                "interaction"
+              ]
+            },
+            {
+              "entity_id": "entity_002",
+              "focus_reasons": [
+                "gain_complementarity",
+                "interaction"
+              ]
+            },
+            {
+              "entity_id": "entity_003",
+              "focus_reasons": [
+                "directional_gain",
+                "interaction"
+              ]
+            },
+            {
+              "entity_id": "entity_004",
+              "focus_reasons": [
+                "directional_gain",
+                "interaction"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "The person's feet and legs are visible near the white desk. Initially, the person's hand holds the pink mug. They use both hands to unscrew the lid of the silver thermos. Next, they lift the silver thermos and pour water from it into the pink mug. They then set the thermos down briefly, before pouring water from the electric kettle into the silver thermos. The kettle is then returned onto its black circular base, where it remains stationary. Finally, the person uses both hands to twist the lid back onto the silver thermos.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The person's hand holds the pink mug."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000090",
+                "frame_000120"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The person uses both hands to unscrew the lid from the silver thermos."
+            },
+            {
+              "atom_id": "v1_atom_003",
+              "frame_keys": [
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002",
+                "entity_003"
+              ],
+              "fact": "The person pours water from the silver thermos into the pink mug."
+            },
+            {
+              "atom_id": "v1_atom_004",
+              "frame_keys": [
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The person holds the pink mug."
+            },
+            {
+              "atom_id": "v1_atom_005",
+              "frame_keys": [
+                "frame_000510"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002",
+                "entity_004"
+              ],
+              "fact": "The person pours water from the electric kettle into the silver thermos."
+            },
+            {
+              "atom_id": "v1_atom_006",
+              "frame_keys": [
+                "frame_000630",
+                "frame_000690"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_004",
+                "entity_006"
+              ],
+              "fact": "The person places the electric kettle back onto its circular base."
+            },
+            {
+              "atom_id": "v1_atom_007",
+              "frame_keys": [
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_004",
+                "entity_006"
+              ],
+              "fact": "The electric kettle sits stationary on its circular base."
+            },
+            {
+              "atom_id": "v1_atom_008",
+              "frame_keys": [
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The person twists the lid back onto the silver thermos."
+            },
+            {
+              "atom_id": "v1_atom_009",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_005"
+              ],
+              "fact": "The pink pitcher sits stationary on the table."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Direct color information distinguishes the pink mug, pink pitcher, and silver thermos."
+          ],
+          "sensor_limitations": [
+            "Rapid movements during water pouring result in slight motion blur of the hands."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "The person's movements and the contours of the active objects are tracked. Motion indicates the person's hand interacting with the mug and then using both hands to manipulate the thermos. Distinct motion of a large container being lifted and tilted is detected as water is poured. The container is moved again during a second pouring action, then lowered back toward a circular base where motion ceases. Finally, hand motions are detected near the thermos as its lid is manipulated.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The person's hand is positioned near the mug."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000090",
+                "frame_000120"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The person's hands manipulate the thermos."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The person holds and tilts the silver thermos."
+            },
+            {
+              "atom_id": "v2_atom_004",
+              "frame_keys": [
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The person holds the mug."
+            },
+            {
+              "atom_id": "v2_atom_005",
+              "frame_keys": [
+                "frame_000510"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_004"
+              ],
+              "fact": "The person holds and tilts the kettle-shaped container."
+            },
+            {
+              "atom_id": "v2_atom_006",
+              "frame_keys": [
+                "frame_000630",
+                "frame_000690"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_004"
+              ],
+              "fact": "The person moves the container downwards."
+            },
+            {
+              "atom_id": "v2_atom_007",
+              "frame_keys": [
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The person's hands manipulate the thermos."
+            }
+          ],
+          "sensor_specific_cues": [
+            "The motion of the feet and leg transitions is highly defined by outline patterns."
+          ],
+          "sensor_limitations": [
+            "Color and fine texture attributes of the pink mug, pink pitcher, and silver thermos are completely absent."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "surface_attribute",
+              "missing_attribute": "The color and precise material texture of the containers.",
+              "why_missing": "The sensing modality only captures boundaries of motion and structural changes, not static surface colors.",
+              "recoverable_evidence_refs": [
+                "v1_atom_001",
+                "v1_atom_002"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "entity_003",
+            "video1_evidence_refs": [
+              "v1_atom_001",
+              "v1_atom_003",
+              "v1_atom_004"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001",
+              "v2_atom_004"
+            ],
+            "shared_evidence": [],
+            "unique_to_video1": [
+              "The mug is pink, made of plastic/metal, and has a transparent lid."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 establishes the color and specific semantic identity of the mug as a pink mug."
+              }
+            ]
+          },
+          {
+            "entity_id": "entity_004",
+            "video1_evidence_refs": [
+              "v1_atom_005",
+              "v1_atom_006",
+              "v1_atom_007"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_005",
+              "v2_atom_006"
+            ],
+            "shared_evidence": [],
+            "unique_to_video1": [
+              "The object is a silver electric kettle with a black plastic handle, lid, and heating base."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 provides clear visual details on the kettle's metallic composition and black electrical heating base."
+              }
+            ]
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "entity_002",
+            "video1_evidence_refs": [
+              "v1_atom_002",
+              "v1_atom_003",
+              "v1_atom_005",
+              "v1_atom_008"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_002",
+              "v2_atom_003",
+              "v2_atom_007"
+            ],
+            "video1_can_determine": [
+              "The container is a silver metal thermos."
+            ],
+            "video1_cannot_determine": [],
+            "video2_can_determine": [
+              "The container is being opened, tilted, and closed based on hand movements."
+            ],
+            "video2_cannot_determine": [
+              "The silver metal material of the thermos."
+            ],
+            "fusion_additionally_reveals": [],
+            "gain_type": "complementarity",
+            "gain_rating": "medium"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "interaction",
+            "participating_entities": [
+              "entity_001",
+              "entity_002",
+              "entity_003"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_003",
+              "v2_atom_003"
+            ],
+            "description": "The person pours water from the silver thermos into the pink mug."
+          },
+          {
+            "event_id": "evt_002",
+            "event_type": "interaction",
+            "participating_entities": [
+              "entity_001",
+              "entity_002",
+              "entity_004"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_005",
+              "v2_atom_005"
+            ],
+            "description": "The person pours water from the electric kettle into the silver thermos."
+          }
+        ],
+        "ambiguity_events": [],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "interaction_reasoning",
+            "supporting_refs": [
+              "evt_001",
+              "evt_002"
+            ],
+            "why_question_worthy": "This explains the specific sequence of water pouring actions between the thermos, the pink mug, and the kettle."
+          }
+        ],
+        "rejected_observations": []
+      },
+      "validation_warnings": [
+        "video1_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: before, black, briefly, finally, initially...",
+        "video2_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: action, active, again, being, ceases..."
+      ]
+    },
+    {
+      "caption_id": "water_plants_split__seg4__day__rgb__event",
+      "segment_id": "water_plants_split__Seg4",
+      "split_dir": "water_plants_split",
+      "segment_name": "Seg4",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000150.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000600.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/water_plants_split/Seg4/water_plants_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000150.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000600.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/water_plants_split/Seg4/water_plants_day_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000150.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000600.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        600,
+        150
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        150,
+        240,
+        360,
+        510,
+        600,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 2,
+      "first_attempt_success": false,
+      "final_error_category": null,
+      "caption": {
+        "global_scene": {
+          "scene_summary": "In an indoor gardening setting, a person's hand holds a green-and-white pressure spray bottle to water plants. A healthy, leafy green parsley plant sits in a circular green pot on the left, while another plant with light-green leaves and thin stems is in a container nearby. The person moves the pressure spray bottle to mist the soil, then uses their hand to touch and inspect the parsley leaves before spraying the parsley leaves directly with a fine mist of water.",
+          "environment": "indoor",
+          "temporal_progression": "The action transitions systematically: the spray bottle is initially held close to the plants, then is operated to spray a fine mist of water onto the soil. After spraying, the hand is used to manually touch and inspect the leaves of the parsley plant. Finally, the spray bottle is aimed directly at the parsley plant, spraying water over its leaves.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "hand",
+              "referential_scope": "the person's hand operating the sprayer and touching the plants",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "The hand is visible holding the handle of the spray bottle and moving to touch the parsley leaves."
+                ],
+                "observable_attributes": [
+                  "Active manual manipulation"
+                ],
+                "spatial_context": [
+                  "Positioned in the foreground, interacting directly with the spray bottle and plants."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "tool",
+              "referential_scope": "the green-and-white pressure sprayer bottle",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A green trigger mechanism on a white plastic container."
+                ],
+                "observable_attributes": [
+                  "Green handle",
+                  "White container",
+                  "Fine nozzle"
+                ],
+                "spatial_context": [
+                  "Held by the hand and positioned above the pots."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "plant",
+              "referential_scope": "the parsley plant growing in the circular green pot",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Lush, dense green parsley leaves."
+                ],
+                "observable_attributes": [
+                  "Green leaves",
+                  "Multi-stemmed structure"
+                ],
+                "spatial_context": [
+                  "Growing on the left side in a green pot."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_004",
+              "category": "container",
+              "referential_scope": "the circular green pot containing the parsley plant",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "A dark green circular plastic rim filled with dark soil."
+                ],
+                "observable_attributes": [
+                  "Circular shape",
+                  "Dark green color"
+                ],
+                "spatial_context": [
+                  "Placed on the left, holding the parsley plant."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_005",
+              "category": "plant",
+              "referential_scope": "the other plant with yellowish-green leaves and thin stems",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Thin stalks and light yellowish-green leaves."
+                ],
+                "observable_attributes": [
+                  "Yellow-green leaves",
+                  "Tall thin stems"
+                ],
+                "spatial_context": [
+                  "Located next to the green pot on the right."
+                ]
+              }
+            }
+          ],
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "entity_001",
+              "focus_reasons": [
+                "temporal_change"
+              ]
+            },
+            {
+              "entity_id": "entity_002",
+              "focus_reasons": [
+                "directional_gain",
+                "temporal_change"
+              ]
+            },
+            {
+              "entity_id": "entity_003",
+              "focus_reasons": [
+                "directional_gain",
+                "temporal_change"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "A person holds a green-and-white pressure spray bottle near several potted plants. A lush green parsley plant grows inside a circular green pot on the left. Another plant with light green leaves and thin stems sits in a container nearby. The person moves the spray bottle closer to the plants, then presses the trigger to spray a fine mist of water onto the soil of the plant container. Later, the person uses one hand to touch and examine the leaves of the parsley plant while holding the spray bottle, and then sprays water directly onto the parsley plant's leaves.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The hand holds the pressure sprayer."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_003",
+                "entity_004"
+              ],
+              "fact": "The parsley plant grows in the green circular pot."
+            },
+            {
+              "atom_id": "v1_atom_003",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_005"
+              ],
+              "fact": "The other plant has light green leaves and thin stems."
+            },
+            {
+              "atom_id": "v1_atom_004",
+              "frame_keys": [
+                "frame_000510"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The pressure sprayer releases a fine mist of water."
+            },
+            {
+              "atom_id": "v1_atom_005",
+              "frame_keys": [
+                "frame_000600"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The hand touches the parsley plant leaves."
+            },
+            {
+              "atom_id": "v1_atom_006",
+              "frame_keys": [
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_002",
+                "entity_003"
+              ],
+              "fact": "The pressure sprayer is used to spray water onto the parsley plant."
+            }
+          ],
+          "sensor_specific_cues": [
+            "The healthy green color of the parsley leaves and the yellowish color of the other plant's leaves are easily distinguishable.",
+            "The water mist is visible as a fine white aerosol spray against the darker background of the soil."
+          ],
+          "sensor_limitations": [
+            "Visual details of the plants can be temporarily obscured or out of focus when the camera moves extremely close to the stems."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "A hand holds a pressure sprayer near a plant container with a circular rim. As the hand moves the sprayer, the outlines and shapes of the hand and bottle are visible. Later, a fine stream of spray is directed onto the soil. After that, the hand moves closer to touch the parsley leaves, creating movement, and then sprays mist onto the parsley leaves.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_002"
+              ],
+              "fact": "The outline of the hand holding the pressure sprayer is visible."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "The circular rim of the plant pot is visible."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000510"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "A stream of spray droplets is emitted from the pressure sprayer."
+            },
+            {
+              "atom_id": "v2_atom_004",
+              "frame_keys": [
+                "frame_000600"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_003"
+              ],
+              "fact": "The hand moves closer to the parsley plant leaves."
+            },
+            {
+              "atom_id": "v2_atom_005",
+              "frame_keys": [
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_002",
+                "entity_003"
+              ],
+              "fact": "The sprayer emits water droplets directed at the parsley plant leaves."
+            }
+          ],
+          "sensor_specific_cues": [
+            "High-contrast movements, such as the hand moving, the spray trigger being pulled, and the fine droplets of sprayed water, are captured as clear contours of motion.",
+            "The texture of the soil in the pots is highlighted due to the small movements or changes in light and surface structure."
+          ],
+          "sensor_limitations": [
+            "Colors, fine textures, and static features of the plants and bottle are not directly observable unless there is motion relative to the view."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "fine_grained_category",
+              "missing_attribute": "plant species identity and leaf colors",
+              "why_missing": "static features do not produce prominent changes in light when stationary",
+              "recoverable_evidence_refs": [
+                "v1_atom_002",
+                "v1_atom_003"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "entity_002",
+            "video1_evidence_refs": [
+              "v1_atom_001",
+              "v1_atom_004"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001",
+              "v2_atom_003"
+            ],
+            "shared_evidence": [
+              "The pressure sprayer is held and operated to spray water."
+            ],
+            "unique_to_video1": [
+              "The pressure sprayer has a green handle and trigger with a white bottle."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 provides color and text details on the sprayer bottle."
+              }
+            ]
+          },
+          {
+            "entity_id": "entity_003",
+            "video1_evidence_refs": [
+              "v1_atom_002",
+              "v1_atom_005"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_004"
+            ],
+            "shared_evidence": [
+              "The hand moves to touch the plant leaves on the left."
+            ],
+            "unique_to_video1": [
+              "The plant leaves belong to a green parsley plant."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 identifies the plant species as parsley."
+              }
+            ]
+          }
+        ],
+        "information_gain": [],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "temporal_change",
+            "participating_entities": [
+              "entity_001",
+              "entity_002",
+              "entity_003"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v1_atom_004",
+              "v1_atom_005",
+              "v1_atom_006",
+              "v2_atom_001",
+              "v2_atom_003",
+              "v2_atom_004",
+              "v2_atom_005"
+            ],
+            "description": "The action transitions from holding the sprayer to spraying mist on the soil, touching the parsley leaves, and finally spraying the parsley leaves."
+          },
+          {
+            "event_id": "evt_002",
+            "event_type": "confirmation",
+            "participating_entities": [
+              "entity_001",
+              "entity_002"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Both sequences confirm that the hand is holding and operating the pressure sprayer."
+          }
+        ],
+        "ambiguity_events": [],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "temporal_integration",
+            "supporting_refs": [
+              "evt_001"
+            ],
+            "why_question_worthy": "Understanding the sequential steps of plant care, such as checking the leaves manually before administering a spray, requires tracing the hand-object interactions over time."
+          }
+        ],
+        "rejected_observations": []
+      },
+      "validation_warnings": [
+        "video1_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: another, bottle, closer, container, directly...",
+        "video2_analysis.detailed_caption may contain ungrounded claims. Words not in atoms: after, bottle, container, creating, holds..."
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "caption_id": "brew_tea_split__seg1__day__rgb__event",
+      "segment_id": "brew_tea_split__Seg1",
+      "split_dir": "brew_tea_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000030.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000060.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/brew_tea_split/Seg1/with_light_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000030.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000060.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/brew_tea_split/Seg1/with_light_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000030.png",
+        "frame_000060.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        60,
+        30
+      ],
+      "selected_frame_indexes": [
+        0,
+        30,
+        60,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "failed",
+      "reason": "Server disconnected without sending a response.",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "final_error_category": "transport_other",
+      "caption": null,
+      "validation_warnings": []
+    },
+    {
+      "caption_id": "wash_cup_split__seg2__night__rgb__event",
+      "segment_id": "wash_cup_split__Seg2",
+      "split_dir": "wash_cup_split",
+      "segment_name": "Seg2",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000180.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/wash_cup_split/Seg2/wash_cup_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000180.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/wash_cup_split/Seg2/wash_cup_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000180.png",
+        "frame_000240.png",
+        "frame_000300.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        300,
+        180
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        180,
+        240,
+        300,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "failed",
+      "reason": "Server disconnected without sending a response.",
+      "attempts": 3,
+      "first_attempt_success": false,
+      "final_error_category": "transport_other",
+      "caption": null,
+      "validation_warnings": []
+    }
+  ]
+}

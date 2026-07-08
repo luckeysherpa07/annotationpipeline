@@ -1,0 +1,478 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "input": "outputs/archive/temp_and_tests/temp_bike_filtered.json",
+    "output": "outputs/temp_bike_8_plus_2_gemini_3.5_flash.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 1,
+    "completed_items": 1,
+    "skipped_items": 0,
+    "gemini_calls": 1
+  },
+  "items": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000450.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000480.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000450.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000480.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000450.png",
+        "frame_000480.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        450,
+        480
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        450,
+        480,
+        510,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 1,
+      "first_attempt_success": true,
+      "final_error_category": null,
+      "caption": {
+        "global_scene": {
+          "scene_summary": "A person rides a bicycle along an urban street. The roadway is flanked by paved curbs and parked cars on both sides. The rider passes a manhole cover, a storm drain, and several parked vehicles, including a white BMW sedan, under tree shadows.",
+          "environment": "urban",
+          "temporal_progression": "The rider moves forward down the street, passing ground features and parked vehicles in chronological sequence.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "rider",
+              "referential_scope": "the bicycle and its rider moving through the scene",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Bicycle handlebar and wheel are visible at the bottom of the frame."
+                ],
+                "observable_attributes": [
+                  "Moving forward along the roadway."
+                ],
+                "spatial_context": [
+                  "Starts at the bottom left, moving forward along the street."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "vehicle",
+              "referential_scope": "the white BMW sedan parked on the right side of the street",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "White sedan with distinct BMW rear branding."
+                ],
+                "observable_attributes": [
+                  "Stationary, parked parallel to the curb."
+                ],
+                "spatial_context": [
+                  "Parked on the right curb, behind a black hatchback."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "parked_vehicle_group",
+              "referential_scope": "the collection of other parked cars along both sides of the street",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Multiple stationary vehicles lined up along the curbs."
+                ],
+                "observable_attributes": [
+                  "Stationary, various colors and models."
+                ],
+                "spatial_context": [
+                  "Positioned along both the left and right sides of the roadway."
+                ]
+              }
+            },
+            {
+              "entity_id": "entity_004",
+              "category": "roadway_features",
+              "referential_scope": "the street surface, curbs, paving stones, manhole, and storm drain",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Asphalt roadway with brick gutters, manhole cover, and storm drain grate."
+                ],
+                "observable_attributes": [
+                  "Curved roadway containing utility covers and drainage features."
+                ],
+                "spatial_context": [
+                  "Spans the entire path of travel."
+                ]
+              }
+            }
+          ],
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "entity_002",
+              "focus_reasons": [
+                "directional_gain"
+              ]
+            },
+            {
+              "entity_id": "entity_004",
+              "focus_reasons": [
+                "directional_gain"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "The bicycle handlebar and wheel move forward. A circular manhole cover and a metal drain grate appear on the left. The rider approaches and passes several parked cars, including a white BMW sedan on the right, under tree shadows.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001"
+              ],
+              "fact": "The bicycle handlebar and front wheel are visible."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_004"
+              ],
+              "fact": "The rider casts a shadow onto the brick pavement on the right."
+            },
+            {
+              "atom_id": "v1_atom_003",
+              "frame_keys": [
+                "frame_000120"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "A circular metal manhole cover is set into the asphalt."
+            },
+            {
+              "atom_id": "v1_atom_004",
+              "frame_keys": [
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "A rectangular metal storm drain grate is located in the brick gutter."
+            },
+            {
+              "atom_id": "v1_atom_005",
+              "frame_keys": [
+                "frame_000360",
+                "frame_000450"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "A white BMW sedan is parked on the right side of the street."
+            },
+            {
+              "atom_id": "v1_atom_006",
+              "frame_keys": [
+                "frame_000360",
+                "frame_000450"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "Multiple other vehicles are parked along both sides of the street."
+            },
+            {
+              "atom_id": "v1_atom_007",
+              "frame_keys": [
+                "frame_000480",
+                "frame_000510",
+                "frame_000630"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "Sprawling tree shadows lie across the roadway."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Direct color information distinguishes the white BMW from darker parked vehicles."
+          ],
+          "sensor_limitations": [
+            "No major limitations; clear daylight visibility throughout."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "The road surface and brick curb boundaries are visible. Circular and rectangular pavement features appear. Parked vehicles are outlined along the curbs. Detailed branch-like shadow patterns appear on the street as the rider passes.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "The textured roadway surface and the edge of the brick gutter are visible."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000120"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "A circular boundary corresponding to the manhole cover is visible."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "The rectangular outer profile of the storm drain is visible."
+            },
+            {
+              "atom_id": "v2_atom_004",
+              "frame_keys": [
+                "frame_000360",
+                "frame_000450"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "The outlines of parked vehicles on both sides of the street are visible."
+            },
+            {
+              "atom_id": "v2_atom_005",
+              "frame_keys": [
+                "frame_000450",
+                "frame_000480"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The profile of a sedan is visible on the right."
+            },
+            {
+              "atom_id": "v2_atom_006",
+              "frame_keys": [
+                "frame_000480",
+                "frame_000510",
+                "frame_000630"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "Intricate branch-like shadow boundaries are visible on the road surface."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Physical structures and shadow contours are emphasized during forward motion."
+          ],
+          "sensor_limitations": [
+            "Lacks color and semantic details like vehicle brand badges."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "surface_attribute",
+              "missing_attribute": "Vehicle color and brand paint markings",
+              "why_missing": "This sensing modality only captures spatial contrast transitions, not static color or paint pigment.",
+              "recoverable_evidence_refs": [
+                "v1_atom_005"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "entity_002",
+            "video1_evidence_refs": [
+              "v1_atom_005"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_005"
+            ],
+            "shared_evidence": [
+              "A parked sedan is located along the right curb."
+            ],
+            "unique_to_video1": [
+              "The vehicle is a white BMW."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 identifies the vehicle color (white) and brand (BMW)."
+              }
+            ]
+          },
+          {
+            "entity_id": "entity_004",
+            "video1_evidence_refs": [
+              "v1_atom_003",
+              "v1_atom_004"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_002",
+              "v2_atom_003"
+            ],
+            "shared_evidence": [
+              "Circular manhole and rectangular drain grate are present on the roadway."
+            ],
+            "unique_to_video1": [
+              "Shows color contrast and material textures of the metal covers."
+            ],
+            "unique_to_video2": [],
+            "directional_contributions": [
+              {
+                "direction": "video1_improves_video2",
+                "contribution": "Video 1 resolves the material composition of the road fixtures."
+              }
+            ]
+          }
+        ],
+        "information_gain": [],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "confirmation",
+            "participating_entities": [
+              "entity_004"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_003",
+              "v2_atom_002",
+              "v1_atom_004",
+              "v2_atom_003"
+            ],
+            "description": "Both videos independently confirm the existence and exact layout of the circular manhole cover and storm drain."
+          },
+          {
+            "event_id": "evt_002",
+            "event_type": "cross_modal_complementarity",
+            "participating_entities": [
+              "entity_002",
+              "entity_003"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_005",
+              "v1_atom_006",
+              "v2_atom_004",
+              "v2_atom_005"
+            ],
+            "description": "Video 1 provides color and categorical identity, while Video 2 confirms structural outlines of the parked vehicles."
+          }
+        ],
+        "ambiguity_events": [],
+        "qa_relevant_details": [],
+        "rejected_observations": []
+      },
+      "validation_warnings": []
+    }
+  ],
+  "skipped": []
+}

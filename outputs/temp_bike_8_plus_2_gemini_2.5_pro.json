@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "schema_version": "cross_modal_disambiguation_caption_v7",
+    "input": "outputs/archive/temp_and_tests/temp_bike_filtered.json",
+    "output": "outputs/temp_bike_8_plus_2_gemini_2.5_pro.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-2.5-pro",
+    "planned_items": 1,
+    "completed_items": 0,
+    "skipped_items": 1,
+    "gemini_calls": 0
+  },
+  "items": [],
+  "skipped": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "reason": "reasoning_events[2] event_type temporal_change requires at least one participating_entity to have a compatible focus reason"
+    }
+  ]
+}

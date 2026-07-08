@@ -1,0 +1,659 @@
+{
+  "metadata": {
+    "source_file": "outputs\\aligned_qa_split_items.json",
+    "modality_filter": [
+      "rgb",
+      "event",
+      "depth",
+      "ir"
+    ],
+    "excluded_modalities": [
+      "audio"
+    ],
+    "filter_low_entropy": true,
+    "excluded_section_tokens": [
+      "counting",
+      "non_common"
+    ],
+    "low_entropy_answer_policy": [
+      "yes_no_true_false",
+      "none_zero_small_number_words",
+      "pure_numeric",
+      "single_color_word",
+      "yes_no_question_prefix"
+    ],
+    "excluded_counts": {
+      "excluded_modality": 261,
+      "excluded_section": 2186,
+      "low_entropy_answer": 1038,
+      "yes_no_question": 1214
+    },
+    "supported_pairs": [
+      [
+        "rgb",
+        "event"
+      ],
+      [
+        "rgb",
+        "depth"
+      ],
+      [
+        "rgb",
+        "ir"
+      ],
+      [
+        "event",
+        "ir"
+      ],
+      [
+        "event",
+        "depth"
+      ]
+    ],
+    "segments": 59
+  },
+  "segments": {
+    "ride_a_bike_split__Seg1": {
+      "segment_id": "ride_a_bike_split__Seg1",
+      "source_prefix": "ride_a_bike",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "aligned",
+      "task_label": "ride a bike segment 1",
+      "source_files": {
+        "depth": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json",
+        "event": "qa_pairs/aligned/event_qa_results_aligned.json",
+        "ir": "qa_pairs/aligned/ir_qa_results_aligned.json",
+        "rgb": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+      },
+      "media_by_modality": {
+        "depth": {
+          "pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "videos": [
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_day_depth.mp4",
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_night_depth.mp4"
+          ],
+          "frame_cache_dir": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1"
+        },
+        "event": {
+          "pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+          "videos": [
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_day_event.mp4",
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_night_event.mp4"
+          ],
+          "frame_cache_dir": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1"
+        },
+        "ir": {
+          "pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "videos": [
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_day_ir.mp4",
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_night_ir.mp4"
+          ],
+          "frame_cache_dir": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1"
+        },
+        "rgb": {
+          "pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "videos": [
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_day_rgb.mp4",
+            "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_night_rgb.mp4"
+          ],
+          "frame_cache_dir": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1"
+        }
+      },
+      "source_keys": {
+        "rgb": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+        "ir": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+        "event": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+        "depth": "ride_a_bike_split/Seg1/ride_a_bike"
+      },
+      "evidence_units": [
+        {
+          "modality": "rgb",
+          "section": "object_recognition",
+          "caption": "The scene is a paved street at night, illuminated by multiple street lamps. Objects present include a sidewalk, several parked vehicles (cars and a caravan/camper), a trash bin, and building structures.",
+          "question": "What type of large vehicle is parked on the side of the street?",
+          "answer": "A camper or caravan.",
+          "evidence": "The scene is a paved street at night, illuminated by multiple street lamps. Objects present include a sidewalk, several parked vehicles (cars and a caravan/camper), a trash bin, and building structures.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1561,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "spatial_reasoning",
+          "caption": "The scene displays several spatial relationships: 1. The street lamp is to the left of the sidewalk. 2. The camper is parked behind a small car. 3. The sidewalk is adjacent to the road. 4. Buildings are located to the right of the street. 5. A trash bin is positioned between the sidewalk and the road. Estimated steps: The street lamp is approximately 3 steps from the sidewalk, and the camper is roughly 10 steps away.",
+          "question": "Which object is situated between the sidewalk and the road?",
+          "answer": "A trash bin.",
+          "evidence": "The scene displays several spatial relationships: 1. The street lamp is to the left of the sidewalk. 2. The camper is parked behind a small car. 3. The sidewalk is adjacent to the road. 4. Buildings are located to the right of the street. 5. A trash bin is positioned between the sidewalk and the road. Estimated steps: The street lamp is approximately 3 steps from the sidewalk, and the camper is roughly 10 steps away.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1562,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "text_recognition",
+          "caption": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "question": "What is the text on the parking sign in frame 240?",
+          "answer": "The sign in frame 240 specifies parking restrictions for certain vehicle types.",
+          "evidence": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1563,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "text_recognition",
+          "caption": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "question": "What do the signs in the video generally indicate about the environment?",
+          "answer": "The signs indicate that the area is a residential or mixed-use parking zone.",
+          "evidence": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1568,
+          "pair_index": 6,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "text_recognition",
+          "caption": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "question": "How many times does the word 'Parking' appear in the visual field?",
+          "answer": "The word 'Parking' is clearly identifiable on the sign in frame 240.",
+          "evidence": "The video captured at night displays street signs and building labels. In frame 240, there is a sign indicating parking regulations. In frame 600, building identification numbers are visible on the exterior walls.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1570,
+          "pair_index": 8,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "scene_sequence",
+          "caption": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "question": "What is the first object I encounter after the street lights?",
+          "answer": "I encounter a large white camper parked on the side of the road.",
+          "evidence": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1571,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "scene_sequence",
+          "caption": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "question": "What kind of building structure do I pass by in the middle of the video?",
+          "answer": "I pass by a modern, multi-story building with a facade featuring dark panels and large windows.",
+          "evidence": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1572,
+          "pair_index": 2,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "scene_sequence",
+          "caption": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "question": "What is the primary surface I am traveling on?",
+          "answer": "The surface is primarily paved asphalt for the road and stone blocks for the sidewalk.",
+          "evidence": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1574,
+          "pair_index": 4,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "scene_sequence",
+          "caption": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "question": "How does the environment change after passing the modern building?",
+          "answer": "The environment transitions to a wider street with more organized parking spaces and clear daylight visibility.",
+          "evidence": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1577,
+          "pair_index": 7,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "scene_sequence",
+          "caption": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "question": "What color are the bricks in the paved section?",
+          "answer": "The bricks appear to be a neutral grey or brownish tone.",
+          "evidence": "The video shows a path starting from a dimly lit street with parked cars and a camper, moving along a modern building with large windows and brick-paved sections, eventually transitioning to a brighter, daytime scene featuring a street with various parked vehicles, trees, and sidewalks.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1579,
+          "pair_index": 9,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "light_recognition",
+          "caption": "Multiple street lamps are the primary light sources in the scene, casting illumination on the pavement and surroundings. The lights are spaced along the street.",
+          "question": "What is the primary source of illumination for the street?",
+          "answer": "Street lamps.",
+          "evidence": "Multiple street lamps are the primary light sources in the scene, casting illumination on the pavement and surroundings. The lights are spaced along the street.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1581,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "light_change",
+          "caption": "The video begins with low-light, artificial street lighting illuminating a dark residential street. As the video progresses, the lighting shifts to bright, natural sunlight, indicating a change in time of day.",
+          "question": "How does the light intensity compare between the first and last frame?",
+          "answer": "The light intensity is significantly higher in the final frames compared to the initial frames, due to the presence of direct sunlight.",
+          "evidence": "The video begins with low-light, artificial street lighting illuminating a dark residential street. As the video progresses, the lighting shifts to bright, natural sunlight, indicating a change in time of day.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1589,
+          "pair_index": 8,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "navigation",
+          "caption": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "question": "What direction should I follow to stay on the path?",
+          "answer": "You should continue moving forward, keeping the buildings on your right and the road on your left.",
+          "evidence": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1616,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "navigation",
+          "caption": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "question": "What is the approximate number of meters I travel in the video?",
+          "answer": "It is hard to give an exact distance, but the travel covers several hundred meters.",
+          "evidence": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1619,
+          "pair_index": 4,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "navigation",
+          "caption": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "question": "How do I reach the parking zone?",
+          "answer": "You simply follow the street, as the parking areas are located directly along the curb.",
+          "evidence": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1621,
+          "pair_index": 6,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "navigation",
+          "caption": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "question": "What is the safest part of the road to travel on?",
+          "answer": "The path along the sidewalk or the edge of the road is the designated space for travel.",
+          "evidence": "The navigation involves moving forward along a straight, paved street. The path is consistent throughout the night and day sequences, following the right-hand curb, with no major turns required.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1622,
+          "pair_index": 7,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "action",
+          "caption": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "question": "What is the primary action I am performing?",
+          "answer": "You are moving forward through the environment, likely riding a bicycle or a vehicle.",
+          "evidence": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1634,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "action",
+          "caption": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "question": "Am I interacting with any objects during the ride?",
+          "answer": "No, there is no physical interaction with objects, you are only observing them.",
+          "evidence": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1635,
+          "pair_index": 2,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "action",
+          "caption": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "question": "What is the intended consequence of my movement?",
+          "answer": "The movement allows for the traversal and observation of the street and buildings.",
+          "evidence": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1636,
+          "pair_index": 3,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "action",
+          "caption": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "question": "Am I traveling at a consistent speed?",
+          "answer": "Yes, the travel speed appears to be relatively constant.",
+          "evidence": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1638,
+          "pair_index": 5,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "rgb",
+          "section": "action",
+          "caption": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "question": "Am I using a vehicle or walking?",
+          "answer": "The smooth motion and perspective suggest you are riding a vehicle or bicycle.",
+          "evidence": "The subject is riding a bicycle or vehicle forward along a street, passing buildings and parked cars. The purpose is likely commuting or traversing the neighborhood to observe the environment.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 1640,
+          "pair_index": 7,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_rgb",
+          "source_file": "qa_pairs/aligned/rgb_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "object_recognition",
+          "caption": "The video features a night-time scene captured in infrared. The primary objects include a bicycle handlebar assembly, a circular bell, a small display screen, a paved sidewalk with rectangular blocks, and an adjacent asphalt road. Thermal contrast is visible between the cooler paved surfaces and the warmer bike components.",
+          "question": "What kind of small circular device is mounted on the bicycle handlebar?",
+          "answer": "A bicycle bell.",
+          "evidence": "The video features a night-time scene captured in infrared. The primary objects include a bicycle handlebar assembly, a circular bell, a small display screen, a paved sidewalk with rectangular blocks, and an adjacent asphalt road. Thermal contrast is visible between the cooler paved surfaces and the warmer bike components.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4088,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "spatial_reasoning",
+          "caption": "The spatial relationships include the bicycle handlebars situated above the sidewalk, the sidewalk running parallel to the asphalt road, a curb separating the sidewalk from the road, a storm drain cover located on the road, and a row of parked cars along the curb. The objects appear to be within 1 to 5 steps of the camera.",
+          "question": "Where is the storm drain cover located relative to the curb?",
+          "answer": "It is located on the road, adjacent to the curb.",
+          "evidence": "The spatial relationships include the bicycle handlebars situated above the sidewalk, the sidewalk running parallel to the asphalt road, a curb separating the sidewalk from the road, a storm drain cover located on the road, and a row of parked cars along the curb. The objects appear to be within 1 to 5 steps of the camera.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4089,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "scene_sequence",
+          "caption": "The sequence starts with the camera mounted on a bicycle riding along a sidewalk. I then pass by parked cars, a storm drain, and eventually approach a building frontage at night.",
+          "question": "What is the final landmark seen?",
+          "answer": "A building wall with a sign.",
+          "evidence": "The sequence starts with the camera mounted on a bicycle riding along a sidewalk. I then pass by parked cars, a storm drain, and eventually approach a building frontage at night.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4091,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "light_recognition",
+          "caption": "The scene is illuminated by streetlights, which appear as bright hotspots in the infrared spectrum, casting long, dark shadows on the ground.",
+          "question": "What is the primary source of illumination for the outdoor scene?",
+          "answer": "Streetlights.",
+          "evidence": "The scene is illuminated by streetlights, which appear as bright hotspots in the infrared spectrum, casting long, dark shadows on the ground.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4092,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "navigation",
+          "caption": "The path follows a sidewalk that curves slightly. I should maintain the current trajectory to continue along the street.",
+          "question": "How many steps to reach the building?",
+          "answer": "It depends on the speed, but it is nearby.",
+          "evidence": "The path follows a sidewalk that curves slightly. I should maintain the current trajectory to continue along the street.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4097,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "ir",
+          "section": "action",
+          "caption": "I am riding a bicycle along a sidewalk at night. The purpose is to navigate through the residential area.",
+          "question": "What is the consequence of my action?",
+          "answer": "I am moving along the street.",
+          "evidence": "I am riding a bicycle along a sidewalk at night. The purpose is to navigate through the residential area.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 4099,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_ir",
+          "source_file": "qa_pairs/aligned/ir_qa_results_aligned.json"
+        },
+        {
+          "modality": "event",
+          "section": "event_object_recognition",
+          "caption": "The video displays a road scene with multiple parked cars along the sides, a manhole cover on the left, and a tree branch casting a moving shadow on the asphalt. The motion is defined by the camera's forward movement, which makes the stationary objects appear to recede and shift their relative positions in the field of view.",
+          "question": "What is the primary stationary object visible on the ground that passes by as I move forward?",
+          "answer": "A manhole cover.",
+          "evidence": "The video displays a road scene with multiple parked cars along the sides, a manhole cover on the left, and a tree branch casting a moving shadow on the asphalt. The motion is defined by the camera's forward movement, which makes the stationary objects appear to recede and shift their relative positions in the field of view.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 5370,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+          "source_file": "qa_pairs/aligned/event_qa_results_aligned.json"
+        },
+        {
+          "modality": "event",
+          "section": "event_scene_sequence",
+          "caption": "The sequence begins with a view of a street with parked cars on both sides. As the camera moves forward, the view captures the transition of passing these parked vehicles. Eventually, the shadows of trees moving across the road surface become more prominent, and the scene concludes with the camera continuing along the same path between the lines of parked cars.",
+          "question": "What primary change occurs to the road surface as I continue moving forward through the scene?",
+          "answer": "Tree shadows appear.",
+          "evidence": "The sequence begins with a view of a street with parked cars on both sides. As the camera moves forward, the view captures the transition of passing these parked vehicles. Eventually, the shadows of trees moving across the road surface become more prominent, and the scene concludes with the camera continuing along the same path between the lines of parked cars.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 5372,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+          "source_file": "qa_pairs/aligned/event_qa_results_aligned.json"
+        },
+        {
+          "modality": "event",
+          "section": "event_navigation",
+          "caption": "The camera moves in a straight line along the center of a residential or commercial street. The path is guided by the parallel lines of parked vehicles, providing a clear corridor for the forward movement. There are no turns or significant deviations in the path.",
+          "question": "Am I turning or moving in a straight line?",
+          "answer": "Moving in a straight line.",
+          "evidence": "The camera moves in a straight line along the center of a residential or commercial street. The path is guided by the parallel lines of parked vehicles, providing a clear corridor for the forward movement. There are no turns or significant deviations in the path.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 5375,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+          "source_file": "qa_pairs/aligned/event_qa_results_aligned.json"
+        },
+        {
+          "modality": "event",
+          "section": "event_action",
+          "caption": "The camera holder is performing a forward-moving action, likely driving or moving along the road. The subject is observing the environment as the scene progresses, focusing on the static layout of the street and the parked vehicles.",
+          "question": "What is my primary action while filming?",
+          "answer": "Moving forward.",
+          "evidence": "The camera holder is performing a forward-moving action, likely driving or moving along the road. The subject is observing the environment as the scene progresses, focusing on the static layout of the street and the parked vehicles.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 5377,
+          "pair_index": 1,
+          "source_pair_key": "aligned_dataset/ride_a_bike_split/Seg1/ride_a_bike_event",
+          "source_file": "qa_pairs/aligned/event_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_object_recognition",
+          "caption": "The scene shows a narrow street with cars parked on both sides, and several trees lining the sidewalk. The camera moves forward along the road, where objects closer to the camera are at the edges and a brighter, more distant area is visible ahead.",
+          "question": "What objects are positioned along the sides of the path in the depth stream?",
+          "answer": "Cars and trees.",
+          "evidence": "The scene shows a narrow street with cars parked on both sides, and several trees lining the sidewalk. The camera moves forward along the road, where objects closer to the camera are at the edges and a brighter, more distant area is visible ahead.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6769,
+          "pair_index": 1,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_dynamic_recognition",
+          "caption": "The sequence shows a forward-moving perspective through a street. All observed objects, including vehicles and trees, remain stationary relative to the environment and do not show independent motion.",
+          "question": "When did a person appear in the frame?",
+          "answer": "None appeared.",
+          "evidence": "The sequence shows a forward-moving perspective through a street. All observed objects, including vehicles and trees, remain stationary relative to the environment and do not show independent motion.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6790,
+          "pair_index": 2,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_action",
+          "caption": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "question": "What is my primary action in this sequence?",
+          "answer": "Forward movement.",
+          "evidence": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6797,
+          "pair_index": 1,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_action",
+          "caption": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "question": "Am I moving toward or away from the objects?",
+          "answer": "Toward.",
+          "evidence": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6798,
+          "pair_index": 2,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_action",
+          "caption": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "question": "Am I stationary or moving?",
+          "answer": "Moving.",
+          "evidence": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6801,
+          "pair_index": 5,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        },
+        {
+          "modality": "depth",
+          "section": "depth_action",
+          "caption": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "question": "How does the depth map change in the center of the frame?",
+          "answer": "It shows decreasing distance to objects.",
+          "evidence": "The camera holder is performing a forward-moving action, likely driving or walking down a residential street. The depth layout shifts as the camera approaches stationary objects, resulting in a continuous expansion of objects from the center toward the periphery.",
+          "timestamp": null,
+          "confidence": null,
+          "source_unit_index": 6804,
+          "pair_index": 8,
+          "source_pair_key": "ride_a_bike_split/Seg1/ride_a_bike",
+          "source_file": "qa_pairs/aligned/marigold_depth_qa_results_aligned.json"
+        }
+      ],
+      "evidence_modalities": [
+        "depth",
+        "event",
+        "ir",
+        "rgb"
+      ],
+      "modality_pairs": [
+        [
+          "rgb",
+          "event"
+        ],
+        [
+          "rgb",
+          "depth"
+        ],
+        [
+          "rgb",
+          "ir"
+        ],
+        [
+          "event",
+          "ir"
+        ],
+        [
+          "event",
+          "depth"
+        ]
+      ]
+    }
+  }
+}

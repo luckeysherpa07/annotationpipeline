@@ -1,0 +1,3509 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "schema_version": "cross_modal_disambiguation_caption_v10",
+    "input": "outputs/temp_bike_input.json",
+    "output": "outputs/temp_bike_validation.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "template",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 10,
+    "completed_items": 10,
+    "skipped_items": 0,
+    "gemini_calls": 0
+  },
+  "items": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000450.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000480.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000450.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000480.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000450.png",
+        "frame_000480.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        450,
+        480
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        450,
+        480,
+        510,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000720.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000720.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000720.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        720
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        720,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__rgb__depth",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "depth",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000420.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000540.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000120_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000240_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000360_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000420_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000510_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000540_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000630_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000750_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000870_depth.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000420.png",
+        "frame_000510.png",
+        "frame_000540.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        540,
+        420
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        420,
+        510,
+        540,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "depth",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__depth",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "depth",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000300.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000120_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000240_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000360_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000510_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000630_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000690_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000750_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000870_depth.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000300.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        300,
+        690
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        300,
+        360,
+        510,
+        630,
+        690,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "depth",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__rgb__ir",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "rgb",
+      "modality2": "ir",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000420.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000540.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_day_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000120.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000240.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000360.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000420.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000510.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000540.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000630.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000750.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000420.png",
+        "frame_000510.png",
+        "frame_000540.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        420,
+        540
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        420,
+        510,
+        540,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "ir",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__ir",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "ir",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000660.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000120.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000240.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000360.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000510.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000630.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000660.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000690.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000750.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000660.png",
+        "frame_000690.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        660
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        660,
+        690,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "ir",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__event__ir",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "event",
+      "modality2": "ir",
+      "frame_dir1": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event",
+      "frame_dir2": "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir",
+      "frames1": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000450.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000480.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000120.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000240.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000360.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000450.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000480.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000510.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000630.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000750.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_day_ir/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000450.png",
+        "frame_000480.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        450,
+        480
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        450,
+        480,
+        510,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "ir",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__event__ir",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "event",
+      "modality2": "ir",
+      "frame_dir1": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frame_dir2": "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir",
+      "frames1": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000780.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000000.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000120.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000240.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000360.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000510.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000630.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000690.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000750.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000780.png",
+        "aligned_dataset/.frames_cache_ir/ride_a_bike_split/Seg1/ride_a_bike_night_ir/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000750.png",
+        "frame_000780.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        780
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        750,
+        780,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "ir",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__day__event__depth",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "day",
+      "modality1": "event",
+      "modality2": "depth",
+      "frame_dir1": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event",
+      "frame_dir2": "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day",
+      "frames1": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000450.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000540.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_day_event/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000120_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000240_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000360_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000450_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000510_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000540_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000630_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000750_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/day/frame_000870_depth.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000450.png",
+        "frame_000510.png",
+        "frame_000540.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        450,
+        540
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        450,
+        510,
+        540,
+        630,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "depth",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    },
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__event__depth",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "event",
+      "modality2": "depth",
+      "frame_dir1": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frame_dir2": "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night",
+      "frames1": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000300.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000780.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000000_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000120_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000240_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000300_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000360_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000510_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000630_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000750_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000780_depth.png",
+        "aligned_dataset/.frames_cache_marigold/ride_a_bike_split/Seg1/ride_a_bike/night/frame_000870_depth.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000300.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000750.png",
+        "frame_000780.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        300,
+        780
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        300,
+        360,
+        510,
+        630,
+        750,
+        780,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "template",
+      "reason": null,
+      "attempts": null,
+      "first_attempt_success": null,
+      "final_error_category": null,
+      "caption": {
+        "schema_version": "cross_modal_disambiguation_caption_v10",
+        "global_scene": {
+          "scene_summary": "Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. Template mode placeholder for scene summary. ",
+          "physical_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "category": "unknown",
+              "evidence_profile": {
+                "identity_evidence": [
+                  "Placeholder evidence"
+                ],
+                "observable_attributes": [
+                  "Placeholder attribute"
+                ],
+                "spatial_context": [
+                  "Placeholder context"
+                ]
+              }
+            }
+          ],
+          "environment": "unknown",
+          "temporal_progression": "Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. Template mode placeholder for temporal progression. ",
+          "reasoning_focus_entities": [
+            {
+              "entity_id": "unresolved_target",
+              "focus_reasons": [
+                "ambiguity_resolution",
+                "cross_modal_complementarity",
+                "fusion_gain",
+                "joint_fusion"
+              ]
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "event",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "depth",
+          "detailed_caption": "Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. Template mode placeholder for detailed caption. ",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000"
+              ],
+              "fact": "Template placeholder fact"
+            }
+          ],
+          "sensor_specific_cues": [
+            "Template mode placeholder."
+          ],
+          "sensor_limitations": [
+            "Template mode placeholder."
+          ],
+          "uncertain_observations": [
+            {
+              "observed_evidence": "Template placeholder",
+              "hypotheses": [
+                {
+                  "hypothesis": "Placeholder 1",
+                  "confidence": "low"
+                },
+                {
+                  "hypothesis": "Placeholder 2",
+                  "confidence": "low"
+                }
+              ],
+              "missing_evidence": "Placeholder"
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "attribute_type": "existence",
+              "missing_attribute": "Template placeholder",
+              "why_missing": "Template placeholder",
+              "recoverable_evidence_refs": [
+                "v1_atom_001"
+              ]
+            }
+          ]
+        },
+        "cross_modal_evidence_links": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "shared_evidence": "Placeholder",
+            "unique_to_video1": "Placeholder",
+            "unique_to_video2": "Placeholder",
+            "how_video1_improves_video2": "Placeholder",
+            "how_video2_improves_video1": "Placeholder"
+          }
+        ],
+        "information_gain": [
+          {
+            "entity_id": "unresolved_target",
+            "video1_evidence_refs": [
+              "v1_atom_001"
+            ],
+            "video2_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "video1_can_determine": [
+              "Placeholder"
+            ],
+            "video1_cannot_determine": [
+              "Placeholder"
+            ],
+            "video2_can_determine": [
+              "Placeholder"
+            ],
+            "video2_cannot_determine": [
+              "Placeholder"
+            ],
+            "fusion_additionally_reveals": [
+              "Placeholder"
+            ],
+            "gain_rating": "low"
+          }
+        ],
+        "reasoning_events": [
+          {
+            "event_id": "evt_001",
+            "event_type": "joint_fusion",
+            "participating_entities": [
+              "unresolved_target"
+            ],
+            "supporting_atom_refs": [
+              "v1_atom_001",
+              "v2_atom_001"
+            ],
+            "description": "Template placeholder event"
+          }
+        ],
+        "ambiguity_events": [
+          {
+            "ambiguity_id": "amb_001",
+            "target_entity": "unresolved_target",
+            "direction": "video1_resolves_video2",
+            "ambiguous_video": "video2",
+            "resolving_video": "video1",
+            "low_confidence_observation": "Placeholder",
+            "why_ambiguous_video_cannot_resolve": "Placeholder",
+            "candidate_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              },
+              {
+                "hypothesis": "Placeholder 2",
+                "why_compatible_with_ambiguous": "Placeholder",
+                "support_from_resolving": "Placeholder"
+              }
+            ],
+            "resolving_discriminative_evidence": "Placeholder",
+            "eliminated_hypotheses": [
+              {
+                "hypothesis": "Placeholder 1",
+                "why_eliminated": "Placeholder"
+              }
+            ],
+            "fusion_conclusion": "Placeholder",
+            "missing_attribute_type": "existence",
+            "ambiguous_evidence_refs": [
+              "v2_atom_001"
+            ],
+            "resolving_evidence_refs": [
+              "v1_atom_001"
+            ]
+          }
+        ],
+        "qa_relevant_details": [
+          {
+            "detail_id": "qa_detail_001",
+            "reasoning_pattern": "joint_fusion",
+            "supporting_refs": [
+              "evt_001",
+              "amb_001"
+            ],
+            "why_question_worthy": "Placeholder"
+          }
+        ],
+        "rejected_observations": [
+          {
+            "observation": "No rejected observation was evaluated in template mode.",
+            "reason": "Gemini was not called in template mode."
+          }
+        ]
+      }
+    }
+  ],
+  "skipped": []
+}
