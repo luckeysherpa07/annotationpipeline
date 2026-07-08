@@ -268,6 +268,7 @@ def build_caption_tasks(
     limit: int | None = None,
     limit_scenes: int | None = None,
     limit_scene_folders: int | None = None,
+    target_paths: set[str] | None = None,
     write_composites: bool = True,
 ) -> tuple[list[CaptionTask], list[dict[str, Any]], int]:
     data = _load_json(input_path)
@@ -311,6 +312,12 @@ def build_caption_tasks(
                     if allowed_sides is not None and side.lower() not in allowed_sides:
                         continue
                         
+                    if target_paths is not None:
+                        dir1_str = dir1.resolve().as_posix().lower()
+                        dir2_str = dir2.resolve().as_posix().lower()
+                        if not any(tp.lower() in dir1_str or tp.lower() in dir2_str for tp in target_paths):
+                            continue
+
                     by_index1 = frames_by_index(dir1, modality1)
                     by_index2 = frames_by_index(dir2, modality2)
                     shared_indexes = tuple(sorted(set(by_index1) & set(by_index2)))
@@ -564,6 +571,7 @@ def _is_transport_error(exc: Exception) -> bool:
         "connection reset",
         "connection aborted",
         "connection error",
+        "disconnected",
         "temporarily unavailable",
         "503",
         "504",
@@ -1009,6 +1017,7 @@ async def run_caption_pipeline_async(
     limit: int | None,
     limit_scenes: int | None,
     limit_scene_folders: int | None,
+    target_paths: str | None,
     max_retries: int,
     max_transport_retries: int,
     delay_between_calls: int,
@@ -1018,6 +1027,7 @@ async def run_caption_pipeline_async(
     allowed_pairs = _parse_pairs(pairs)
     allowed_directions = _parse_pairs(directions)
     allowed_sides = _parse_sides(sides)
+    parsed_target_paths = {p.strip().replace('\\', '/') for p in target_paths.split(',')} if target_paths else None
     
     client = create_gemini_client(api_key_source=api_key_source) if generation_mode in ("gemini", "batch") else None
     
@@ -1039,6 +1049,7 @@ async def run_caption_pipeline_async(
         limit_scenes=limit_scenes,
         limit_scene_folders=limit_scene_folders,
         allowed_sides=allowed_sides,
+        target_paths=parsed_target_paths,
         write_composites=False,
     )
     
@@ -1209,6 +1220,7 @@ def run_caption_pipeline(
     limit: int | None = None,
     limit_scenes: int | None = None,
     limit_scene_folders: int | None = None,
+    target_paths: str | None = None,
     max_retries: int = 3,
     max_transport_retries: int = DEFAULT_MAX_TRANSPORT_RETRIES,
     delay_between_calls: int = 5,
@@ -1232,6 +1244,7 @@ def run_caption_pipeline(
             limit=limit,
             limit_scenes=limit_scenes,
             limit_scene_folders=limit_scene_folders,
+            target_paths=target_paths,
             max_retries=max_retries,
             max_transport_retries=max_transport_retries,
             delay_between_calls=delay_between_calls,
@@ -1291,6 +1304,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Limit the number of top-level aligned_dataset scene folders/split_dir values, such as brew_tea_split.",
     )
+    parser.add_argument(
+        "--target-paths",
+        default=None,
+        help="Comma-separated list of paths or path substrings to restrict processing (e.g., brew_tea_split/Seg1/with_light_rgb).",
+    )
     parser.add_argument("--max-retries", type=int, default=3, help="Maximum parse/schema validation retries per item.")
     parser.add_argument(
         "--max-transport-retries",
@@ -1333,6 +1351,7 @@ def main() -> None:
         limit=args.limit,
         limit_scenes=args.limit_scenes,
         limit_scene_folders=args.limit_scene_folders,
+        target_paths=args.target_paths,
         max_retries=max(1, args.max_retries),
         max_transport_retries=max(1, args.max_transport_retries),
         delay_between_calls=max(0, args.delay_between_calls),
