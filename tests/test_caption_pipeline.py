@@ -1,19 +1,25 @@
 import sys
 import json
 import py_compile
+import tempfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from annotation_feature.aligned_multimodal_caption_pipeline import (
-    _validate_caption_schema,
     _task_to_item,
     CaptionTask,
-    CAPTION_SCHEMA_VERSION,
     CaptionValidationError,
     _template_caption,
-    _build_prompt_schema_example,
+    _build_caption_prompt,
     _load_resume,
-    _derive_reasoning_focus_entities,
+    build_caption_tasks,
+)
+from annotation_feature.aligned_caption_prompt import _build_prompt_schema_example
+from annotation_feature.aligned_caption_validation import (
+    _contains_any_term,
     _contains_term,
-    _contains_any_term
+    _validate_caption_schema,
 )
 
 def run_tests():
@@ -38,7 +44,6 @@ def run_tests():
 
     # Shared minimal valid caption setup
     minimal_caption = {
-        "schema_version": CAPTION_SCHEMA_VERSION,
         "global_scene": {
             "scene_summary": "This is a detailed paragraph covering the environment. " * 5,
             "environment": "urban",
@@ -47,6 +52,7 @@ def run_tests():
                 {
                     "entity_id": "entity_001",
                     "category": "vehicle",
+                    "referential_scope": "the vehicle tracked as the main reasoning target",
                     "evidence_profile": {
                         "identity_evidence": ["Shape"],
                         "observable_attributes": ["Fast"],
@@ -59,7 +65,7 @@ def run_tests():
             "modality": "rgb",
             "detailed_caption": "This is a detailed caption paragraph for video one. " * 6,
             "information_atoms": [
-                {"atom_id": "v1_atom_001", "frame_keys": ["frame_0001"], "fact": "Red car is present."}
+                {"atom_id": "v1_atom_001", "frame_keys": ["frame_0001"], "entity_refs": ["entity_001"], "fact": "Red car is present."}
             ],
             "sensor_specific_cues": ["Cue 1"],
             "sensor_limitations": ["Limit 1"],
@@ -70,7 +76,7 @@ def run_tests():
             "modality": "event",
             "detailed_caption": "This is a detailed caption paragraph for video two. " * 6,
             "information_atoms": [
-                {"atom_id": "v2_atom_001", "frame_keys": ["frame_0001"], "fact": "Moving edges observed."}
+                {"atom_id": "v2_atom_001", "frame_keys": ["frame_0001"], "entity_refs": ["entity_001"], "fact": "Moving edges observed."}
             ],
             "sensor_specific_cues": ["Cue 2"],
             "sensor_limitations": ["Limit 2"],
@@ -136,7 +142,7 @@ def run_tests():
                 cap[f"video{recovering_video}_analysis"]["information_atoms"][0]["atom_id"] = ref_atom
                 cap[f"video{recovering_video}_analysis"]["information_atoms"][0]["fact"] = fact
             else:
-                cap[f"video{recovering_video}_analysis"]["information_atoms"].append({"atom_id": ref_atom, "frame_keys": ["frame_0001"], "fact": fact})
+                cap[f"video{recovering_video}_analysis"]["information_atoms"].append({"atom_id": ref_atom, "frame_keys": ["frame_0001"], "entity_refs": ["entity_001"], "fact": fact})
         
         cap[f"video{missing_video}_analysis"]["missing_key_attributes"].append({
             "attribute_type": attr_type,
@@ -232,60 +238,448 @@ def run_tests():
     assert ex_warn == [], f"Prompt example generated warnings: {ex_warn}"
     print("Test 16 (Prompt example validates and no warnings) passed")
 
-    # Test 17: Template validates
+    # Test 17: Stage-2 prompt consolidation preserves semantic invariants
+    prompt_text = _build_caption_prompt(task)
+    consolidated_blocks = [
+        "ENTITY REGISTRY CONSTRUCTION AND INVARIANTS",
+        "ATOM AND PROVENANCE INVARIANTS",
+        "GRAPH CONSTRUCTION AND EVIDENCE-CLOSURE WORKFLOW",
+        "FINAL GRAPH CONSISTENCY SELF-CHECK",
+    ]
+    for block in consolidated_blocks:
+        assert prompt_text.count(block) == 1, f"Missing or duplicated consolidated prompt block: {block}"
+    removed_blocks = [
+        "SAME-OBJECT IDENTITY CONSISTENCY",
+        "ENTITY SCOPE EXCLUSIVITY",
+        "GROUP MEMBER PROMOTION RULE",
+        "SHARED ENTITY REGISTRY WORKFLOW",
+        "ATOM RECONCILIATION / EVIDENCE COMPLETION",
+        "ATOM CLOSURE WORKFLOW",
+        "FINAL EVIDENCE-CLOSURE SELF-CHECK",
+    ]
+    for block in removed_blocks:
+        assert block not in prompt_text, f"Old duplicate prompt block still present: {block}"
+    assert "Each information atom is one minimal" in prompt_text
+    assert "multiple independently testable observations" in prompt_text
+    assert "directly observable relation, interaction, or joint event" in prompt_text
+    assert "A multi-entity atom is valid" in prompt_text
+    assert "Evidence validity is determined by atom.fact semantics" in prompt_text
+    assert "Same-object continuity" in prompt_text
+    assert "reuse one entity_id" in prompt_text
+    assert "state, action, position, visibility, or modality-specific appearance changes do not create a new Entity" in prompt_text
+    assert "Frame co-occurrence does not imply semantic support" in prompt_text
+    assert "CAPTION_SCHEMA_VERSION" not in prompt_text
+    assert "schema_version" not in prompt_text
+    assert "cross_modal_disambiguation_caption_v" not in prompt_text
+    assert "v12" not in prompt_text
+    assert "v13" not in prompt_text
+    print("Test 17 (Stage-2 prompt consolidation regression) passed")
+
+    # Test 18: Template validates
     template_cap = _template_caption(task)
     _validate_caption_schema(template_cap, {"frame_0001"}, "rgb", "event")
-    print("Test 17 (Template validates) passed")
+    print("Test 18 (Template validates) passed")
 
-    # Test 18: Asymmetric frame refs
+    # Test 19: Asymmetric frame refs
     test_d_caption = eval(repr(minimal_caption))
     test_d_caption["video1_analysis"]["information_atoms"][0]["frame_keys"] = ["frame_000450", "frame_000480"]
     test_d_caption["video2_analysis"]["information_atoms"][0]["frame_keys"] = ["frame_000480"]
     _validate_caption_schema(test_d_caption, {"frame_000450", "frame_000480"}, "rgb", "event")
-    print("Test 18 (Asymmetric frame refs) passed")
+    print("Test 19 (Asymmetric frame refs) passed")
 
-    # Test 19: Old v10 resume rejection
-    old_cap = {
-        "caption_id": "test_old_v10",
-        "caption": {
-            "schema_version": "cross_modal_disambiguation_caption_v10",
-            "global_scene": {},
-            "video1_analysis": {},
-            "video2_analysis": {},
-            "cross_modal_evidence_links": [
-                {
-                    "shared_evidence": "old string",
-                    "unique_to_video1": "old string",
-                    "unique_to_video2": "old string"
-                }
-            ],
-            "information_gain": [],
-            "reasoning_events": [],
-            "ambiguity_events": [],
-            "qa_relevant_details": [],
-            "rejected_observations": [],
+    example_entities = example["global_scene"]["physical_entities"]
+    assert sum(1 for entity in example_entities if entity["entity_id"] == "entity_002") == 1
+    v1_entity_002_atoms = [
+        atom for atom in example["video1_analysis"]["information_atoms"]
+        if "entity_002" in atom["entity_refs"]
+    ]
+    assert len(v1_entity_002_atoms) >= 2, "Same BMW across time should use one entity with multiple atoms"
+    residual_group = next(entity for entity in example_entities if entity["entity_id"] == "entity_003")
+    assert "excluding entity_002" in residual_group["referential_scope"]
+    print("Test 20 (Prompt example same-object and residual-group fixture) passed")
+
+    def assert_validation_fails(cap, expected_message):
+        try:
+            _validate_caption_schema(cap, {"frame_0001"}, "rgb", "event")
+            assert False, f"Expected validation failure containing: {expected_message}"
+        except CaptionValidationError as e:
+            assert expected_message in str(e), f"Expected '{expected_message}' in '{e}'"
+            return str(e)
+
+    # Test 21: Asymmetric cross-modal link is accepted
+    asymmetric_link_cap = eval(repr(minimal_caption))
+    asymmetric_link_cap["cross_modal_evidence_links"][0]["video1_evidence_refs"] = ["v1_atom_001"]
+    asymmetric_link_cap["cross_modal_evidence_links"][0]["video2_evidence_refs"] = []
+    asymmetric_link_cap["cross_modal_evidence_links"][0]["shared_evidence"] = []
+    asymmetric_link_cap["cross_modal_evidence_links"][0]["unique_to_video1"] = [
+        "Video 1 provides unique evidence."
+    ]
+    _validate_caption_schema(asymmetric_link_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 21 (Asymmetric cross-modal link accepted) passed")
+
+    # Test 22: Fully unsupported cross-modal link is rejected
+    unsupported_link_cap = eval(repr(minimal_caption))
+    unsupported_link_cap["cross_modal_evidence_links"][0]["video1_evidence_refs"] = []
+    unsupported_link_cap["cross_modal_evidence_links"][0]["video2_evidence_refs"] = []
+    assert_validation_fails(unsupported_link_cap, "must cite at least one source-local evidence atom")
+    print("Test 22 (Unsupported cross-modal link rejected) passed")
+
+    # Test 23: Asymmetric non-confirmation information gain is accepted
+    asymmetric_gain_cap = eval(repr(minimal_caption))
+    asymmetric_gain_cap["information_gain"][0]["gain_type"] = "disambiguation"
+    asymmetric_gain_cap["information_gain"][0]["video1_evidence_refs"] = ["v1_atom_001"]
+    asymmetric_gain_cap["information_gain"][0]["video2_evidence_refs"] = []
+    _validate_caption_schema(asymmetric_gain_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 23 (Asymmetric non-confirmation information gain accepted) passed")
+
+    # Test 24: Confirmation information gain still requires both videos
+    asymmetric_confirmation_cap = eval(repr(minimal_caption))
+    asymmetric_confirmation_cap["information_gain"][0]["gain_type"] = "confirmation"
+    asymmetric_confirmation_cap["information_gain"][0]["video1_evidence_refs"] = ["v1_atom_001"]
+    asymmetric_confirmation_cap["information_gain"][0]["video2_evidence_refs"] = []
+    assert_validation_fails(asymmetric_confirmation_cap, "confirmation' requires evidence from both videos")
+    print("Test 24 (Confirmation information gain requires both videos) passed")
+
+    # Test 25: Fully unsupported information gain is rejected
+    unsupported_gain_cap = eval(repr(minimal_caption))
+    unsupported_gain_cap["information_gain"][0]["gain_type"] = "disambiguation"
+    unsupported_gain_cap["information_gain"][0]["video1_evidence_refs"] = []
+    unsupported_gain_cap["information_gain"][0]["video2_evidence_refs"] = []
+    assert_validation_fails(unsupported_gain_cap, "must cite at least one source-local evidence atom")
+    print("Test 25 (Unsupported information gain rejected) passed")
+
+    # Test 26: Exact normalized duplicate referential_scope rejection
+    exact_white_car_duplicate = eval(repr(minimal_caption))
+    exact_white_car_duplicate["global_scene"]["physical_entities"][0]["referential_scope"] = "The   White Car"
+    exact_white_car_duplicate["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the white car"
+    })
+    assert_validation_fails(exact_white_car_duplicate, "Duplicate normalized referential_scope detected")
+    print("Test 26 (Exact normalized duplicate scope rejected) passed")
+
+    # Test 27: Semantically similar scopes are not fuzzily rejected
+    similar_non_duplicate_scope_cap = eval(repr(minimal_caption))
+    similar_non_duplicate_scope_cap["global_scene"]["physical_entities"][0]["referential_scope"] = "the white car"
+    similar_non_duplicate_scope_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the white vehicle"
+    })
+    _validate_caption_schema(similar_non_duplicate_scope_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 27 (Similar non-identical scope not fuzzily rejected) passed")
+
+    # Test 28: Tree-shadow wrong atom rejection for information_gain
+    tree_wrong_gain = eval(repr(minimal_caption))
+    tree_wrong_gain["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_005",
+        "category": "tree_shadow",
+        "referential_scope": "the branching tree-shadow phenomenon on the road surface"
+    })
+    tree_wrong_gain["information_gain"][0]["entity_id"] = "entity_005"
+    assert_validation_fails(tree_wrong_gain, "not explicitly connected to entity entity_005")
+    print("Test 28 (Tree-shadow wrong atom rejection) passed")
+
+    # Test 29: Normalized duplicate referential_scope rejection
+    duplicate_scope_cap = eval(repr(minimal_caption))
+    duplicate_scope_cap["global_scene"]["physical_entities"][0]["referential_scope"] = (
+        "The specific white sedan tracked across the sampled interval"
+    )
+    duplicate_scope_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "  the   SPECIFIC white sedan tracked across the sampled interval  "
+    })
+    duplicate_scope_error = assert_validation_fails(duplicate_scope_cap, "Duplicate normalized referential_scope detected")
+    assert "entity_001" in duplicate_scope_error and "entity_002" in duplicate_scope_error
+    print("Test 29 (Normalized duplicate referential_scope rejection) passed")
+
+    # Test 30: Different referential scopes remain valid
+    distinct_scope_cap = eval(repr(minimal_caption))
+    distinct_scope_cap["global_scene"]["physical_entities"][0]["referential_scope"] = (
+        "the specific white sedan tracked across the sampled interval"
+    )
+    distinct_scope_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "parked_vehicle_group",
+        "referential_scope": "the other parked vehicles excluding entity_001"
+    })
+    _validate_caption_schema(distinct_scope_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 30 (Different referential scopes remain valid) passed")
+
+    # Test 31: Similar but distinct referential scopes are not fuzzy-rejected
+    similar_distinct_scope_cap = eval(repr(minimal_caption))
+    similar_distinct_scope_cap["global_scene"]["physical_entities"][0]["referential_scope"] = (
+        "the white sedan nearest the foreground"
+    )
+    similar_distinct_scope_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the white sedan farther down the curb"
+    })
+    _validate_caption_schema(similar_distinct_scope_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 31 (Similar but distinct referential scopes are not fuzzy-rejected) passed")
+
+    # Test 32: Same-object valid graph with multiple atoms passes
+    same_object_cap = eval(repr(minimal_caption))
+    same_object_cap["global_scene"]["physical_entities"][0]["entity_id"] = "entity_002"
+    same_object_cap["global_scene"]["physical_entities"][0]["referential_scope"] = (
+        "the specific white BMW tracked across the sampled interval"
+    )
+    same_object_cap["video1_analysis"]["information_atoms"][0]["entity_refs"] = ["entity_002"]
+    same_object_cap["video1_analysis"]["information_atoms"][0]["fact"] = "The white BMW is parked near the curb."
+    same_object_cap["video1_analysis"]["information_atoms"].append({
+        "atom_id": "v1_atom_002",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_002"],
+        "fact": "The same white BMW begins moving forward."
+    })
+    same_object_cap["video1_analysis"]["information_atoms"].append({
+        "atom_id": "v1_atom_003",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_002"],
+        "fact": "The same white BMW turns left."
+    })
+    same_object_cap["video2_analysis"]["information_atoms"][0]["entity_refs"] = ["entity_002"]
+    same_object_cap["cross_modal_evidence_links"][0]["entity_id"] = "entity_002"
+    same_object_cap["information_gain"][0]["entity_id"] = "entity_002"
+    same_object_cap["reasoning_events"][0]["participating_entities"] = ["entity_002"]
+    _validate_caption_schema(same_object_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 32 (Same-object valid graph with multiple atoms passes) passed")
+
+    # Test 33: Multi-Entity Atom allowed
+    multi_entity_cap = eval(repr(minimal_caption))
+    multi_entity_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the specific white BMW tracked across the sampled interval"
+    })
+    multi_entity_cap["video1_analysis"]["information_atoms"].append({
+        "atom_id": "v1_atom_010",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_001", "entity_002"],
+        "fact": "The rider passes behind the turning white BMW."
+    })
+    multi_entity_cap["reasoning_events"].append({
+        "event_id": "evt_002",
+        "event_type": "interaction",
+        "participating_entities": ["entity_001", "entity_002"],
+        "supporting_atom_refs": ["v1_atom_010"],
+        "description": "The rider and white BMW form one directly observed interaction."
+    })
+    _validate_caption_schema(multi_entity_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 33 (Multi-Entity Atom allowed) passed")
+
+    # Test 34: Unknown Entity Ref
+    unknown_entity_cap = eval(repr(minimal_caption))
+    unknown_entity_cap["video1_analysis"]["information_atoms"][0]["entity_refs"] = ["entity_999"]
+    assert_validation_fails(unknown_entity_cap, "references unknown entity: entity_999")
+    print("Test 34 (Unknown Entity Ref rejection) passed")
+
+    # Test 35: Cross-modal Entity mismatch
+    cross_modal_mismatch = eval(repr(minimal_caption))
+    cross_modal_mismatch["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_005",
+        "category": "tree_shadow",
+        "referential_scope": "the branching tree-shadow phenomenon on the road surface"
+    })
+    cross_modal_mismatch["video1_analysis"]["information_atoms"].append({
+        "atom_id": "v1_atom_005",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_005"],
+        "fact": "Branching tree shadows extend across the road."
+    })
+    cross_modal_mismatch["video2_analysis"]["information_atoms"].append({
+        "atom_id": "v2_atom_005",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_005"],
+        "fact": "Branching tree-shadow boundaries remain visible."
+    })
+    cross_modal_mismatch["cross_modal_evidence_links"][0]["video1_evidence_refs"] = ["v1_atom_005"]
+    cross_modal_mismatch["cross_modal_evidence_links"][0]["video2_evidence_refs"] = ["v2_atom_005"]
+    assert_validation_fails(cross_modal_mismatch, "not explicitly connected to entity entity_001")
+    print("Test 35 (Cross-modal Entity mismatch rejection) passed")
+
+    # Test 36: Reasoning Event disconnected Entity
+    disconnected_event_cap = eval(repr(minimal_caption))
+    disconnected_event_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the specific white BMW tracked across the sampled interval"
+    })
+    disconnected_event_cap["reasoning_events"][0]["participating_entities"] = ["entity_001", "entity_002"]
+    assert_validation_fails(disconnected_event_cap, "participating_entities not covered")
+    print("Test 36 (Reasoning Event disconnected Entity rejection) passed")
+
+    # Test 37: Ambiguity target mismatch
+    ambiguity_mismatch_cap = eval(repr(minimal_caption))
+    ambiguity_mismatch_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "the specific white BMW tracked across the sampled interval"
+    })
+    ambiguity_mismatch_cap["ambiguity_events"].append({
+        "ambiguity_id": "amb_001",
+        "target_entity": "entity_002",
+        "direction": "video1_resolves_video2",
+        "ambiguous_video": "video2",
+        "resolving_video": "video1",
+        "low_confidence_observation": "Ambiguous evidence in video 2.",
+        "why_ambiguous_video_cannot_resolve": "Cannot resolve due to lack of detail.",
+        "candidate_hypotheses": [
+            {"hypothesis": "hypothesis 1", "why_compatible_with_ambiguous": "Fits partial evidence.", "support_from_resolving": "Confirmed by video 1."},
+            {"hypothesis": "hypothesis 2", "why_compatible_with_ambiguous": "Fits partial evidence.", "support_from_resolving": "Rejected by video 1."}
+        ],
+        "resolving_discriminative_evidence": "Clear evidence in video 1.",
+        "eliminated_hypotheses": [{"hypothesis": "hypothesis 2", "why_eliminated": "Contradicted by video 1."}],
+        "fusion_conclusion": "Conclusion after resolution.",
+        "missing_attribute_type": "existence",
+        "ambiguous_evidence_refs": ["v2_atom_001"],
+        "resolving_evidence_refs": ["v1_atom_001"]
+    })
+    assert_validation_fails(ambiguity_mismatch_cap, "not explicitly connected to entity entity_002")
+    print("Test 37 (Ambiguity target mismatch rejection) passed")
+
+    # Test 38: Asymmetric modality coverage is allowed outside bilateral cross-modal sections
+    asymmetric_entity_cap = eval(repr(minimal_caption))
+    asymmetric_entity_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_005",
+        "category": "tree_shadow",
+        "referential_scope": "the branching tree-shadow phenomenon on the road surface"
+    })
+    asymmetric_entity_cap["video2_analysis"]["information_atoms"].append({
+        "atom_id": "v2_atom_005",
+        "frame_keys": ["frame_0001"],
+        "entity_refs": ["entity_005"],
+        "fact": "Branching tree-shadow boundaries remain visible."
+    })
+    _validate_caption_schema(asymmetric_entity_cap, {"frame_0001"}, "rgb", "event")
+    print("Test 38 (Asymmetric modality coverage allowed) passed")
+
+    def load_resume_items(*items):
+        temp_file = Path("temp_resume_validator_compat.json")
+        with open(temp_file, "w") as f:
+            json.dump({"items": list(items)}, f)
+        try:
+            return _load_resume(temp_file)
+        finally:
+            temp_file.unlink()
+
+    def current_resume_item(caption, **overrides):
+        item = _task_to_item(task, status="generated", caption=caption)
+        item.update(overrides)
+        return item
+
+    # Test 39: Current valid caption resumes
+    valid_resume_item = current_resume_item(minimal_caption)
+    valid_items, _ = load_resume_items(valid_resume_item)
+    assert len(valid_items) == 1, "Current valid caption must be accepted by resume"
+    print("Test 39 (Current valid caption resumes) passed")
+
+    # Test 40: Old caption without entity_refs is rejected
+    no_entity_refs_cap = eval(repr(minimal_caption))
+    no_entity_refs_cap["video1_analysis"]["information_atoms"][0].pop("entity_refs")
+    valid_items, _ = load_resume_items(current_resume_item(no_entity_refs_cap))
+    assert len(valid_items) == 0, "Caption missing entity_refs must be rejected by resume"
+    print("Test 40 (Resume rejects caption without entity_refs) passed")
+
+    # Test 41: Old caption without referential_scope is rejected
+    no_scope_cap = eval(repr(minimal_caption))
+    no_scope_cap["global_scene"]["physical_entities"][0].pop("referential_scope")
+    valid_items, _ = load_resume_items(current_resume_item(no_scope_cap))
+    assert len(valid_items) == 0, "Caption missing referential_scope must be rejected by resume"
+    print("Test 41 (Resume rejects caption without referential_scope) passed")
+
+    # Test 42: Invalid current Entity-Atom connection is rejected
+    invalid_connection_cap = eval(repr(minimal_caption))
+    invalid_connection_cap["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_005",
+        "category": "tree_shadow",
+        "referential_scope": "the branching tree-shadow phenomenon on the road surface"
+    })
+    invalid_connection_cap["information_gain"][0]["entity_id"] = "entity_005"
+    valid_items, _ = load_resume_items(current_resume_item(invalid_connection_cap))
+    assert len(valid_items) == 0, "Invalid Entity-Atom connection must be rejected by resume"
+    print("Test 42 (Resume rejects invalid Entity-Atom connection) passed")
+
+    # Test 43: Missing resume metadata is rejected safely
+    missing_metadata_item = {"caption_id": "missing_metadata", "caption": minimal_caption}
+    valid_items, _ = load_resume_items(missing_metadata_item)
+    assert len(valid_items) == 0, "Resume item missing metadata must be treated as stale"
+    print("Test 43 (Resume rejects missing metadata safely) passed")
+
+    # Test 44: Resume no longer filters skipped reasons containing additional_properties
+    temp_file = Path("temp_resume_skipped_compat.json")
+    skipped_item = {
+        "caption_id": "failed_current_item",
+        "reason": "Validation Error: additional_properties is not allowed here",
+    }
+    with open(temp_file, "w") as f:
+        json.dump({"items": [], "skipped": [skipped_item]}, f)
+    try:
+        _, skipped_items = _load_resume(temp_file)
+    finally:
+        temp_file.unlink()
+    assert skipped_items == [skipped_item], "Resume must preserve current additional_properties failures"
+    print("Test 44 (Resume preserves additional_properties skipped reasons) passed")
+
+    # Test 45: Limited run skipped accounting excludes unrelated global discovery failures
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        input_path = root / "input.json"
+        dataset_root = root / "dataset"
+        composite_root = root / "composite"
+        input_payload = {
+            "segments": {
+                "aaa_missing": {
+                    "split_dir": "missing_split",
+                    "segment_name": "missing_segment",
+                    "modality_pairs": [["rgb", "event"]],
+                },
+                "bbb_valid": {
+                    "split_dir": "valid_split",
+                    "segment_name": "valid_segment",
+                    "modality_pairs": [["rgb", "event"]],
+                },
+            }
         }
-    }
-    temp_file = Path("temp_resume_v10.json")
-    with open(temp_file, "w") as f:
-        json.dump({"items": [old_cap]}, f)
-    valid_items, _ = _load_resume(temp_file)
-    assert len(valid_items) == 0, "Old v10 caption must be rejected by resume"
-    temp_file.unlink()
-    print("Test 19 (Old v10 resume rejection) passed")
+        input_path.write_text(json.dumps(input_payload), encoding="utf-8")
+        rgb_dir = dataset_root / ".frames_cache" / "valid_split" / "valid_segment" / "valid_day_rgb"
+        event_dir = dataset_root / ".frames_cache_event" / "valid_split" / "valid_segment" / "valid_day_event"
+        rgb_dir.mkdir(parents=True)
+        event_dir.mkdir(parents=True)
+        for frame_number in range(1, 31):
+            (rgb_dir / f"frame_{frame_number:06d}.png").write_bytes(b"")
+            (event_dir / f"frame_{frame_number:06d}.png").write_bytes(b"")
 
-    # Test 20: Valid v11 resume acceptance
-    v11_cap = {
-        "caption_id": "test_v11",
-        "caption": minimal_caption
-    }
-    temp_file = Path("temp_resume_v11.json")
-    with open(temp_file, "w") as f:
-        json.dump({"items": [v11_cap]}, f)
-    valid_items, _ = _load_resume(temp_file)
-    assert len(valid_items) == 1, "Valid v11 caption must be accepted by resume"
-    temp_file.unlink()
-    print("Test 20 (Valid v11 resume acceptance) passed")
+        tasks, scoped_skipped, total_selected = build_caption_tasks(
+            input_path=input_path,
+            dataset_root=dataset_root,
+            composite_root=composite_root,
+            sampling_strategy="uniform_adaptive",
+            num_uniform_frames=1,
+            num_adaptive_frames=0,
+            existing_items=[],
+            limit=1,
+            write_composites=False,
+        )
+        assert len(tasks) == 1
+        assert total_selected == 1
+        assert scoped_skipped == [], f"Limited run should not include unrelated skipped items: {scoped_skipped}"
+
+        _, full_skipped, _ = build_caption_tasks(
+            input_path=input_path,
+            dataset_root=dataset_root,
+            composite_root=composite_root,
+            sampling_strategy="uniform_adaptive",
+            num_uniform_frames=1,
+            num_adaptive_frames=0,
+            existing_items=[],
+            write_composites=False,
+        )
+        assert any(item.get("segment_id") == "aaa_missing" for item in full_skipped)
+    print("Test 45 (Limited run skipped accounting scoped) passed")
 
     print("All tests passed!")
 
