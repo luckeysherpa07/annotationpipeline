@@ -37,7 +37,8 @@ from annotation_feature.aligned_multimodal_caption_pipeline import (
 
 # Import Pass 1 specifics
 from annotation_feature.aligned_caption_pass1_prompt import (
-    _build_pass1_prompt,
+    build_pass1_system_prompt,
+    build_pass1_user_prompt,
     _template_caption_pass1,
 )
 from annotation_feature.aligned_caption_pass1_validation import _validate_pass1_schema
@@ -83,13 +84,15 @@ def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
             "REQUIRED form for why_missing: describe what is concretely absent in these specific frames, e.g. 'Vehicle surfaces in the sampled frames show no stable internal detail sufficient to distinguish paint color.' "
             "REQUIRED form for sensor_limitations: cite a specific frame range or observable condition, e.g. 'Sunlight glare on windshields reduces surface detail in the later frames.'"
         )
-    if "hypotheses" in message or "hypothesis" in message or "meta-statement" in message:
+    if "hypotheses" in message or "hypothesis" in message or "meta-statement" in message or "confidence" in message:
         hints.append(
             "Every uncertain_observations item must contain a valid uncertainty_id, "
             "one known entity_id, and at least one same-source evidence_ref connected "
             "to that entity. hypotheses may be empty; if non-empty, they must contain "
             "at least 2 distinct candidate interpretations. Do not output meta-statements of inability (e.g. 'cannot be determined'). "
-            "Hypotheses must be plausible factual candidate interpretations."
+            "Hypotheses must be plausible factual candidate interpretations. "
+            "Each hypothesis item must be exactly: {\"hypothesis\": \"<text>\", \"confidence\": \"low|medium|high\"}. "
+            "No other keys like hypothesis_id are allowed."
         )
     if category in {"invalid_reference", "missing_attribute_recovery"}:
         hints.append(
@@ -117,7 +120,8 @@ async def _call_gemini_pass1(
     from google.genai import types as genai_types
     from annotation_feature.pipeline.utils import build_image_parts
     
-    base_contents = build_image_parts(encoded) + [_build_pass1_prompt(task)]
+    system_instruction = build_pass1_system_prompt()
+    base_contents = build_image_parts(encoded) + [build_pass1_user_prompt(task)]
     contents = base_contents
     raw_text = None
     validation_attempt = 1
@@ -140,6 +144,9 @@ async def _call_gemini_pass1(
                         client.models.generate_content,
                         model=model_name,
                         contents=contents,
+                        config=genai_types.GenerateContentConfig(
+                            system_instruction=system_instruction,
+                        ),
                     )
                     break
                 except Exception as exc:

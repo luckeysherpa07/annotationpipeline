@@ -62,7 +62,10 @@ def _build_prompt_schema_example(task: Any) -> dict[str, Any]:
                     "observed_evidence": "Partial outline of the vehicle.",
                     "missing_evidence": "Internal structural details.",
                     "evidence_refs": ["v1_atom_001"],
-                    "hypotheses": []
+                    "hypotheses": [
+                        {"hypothesis": "Small passenger car.", "confidence": "low"},
+                        {"hypothesis": "Delivery van.", "confidence": "low"}
+                    ]
                 }
             ],
             "missing_key_attributes": [
@@ -93,19 +96,9 @@ def _build_prompt_schema_example(task: Any) -> dict[str, Any]:
     }
 
 
-def _build_pass1_prompt(task: Any) -> str:
-    frame_names = ", ".join(path.name for path in task.composite_frames)
-    constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
-    schema_example_text = json.dumps(_build_prompt_schema_example(task), indent=2, ensure_ascii=False)
-
-
-
+def build_pass1_system_prompt() -> str:
     return "\n".join(
         [
-            "TASK: Construct PASS 1 evidence for an aligned multimodal video segment. Neither source is ground truth.",
-            "SCOPE: Produce ONLY global_scene, video1_analysis, and video2_analysis. NO cross-modal fusion, information-gain, directional contribution, cross-source ambiguity resolution, QA, or recoverability reasoning.",
-            "PRIORITIES: 1. source-local factual correctness; 2. valid provenance/references; 3. stable entity identity; 4. evidence coverage (do not omit salient observations; every independently distinguishable physical object in any frame that meets the minimum-size threshold MUST have an entity in global_scene.physical_entities); 5. atom proposition integrity (each atom = 1 minimal proposition, but no upper limit on atom count); 6. caption completeness (every caption sentence must be supported by a same-source atom); 7. descriptive richness.",
-            constraint_block,
             "RULES:",
             "1. SHARED ENTITIES: Reuse `entity_id` for the same physical referent. Never reuse an ID for different referents. Create entities for salient independent physical referents. Preserve minimality; do not hide genuinely salient referents. ENTITY COMPLETENESS SCAN (MANDATORY): Before writing any atom, scan ALL visible physical objects in every supplied frame and enumerate a candidate entity for each. Apply this minimum bar: if an object is (a) large enough to occupy more than ~5% of frame area, AND (b) can be identified to at least a coarse category (e.g. vehicle, building, vegetation), it MUST receive an entity_id. Common omissions to watch for: multiple parked vehicles counted as one, background buildings ignored, trees and utility poles missed. Do NOT merge distinct physical objects into a single entity merely for brevity.",
             "2. REGISTRY METADATA: Global registry metadata is organizational, not source-local evidence. Use conservative but useful identity descriptions. Do not automatically over-neutralize every referent to 'object' or 'unknown', but do not insert source-exclusive details that create leakage risk.",
@@ -116,7 +109,7 @@ def _build_pass1_prompt(task: Any) -> str:
             "7. LENGTH: Meet minimum lengths using supported content only. Target 24-40 words for scene_summary and 35-60 words for each detailed_caption. Never add unsupported facts as filler.",
             "8. PHYSICAL WORDING & ENTITY CATEGORIES: Entity `category` MUST refer to a physical, tangible object class (e.g. vehicle, pedestrian, roadway, sidewalk, vegetation, infrastructure, building, animal, cyclist). For lighting phenomena (shadows, glare, reflections), use `lighting_effect` as category. Do NOT use 'barrier' for non-physical phenomena. For undetermined objects, use `unknown_object`. `detailed_caption`, `global_scene`, and `information_atoms` must describe the physical world as observed from within the scene. Forbidden words for ALL fields: modality, rgb, ir, event, depth, edge map, blurry, noisy, pixel, grayscale, sensor, capture, footage, stream, recording. GLOBAL SCENE FIELDS: additionally forbidden: camera, lens, viewpoint, frame. Instead of 'A camera moves forward', write 'The perspective advances along the street' or 'The scene unfolds from a forward-moving vantage point'. Do not use 'the sensor records', 'generates activations', or any modality-mechanism explanation.",
             "9. SENSORS & UNCERTAINTY: `sensor_specific_cues` may describe response patterns but must remain segment-specific; do not use a cue as evidence for an unsupported semantic interpretation. `sensor_limitations` must describe a limitation specifically manifested in this segment's frames — apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality, it is forbidden generic theory. FORBIDDEN examples: 'The modality lacks intensity data.', 'The sensor does not record color.', 'Lack of intensity data prevents identifying X.' REQUIRED form — cite what is absent in these specific frames: e.g. 'Vehicle surfaces in the sampled frames show no stable internal detail sufficient to distinguish paint color.' or 'Sunlight glare on windshields in frames 450–870 reduces surface detail.' Uncertain hypotheses must arise from current-source evidence.",
-            "10. MISSING ATTRIBUTES: `why_missing` must be SEGMENT-LOCAL: cite what is absent IN THESE SPECIFIC FRAMES that prevents observing the attribute. Apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality regardless of content, it is forbidden generic theory.\n   FORBIDDEN form: 'Surface color cannot be observed because this sensing method does not register static spectral differences.' (= generic theory about the modality)\n   FORBIDDEN form: 'The physical instrument does not register static surface paint reflectance.' (= same problem, disguised wording)\n   REQUIRED form: 'The vehicle body in frames 450–480 is partially occluded by shadow, preventing identification of paint color.' or 'Distant vehicles in the background frames show insufficient resolution to distinguish a specific color.' — these cite what is concretely absent in this segment.",
+            "10. MISSING ATTRIBUTES: `why_missing` must be SEGMENT-LOCAL: cite what is absent IN THESE SPECIFIC FRAMES that prevents observing the attribute. Apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality regardless of content, it is forbidden generic theory.\n   FORBIDDEN form: 'Surface color cannot be observed because this sensing method does not register static spectral differences.' (= generic theory about the modality)\n   FORBIDDEN form: 'The physical instrument does not register static surface paint reflectance.' (= same problem, disguised wording)\n   REQUIRED form: 'The vehicle body in frames 450–480 is partially occluded by shadow, preventing identification of paint color.' or 'Distant vehicles in the background frames show insufficient resolution to distinguish a specific color.' — these cite what is concretely absent in this segment.\n   SELECTION PRIORITY: When choosing which attributes to flag as missing, apply this ranking:\n   (1) Cross-modally recoverable: an attribute the OTHER modality could plausibly supply (e.g. event can confirm motion; rgb can confirm color). These are the most valuable.\n   (2) Semantically consequential: resolving the attribute would change the scene interpretation (e.g. is the object a pedestrian or a cyclist?).\n   AVOID: Attributes that are permanently unresolvable (e.g. engine idle state of a parked vehicle) or attributes whose absence is a generic property of the modality with no specific consequence in this segment.",
             "11. `recoverable_evidence_refs` MUST remain [] in PASS 1.",
             (
                 "PRE-SUBMISSION SELF-CHECK (MANDATORY — complete this check mentally before finalising your JSON output):\n"
@@ -133,8 +126,16 @@ def _build_pass1_prompt(task: Any) -> str:
                 "  [ ] Every atom has a non-empty entity_refs list. An atom with zero entity_refs is a hard schema violation. "
                 "If a fact describes a scene-level condition with no specific entity, either assign it to the most relevant "
                 "existing entity_id, or create a new entity entry in global_scene.physical_entities first.\n"
+                "  [ ] ENTITY LOCKDOWN: For every physical object named by noun phrase in ANY text field — including `fact`, "
+                "`missing_attribute`, `observed_evidence`, `missing_evidence`, and `sensor_limitations` — there MUST be a "
+                "corresponding entity_id in global_scene.physical_entities. If you referenced a physical object in any of "
+                "these fields but have no entity for it, ADD the entity to physical_entities NOW before finalising. "
+                "Do not leave unnamed physical referents in any text field.\n"
                 "\n"
                 "CAPTIONS:\n"
+                "  DEFINITION: detailed_caption is a lossy prose compression of information_atoms. It must contain LESS "
+                "information than the atoms combined, never more. Any word or phrase that does not map back to a specific "
+                "atom_id is a violation.\n"
                 "  [ ] Scan each sentence of detailed_caption in video1_analysis. For each sentence, name the atom_id that "
                 "supports it. If no atom supports a sentence, delete the sentence or create a new atom first.\n"
                 "  [ ] Scan each sentence of detailed_caption in video2_analysis. Same rule as above.\n"
@@ -146,6 +147,13 @@ def _build_pass1_prompt(task: Any) -> str:
                 "    'X appears to be Y'           → 'X is Y' (only if an atom supports it) or drop the claim\n"
                 "    'indicating forward motion'   → 'establishing forward motion' or cite the physical atom directly\n"
                 "    'suggesting the surface is X' → 'the surface shows X' (only if an atom supports it)\n"
+                "  SYNONYM DISCIPLINE — caption word choice must match atom word choice exactly where possible. Common violations to avoid:\n"
+                "    'ground'    → use the atom's wording: 'asphalt', 'road surface', 'sidewalk', etc.\n"
+                "    'displays'  → 'has', 'shows', 'contains' only if atom uses those words; otherwise rewrite the sentence using the atom's exact phrasing\n"
+                "    'lined with'→ rephrase using atom facts: e.g. 'a white sedan, a black van ... are parked on the street' (enumerate from atoms)\n"
+                "  OBSERVER MOTION — these phrases are FORBIDDEN in detailed_caption even if an atom supports forward movement:\n"
+                "    FORBIDDEN: 'Moving forward', 'As we move', 'moving along', 'as the path advances'\n"
+                "    ALLOWED:   Use the physical-world atom wording directly, e.g. 'Further along the street, a white sedan is parked on the right.'\n"
                 "\n"
                 "SCHEMA:\n"
                 "  [ ] Every uncertain_observations item must contain a valid uncertainty_id, one known entity_id, and at least one same-source evidence_ref connected to that entity. hypotheses may be empty; if non-empty, they must contain at least 2 distinct candidate interpretations.\n"
@@ -159,7 +167,22 @@ def _build_pass1_prompt(task: Any) -> str:
                 "- global_scene.scene_summary / temporal_progression: NO \"camera\", \"lens\", \"viewpoint\", \"frame\"\n"
                 "- ALL fields: NO \"corresponding\", \"suggesting\", \"indicating\", \"implying\""
             ),
-            "OUTPUT CONTRACT: Return ONLY valid JSON matching this skeleton. No other top-level fields.",
+            "OUTPUT CONTRACT: Return ONLY valid JSON matching the provided skeleton. No other top-level fields.",
+        ]
+    )
+
+
+def build_pass1_user_prompt(task: Any) -> str:
+    frame_names = ", ".join(path.name for path in task.composite_frames)
+    constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
+    schema_example_text = json.dumps(_build_prompt_schema_example(task), indent=2, ensure_ascii=False)
+
+    return "\n".join(
+        [
+            "TASK: Construct PASS 1 evidence for an aligned multimodal video segment. Neither source is ground truth.",
+            "SCOPE: Produce ONLY global_scene, video1_analysis, and video2_analysis. NO cross-modal fusion, information-gain, directional contribution, cross-source ambiguity resolution, QA, or recoverability reasoning.",
+            "PRIORITIES: 1. source-local factual correctness; 2. valid provenance/references; 3. stable entity identity; 4. evidence coverage (do not omit salient observations; every independently distinguishable physical object in any frame that meets the minimum-size threshold MUST have an entity in global_scene.physical_entities); 5. atom proposition integrity (each atom = 1 minimal proposition, but no upper limit on atom count); 6. caption completeness (every caption sentence must be supported by a same-source atom); 7. descriptive richness.",
+            constraint_block,
             schema_example_text,
             "ALLOWED ENUMS:",
             "- confidence: low, medium, high",
@@ -210,7 +233,10 @@ def _template_caption_pass1(task: Any) -> dict[str, Any]:
                     "observed_evidence": "Template placeholder",
                     "missing_evidence": "Placeholder",
                     "evidence_refs": ["v1_atom_001"],
-                    "hypotheses": []
+                    "hypotheses": [
+                        {"hypothesis": "Placeholder 1", "confidence": "low"},
+                        {"hypothesis": "Placeholder 2", "confidence": "low"}
+                    ]
                 }
             ],
             "missing_key_attributes": [
@@ -242,7 +268,10 @@ def _template_caption_pass1(task: Any) -> dict[str, Any]:
                     "observed_evidence": "Template placeholder",
                     "missing_evidence": "Placeholder",
                     "evidence_refs": ["v2_atom_001"],
-                    "hypotheses": []
+                    "hypotheses": [
+                        {"hypothesis": "Placeholder 1", "confidence": "low"},
+                        {"hypothesis": "Placeholder 2", "confidence": "low"}
+                    ]
                 }
             ],
             "missing_key_attributes": [
