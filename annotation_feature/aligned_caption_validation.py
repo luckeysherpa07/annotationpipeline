@@ -19,6 +19,8 @@ from annotation_feature.aligned_caption_schema import (
     FORBIDDEN_GLOBAL_SCENE_PATTERN,
     FORBIDDEN_INFERENTIAL_MESSAGE,
     FORBIDDEN_INFERENTIAL_PATTERN,
+    FORBIDDEN_MECHANISM_MESSAGE,
+    FORBIDDEN_MECHANISM_PATTERNS,
     FORBIDDEN_SENSOR_QUALITY_MESSAGE,
     FORBIDDEN_SENSOR_QUALITY_PATTERN,
     GENERIC_SENSOR_EXPLANATION_PATTERNS,
@@ -95,6 +97,16 @@ def _validate_no_generic_sensor_explanation(
 def _validate_no_forbidden_inferential_terms(text: str, field: str) -> None:
     if FORBIDDEN_INFERENTIAL_PATTERN.search(text):
         raise CaptionValidationError(f"{field} contains forbidden inferential wording. {FORBIDDEN_INFERENTIAL_MESSAGE}")
+
+
+def _validate_physical_world_wording(text: str, field: str) -> None:
+    for pattern in FORBIDDEN_MECHANISM_PATTERNS:
+        match = pattern.search(text)
+        if match:
+            raise CaptionValidationError(
+                f"{field} contains forbidden mechanism-oriented wording "
+                f"{match.group(0)!r}. {FORBIDDEN_MECHANISM_MESSAGE}"
+            )
 
 
 def _validate_uncertain_observations(values: Any, field: str, *, min_hypotheses: int = 1) -> None:

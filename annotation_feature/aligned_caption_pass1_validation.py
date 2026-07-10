@@ -25,6 +25,7 @@ from annotation_feature.aligned_caption_validation import (
     _validate_min_words,
     _validate_no_forbidden_inferential_terms,
     _validate_no_generic_sensor_explanation,
+    _validate_physical_world_wording,
     _validate_uncertain_observations,
     _normalize_referential_scope,
 )
@@ -180,6 +181,7 @@ def _validate_pass1_schema(
         raise CaptionValidationError(f"global_scene.scene_summary contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
     _validate_no_forbidden_inferential_terms(scene_summary, "global_scene.scene_summary")
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
+    _validate_physical_world_wording(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
     temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
     if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(temporal_progression):
@@ -188,6 +190,7 @@ def _validate_pass1_schema(
         raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
     _validate_no_forbidden_inferential_terms(temporal_progression, "global_scene.temporal_progression")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
+    _validate_physical_world_wording(temporal_progression, "global_scene.temporal_progression")
     
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
     if not physical_entities:
@@ -251,6 +254,7 @@ def _validate_pass1_schema(
             raise CaptionValidationError(f"{field}.detailed_caption contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
         _validate_no_forbidden_inferential_terms(detailed_caption, f"{field}.detailed_caption")
         _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
+        _validate_physical_world_wording(detailed_caption, f"{field}.detailed_caption")
         
         atoms = _require_list(analysis.get("information_atoms"), f"{field}.information_atoms")
         if not atoms:
@@ -285,6 +289,7 @@ def _validate_pass1_schema(
             atom_entity_refs[atom_id] = seen_atom_entities
             fact = _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
             _validate_no_forbidden_inferential_terms(fact, f"{field}.information_atoms[{i}].fact")
+            _validate_physical_world_wording(fact, f"{field}.information_atoms[{i}].fact")
             atom_facts[atom_id] = fact
 
         for key in ("sensor_specific_cues", "sensor_limitations"):
@@ -315,6 +320,25 @@ def _validate_pass1_schema(
         for i, attr in enumerate(missing_attrs, start=1):
             if not isinstance(attr, dict):
                 raise CaptionValidationError(f"{field}.missing_key_attributes[{i}] must be an object")
+                
+            expected_fields = {"attribute_type", "missing_attribute", "why_missing", "recoverable_evidence_refs"}
+            actual_fields = set(attr.keys())
+            missing_fields = expected_fields - actual_fields
+            unexpected_fields = actual_fields - expected_fields
+            
+            if missing_fields or unexpected_fields:
+                err_parts = []
+                if missing_fields:
+                    err_parts.append(f"Missing required fields: {sorted(missing_fields)}")
+                if unexpected_fields:
+                    err_parts.append(f"Unexpected fields: {sorted(unexpected_fields)}")
+                raise CaptionValidationError(
+                    f"{field}.missing_key_attributes[{i}] has an invalid structure. "
+                    f"{'; '.join(err_parts)}. "
+                    f"A valid item MUST contain exactly {sorted(expected_fields)}. "
+                    "If you cannot construct a valid target, remove the item and use an empty list '[]'."
+                )
+
             attr_type = attr.get("attribute_type")
             if attr_type not in ALLOWED_MISSING_ATTRIBUTE_TYPES:
                 raise CaptionValidationError(f"{field}.missing_key_attributes[{i}].attribute_type invalid: {attr_type}")

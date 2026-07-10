@@ -563,7 +563,7 @@ def test_hypothesis_normalization_distinct():
 
 
 def test_pass1_prompt_regression():
-    from annotation_feature.aligned_caption_pass1_prompt import _build_pass1_prompt, _build_prompt_schema_example
+    from annotation_feature.aligned_caption_pass1_prompt import build_pass1_system_prompt, build_pass1_user_prompt, _build_prompt_schema_example
     
     class DummyPath:
         stem = "frame_000000"
@@ -580,7 +580,8 @@ def test_pass1_prompt_regression():
         frames2 = [DummyPath()]
 
     task = DummyTask()
-    prompt = _build_pass1_prompt(task)
+    prompt = build_pass1_system_prompt()
+    prompt += build_pass1_user_prompt(task)
     
     # Must exist
     assert "PASS 1" in prompt
@@ -852,3 +853,136 @@ def test_uncertain_observations_bad_confidence():
     })
     with pytest.raises(CaptionValidationError, match="confidence must be high, medium, or low"):
         _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_mechanism_wording_in_scene_summary():
+    parsed = create_valid_pass1_schema()
+    parsed["global_scene"]["scene_summary"] = "The scene has activation contours and cars. " * 5
+    with pytest.raises(CaptionValidationError, match="forbidden mechanism-oriented wording 'activation'"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_mechanism_wording_in_temporal_progression():
+    parsed = create_valid_pass1_schema()
+    parsed["global_scene"]["temporal_progression"] = "The scene progresses with a response map showing cars. " * 4
+    with pytest.raises(CaptionValidationError, match="forbidden mechanism-oriented wording 'response map'"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_mechanism_wording_in_detailed_caption():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["detailed_caption"] = "The edge activations define the car's boundary in the video. " * 4
+    with pytest.raises(CaptionValidationError, match="forbidden mechanism-oriented wording 'activations'"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_mechanism_wording_in_atom_fact():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["information_atoms"][0]["fact"] = "The edge-onset outlines are clearly visible."
+    with pytest.raises(CaptionValidationError, match="forbidden mechanism-oriented wording 'edge-onset'"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_physical_wording_pass():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["detailed_caption"] = "The parked vehicle outline remains distinct near the vertical boundary. " * 3
+    parsed["video1_analysis"]["information_atoms"][0]["fact"] = "A vertical boundary separates the doorway from the wall."
+    parsed["global_scene"]["scene_summary"] = "Dense pedestrian activity continues near the entrance of the building. " * 4
+    # Should not raise
+    _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_mechanism_wording_permitted_in_sensor_specific_cues():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["sensor_specific_cues"].append("Dense edge activations define the response map.")
+    # Should not raise physical wording error
+    _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_missing_attributes_empty_list_passes():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = []
+    _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_missing_attributes_empty_object_fails_with_all_missing_fields():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [{}]
+    with pytest.raises(CaptionValidationError) as exc_info:
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+    
+    msg = str(exc_info.value)
+    assert "invalid structure" in msg
+    assert "Missing required fields" in msg
+    assert "attribute_type" in msg
+    assert "missing_attribute" in msg
+    assert "why_missing" in msg
+    assert "recoverable_evidence_refs" in msg
+
+def test_missing_attributes_partial_object_fails_listing_missing_fields():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [
+        {"missing_attribute": "foo"}
+    ]
+    with pytest.raises(CaptionValidationError) as exc_info:
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+    
+    msg = str(exc_info.value)
+    assert "invalid structure" in msg
+    assert "Missing required fields" in msg
+    assert "attribute_type" in msg
+    assert "why_missing" in msg
+    assert "recoverable_evidence_refs" in msg
+    
+    missing_fields_str = msg.split("Missing required fields: [")[1].split("]")[0]
+    assert "missing_attribute" not in missing_fields_str
+
+def test_missing_attributes_unexpected_field_fails():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [
+        {
+            "missing_attribute_type": "existence",
+            "missing_attribute": "foo",
+            "why_missing": "bar",
+            "recoverable_evidence_refs": []
+        }
+    ]
+    with pytest.raises(CaptionValidationError) as exc_info:
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+    
+    msg = str(exc_info.value)
+    assert "invalid structure" in msg
+    assert "Missing required fields" in msg
+    assert "attribute_type" in msg
+    assert "Unexpected fields" in msg
+    assert "missing_attribute_type" in msg
+
+def test_missing_attributes_empty_string_fails():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [
+        {
+            "attribute_type": "existence",
+            "missing_attribute": "",
+            "why_missing": "bar",
+            "recoverable_evidence_refs": []
+        }
+    ]
+    with pytest.raises(CaptionValidationError, match="must be a non-empty string"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_missing_attributes_null_array_fails():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [
+        {
+            "attribute_type": "existence",
+            "missing_attribute": "foo",
+            "why_missing": "bar",
+            "recoverable_evidence_refs": None
+        }
+    ]
+    with pytest.raises(CaptionValidationError, match="must be a list"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_missing_attributes_valid_passes():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["missing_key_attributes"] = [
+        {
+            "attribute_type": "existence",
+            "missing_attribute": "foo",
+            "why_missing": "bar",
+            "recoverable_evidence_refs": []
+        }
+    ]
+    _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")

@@ -71,6 +71,13 @@ def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
             "Do not mention sensor names, modality names, camera/frame/image-processing terms, "
             "or image-quality descriptions. Keep detailed captions above the minimum word count."
         )
+    if category == "physical_world_wording":
+        hints.append(
+            "Preserve the original atom ID, frame references, entity references, and supported physical meaning "
+            "whenever a supported physical proposition can be recovered. If the atom contains only a technical "
+            "response description and no defensible physical-world proposition, remove that atom and update dependent "
+            "caption text and evidence references rather than inventing a semantic interpretation."
+        )
     if "too short" in message:
         hints.append(
             "Expand the reported detailed_caption into a complete source-local paragraph of at least "
@@ -94,10 +101,21 @@ def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
             "Each hypothesis item must be exactly: {\"hypothesis\": \"<text>\", \"confidence\": \"low|medium|high\"}. "
             "No other keys like hypothesis_id are allowed."
         )
-    if category in {"invalid_reference", "missing_attribute_recovery"}:
+    if category == "invalid_reference":
         hints.append(
             "Re-check all IDs and references after the edit. Every referenced atom, entity, and frame_key "
             "must exist and must keep the required prefix. Duplicate IDs are not allowed."
+        )
+    if category == "missing_attribute_recovery":
+        hints.append(
+            "Rebuild the entire missing_key_attributes item. "
+            "Every item MUST simultaneously contain exactly four fields: 'attribute_type', 'missing_attribute', 'why_missing', and 'recoverable_evidence_refs'. "
+            "'attribute_type' MUST be from the allowed enum. "
+            "'missing_attribute' and 'why_missing' MUST be non-empty strings. "
+            "'recoverable_evidence_refs' MUST be an empty list []. "
+            "Do NOT use 'missing_attribute_type' or partial objects. "
+            "Do NOT use null, empty strings, or placeholders. "
+            "If you cannot produce a complete, reliable target, delete the item and return an empty list: \"missing_key_attributes\": []."
         )
     if not hints:
         return ""
@@ -204,7 +222,11 @@ async def _call_gemini_pass1(
             if isinstance(exc, CaptionParseError):
                 category = "parse_error"
             else:
-                if "blocklist" in exc_str or "forbidden" in exc_str:
+                if "mechanism-oriented wording" in exc_str or "representation-oriented wording" in exc_str:
+                    category = "physical_world_wording"
+                elif "generic sensor-theory" in exc_str:
+                    category = "generic_sensor_theory"
+                elif "blocklist" in exc_str or "forbidden" in exc_str:
                     category = "blocklist_failure"
                 elif "missing_key_attributes" in exc_str or "recoverable_evidence_refs" in exc_str:
                     category = "missing_attribute_recovery"
@@ -548,12 +570,16 @@ async def run_caption_pipeline_pass1_async(
             if isinstance(exc, CaptionParseError):
                 final_error_category = "parse_error"
             elif isinstance(exc, CaptionValidationError):
-                if "blocklist" in exc_str_lower or "forbidden" in exc_str_lower:
+                if "mechanism-oriented wording" in exc_str_lower:
+                    final_error_category = "physical_world_wording"
+                elif "blocklist" in exc_str_lower or "forbidden" in exc_str_lower:
                     final_error_category = "blocklist_failure"
                 elif "missing_key_attributes" in exc_str_lower or "recoverable_evidence_refs" in exc_str_lower:
                     final_error_category = "missing_attribute_recovery"
                 elif "reference" in exc_str_lower or "duplicate" in exc_str_lower or "unknown" in exc_str_lower:
                     final_error_category = "invalid_reference"
+                elif "mechanism-oriented wording" in exc_str_lower:
+                    final_error_category = "physical_world_wording"
                 else:
                     final_error_category = "schema_validation_error"
             elif _is_transport_error(exc):

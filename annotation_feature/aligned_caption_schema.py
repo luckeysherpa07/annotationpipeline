@@ -113,6 +113,22 @@ FORBIDDEN_SENSOR_QUALITY_MESSAGE = (
     "grayscale/greyscale, monochrome, overexposed, saturated. REMOVE THESE TERMS!"
 )
 
+FORBIDDEN_MECHANISM_PATTERNS = (
+    re.compile(r"\bactivations?\b", re.I),
+    re.compile(r"\bedge[\s-]?onset\b", re.I),
+    re.compile(r"\bresponse\s+maps?\b", re.I),
+    re.compile(r"\bzero[\s-]?activation\b", re.I),
+    re.compile(r"\b(?:dense\s+)?edge\s+activity\b", re.I),
+    re.compile(r"\bevent\s+activity\b", re.I),
+    re.compile(r"\bclusters?\s+of\s+(?:edge\s+)?activations?\b", re.I),
+    re.compile(r"\bgenerated\s+activations?\b", re.I),
+    re.compile(r"\bdata\s+represents?\s+only\b", re.I),
+    re.compile(r"\b(?:is|are|were)\s+(?:rendered|represented|captured|encoded|resolved|visualized|depicted|highlighted)\s+(?:as|by)(?:\s+\w+){0,5}\s+(?:silhouettes?|boundaries|boundary|patterns?|signals?|responses?|events?|clusters?|pixels?|maps?|traces?|contours?)\b", re.I),
+)
+FORBIDDEN_MECHANISM_MESSAGE = (
+    "Rewrite to describe the physical world (e.g., 'parked vehicle outlines remain distinct' instead of 'edge activations define the car'). Do not use mechanism-oriented or representation-oriented wording."
+)
+
 FORBIDDEN_GLOBAL_SCENE_TERMS = (
     "camera",
     "lens",
@@ -151,15 +167,17 @@ MIN_FRAME_DETAIL_WORDS = 8
 MIN_UNCERTAIN_OBSERVATION_HYPOTHESES = 1
 MIN_AMBIGUITY_EVENT_HYPOTHESES = 2
 GENERIC_SENSOR_EXPLANATION_PATTERNS = (
-    re.compile(r"\bevent cameras?\s+(capture|detect|record|respond)", re.I),
-    re.compile(r"\b(depth|rgb|infrared|ir)\s+(camera|sensor)s?\s+(capture|detect|record|measure)", re.I),
-    re.compile(r"\bthis modality\s+(captures|detects|records|measures)", re.I),
-    re.compile(r"\bdesigned to\s+(capture|detect|record|measure)", re.I),
-    re.compile(r"\b(inability|unable)\s+to\s+(capture|detect|record)", re.I),
-    re.compile(r"\b(loss|lack)\s+of\s+(color|absolute|illumination)", re.I),
-    re.compile(r"\bzero\s+response\s+on", re.I),
-    re.compile(r"\bhigh\s+sensitivity\s+to", re.I),
-    re.compile(r"\black\s+of\s+signal\s+response", re.I),
+    re.compile(r"\b(?:the|this)\s+(?:event|ir|depth|rgb|thermal)?\s*(?:sensor|camera|modality)\s+(?:registers|records|captures|detects|measures|cannot|does not)\b", re.I),
+    re.compile(r"\b(?:the|this)\s+(?:sensing|imaging)\s+process\b", re.I),
+    re.compile(r"\bonly\s+(?:temporal|intensity|contrast)\s+changes\b", re.I),
+    re.compile(r"\bstatic(?:\s+background)?\s+regions\s+generate\s+no\b", re.I),
+    re.compile(r"\bmovement\s+generates\b", re.I),
+    re.compile(r"\b(?:the|this)\s+modality\s+does\s+not\s+provide\b", re.I),
+    re.compile(r"\b(?:inability|unable)\s+to\s+(?:capture|detect|record)\b", re.I),
+    re.compile(r"\b(?:loss|lack)\s+of\s+(?:color|absolute|illumination)\b", re.I),
+    re.compile(r"\bzero\s+response\s+on\b", re.I),
+    re.compile(r"\bhigh\s+sensitivity\s+to\b", re.I),
+    re.compile(r"\black\s+of\s+signal\s+response\b", re.I),
 )
 
 # ─── Section 1: Structured capability constraints (machine-readable) ───
@@ -175,20 +193,20 @@ MODALITY_CAPABILITIES = {
 # cannot observe. Used to generate the CROSS-MODAL DIFFERENTIATION block in prompts.
 MODALITY_EXCLUSIVE_CUES: dict[str, dict[str, str]] = {
     "rgb": {
-        "exclusive":    "surface color of objects, texture details (e.g. cobblestone vs asphalt), specular highlights on glass, overexposed regions where texture is lost, surface reflectance patterns",
-        "not_visible":  "motion onset/offset edge dynamics, high-frequency structural outlines invisible in static frames, regions of zero activation on uniform surfaces",
+        "exclusive":    "visible color, surface texture, paint and material appearance, visible lighting effects",
+        "not_visible":  "short-lived spatial changes around moving entities, physical outlines distinguishable under poor illumination, relative temperature differences, absolute metric distance",
     },
     "event": {
-        "exclusive":    "edge-onset of moving objects, contour density of high-frequency texture borders, zero-activation zones (smooth low-contrast surfaces like painted car doors), motion direction implied by event polarity gradients",
-        "not_visible":  "absolute surface color, spectral contrast, texture details on uniform or slowly-moving surfaces",
+        "exclusive":    "changes in physical object boundaries across sampled times, changes in object position, extent, or silhouette, physical outlines that remain distinguishable under poor illumination, short-lived spatial changes around moving entities",
+        "not_visible":  "visible color, surface texture, paint and material appearance, stationary objects without lighting changes",
     },
     "ir": {
-        "exclusive":    "heat signatures, emissivity contrast, temperature gradients, active cooling/heating sources, thermal radiation from engine components",
-        "not_visible":  "visible surface color, fine texture details, spectral highlights",
+        "exclusive":    "one physical region being warmer or cooler than another, localized heat concentration, temperature-related contrast when directly supported",
+        "not_visible":  "visible color, paint and material appearance, fine texture details, visible lighting effects",
     },
     "depth": {
-        "exclusive":    "absolute metric distance, 3D surface geometry, foreground/background segmentation boundaries, depth discontinuities between adjacent surfaces",
-        "not_visible":  "surface color, texture, thermal information, fine visual detail of surfaces",
+        "exclusive":    "one entity standing in front of or behind another, relative or metric distance when directly supported, physical surface geometry and spatial separation",
+        "not_visible":  "visible color, paint and material appearance, thermal differences, fine surface texture",
     },
 }
 
