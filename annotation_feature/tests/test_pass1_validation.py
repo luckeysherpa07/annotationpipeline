@@ -180,6 +180,9 @@ def test_wrong_video2_atom_prefix():
 def test_uncertain_observations_one_hypothesis():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry car",
         "missing_evidence": "Cannot see license plate",
         "hypotheses": [
@@ -192,6 +195,9 @@ def test_uncertain_observations_one_hypothesis():
 def test_uncertain_observations_duplicate_hypotheses():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry car",
         "missing_evidence": "Cannot see license plate",
         "hypotheses": [
@@ -205,6 +211,9 @@ def test_uncertain_observations_duplicate_hypotheses():
 def test_uncertain_observations_meta_hypothesis():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry car",
         "missing_evidence": "Cannot see license plate",
         "hypotheses": [
@@ -218,6 +227,9 @@ def test_uncertain_observations_meta_hypothesis():
 def test_uncertain_observations_valid_hypotheses():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry car",
         "missing_evidence": "Cannot see brand",
         "hypotheses": [
@@ -269,7 +281,7 @@ def test_prompt_schema_example_neutral_identity():
     example_str = json.dumps(example)
     assert "white BMW" not in example_str, "Schema example must not encode rich identity like 'white BMW'"
     assert "BMW" not in example_str, "Schema example must not encode rich identity like 'BMW'"
-    assert "stable structure" in example_str, "Schema example should use neutral identity"
+    assert "concrete barrier" in example_str, "Schema example should use neutral identity"
 
 
 class DummyPath:
@@ -504,6 +516,9 @@ def test_why_missing_segment_specific_2():
 def test_hypothesis_normalization_duplicates_punctuation():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry vehicle",
         "missing_evidence": "Brand details",
         "hypotheses": [
@@ -517,6 +532,9 @@ def test_hypothesis_normalization_duplicates_punctuation():
 def test_hypothesis_normalization_duplicates_whitespace():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry vehicle",
         "missing_evidence": "Brand details",
         "hypotheses": [
@@ -530,6 +548,9 @@ def test_hypothesis_normalization_duplicates_whitespace():
 def test_hypothesis_normalization_distinct():
     parsed = create_valid_pass1_schema()
     parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
         "observed_evidence": "Blurry vehicle",
         "missing_evidence": "Brand details",
         "hypotheses": [
@@ -563,12 +584,12 @@ def test_pass1_prompt_regression():
     
     # Must exist
     assert "PASS 1" in prompt
-    assert "PRIORITY ORDER" in prompt
-    assert "Neither source is the reference or ground truth" in prompt
-    assert "SOURCE-LOCAL EVIDENCE ISOLATION" in prompt
-    assert "Registry coverage" in prompt
-    assert "recoverable_evidence_refs MUST always be [] in PASS 1" in prompt
-    assert "do not judge whether the opposite source can recover the attribute" in prompt
+    assert "PRIORITIES:" in prompt
+    assert "Neither source is ground truth." in prompt
+    assert "ISOLATION & LEAKAGE:" in prompt
+    assert "REGISTRY METADATA:" in prompt
+    assert "MUST remain [] in PASS 1." in prompt
+    assert "recoverability reasoning" in prompt
     
     # Must preserve modality block
     assert "MODALITY CAPABILITY CONSTRAINTS" in prompt
@@ -585,3 +606,249 @@ def test_pass1_prompt_regression():
     # Should validate example output structure successfully
     _validate_pass1_schema(example, {"frame_000000"}, "rgb", "event")
 
+def test_build_modality_constraint_block_contains_differentiation():
+    from annotation_feature.aligned_caption_schema import build_modality_constraint_block
+
+    # rgb + event
+    block = build_modality_constraint_block("rgb", "event")
+    assert "CROSS-MODAL DIFFERENTIATION GUIDE" in block
+    assert "rgb-EXCLUSIVE" in block
+    assert "event-EXCLUSIVE" in block
+    assert "SHARED atoms" in block
+
+    # ir + depth（验证其他 pair 同样工作）
+    block2 = build_modality_constraint_block("ir", "depth")
+    assert "CROSS-MODAL DIFFERENTIATION GUIDE" in block2
+    assert "ir-EXCLUSIVE" in block2
+    assert "depth-EXCLUSIVE" in block2
+
+    # 未知 modality（验证 fallback 不崩溃）
+    block3 = build_modality_constraint_block("unknown_mod", "event")
+    assert "CROSS-MODAL DIFFERENTIATION GUIDE" in block3
+
+def test_grounding_exempt_words_not_flagged():
+    from annotation_feature.aligned_caption_pass1_validation import _validate_pass1_schema
+    example = create_valid_pass1_schema()
+    
+    # 构造一个带有多个豁免词但本质上 grounded 的详细描述
+    # 这些词如果不在 atom 中，以前会触发 soft warning (因为长度 >= 5)
+    example["video1_analysis"]["detailed_caption"] = "Initially, the vehicle advances along the broad street, passing through several clear regions, including multiple bright segments, before finally progressing beyond the short wall. " * 3
+    
+    # Atoms 只包含核心物理名词
+    example["video1_analysis"]["information_atoms"] = [
+        {
+            "atom_id": "v1_atom_1",
+            "frame_keys": ["frame_000000"],
+            "entity_refs": ["entity_001"],
+            "fact": "The vehicle moves on the street near a wall." # 不包含 initially, advances, passing, broad, bright 等
+        }
+    ]
+    
+    _, warnings = _validate_pass1_schema(example, {"frame_000000"}, "rgb", "event")
+    
+    # 我们期望不包含 "Words not in atoms:" 这样的 warning，因为所有缺失的词都在豁免列表里
+    for w in warnings:
+        assert "Words not in atoms:" not in w
+
+def test_why_missing_physical_instrument_pattern():
+    from annotation_feature.aligned_caption_pass1_validation import _validate_pass1_why_missing
+    from annotation_feature.aligned_caption_schema import CaptionValidationError
+    import pytest
+    
+    with pytest.raises(CaptionValidationError, match="generic sensor theory"):
+        _validate_pass1_why_missing("The physical instrument does not register surface paint reflectance.", "missing_key_attributes[0].why_missing")
+
+def test_why_missing_does_not_detect_static():
+    from annotation_feature.aligned_caption_pass1_validation import _validate_pass1_why_missing
+    from annotation_feature.aligned_caption_schema import CaptionValidationError
+    import pytest
+    
+    with pytest.raises(CaptionValidationError, match="generic sensor theory"):
+        _validate_pass1_why_missing("It does not record absolute intensity differences without motion.", "missing_key_attributes[0].why_missing")
+        
+    with pytest.raises(CaptionValidationError, match="generic sensor theory"):
+        _validate_pass1_why_missing("It is not possible to distinguish the car without color information.", "missing_key_attributes[0].why_missing")
+
+
+def test_uncertain_observations_empty_hypotheses_passes():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_missing_id():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="must be a non-empty string"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_bad_prefix():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "bad_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="must start with v1_unc_"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_duplicate_id():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car 1",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car 2",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="Duplicate evidence ID found: v1_unc_001"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_missing_entity_id():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="must be a non-empty string"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_unknown_entity():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_002",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="references unknown entity: entity_002"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_empty_evidence_refs():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": [],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="evidence_refs cannot be empty"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_unknown_atom():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_999"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="references unknown atom: v1_atom_999"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_video1_ref_video2_atom():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v2_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="evidence_refs v2_atom_001 must start with v1_atom_"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_video2_ref_video1_atom():
+    parsed = create_valid_pass1_schema()
+    parsed["video2_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v2_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="evidence_refs v1_atom_001 must start with v2_atom_"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_atom_not_connected_to_entity():
+    parsed = create_valid_pass1_schema()
+    parsed["global_scene"]["physical_entities"].append({
+        "entity_id": "entity_002",
+        "category": "vehicle",
+        "referential_scope": "another car"
+    })
+    # Create an atom connected to entity_001
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_002",  # Not connected to v1_atom_001
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="is not connected to entity entity_002"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_duplicate_evidence_refs():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001", "v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": []
+    })
+    with pytest.raises(CaptionValidationError, match="evidence_refs contains duplicate: v1_atom_001"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")
+
+def test_uncertain_observations_bad_confidence():
+    parsed = create_valid_pass1_schema()
+    parsed["video1_analysis"]["uncertain_observations"].append({
+        "uncertainty_id": "v1_unc_001",
+        "entity_id": "entity_001",
+        "evidence_refs": ["v1_atom_001"],
+        "observed_evidence": "Blurry car",
+        "missing_evidence": "Cannot see brand",
+        "hypotheses": [
+            {"hypothesis": "BMW", "confidence": "low"},
+            {"hypothesis": "Audi", "confidence": "super_high"}
+        ]
+    })
+    with pytest.raises(CaptionValidationError, match="confidence must be high, medium, or low"):
+        _validate_pass1_schema(parsed, {"frame_000000"}, "rgb", "event")

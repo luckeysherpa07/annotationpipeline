@@ -8,6 +8,8 @@ from typing import Any
 from annotation_feature.aligned_caption_schema import (
     ALLOWED_MISSING_ATTRIBUTE_TYPES,
     CaptionValidationError,
+    FORBIDDEN_GLOBAL_SCENE_MESSAGE,
+    FORBIDDEN_GLOBAL_SCENE_PATTERN,
     FORBIDDEN_SENSOR_QUALITY_MESSAGE,
     FORBIDDEN_SENSOR_QUALITY_PATTERN,
     MIN_DETAILED_CAPTION_WORDS,
@@ -21,6 +23,7 @@ from annotation_feature.aligned_caption_validation import (
     _require_list,
     _require_string,
     _validate_min_words,
+    _validate_no_forbidden_inferential_terms,
     _validate_no_generic_sensor_explanation,
     _validate_uncertain_observations,
     _normalize_referential_scope,
@@ -57,10 +60,46 @@ def _normalize_pass1_hypothesis(text: str) -> str:
     return t
 
 
-def _validate_pass1_uncertain_observations(values: Any, field: str) -> None:
-    _validate_uncertain_observations(values, field)
+def _validate_pass1_uncertain_observations(
+    values: Any,
+    field: str,
+    *,
+    entity_ids: set[str],
+    evidence_namespace: set[str],
+    atom_entity_refs: dict[str, set[str]],
+    atom_prefix: str,
+    register_evidence_id: Any,
+) -> None:
+    _validate_uncertain_observations(values, field, min_hypotheses=0)
     for index, item in enumerate(values or [], start=1):
         if not isinstance(item, dict): continue
+        unc_id = _require_string(item.get("uncertainty_id"), f"{field}[{index}].uncertainty_id")
+        unc_prefix = atom_prefix.replace("atom", "unc")
+        if not unc_id.startswith(unc_prefix):
+            raise CaptionValidationError(f"uncertainty_id {unc_id} must start with {unc_prefix}")
+        register_evidence_id(unc_id)
+        
+        ent_id = _require_string(item.get("entity_id"), f"{field}[{index}].entity_id")
+        if ent_id not in entity_ids:
+            raise CaptionValidationError(f"{field}[{index}].entity_id references unknown entity: {ent_id}")
+            
+        ev_refs = _require_list(item.get("evidence_refs"), f"{field}[{index}].evidence_refs")
+        if not ev_refs:
+            raise CaptionValidationError(f"{field}[{index}].evidence_refs cannot be empty")
+            
+        seen_refs = set()
+        for ref_idx, ref in enumerate(ev_refs, start=1):
+            ref_val = _require_string(ref, f"{field}[{index}].evidence_refs[{ref_idx}]")
+            if ref_val in seen_refs:
+                raise CaptionValidationError(f"{field}[{index}].evidence_refs contains duplicate: {ref_val}")
+            seen_refs.add(ref_val)
+            if not ref_val.startswith(atom_prefix):
+                raise CaptionValidationError(f"evidence_refs {ref_val} must start with {atom_prefix}")
+            if ref_val not in atom_entity_refs:
+                raise CaptionValidationError(f"{field}[{index}].evidence_refs references unknown atom: {ref_val}")
+            if ent_id not in atom_entity_refs[ref_val]:
+                raise CaptionValidationError(f"{field}[{index}] references atom {ref_val} that is not connected to entity {ent_id}")
+
         hypotheses = item.get("hypotheses") or []
         normalized_hyps: set[str] = set()
         for hyp in hypotheses:
@@ -73,7 +112,7 @@ def _validate_pass1_uncertain_observations(values: Any, field: str) -> None:
                     raise CaptionValidationError(f"{field}[{index}] contains meta-statement of inability: '{hyp_text}'. Hypotheses must be candidate interpretations, not meta-statements.")
                 norm = _normalize_pass1_hypothesis(hyp_text)
                 normalized_hyps.add(norm)
-        if len(normalized_hyps) < 2:
+        if hypotheses and len(normalized_hyps) < 2:
             raise CaptionValidationError(f"{field}[{index}].hypotheses must contain at least 2 distinct valid candidate hypotheses in Pass 1")
 
 
@@ -87,7 +126,10 @@ def _validate_pass1_why_missing(text: str, field: str) -> None:
         re.compile(r"\bthe\s+sensor\s+(captures|records)\b", re.I),
         re.compile(r"\bdoes\s+not\s+preserve\s+(static\s+)?color\b", re.I),
         re.compile(r"\bimaging\s+process\s+records\b", re.I),
-        re.compile(r"\bsensor\s+captures\s+changes\b", re.I)
+        re.compile(r"\bsensor\s+captures\s+changes\b", re.I),
+        re.compile(r"\b(does|do)\s+not\s+(register|detect|record)\s+(static|absolute|surface)\b", re.I),
+        re.compile(r"\bphysical\s+instrument\s+(does|do)\s+not\b", re.I),
+        re.compile(r"\bnot\s+possible\s+to\s+(distinguish|identify|determine)\s+.{0,30}\b(without|from)\s+(color|intensity|additional)\b", re.I)
     ]
     for pat in generic_process_patterns:
         if pat.search(text):
@@ -134,11 +176,17 @@ def _validate_pass1_schema(
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
     if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(scene_summary):
         raise CaptionValidationError(f"global_scene.scene_summary contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+    if FORBIDDEN_GLOBAL_SCENE_PATTERN.search(scene_summary):
+        raise CaptionValidationError(f"global_scene.scene_summary contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
+    _validate_no_forbidden_inferential_terms(scene_summary, "global_scene.scene_summary")
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
     temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
     if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(temporal_progression):
         raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+    if FORBIDDEN_GLOBAL_SCENE_PATTERN.search(temporal_progression):
+        raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
+    _validate_no_forbidden_inferential_terms(temporal_progression, "global_scene.temporal_progression")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
     
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
@@ -201,6 +249,7 @@ def _validate_pass1_schema(
         )
         if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(detailed_caption):
             raise CaptionValidationError(f"{field}.detailed_caption contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+        _validate_no_forbidden_inferential_terms(detailed_caption, f"{field}.detailed_caption")
         _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
         
         atoms = _require_list(analysis.get("information_atoms"), f"{field}.information_atoms")
@@ -235,6 +284,7 @@ def _validate_pass1_schema(
                 seen_atom_entities.add(ref_value)
             atom_entity_refs[atom_id] = seen_atom_entities
             fact = _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
+            _validate_no_forbidden_inferential_terms(fact, f"{field}.information_atoms[{i}].fact")
             atom_facts[atom_id] = fact
 
         for key in ("sensor_specific_cues", "sensor_limitations"):
@@ -251,7 +301,15 @@ def _validate_pass1_schema(
                     )
                 else:
                     _validate_no_generic_sensor_explanation(text, item_field)
-        _validate_pass1_uncertain_observations(analysis.get("uncertain_observations"), f"{field}.uncertain_observations")
+        _validate_pass1_uncertain_observations(
+            analysis.get("uncertain_observations"),
+            f"{field}.uncertain_observations",
+            entity_ids=entity_ids,
+            evidence_namespace=evidence_namespace,
+            atom_entity_refs=atom_entity_refs,
+            atom_prefix=atom_prefix,
+            register_evidence_id=_register_evidence_id,
+        )
         
         missing_attrs = _require_list(analysis.get("missing_key_attributes"), f"{field}.missing_key_attributes")
         for i, attr in enumerate(missing_attrs, start=1):
@@ -280,12 +338,38 @@ def _validate_pass1_schema(
                         "Rewrite the caption to use neutral perceptual language."
                     )
                     
-        # Validator D: caption-to-atom grounding (soft warning)
-        caption_words = set(re.findall(r'\b[a-zA-Z]{5,}\b', detailed_caption.lower()))
+        # Validator D: caption-to-atom grounding and inferential word check
+        # Phase 1: Hard-fail on inferential linkage words
+        INFERENTIAL_LINKAGE_WORDS = {
+            "corresponding", "indicating", "suggesting", "implying",
+            "therefore", "consequently", "representing", "associated",
+            "appear", "seem", "apparently"
+        }
+        caption_lower = detailed_caption.lower()
+        inferential_hits = set(re.findall(r'\b[a-z]+\b', caption_lower)) & INFERENTIAL_LINKAGE_WORDS
+        if inferential_hits:
+            raise CaptionValidationError(
+                f"{field}.detailed_caption contains inferential linkage words that violate atom-grounding: "
+                f"{', '.join(sorted(inferential_hits))}. "
+                "Replace with direct perceptual statements grounded in same-source atoms."
+            )
+
+        # Phase 2: Soft warning on ungrounded words with tighter threshold
+        GROUNDING_EXEMPT_WORDS = {
+            "initially", "later", "finally", "previously", "subsequently",
+            "along", "across", "through", "around", "between", "beyond",
+            "within", "toward", "beside", "against",
+            "bright", "clear", "broad", "large", "small", "short",
+            "various", "several", "multiple", "additional", "further",
+            "including", "passing", "following",
+            "progresses", "advances", "continues", "remains",
+        }
+        
+        caption_words = set(re.findall(r'\b[a-zA-Z]{5,}\b', caption_lower)) - GROUNDING_EXEMPT_WORDS
         atom_text = " ".join([str(a.get("fact", "")) for a in atoms if isinstance(a, dict)]).lower()
         atom_words = set(re.findall(r'\b[a-zA-Z]{5,}\b', atom_text))
         ungrounded = caption_words - atom_words
-        if len(ungrounded) > 10:
+        if len(ungrounded) > 5:
              local_warnings.append(f"{field}.detailed_caption may contain ungrounded claims. Words not in atoms: {', '.join(sorted(list(ungrounded))[:5])}...")
 
     _validate_video_analysis(parsed, "video1_analysis", "v1_atom_")

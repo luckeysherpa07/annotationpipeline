@@ -77,14 +77,18 @@ def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
         )
     if "generic sensor-theory" in message or "segment-specific" in message or "forbidden wording" in message:
         hints.append(
-            "Rewrite the reported field using segment-specific evidence. "
-            "Describe what is directly observable or difficult to determine in the supplied frames, "
-            "rather than stating general sensor theory. For why_missing, describe specific evidence limitations and do not use wording like 'modality does not record'."
+            "Rewrite the reported field using segment-specific evidence only. "
+            "Apply the GENERICITY TEST: if the sentence would be equally true for any segment of the same modality, it is forbidden. "
+            "FORBIDDEN: 'The modality lacks intensity data.', 'The sensor does not record color.', 'The capture mechanism registers only intensity changes.' "
+            "REQUIRED form for why_missing: describe what is concretely absent in these specific frames, e.g. 'Vehicle surfaces in the sampled frames show no stable internal detail sufficient to distinguish paint color.' "
+            "REQUIRED form for sensor_limitations: cite a specific frame range or observable condition, e.g. 'Sunlight glare on windshields reduces surface detail in the later frames.'"
         )
     if "hypotheses" in message or "hypothesis" in message or "meta-statement" in message:
         hints.append(
-            "Every uncertain_observations item MUST contain at least 2 distinct candidate hypotheses. "
-            "Do not output meta-statements of inability (e.g. 'cannot be determined'). "
+            "Every uncertain_observations item must contain a valid uncertainty_id, "
+            "one known entity_id, and at least one same-source evidence_ref connected "
+            "to that entity. hypotheses may be empty; if non-empty, they must contain "
+            "at least 2 distinct candidate interpretations. Do not output meta-statements of inability (e.g. 'cannot be determined'). "
             "Hypotheses must be plausible factual candidate interpretations."
         )
     if category in {"invalid_reference", "missing_attribute_recovery"}:

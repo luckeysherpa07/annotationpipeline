@@ -15,6 +15,10 @@ from annotation_feature.aligned_caption_schema import (
     ALLOWED_REASONING_EVENT_TYPES,
     CAPTION_REQUIRED_TOP_LEVEL_FIELDS,
     CaptionValidationError,
+    FORBIDDEN_GLOBAL_SCENE_MESSAGE,
+    FORBIDDEN_GLOBAL_SCENE_PATTERN,
+    FORBIDDEN_INFERENTIAL_MESSAGE,
+    FORBIDDEN_INFERENTIAL_PATTERN,
     FORBIDDEN_SENSOR_QUALITY_MESSAGE,
     FORBIDDEN_SENSOR_QUALITY_PATTERN,
     GENERIC_SENSOR_EXPLANATION_PATTERNS,
@@ -88,17 +92,22 @@ def _validate_no_generic_sensor_explanation(
         return
 
 
-def _validate_uncertain_observations(values: Any, field: str) -> None:
+def _validate_no_forbidden_inferential_terms(text: str, field: str) -> None:
+    if FORBIDDEN_INFERENTIAL_PATTERN.search(text):
+        raise CaptionValidationError(f"{field} contains forbidden inferential wording. {FORBIDDEN_INFERENTIAL_MESSAGE}")
+
+
+def _validate_uncertain_observations(values: Any, field: str, *, min_hypotheses: int = 1) -> None:
     for index, item in enumerate(_require_list(values, field), start=1):
         if not isinstance(item, dict):
             raise CaptionValidationError(f"{field}[{index}] must be an object")
         _require_string(item.get("observed_evidence"), f"{field}[{index}].observed_evidence")
         _require_string(item.get("missing_evidence"), f"{field}[{index}].missing_evidence")
         hypotheses = _require_list(item.get("hypotheses"), f"{field}[{index}].hypotheses")
-        if len(hypotheses) < MIN_UNCERTAIN_OBSERVATION_HYPOTHESES:
+        if min_hypotheses > 0 and len(hypotheses) < min_hypotheses:
             raise CaptionValidationError(
                 f"{field}[{index}].hypotheses must contain at least "
-                f"{MIN_UNCERTAIN_OBSERVATION_HYPOTHESES} hypothesis"
+                f"{min_hypotheses} hypothesis"
             )
         normalized_hyps: set[str] = set()
         for hypothesis in hypotheses:
@@ -107,10 +116,10 @@ def _validate_uncertain_observations(values: Any, field: str) -> None:
             hyp_text = hypothesis.get("hypothesis")
             if isinstance(hyp_text, str) and hyp_text.strip():
                 normalized_hyps.add(hyp_text.strip().casefold())
-        if len(normalized_hyps) < MIN_UNCERTAIN_OBSERVATION_HYPOTHESES:
+        if min_hypotheses > 0 and len(normalized_hyps) < min_hypotheses:
             raise CaptionValidationError(
                 f"{field}[{index}].hypotheses must contain at least "
-                f"{MIN_UNCERTAIN_OBSERVATION_HYPOTHESES} valid hypothesis"
+                f"{min_hypotheses} valid hypothesis"
             )
         for hyp_index, hyp in enumerate(hypotheses, start=1):
             if not isinstance(hyp, dict):
@@ -421,11 +430,17 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
     scene_summary = _validate_min_words(global_scene.get("scene_summary"), "global_scene.scene_summary", MIN_SCENE_SUMMARY_WORDS)
     if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(scene_summary):
         raise CaptionValidationError(f"global_scene.scene_summary contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+    if FORBIDDEN_GLOBAL_SCENE_PATTERN.search(scene_summary):
+        raise CaptionValidationError(f"global_scene.scene_summary contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
+    _validate_no_forbidden_inferential_terms(scene_summary, "global_scene.scene_summary")
     _validate_no_generic_sensor_explanation(scene_summary, "global_scene.scene_summary")
     _require_string(global_scene.get("environment"), "global_scene.environment")
     temporal_progression = _validate_min_words(global_scene.get("temporal_progression"), "global_scene.temporal_progression", MIN_FRAME_DETAIL_WORDS)
     if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(temporal_progression):
         raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+    if FORBIDDEN_GLOBAL_SCENE_PATTERN.search(temporal_progression):
+        raise CaptionValidationError(f"global_scene.temporal_progression contains forbidden scene-level terms. {FORBIDDEN_GLOBAL_SCENE_MESSAGE}")
+    _validate_no_forbidden_inferential_terms(temporal_progression, "global_scene.temporal_progression")
     _validate_no_generic_sensor_explanation(temporal_progression, "global_scene.temporal_progression")
     
     physical_entities = _require_list(global_scene.get("physical_entities"), "global_scene.physical_entities")
@@ -479,6 +494,7 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
         )
         if FORBIDDEN_SENSOR_QUALITY_PATTERN.search(detailed_caption):
             raise CaptionValidationError(f"{field}.detailed_caption contains forbidden sensor-quality wording. {FORBIDDEN_SENSOR_QUALITY_MESSAGE}")
+        _validate_no_forbidden_inferential_terms(detailed_caption, f"{field}.detailed_caption")
         _validate_no_generic_sensor_explanation(detailed_caption, f"{field}.detailed_caption")
         
         atoms = _require_list(analysis.get("information_atoms"), f"{field}.information_atoms")
@@ -513,6 +529,7 @@ def _validate_caption_schema(parsed: dict[str, Any], valid_frame_keys: set[str],
                 seen_atom_entities.add(ref_value)
             atom_entity_refs[atom_id] = seen_atom_entities
             fact = _require_string(atom.get("fact"), f"{field}.information_atoms[{i}].fact")
+            _validate_no_forbidden_inferential_terms(fact, f"{field}.information_atoms[{i}].fact")
             atom_facts[atom_id] = fact
 
         for key in ("sensor_specific_cues", "sensor_limitations"):

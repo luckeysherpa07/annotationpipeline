@@ -113,6 +113,38 @@ FORBIDDEN_SENSOR_QUALITY_MESSAGE = (
     "grayscale/greyscale, monochrome, overexposed, saturated. REMOVE THESE TERMS!"
 )
 
+FORBIDDEN_GLOBAL_SCENE_TERMS = (
+    "camera",
+    "lens",
+    "viewpoint",
+    "frame",
+)
+FORBIDDEN_GLOBAL_SCENE_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(term) for term in FORBIDDEN_GLOBAL_SCENE_TERMS) + r")\b",
+    re.I,
+)
+FORBIDDEN_GLOBAL_SCENE_MESSAGE = (
+    "EXACT BLOCKLIST for global_scene: camera, lens, viewpoint, frame. REMOVE THESE TERMS!"
+)
+
+FORBIDDEN_INFERENTIAL_TERMS = (
+    "corresponding",
+    "suggesting",
+    "indicating",
+    "implying",
+    "consequently",
+    "representing",
+    "associated",
+)
+FORBIDDEN_INFERENTIAL_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(term) for term in FORBIDDEN_INFERENTIAL_TERMS) + r")\b",
+    re.I,
+)
+FORBIDDEN_INFERENTIAL_MESSAGE = (
+    "EXACT BLOCKLIST (inferential terms): corresponding, suggesting, indicating, implying, "
+    "consequently, representing, associated. REMOVE THESE TERMS!"
+)
+
 MIN_DETAILED_CAPTION_WORDS = 30
 MIN_SCENE_SUMMARY_WORDS = 20
 MIN_FRAME_DETAIL_WORDS = 8
@@ -127,13 +159,37 @@ GENERIC_SENSOR_EXPLANATION_PATTERNS = (
     re.compile(r"\b(loss|lack)\s+of\s+(color|absolute|illumination)", re.I),
     re.compile(r"\bzero\s+response\s+on", re.I),
     re.compile(r"\bhigh\s+sensitivity\s+to", re.I),
+    re.compile(r"\black\s+of\s+signal\s+response", re.I),
 )
 
+# ─── Section 1: Structured capability constraints (machine-readable) ───
 MODALITY_CAPABILITIES = {
     "rgb":   {"color": "direct",       "visual_category": "direct",      "thermal": "not_direct", "structure_edge": "direct",      "depth": "conditional"},
     "event": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "direct",      "depth": "not_direct"},
     "ir":    {"color": "not_direct",   "visual_category": "conditional", "thermal": "direct",     "structure_edge": "conditional", "depth": "not_direct"},
     "depth": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "conditional", "depth": "direct"},
+}
+
+# ─── Section 2: Per-modality exclusive observation cues (LLM prompt fragments) ───
+# These describe what each modality is EXCLUSIVELY able to observe and what it
+# cannot observe. Used to generate the CROSS-MODAL DIFFERENTIATION block in prompts.
+MODALITY_EXCLUSIVE_CUES: dict[str, dict[str, str]] = {
+    "rgb": {
+        "exclusive":    "surface color of objects, texture details (e.g. cobblestone vs asphalt), specular highlights on glass, overexposed regions where texture is lost, surface reflectance patterns",
+        "not_visible":  "motion onset/offset edge dynamics, high-frequency structural outlines invisible in static frames, regions of zero activation on uniform surfaces",
+    },
+    "event": {
+        "exclusive":    "edge-onset of moving objects, contour density of high-frequency texture borders, zero-activation zones (smooth low-contrast surfaces like painted car doors), motion direction implied by event polarity gradients",
+        "not_visible":  "absolute surface color, spectral contrast, texture details on uniform or slowly-moving surfaces",
+    },
+    "ir": {
+        "exclusive":    "heat signatures, emissivity contrast, temperature gradients, active cooling/heating sources, thermal radiation from engine components",
+        "not_visible":  "visible surface color, fine texture details, spectral highlights",
+    },
+    "depth": {
+        "exclusive":    "absolute metric distance, 3D surface geometry, foreground/background segmentation boundaries, depth discontinuities between adjacent surfaces",
+        "not_visible":  "surface color, texture, thermal information, fine visual detail of surfaces",
+    },
 }
 
 def _describe_capability_pair(attr: str, mod1: str, state1: str, mod2: str, state2: str) -> str:
@@ -173,7 +229,20 @@ def build_modality_constraint_block(mod1: str, mod2: str) -> str:
         v_can = v[cap_name]
         lines.append(_describe_capability_pair(attr, mod1, h_can, mod2, v_can))
     
-    return "MODALITY CAPABILITY CONSTRAINTS:\n" + "\n".join(lines)
+    capability_block = "MODALITY CAPABILITY CONSTRAINTS:\n" + "\n".join(lines)
+    
+    default_cues = {"exclusive": "general visual observations", "not_visible": "unknown"}
+    cues1 = MODALITY_EXCLUSIVE_CUES.get(mod1, default_cues)
+    cues2 = MODALITY_EXCLUSIVE_CUES.get(mod2, default_cues)
+    
+    differentiation_block = "\n".join([
+        f"CROSS-MODAL DIFFERENTIATION GUIDE ({mod1} + {mod2}):",
+        f"- {mod1}-EXCLUSIVE atoms should capture: {cues1['exclusive']}.",
+        f"- {mod2}-EXCLUSIVE atoms should capture: {cues2['exclusive']}.",
+        "- SHARED atoms are allowed ONLY for large-scale physical events observable through both modalities (e.g. coarse object presence, global scene change). Do NOT duplicate fine-grained perceptual details across modalities."
+    ])
+    
+    return capability_block + "\n\n" + differentiation_block
 
 def _enum_line(name: str, values: set[str]) -> str:
     return f"- {name}: {', '.join(sorted(values))}"
