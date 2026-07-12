@@ -328,7 +328,7 @@ def _derive_reasoning_focus_entities(parsed: dict[str, Any], entity_ids: set[str
 
 def _infer_required_capability(attribute_type: str, missing_attribute: str) -> str | None:
     text = missing_attribute.casefold()
-    if _contains_any_term(text, ["color", "paint"]):
+    if _contains_any_term(text, ["color", "paint", "red", "blue", "green", "yellow", "black", "white", "silver", "gray", "grey"]):
         return "color"
     if _contains_any_term(text, ["depth", "distance", "range"]):
         return "depth"
@@ -356,7 +356,7 @@ def _visual_category_support_status(missing_attribute: str, recovering_facts: st
     
     # Vehicle-oriented target
     if _contains_any_term(target, ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile", "motor vehicle"]):
-        vehicle_support_terms = ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile", "hatchback", "pickup", "minivan", "box-shaped vehicle", "tall rear body", "four-wheeled vehicle"]
+        vehicle_support_terms = ["vehicle", "car", "truck", "van", "bus", "sedan", "suv", "automobile", "hatchback", "pickup", "minivan", "box-shaped vehicle", "tall rear body", "four-wheeled vehicle", "bicycle", "bike", "motorcycle", "motorbike", "two-wheeler"]
         if _contains_any_term(facts, vehicle_support_terms):
             return "accept"
         person_support_terms = ["person", "human", "pedestrian", "worker", "walking figure", "cyclist", "rider"]
@@ -389,6 +389,8 @@ def _conditional_recovery_support_status(capability_name: str, missing_attribute
     if capability_name == "visual_category":
         return _visual_category_support_status(missing_attribute, recovering_facts)
     elif capability_name == "color":
+        if _contains_any_term(facts, ["headlight", "headlights", "illumination", "light", "lights", "lamp", "lamps", "nighttime sky"]):
+            return "reject"
         if _contains_any_term(facts, ["red", "blue", "green", "yellow", "black", "white", "silver", "gray", "grey", "color", "paint"]):
             return "accept"
         if _contains_any_term(facts, ["depth", "distance"]):

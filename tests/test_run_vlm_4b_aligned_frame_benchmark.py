@@ -237,7 +237,9 @@ class FixedFrameBenchmarkTests(unittest.TestCase):
         module = ModuleType(module_name)
         calls = []
 
-        def mask_function(*args, **kwargs):
+        def mask_function(inputs_embeds=None, *args, **kwargs):
+            if inputs_embeds is not None:
+                kwargs["inputs_embeds"] = inputs_embeds
             calls.append((args, kwargs))
             return kwargs
 

@@ -9,12 +9,19 @@ import datetime
 from pathlib import Path
 from typing import Any
 
-from annotation_feature.pipeline.client import create_gemini_client
+from annotation_feature.pipeline.client import (
+    GeminiClientProvider,
+    GeminiKeysExhaustedError,
+    ItemQuotaRetryLimitError,
+    Pass1TransportError,
+)
 
 from annotation_feature.aligned_caption_schema import (
     CaptionParseError,
     CaptionValidationError,
     MIN_DETAILED_CAPTION_WORDS,
+    SUPPORTED_MODALITIES,
+    normalize_modality_name,
 )
 
 # Import shared pipeline components
@@ -41,16 +48,80 @@ from annotation_feature.aligned_caption_pass1_prompt import (
     build_pass1_user_prompt,
     _template_caption_pass1,
 )
-from annotation_feature.aligned_caption_pass1_validation import _validate_pass1_schema
+from annotation_feature.aligned_caption_pass1_validation import (
+    Pass1SemanticValidationError,
+    Pass1StructuralValidationError,
+    Pass1ValidationIssue,
+    _validate_pass1_schema,
+)
 
 DEFAULT_INPUT_PATH = Path("outputs/aligned_multimodal_visual_evidence_units_filtered.json")
 DEFAULT_OUTPUT_PATH = Path("outputs/pass1_evidence_construction.json")
 DEFAULT_MODEL_NAME = "gemini-3.1-flash-lite"
 
 
-def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
+def _format_pass1_validation_issues(exc: Exception) -> str:
+    errors = getattr(exc, "errors", None)
+    if not errors:
+        return str(exc)
+    return "\n".join(f"- [{issue.category}] {issue.path}: {issue.message}" for issue in errors)
+
+
+def _categorize_pass1_validation_error(exc: Exception) -> str:
+    errors = list(getattr(exc, "errors", []) or [])
+    if not errors:
+        message = str(exc).lower()
+        if "mechanism-oriented wording" in message or "representation-oriented wording" in message:
+            return "physical_world_wording"
+        if "generic sensor-theory" in message or "segment-specific" in message:
+            return "generic_sensor_theory"
+        if "blocklist" in message or "forbidden" in message:
+            return "blocklist_failure"
+        if "missing_key_attributes" in message or "recoverable_evidence_refs" in message:
+            return "missing_attribute_recovery"
+        if "reference" in message or "duplicate" in message or "unknown" in message:
+            return "invalid_reference"
+        return "schema_validation_error"
+
+    categories = [issue.category for issue in errors]
+    paths = [issue.path for issue in errors]
+    scopes = [issue.scope for issue in errors]
+
+    for semantic_category in (
+        "source_uncertainty_contradiction",
+        "unrecoverable_missing_attribute",
+        "registry_source_attribute_leakage",
+        "shared_global_source_attribute_leakage",
+        "missing_entity_reference",
+    ):
+        if semantic_category in categories:
+            return semantic_category
+
+    if any(scope == "root" and category == "unexpected_field" for scope, category in zip(scopes, categories)):
+        return "blocklist_failure"
+    if any(category in {"physical_world_wording", "representation_wording"} for category in categories):
+        return "physical_world_wording"
+    if any(category in {"generic_sensor_theory", "generic_theory", "sensor_theory_wording", "sensor_quality_wording", "scene_level_wording"} for category in categories):
+        return "generic_sensor_theory"
+    if any(category in {"invalid_reference", "invalid_entity_reference", "invalid_frame_reference", "duplicate_id", "duplicate_reference", "invalid_atom_reference", "invalid_atom_entity_connection", "missing_entity_connection"} for category in categories):
+        return "invalid_reference"
+    if any(path.endswith("recoverable_evidence_refs") or path.endswith("missing_attribute") for path in paths):
+        return "missing_attribute_recovery"
+    if any(category == "unexpected_field" for category in categories):
+        return "schema_validation_error"
+    if any(category == "missing_field" for category in categories):
+        return "schema_validation_error"
+    return "schema_validation_error"
+
+
+def _build_pass1_validation_retry_hint(exc: Exception, category: str | None = None) -> str:
     message = str(exc).lower()
     hints: list[str] = []
+    errors = getattr(exc, "errors", [])
+    if category is None:
+        category = errors[0].category if errors else "schema_validation_error"
+    if any(issue.category == "unexpected_field" and issue.scope == "root" for issue in errors):
+        hints.append("Pass 1 MUST only output global_scene, video1_analysis, and video2_analysis. Remove unexpected root fields.")
     
     if "unknown top-level fields" in message or "unknown fields for pass 1" in message:
         hints.append(
@@ -109,27 +180,81 @@ def _build_pass1_validation_retry_hint(exc: Exception, category: str) -> str:
     if category == "missing_attribute_recovery":
         hints.append(
             "Rebuild the entire missing_key_attributes item. "
-            "Every item MUST simultaneously contain exactly four fields: 'attribute_type', 'missing_attribute', 'why_missing', and 'recoverable_evidence_refs'. "
+            "Every item MUST simultaneously contain exactly five fields: 'entity_id', 'attribute_type', 'missing_attribute', 'why_missing', and 'recoverable_evidence_refs'. "
             "'attribute_type' MUST be from the allowed enum. "
+            "'entity_id' MUST name one known registry entity. "
             "'missing_attribute' and 'why_missing' MUST be non-empty strings. "
             "'recoverable_evidence_refs' MUST be an empty list []. "
             "Do NOT use 'missing_attribute_type' or partial objects. "
             "Do NOT use null, empty strings, or placeholders. "
             "If you cannot produce a complete, reliable target, delete the item and return an empty list: \"missing_key_attributes\": []."
         )
+    issue_categories = {issue.category for issue in errors}
+    issue_paths = {
+        issue.category: issue.path
+        for issue in errors
+        if issue.category in {
+            "source_uncertainty_contradiction",
+            "unrecoverable_missing_attribute",
+            "registry_source_attribute_leakage",
+            "shared_global_source_attribute_leakage",
+            "missing_entity_reference",
+        }
+    }
+    if "source_uncertainty_contradiction" in issue_categories:
+        hints.append(
+            f"Repair the uncertainty at {issue_paths['source_uncertainty_contradiction']}: read only same-source, "
+            "Entity-bound Atoms and remove any missing property or hypothesis those Atoms already resolve. "
+            "Alternatively weaken the conflicting Atom if it is not actually supported."
+        )
+    if "unrecoverable_missing_attribute" in issue_categories:
+        hints.append(
+            f"Repair or delete the missing target at {issue_paths['unrecoverable_missing_attribute']}. "
+            "Keep it only if an opposite-source Atom for the same Entity directly supports the property. "
+            "Coarse outline evidence does not support make/model or readable license-plate characters."
+        )
+    if "registry_source_attribute_leakage" in issue_categories:
+        hints.append(
+            f"Neutralize the Registry entry at {issue_paths['registry_source_attribute_leakage']} to attributes "
+            "independently supported by both active sources; retain finer identity or lighting details only in "
+            "the source-local analysis that supports them."
+        )
+    if "shared_global_source_attribute_leakage" in issue_categories:
+        hints.append(
+            f"Rewrite {issue_paths['shared_global_source_attribute_leakage']} using only Entity attributes "
+            "independently supported by both active sources."
+        )
+    if "missing_entity_reference" in issue_categories:
+        hints.append(
+            f"Add every registered Entity directly participating in the physical relation at "
+            f"{issue_paths['missing_entity_reference']} to that Atom's entity_refs."
+        )
     if not hints:
         return ""
-    return " Targeted repair guidance: " + " ".join(hints)
+    return "Targeted repair guidance:\n" + "\n".join(hints)
 
 
 async def _call_gemini_pass1(
-    client,
+    client_provider: GeminiClientProvider,
     task: CaptionTask,
     model_name: str,
     max_retries: int,
     max_transport_retries: int,
     api_stats: list[int] | None = None,
-) -> tuple[dict[str, Any], list[str]]:
+) -> tuple[dict[str, Any], list[str], dict[str, Any]]:
+    modality1 = normalize_modality_name(task.modality1)
+    modality2 = normalize_modality_name(task.modality2)
+    if modality1 not in SUPPORTED_MODALITIES or modality2 not in SUPPORTED_MODALITIES:
+        raise Pass1StructuralValidationError(
+            f"Unsupported modalities: {task.modality1}, {task.modality2}",
+            [Pass1ValidationIssue(
+                "modality",
+                "unsupported_modality",
+                f"Unsupported modalities: {task.modality1!r}, {task.modality2!r}",
+                scope="task",
+            )],
+        )
+
     _ensure_composite_frames(task)
     encoded = _encode_images(task.composite_frames)
     if not encoded:
@@ -139,7 +264,7 @@ async def _call_gemini_pass1(
     from annotation_feature.pipeline.utils import build_image_parts
     
     system_instruction = build_pass1_system_prompt()
-    base_contents = build_image_parts(encoded) + [build_pass1_user_prompt(task)]
+    base_contents = build_image_parts(encoded) + [build_pass1_user_prompt(task, modality1, modality2)]
     contents = base_contents
     raw_text = None
     validation_attempt = 1
@@ -147,30 +272,50 @@ async def _call_gemini_pass1(
         "api_calls": 0,
         "validation_attempts": 0,
         "transport_retries": 0,
-        "first_validation_attempt_success": True,
-        "retry_history": []
+        "first_validation_attempt_success": None,
+        "retry_history": [],
+        "key_rotations": 0,
+        "quota_failures": 0,
+        "structural_validation_failures": 0,
+        "semantic_validation_failures": 0,
     }
     while validation_attempt <= max_retries:
         try:
             response = None
             for transport_attempt in range(1, max_transport_retries + 1):
-                if api_stats is not None:
-                    api_stats[0] += 1
-                diagnostics["api_calls"] += 1
-                try:
-                    response = await asyncio.to_thread(
-                        client.models.generate_content,
-                        model=model_name,
-                        contents=contents,
-                        config=genai_types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                        ),
-                    )
+                transport_exc: Exception | None = None
+                while True:
+                    if api_stats is not None:
+                        api_stats[0] += 1
+                    diagnostics["api_calls"] += 1
+                    client = client_provider.get_client()
+                    try:
+                        response = await asyncio.to_thread(
+                            client.models.generate_content,
+                            model=model_name,
+                            contents=contents,
+                            config=genai_types.GenerateContentConfig(
+                                system_instruction=system_instruction,
+                            ),
+                        )
+                        break
+                    except Exception as exc:
+                        exc_str = str(exc).lower()
+                        if "429" in exc_str or "quota" in exc_str:
+                            diagnostics["quota_failures"] += 1
+                            diagnostics["retry_history"].append({"type": "quota", "message": str(exc)[:200]})
+                            client_provider.rotate_client()
+                            diagnostics["key_rotations"] += 1
+                            continue
+                        transport_exc = exc
+                        break
+                if response is not None:
                     break
+                try:
+                    assert transport_exc is not None
+                    raise transport_exc
                 except Exception as exc:
                     exc_str = str(exc).lower()
-                    if "429" in exc_str or "quota" in exc_str:
-                        raise
                     if not _is_transport_error(exc):
                         raise
 
@@ -198,15 +343,25 @@ async def _call_gemini_pass1(
                     print(f"    Failure: {json.dumps(log_msg)}")
 
                     if transport_attempt == max_transport_retries:
-                        raise
+                        raise Pass1TransportError(
+                            str(exc),
+                            category=category,
+                            diagnostics=diagnostics,
+                            last_invalid_response=raw_text,
+                        ) from exc
                     await asyncio.sleep(_transport_retry_wait_seconds(transport_attempt))
 
             if response is None:
                 raise RuntimeError("Gemini caption call failed before receiving a response")
             raw_text = response.text
             diagnostics["validation_attempts"] += 1
+            diagnostics["first_validation_attempt_success"] = validation_attempt == 1
             valid_frame_keys = {path.stem for path in task.composite_frames}
-            evidence, warnings = _validate_pass1_schema(_parse_json_response(raw_text), valid_frame_keys, task.modality1, task.modality2)
+            expected_source_modalities = {
+                "video1_analysis": modality1,
+                "video2_analysis": modality2,
+            }
+            evidence, warnings = _validate_pass1_schema(_parse_json_response(raw_text), valid_frame_keys, expected_source_modalities)
             return evidence, warnings, diagnostics
         except Exception as exc:
             exc_str = str(exc).lower()
@@ -216,24 +371,18 @@ async def _call_gemini_pass1(
             if _is_transport_error(exc):
                 raise
 
+            if isinstance(exc, Pass1StructuralValidationError):
+                diagnostics["structural_validation_failures"] += 1
+            elif isinstance(exc, Pass1SemanticValidationError):
+                diagnostics["semantic_validation_failures"] += 1
+
             if diagnostics["validation_attempts"] == 1:
                 diagnostics["first_validation_attempt_success"] = False
 
             if isinstance(exc, CaptionParseError):
                 category = "parse_error"
             else:
-                if "mechanism-oriented wording" in exc_str or "representation-oriented wording" in exc_str:
-                    category = "physical_world_wording"
-                elif "generic sensor-theory" in exc_str:
-                    category = "generic_sensor_theory"
-                elif "blocklist" in exc_str or "forbidden" in exc_str:
-                    category = "blocklist_failure"
-                elif "missing_key_attributes" in exc_str or "recoverable_evidence_refs" in exc_str:
-                    category = "missing_attribute_recovery"
-                elif "reference" in exc_str or "duplicate" in exc_str or "unknown" in exc_str:
-                    category = "invalid_reference"
-                else:
-                    category = "schema_validation_error"
+                category = _categorize_pass1_validation_error(exc)
             
             diagnostics["retry_history"].append({
                 "type": "validation",
@@ -291,6 +440,10 @@ def _task_to_item_pass1(
     transport_retries: int | None = None,
     first_validation_attempt_success: bool | None = None,
     retry_history: list[dict[str, Any]] | None = None,
+    key_rotations: int = 0,
+    quota_failures: int = 0,
+    structural_validation_failures: int = 0,
+    semantic_validation_failures: int = 0,
 ) -> dict[str, Any]:
     item = _task_metadata(task)
     item.update({
@@ -312,6 +465,19 @@ def _task_to_item_pass1(
         item["first_validation_attempt_success"] = first_validation_attempt_success
     if retry_history is not None:
         item["retry_history"] = retry_history
+
+    if api_calls is not None:
+        item["diagnostics"] = {
+            "api_calls": api_calls,
+            "validation_attempts": validation_attempts or 0,
+            "transport_retries": transport_retries or 0,
+            "first_validation_attempt_success": first_validation_attempt_success,
+            "retry_history": retry_history or [],
+            "key_rotations": key_rotations,
+            "quota_failures": quota_failures,
+            "structural_validation_failures": structural_validation_failures,
+            "semantic_validation_failures": semantic_validation_failures,
+        }
 
     if last_invalid_response is not None:
         item["last_invalid_response"] = last_invalid_response
@@ -376,17 +542,21 @@ def _load_resume_pass1(output_path: Path) -> tuple[list[dict[str, Any]], list[di
                 for frame_name in composite_frames
                 if isinstance(frame_name, str) and frame_name.strip()
             }
-            modality1 = str(item.get("modality1") or "")
-            modality2 = str(item.get("modality2") or "")
+            modality1 = normalize_modality_name(str(item.get("modality1") or ""))
+            modality2 = normalize_modality_name(str(item.get("modality2") or ""))
 
-            if not valid_frame_keys or not modality1 or not modality2:
+            if not valid_frame_keys or modality1 not in SUPPORTED_MODALITIES or modality2 not in SUPPORTED_MODALITIES:
                 continue
+
+            expected_source_modalities = {
+                "video1_analysis": modality1,
+                "video2_analysis": modality2,
+            }
 
             _validate_pass1_schema(
                 copy.deepcopy(ev),
                 valid_frame_keys,
-                modality1,
-                modality2,
+                expected_source_modalities,
             )
         except (CaptionValidationError, CaptionParseError, ValueError, TypeError):
             continue
@@ -428,7 +598,7 @@ async def run_caption_pipeline_pass1_async(
     allowed_sides = _parse_sides(sides)
     parsed_target_paths = {p.strip().replace('\\', '/') for p in target_paths.split(',')} if target_paths else None
     
-    client = create_gemini_client(api_key_source=api_key_source) if generation_mode in ("gemini", "batch") else None
+    client_provider = None
     
     existing_items, existing_skipped = _load_resume_pass1(output_path) if resume else ([], [])
     items = existing_items
@@ -491,6 +661,27 @@ async def run_caption_pipeline_pass1_async(
             output_path,
         )
 
+    if generation_mode in ("gemini", "batch"):
+        try:
+            client_provider = GeminiClientProvider(api_key_source)
+        except GeminiKeysExhaustedError as exc:
+            payload = _build_output_payload_pass1(
+                input_path=input_path,
+                dataset_root=dataset_root,
+                composite_root=composite_root,
+                output_path=output_path,
+                model_name=model_name,
+                generation_mode=generation_mode,
+                items=items,
+                skipped=skipped,
+                planned_total=total_selected_jobs,
+                gemini_calls=0,
+            )
+            payload["metadata"]["initialization_error_category"] = "quota_exhausted"
+            payload["metadata"]["initialization_error"] = str(exc)
+            _save_json(payload, output_path)
+            return output_path
+
     task_index = 0
     MAX_KEY_ROTATIONS = 5
     rotation_attempts = 0
@@ -504,15 +695,23 @@ async def run_caption_pipeline_pass1_async(
         initial_api_stats = api_stats[0]
         try:
             if generation_mode == "gemini":
-                assert client is not None
+                assert client_provider is not None
                 evidence, warnings, diagnostics = await _call_gemini_pass1(
-                    client,
+                    client_provider,
                     task,
                     model_name,
                     max_retries=max_retries,
                     max_transport_retries=max_transport_retries,
                     api_stats=api_stats,
                 )
+                diagnostics = {
+                    "api_calls": 0,
+                    "validation_attempts": 0,
+                    "transport_retries": 0,
+                    "first_validation_attempt_success": False,
+                    "retry_history": [],
+                    **(diagnostics or {}),
+                }
                 attempts_used = api_stats[0] - initial_api_stats
                 status = "generated"
                 
@@ -530,12 +729,22 @@ async def run_caption_pipeline_pass1_async(
                     validation_attempts=diagnostics["validation_attempts"],
                     transport_retries=diagnostics["transport_retries"],
                     first_validation_attempt_success=diagnostics["first_validation_attempt_success"],
-                    retry_history=diagnostics["retry_history"]
+                    retry_history=diagnostics["retry_history"],
+                    key_rotations=diagnostics.get("key_rotations", 0),
+                    quota_failures=diagnostics.get("quota_failures", 0),
+                    structural_validation_failures=diagnostics.get("structural_validation_failures", 0),
+                    semantic_validation_failures=diagnostics.get("semantic_validation_failures", 0),
                 ))
             else:
                 _ensure_composite_frames(task)
                 valid_frame_keys = {path.stem for path in task.composite_frames}
-                evidence, warnings = _validate_pass1_schema(_template_caption_pass1(task), valid_frame_keys, task.modality1, task.modality2)
+                modality1 = normalize_modality_name(task.modality1)
+                modality2 = normalize_modality_name(task.modality2)
+                expected_source_modalities = {
+                    "video1_analysis": modality1,
+                    "video2_analysis": modality2,
+                }
+                evidence, warnings = _validate_pass1_schema(_template_caption_pass1(task), valid_frame_keys, expected_source_modalities)
                 status = "template"
                 skipped[:] = [item for item in skipped if item.get("caption_id") != task.caption_id]
                 items[:] = [item for item in items if item.get("caption_id") != task.caption_id]
@@ -553,13 +762,14 @@ async def run_caption_pipeline_pass1_async(
             rotation_attempts = 0
         except Exception as exc:
             exc_str = str(exc).lower()
-            if "429" in exc_str or "quota" in exc_str:
+            if not isinstance(exc, ItemQuotaRetryLimitError) and ("429" in exc_str or "quota" in exc_str):
                 rotation_attempts += 1
                 if rotation_attempts > MAX_KEY_ROTATIONS:
                     raise RuntimeError("Exceeded maximum API-key rotation attempts")
                 print(f"WARNING: Quota exhausted or rate limit hit. Attempting to rotate API key...")
                 try:
-                    client = create_gemini_client(api_key_source=api_key_source)
+                    assert client_provider is not None
+                    client_provider.rotate_client()
                     continue
                 except Exception as rotate_exc:
                     print(f"FATAL: All API keys exhausted or failed to rotate: {rotate_exc}")
@@ -567,33 +777,25 @@ async def run_caption_pipeline_pass1_async(
             
             final_error_category = "transport_other"
             exc_str_lower = str(exc).lower()
-            if isinstance(exc, CaptionParseError):
+            if isinstance(exc, ItemQuotaRetryLimitError):
+                final_error_category = "item_quota_retry_limit"
+            elif isinstance(exc, CaptionParseError):
                 final_error_category = "parse_error"
             elif isinstance(exc, CaptionValidationError):
-                if "mechanism-oriented wording" in exc_str_lower:
-                    final_error_category = "physical_world_wording"
-                elif "blocklist" in exc_str_lower or "forbidden" in exc_str_lower:
-                    final_error_category = "blocklist_failure"
-                elif "missing_key_attributes" in exc_str_lower or "recoverable_evidence_refs" in exc_str_lower:
-                    final_error_category = "missing_attribute_recovery"
-                elif "reference" in exc_str_lower or "duplicate" in exc_str_lower or "unknown" in exc_str_lower:
-                    final_error_category = "invalid_reference"
-                elif "mechanism-oriented wording" in exc_str_lower:
-                    final_error_category = "physical_world_wording"
-                else:
-                    final_error_category = "schema_validation_error"
+                final_error_category = _categorize_pass1_validation_error(exc)
             elif _is_transport_error(exc):
                 final_error_category = _transport_error_category(exc)
             elif "429" in exc_str_lower or "quota" in exc_str_lower:
                 final_error_category = "quota_exhausted"
                 
-            diagnostics = getattr(exc, "diagnostics", {
+            diagnostics = {
                 "api_calls": api_stats[0] - initial_api_stats,
                 "validation_attempts": 0,
                 "transport_retries": 0,
                 "first_validation_attempt_success": False,
                 "retry_history": []
-            })
+            }
+            diagnostics.update(getattr(exc, "diagnostics", {}) or {})
             
             skipped[:] = [item for item in skipped if item.get("caption_id") != task.caption_id]
             

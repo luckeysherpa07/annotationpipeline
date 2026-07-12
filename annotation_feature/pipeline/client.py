@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from typing import Any
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -31,23 +32,51 @@ _gemini_key_pool = []
 _key_pool_initialized = False
 
 def _load_gemini_key_list() -> None:
-    global _key_pool_initialized
+    global _key_pool_initialized, _gemini_key_pool
     if _key_pool_initialized:
         return
     if not GEMINI_KEY_LIST_FILE.exists():
         raise FileNotFoundError(f"API key list file not found: {GEMINI_KEY_LIST_FILE}")
     
+    seen_keys = set()
     with open(GEMINI_KEY_LIST_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
-            if not line:
+            if not line or line.startswith("#"):
                 continue
             # Extract the last word which is the actual API key
             key = line.split()[-1].strip()
-            if key:
+            if key and key not in seen_keys:
                 _gemini_key_pool.append(key)
+                seen_keys.add(key)
     
     _key_pool_initialized = True
+
+
+class GeminiKeysExhaustedError(RuntimeError):
+    pass
+
+
+class ItemQuotaRetryLimitError(RuntimeError):
+    pass
+
+
+class GeminiClientProvider:
+    def __init__(self, api_key_source: str):
+        self._api_key_source = api_key_source
+        self._client = create_gemini_client(api_key_source=api_key_source)
+
+    def get_client(self) -> Any:
+        return self._client
+
+    def rotate_client(self) -> Any:
+        try:
+            self._client = rotate_gemini_client(api_key_source=self._api_key_source)
+            return self._client
+        except RuntimeError as e:
+            if "exhausted" in str(e).lower() and not isinstance(e, GeminiKeysExhaustedError):
+                raise GeminiKeysExhaustedError("All API keys have been exhausted!") from e
+            raise
 
 
 def create_gemini_client(api_key: str | None = None, api_key_source: str = "list"):
@@ -67,7 +96,7 @@ def create_gemini_client(api_key: str | None = None, api_key_source: str = "list
     elif api_key_source == "list":
         _load_gemini_key_list()
         if not _gemini_key_pool:
-            raise RuntimeError("All API keys in the key list have been exhausted!")
+            raise GeminiKeysExhaustedError("All API keys in the key list have been exhausted!")
         resolved_api_key = _gemini_key_pool.pop(0)
     else:
         resolved_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
@@ -84,7 +113,6 @@ def create_gemini_client(api_key: str | None = None, api_key_source: str = "list
         api_key=resolved_api_key,
         http_options=types.HttpOptions(timeout=300000)
     )
-    client._resolved_api_key = resolved_api_key
     return client
 
 def rotate_gemini_client(api_key_source: str = "list"):
@@ -92,17 +120,36 @@ def rotate_gemini_client(api_key_source: str = "list"):
     Rotate to the next API key in the pool and return a new Gemini client.
     """
     if api_key_source != "list":
-        raise RuntimeError("Cannot rotate API key unless api_key_source is 'list'")
+        raise GeminiKeysExhaustedError(f"Quota exhausted and API-key rotation is unavailable for api_key_source={api_key_source!r}")
         
     _load_gemini_key_list()
     if not _gemini_key_pool:
-        raise RuntimeError("All API keys in the key list have been exhausted!")
+        raise GeminiKeysExhaustedError("All API keys in the key list have been exhausted!")
         
     resolved_api_key = _gemini_key_pool.pop(0)
-    print(f"\n[API KEY ROTATION] Switching to new key starting with {resolved_api_key[:8]}...")
+    print("\n[API KEY ROTATION] Switching to next configured key.")
     client = genai.Client(
         api_key=resolved_api_key,
         http_options=types.HttpOptions(timeout=300000)
     )
-    client._resolved_api_key = resolved_api_key
     return client
+
+def _reset_gemini_key_pool_for_tests() -> None:
+    global _gemini_key_pool, _key_pool_initialized
+    _gemini_key_pool = []
+    _key_pool_initialized = False
+
+
+class Pass1TransportError(RuntimeError):
+    def __init__(
+        self,
+        message: str,
+        *,
+        category: str,
+        diagnostics: dict,
+        last_invalid_response: str | None,
+    ):
+        super().__init__(message)
+        self.category = category
+        self.diagnostics = diagnostics
+        self.last_invalid_response = last_invalid_response

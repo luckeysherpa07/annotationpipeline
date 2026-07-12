@@ -9,20 +9,62 @@ from annotation_feature.aligned_caption_schema import (
     ALLOWED_MISSING_ATTRIBUTE_TYPES,
     _enum_line,
     build_modality_constraint_block,
+    normalize_modality_name,
+    SUPPORTED_MODALITIES,
 )
+from types import MappingProxyType
 
-def _build_prompt_schema_example(task: Any) -> dict[str, Any]:
+MODALITY_PHYSICAL_GUIDANCE = MappingProxyType({
+    "rgb": "### ACTIVE MODALITY GUIDANCE: RGB\n- Supported: Visible color, surface texture, paint and material appearance, visible lighting effects.\n- Avoid: Do not use representation-oriented wording. Do not claim absolute distance or hidden structure.\n- Valid: 'The vehicle is white.' 'The surface is smooth.'\n- Invalid: 'The RGB image captures a white vehicle.'",
+    "event": "### ACTIVE MODALITY GUIDANCE: EVENT\n- Supported: Changes in physical boundaries, object position, and motion. Physical outlines under poor illumination.\n- Avoid: Do not use representation-oriented wording ('event activity', 'response clusters', 'dense event clusters surround').\n- Valid: 'The vehicle outline remains distinguishable.'\n- Invalid: 'The event representation resolves the facade.'",
+    "depth": "### ACTIVE MODALITY GUIDANCE: DEPTH\n- Supported: Relative depth, one entity standing in front of another, surface geometry.\n- Avoid: Do not use representation-oriented wording ('depth map represents'). Do not claim color, material, or exact metric distance unless directly supported.\n- Valid: 'The person stands in front of the wall.'\n- Invalid: 'A depth discontinuity separates the person and wall.'",
+    "ir": "### ACTIVE MODALITY GUIDANCE: IR\n- Supported: Relative infrared appearance or contrast (e.g., one physical region being brighter/darker than another).\n- Avoid: Do not guess thermal IR from pixel appearance alone. Do not claim exact temperature or causal thermal conclusions unless metadata explicitly establishes thermal infrared. Do not use representation-oriented wording.\n- Valid: 'The person is brighter than the surrounding background.'\n- Invalid: 'The infrared channel highlights a warm object.'"
+})
+
+PAIR_PHYSICAL_GUIDANCE = MappingProxyType({
+    frozenset({"rgb", "event"}): "### ACTIVE PAIR GUIDANCE: RGB + EVENT\nRGB may independently support visible color and surface appearance. Event may independently support temporal change and changing structure. Do not copy RGB-only color into Event-local text or shared fields."
+})
+
+def build_modality_physical_guidance(modality1: str, modality2: str) -> str:
+    mod1 = normalize_modality_name(modality1)
+    mod2 = normalize_modality_name(modality2)
+
+    blocks = []
+
+    unsupported = [raw for raw, normalized in ((modality1, mod1), (modality2, mod2)) if normalized not in SUPPORTED_MODALITIES]
+    if unsupported:
+        raise ValueError(f"Unsupported modality: {', '.join(map(str, unsupported))}")
+
+    active_mods = []
+    if mod1 in SUPPORTED_MODALITIES:
+        active_mods.append(mod1)
+    if mod2 in SUPPORTED_MODALITIES and mod2 != mod1:
+        active_mods.append(mod2)
+
+    for mod in active_mods:
+        if mod in MODALITY_PHYSICAL_GUIDANCE:
+            blocks.append(MODALITY_PHYSICAL_GUIDANCE[mod])
+
+    pair_key = frozenset({mod1, mod2})
+    if pair_key in PAIR_PHYSICAL_GUIDANCE:
+        blocks.append(PAIR_PHYSICAL_GUIDANCE[pair_key])
+
+    return "\n\n".join(blocks)
+
+def _build_prompt_schema_example(task: Any, modality1: str | None = None, modality2: str | None = None) -> dict[str, Any]:
     fk = task.composite_frames[0].stem if task.composite_frames else "frame_000000"
+    modality1 = normalize_modality_name(modality1 if modality1 is not None else task.modality1)
+    modality2 = normalize_modality_name(modality2 if modality2 is not None else task.modality2)
     return {
         "global_scene": {
-            "scene_summary": "A stationary vehicle is situated near a concrete barrier, maintaining its position relative to the road markings while casting a distinct, sharp shadow across the adjacent paved surface under the ambient urban lighting conditions.",
+            "scene_summary": "A vehicle is situated near a concrete barrier while casting a distinct shadow across the adjacent paved surface under ambient urban lighting conditions.",
             "environment": "urban",
-            "temporal_progression": "The spatial relationship between the vehicle and barrier is maintained.",
+            "temporal_progression": "The spatial relationship between the vehicle and barrier remains consistent.",
             "physical_entities": [
                 {
                     "entity_id": "entity_001",
                     "category": "vehicle",
-                    "referential_scope": "stationary vehicle"
+                    "referential_scope": "the vehicle"
                 },
                 {
                     "entity_id": "entity_002",
@@ -42,14 +84,14 @@ def _build_prompt_schema_example(task: Any) -> dict[str, Any]:
             ]
         },
         "video1_analysis": {
-            "modality": task.modality1,
-            "detailed_caption": "A stationary vehicle rests beside a concrete barrier. The vehicle's surface shows various textures, and a sharp shadow of the barrier falls across the road surface, emphasizing the spatial boundaries in this specific urban segment.",
+            "modality": modality1,
+            "detailed_caption": "A vehicle rests beside a concrete barrier. The vehicle's surface shows various textures, and a sharp shadow of the barrier falls across the road surface in this urban segment.",
             "information_atoms": [
                 {
                     "atom_id": "v1_atom_001",
                     "frame_keys": [fk],
                     "entity_refs": ["entity_001", "entity_002"],
-                    "fact": "A stationary vehicle rests beside a concrete barrier."
+                    "fact": "A vehicle rests beside a concrete barrier."
                 },
                 {
                     "atom_id": "v1_atom_002",
@@ -76,7 +118,7 @@ def _build_prompt_schema_example(task: Any) -> dict[str, Any]:
             "missing_key_attributes": []
         },
         "video2_analysis": {
-            "modality": task.modality2,
+            "modality": modality2,
             "detailed_caption": "A concrete barrier has a straight upper boundary and a vertical side face. Individual cobblestones remain structurally distinguishable around its base, preserving the visible layout of the paved area surrounding the barrier.",
             "information_atoms": [
                 {
@@ -112,12 +154,11 @@ def build_pass1_system_prompt() -> str:
             "6. CAPTION CLOSURE — PRE-SUBMISSION CHECK: Before finalizing each `detailed_caption`, perform this self-check sentence by sentence: for each sentence in the caption, identify which atom_id supports it. If no atom supports a sentence, that sentence must be deleted or a new atom must be created first. Temporal transition words (initially, later, then, moving forward, passing, as the sequence progresses) each require an explicit same-source atom that establishes the temporal change they describe. Inferential linkage words (corresponding, indicating, suggesting, implying, appear, seem) are STRICTLY FORBIDDEN. Motion of the observer (e.g. 'as we travel along') must not appear in `detailed_caption` (see Rule 8 for forbidden camera wording in global_scene); if forward motion is observable from physical cues, create a physical-world atom for it first.",
             "7. LENGTH: Meet minimum lengths using supported content only. Target 24-40 words for scene_summary and 35-60 words for each detailed_caption. Never add unsupported facts as filler.",
             "8. PHYSICAL WORDING & ENTITY CATEGORIES: Entity `category` MUST refer to a physical, tangible object class (e.g. vehicle, pedestrian, roadway, sidewalk, vegetation, infrastructure, building, animal, cyclist). For lighting phenomena (shadows, glare, reflections), use `lighting_effect` as category. Do NOT use 'barrier' for non-physical phenomena. For undetermined objects, use `unknown_object`.",
-            "9. PHYSICAL SUBJECT RULE & MODALITY-HIDDEN TEST (CRITICAL): For `global_scene.scene_summary`, `global_scene.temporal_progression`, `video1_analysis.detailed_caption`, `video2_analysis.detailed_caption`, and all `information_atoms[].fact`, the primary grammatical subject of the sentence MUST be a physical entity, physical structure, physical state, motion, spatial relation, temporal change, or lighting phenomenon. Do NOT use modality, sensor, data, signal, response, event, activation, pixel, map, representation, output, or sensing process as the main subject or explanatory mechanism. MODALITY-HIDDEN TEST: If a reader does not know the input modality, is this sentence still a natural, complete, and direct physical-world fact? If not, rewrite it or move the raw response description to `sensor_specific_cues`. GLOBAL SCENE FIELDS: additionally forbidden: camera, lens, viewpoint, frame. Instead of 'A camera moves forward', write 'The perspective advances along the street'.",
+            "9. PHYSICAL-WORLD SUBJECT TEST & MODALITY-HIDDEN TEST (CRITICAL): Describe physical objects, attributes, structures, spatial relations, motion, temporal changes, and visibility directly. Do not describe how an image, channel, map, signal, response, or representation encodes or captures the scene. Raw source-specific response wording belongs only in `sensor_specific_cues`; generic sensor theory and inferential conclusions remain forbidden there. MODALITY-HIDDEN TEST: If a reader does not know the input modality, is this still a natural direct physical fact? If not, rewrite it or move only the raw cue to `sensor_specific_cues`.",
             "10. INTERNAL CONVERSION ORDER (Follow this mentally before writing atoms):\n   1. Identify the source-local visual cue.\n   2. Determine whether it supports a defensible physical-world proposition.\n   3. Write the physical proposition into atoms.\n   4. Put raw modality-response wording only in `sensor_specific_cues`.\n   5. If the cue cannot safely support a physical interpretation, do not invent one. A source-specific response pattern does not automatically justify a specific object identity, color, material, motion cause, or semantic class. When the current source supports only a coarse physical structure, write the coarse structure. When no defensible physical proposition can be formed, keep the raw segment-specific observation only in `sensor_specific_cues` or omit it. Do not borrow the interpretation from the opposite source.",
-            "11. CROSS-MODALITY EXAMPLES:\n   Event:\n     - Invalid: 'The event signal captures the vehicle outline.'\n     - Valid: 'The vehicle outline remains distinguishable.'\n     - Invalid: 'Dense event clusters surround the headlights.'\n     - Valid: 'Two circular headlights remain prominent ahead of the vehicle.' (Only if the raw evidence genuinely supports headlights)\n   IR/Thermal:\n     - Invalid: 'The person produces a bright infrared response.'\n     - Valid: 'The person is warmer than the surrounding background.' (Only if relative temperature is directly supported)\n   Depth:\n     - Invalid: 'A depth discontinuity separates the person and wall.'\n     - Valid: 'The person stands in front of the wall.' (Only if spatial ordering is supported)\n   Note: Conversions must NOT increase factual certainty beyond what the sensor directly supports.",
-            "12. SENSORS & UNCERTAINTY: `sensor_specific_cues` is the ONLY place where mechanism-oriented response patterns are permitted; do not use a cue as evidence for an unsupported semantic interpretation. `sensor_limitations` must describe a limitation specifically manifested in this segment's frames — apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality, it is forbidden generic theory. FORBIDDEN examples: 'The modality lacks intensity data.', 'The sensor does not record color.', 'Lack of intensity data prevents identifying X.' REQUIRED form — cite what is absent in these specific frames: e.g. 'Vehicle surfaces in the sampled frames show no stable internal detail sufficient to distinguish paint color.' or 'Sunlight glare on windshields in frames 450–870 reduces surface detail.' Uncertain hypotheses must arise from current-source evidence.",
-            "13. MISSING ATTRIBUTES — PASS 2 RESOLUTION TARGETS: This field is NOT a generic list of \"things we couldn't observe\". It is a curated list of SPECIFIC ATTRIBUTES that Pass 2 will attempt to resolve by cross-referencing the other modality. Ask yourself: \"If Pass 2 reads this, can it go to the other modality and find an answer?\" If the answer is no, do not include the attribute. Trivially unresolvable attributes (e.g. engine idle state of a stationary vehicle, exact odometer reading, interior cabin color) provide no value to Pass 2 and must be excluded.\n   `why_missing` must be SEGMENT-LOCAL: cite what is absent IN THESE SPECIFIC FRAMES that prevents observing the attribute. Apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality regardless of content, it is forbidden generic theory.\n   FORBIDDEN form: 'Surface color cannot be observed because this sensing method does not register static spectral differences.' (= generic theory about the modality)\n   FORBIDDEN form: 'The physical instrument does not register static surface paint reflectance.' (= same problem, disguised wording)\n   REQUIRED form: 'The vehicle body in frames 450–480 is partially occluded by shadow, preventing identification of paint color.' or 'Distant vehicles in the background frames show insufficient resolution to distinguish a specific color.' — these cite what is concretely absent in this segment.\n   SELECTION PRIORITY: When choosing which attributes to flag as missing, apply this ranking:\n   (1) Cross-modally recoverable: an attribute the OTHER modality could plausibly supply (e.g. event can confirm motion; rgb can confirm color). These are the most valuable.\n   (2) Semantically consequential: resolving the attribute would change the scene interpretation (e.g. is the object a pedestrian or a cyclist?).\n   AVOID: Attributes that are permanently unresolvable (e.g. engine idle state of a parked vehicle) or attributes whose absence is a generic property of the modality with no specific consequence in this segment.\n   JSON CONTRACT: Every item in `missing_key_attributes` MUST simultaneously contain exactly four fields:\n     {\n       \"attribute_type\": \"<one allowed enum>\",\n       \"missing_attribute\": \"<non-empty string>\",\n       \"why_missing\": \"<non-empty segment-local explanation>\",\n       \"recoverable_evidence_refs\": []\n     }\n   Null, empty strings, placeholders, and partial objects are FORBIDDEN. The key `missing_attribute_type` is FORBIDDEN. If you cannot construct a complete, reliable item, do NOT create a low-quality target just to avoid an empty list; instead, return an empty list: `\"missing_key_attributes\": []`.",
-            "14. `recoverable_evidence_refs` MUST remain [] in PASS 1.",
+            "11. SENSORS & UNCERTAINTY: `sensor_specific_cues` is the ONLY place where mechanism-oriented response patterns are permitted; do not use a cue as evidence for an unsupported semantic interpretation. `sensor_limitations` must describe a limitation specifically manifested in this segment's frames — apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality, it is forbidden generic theory. FORBIDDEN examples: 'The modality lacks intensity data.', 'The sensor does not record color.', 'Lack of intensity data prevents identifying X.' REQUIRED form — cite what is absent in these specific frames: e.g. 'Vehicle surfaces in the sampled frames show no stable internal detail sufficient to distinguish paint color.' or 'Sunlight glare on windshields in frames 450–870 reduces surface detail.' Uncertain hypotheses must arise from current-source evidence and MUST NOT contradict a same-source Atom. If an Atom establishes a coarse category, uncertainty may concern only finer compatible categories. Do not claim that illumination, color, or object identity is missing when a same-source Atom already asserts it; weaken the Atom instead when the source does not support that assertion. CONSISTENCY TEST: For each uncertainty item, temporarily read only the cited same-source Atoms. Do those Atoms already resolve any property listed as missing or uncertain? If yes, either remove the uncertainty or weaken the Atom.",
+            "12. MISSING ATTRIBUTES — PASS 2 RESOLUTION TARGETS: Every item requires exactly one explicit known `entity_id`; never infer the target from prose. `missing_attribute` names the unknown PROPERTY, not an unknown concrete value. `why_missing` must be SEGMENT-LOCAL: cite what is absent IN THESE SPECIFIC FRAMES that prevents observing the attribute. Apply the GENERICITY TEST: if the sentence would be equally true for any segment recorded by the same modality regardless of content, it is forbidden generic theory. Include a target only when the opposite source has explicit Entity-connected Atom evidence that directly supports the missing property and resolving it would matter; modality capability alone is never enough. Do not propose exact make/model unless the opposite source contains direct distinguishing evidence; coarse shape is not make/model evidence. Do not propose license-plate characters unless the opposite source visibly contains readable characters; an outer outline is not license-plate-text evidence. Empty missing lists are preferable to unrecoverable targets, and lists are never forced to be non-empty.\n   JSON CONTRACT — exactly five fields:\n     {\n       \"entity_id\": \"entity_004\",\n       \"attribute_type\": \"<one allowed enum>\",\n       \"missing_attribute\": \"<unknown property, neutrally worded>\",\n       \"why_missing\": \"<non-empty segment-local explanation>\",\n       \"recoverable_evidence_refs\": []\n     }\n   `entity_id` must exist in the shared Registry. `recoverable_evidence_refs` remains exactly [] in Pass 1. Nulls, empty strings, placeholders, partial objects, extra fields, and the key `missing_attribute_type` are forbidden.",
+            "13. `recoverable_evidence_refs` MUST remain [] in PASS 1.",
             (
                 "PRE-SUBMISSION SELF-CHECK (MANDATORY — complete this check mentally before finalising your JSON output):\n"
                 "Before you write your final JSON, go through every item below. If any item fails, fix it before submitting.\n"
@@ -180,10 +221,13 @@ def build_pass1_system_prompt() -> str:
     )
 
 
-def build_pass1_user_prompt(task: Any) -> str:
+def build_pass1_user_prompt(task: Any, modality1: str | None = None, modality2: str | None = None) -> str:
+    modality1 = normalize_modality_name(modality1 if modality1 is not None else task.modality1)
+    modality2 = normalize_modality_name(modality2 if modality2 is not None else task.modality2)
     frame_names = ", ".join(path.name for path in task.composite_frames)
-    constraint_block = build_modality_constraint_block(task.modality1, task.modality2)
-    schema_example_text = json.dumps(_build_prompt_schema_example(task), indent=2, ensure_ascii=False)
+    constraint_block = build_modality_constraint_block(modality1, modality2)
+    dynamic_guidance = build_modality_physical_guidance(modality1, modality2)
+    schema_example_text = json.dumps(_build_prompt_schema_example(task, modality1, modality2), indent=2, ensure_ascii=False)
 
     return "\n".join(
         [
@@ -191,6 +235,8 @@ def build_pass1_user_prompt(task: Any) -> str:
             "SCOPE: Produce ONLY global_scene, video1_analysis, and video2_analysis. NO cross-modal fusion, information-gain, directional contribution, cross-source ambiguity resolution, QA, or recoverability reasoning.",
             "PRIORITIES: 1. source-local factual correctness; 2. valid provenance/references; 3. stable entity identity; 4. evidence coverage (do not omit salient observations; every independently distinguishable physical object in any frame that meets the minimum-size threshold MUST have an entity in global_scene.physical_entities); 5. atom proposition integrity (each atom = 1 minimal proposition, but no upper limit on atom count); 6. caption completeness (every caption sentence must be supported by a same-source atom); 7. descriptive richness.",
             constraint_block,
+            f"CURRENT SOURCE MODALITIES\nSource 1 modality: {modality1}\nSource 2 modality: {modality2}",
+            dynamic_guidance,
             schema_example_text,
             "ALLOWED ENUMS:",
             "- confidence: low, medium, high",
@@ -249,6 +295,7 @@ def _template_caption_pass1(task: Any) -> dict[str, Any]:
             ],
             "missing_key_attributes": [
                 {
+                    "entity_id": target_entity,
                     "attribute_type": "existence",
                     "missing_attribute": "Template placeholder",
                     "why_missing": "Template placeholder",
@@ -284,6 +331,7 @@ def _template_caption_pass1(task: Any) -> dict[str, Any]:
             ],
             "missing_key_attributes": [
                 {
+                    "entity_id": target_entity,
                     "attribute_type": "existence",
                     "missing_attribute": "Template placeholder",
                     "why_missing": "Template placeholder",

@@ -968,20 +968,21 @@ class BenchmarkKeyRotationTests(unittest.TestCase):
             pass
 
         with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoTokenizer") as mock_tokenizer:
-            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModel") as mock_model:
-                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
-                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
-                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
-                            mock_torch.cuda.is_available.return_value = True
-                            mock_torch.bfloat16 = "bfloat16"
-                            mock_torch.float16 = "float16"
-                            mock_model.from_pretrained.side_effect = ValueError("bitsandbytes exploded")
+            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoConfig") as mock_config:
+                with unittest.mock.patch("annotation_feature.qa_quality.benchmark.AutoModel") as mock_model:
+                    with unittest.mock.patch("annotation_feature.qa_quality.benchmark.BitsAndBytesConfig") as mock_bnb:
+                        with unittest.mock.patch("annotation_feature.qa_quality.benchmark.PreTrainedModel", DummyPreTrainedModel):
+                            with unittest.mock.patch("annotation_feature.qa_quality.benchmark.torch") as mock_torch:
+                                mock_torch.cuda.is_available.return_value = True
+                                mock_torch.bfloat16 = "bfloat16"
+                                mock_torch.float16 = "float16"
+                                mock_model.from_pretrained.side_effect = ValueError("bitsandbytes exploded")
 
-                            with self.assertRaisesRegex(RuntimeError, "Original error: ValueError: bitsandbytes exploded"):
-                                InternVLFrameAnswerAdapter(
-                                    model_name="OpenGVLab/InternVL2_5-4B",
-                                    revision="abc123",
-                                )
+                                with self.assertRaisesRegex(RuntimeError, "Original error: ValueError: bitsandbytes exploded"):
+                                    InternVLFrameAnswerAdapter(
+                                        model_name="OpenGVLab/InternVL2_5-4B",
+                                        revision="abc123",
+                                    )
 
         mock_tokenizer.from_pretrained.assert_called_once()
         mock_bnb.assert_called_once_with(

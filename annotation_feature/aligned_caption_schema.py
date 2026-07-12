@@ -184,7 +184,7 @@ GENERIC_SENSOR_EXPLANATION_PATTERNS = (
 MODALITY_CAPABILITIES = {
     "rgb":   {"color": "direct",       "visual_category": "direct",      "thermal": "not_direct", "structure_edge": "direct",      "depth": "conditional"},
     "event": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "direct",      "depth": "not_direct"},
-    "ir":    {"color": "not_direct",   "visual_category": "conditional", "thermal": "direct",     "structure_edge": "conditional", "depth": "not_direct"},
+    "ir":    {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "conditional", "depth": "not_direct"},
     "depth": {"color": "not_direct",   "visual_category": "conditional", "thermal": "not_direct", "structure_edge": "conditional", "depth": "direct"},
 }
 
@@ -201,8 +201,8 @@ MODALITY_EXCLUSIVE_CUES: dict[str, dict[str, str]] = {
         "not_visible":  "visible color, surface texture, paint and material appearance, stationary objects without lighting changes",
     },
     "ir": {
-        "exclusive":    "one physical region being warmer or cooler than another, localized heat concentration, temperature-related contrast when directly supported",
-        "not_visible":  "visible color, paint and material appearance, fine texture details, visible lighting effects",
+        "exclusive":    "relative infrared appearance, one region being brighter or darker in infrared, coarse object or structural contrast",
+        "not_visible":  "visible color, paint and material appearance, fine texture details, exact temperature, overheating, thermal physical causes",
     },
     "depth": {
         "exclusive":    "one entity standing in front of or behind another, relative or metric distance when directly supported, physical surface geometry and spatial separation",
@@ -276,3 +276,20 @@ def _normalize_license_plates(data: Any) -> Any:
     return data
 
 
+
+
+def normalize_modality_name(modality: str) -> str:
+    if not modality:
+        return ""
+    n = modality.casefold().strip()
+    if n in ("rgb", "video", "visual", "optical"):
+        return "rgb"
+    if n in ("event", "dvs", "event camera"):
+        return "event"
+    if n in ("ir", "infrared", "thermal"):
+        return "ir"
+    if n in ("depth", "disparity", "range"):
+        return "depth"
+    return n
+
+SUPPORTED_MODALITIES = tuple(MODALITY_CAPABILITIES.keys())
