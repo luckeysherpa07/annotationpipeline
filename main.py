@@ -50,8 +50,10 @@ from annotation_feature.pipeline.modalities.marigold import (
     list_cached_rgb_folders,
 )
 from annotation_feature.temporal_alignment import (
+    create_check_mailbox_native_rgb_cut_plan,
     export_check_mailbox_day_rgb_event_optical_flow_alignment,
     export_check_mailbox_day_night_robustness_qa_1fps_frames,
+    export_check_mailbox_native_rgb_segments,
     export_day_night_rgb_event_depth_ir_alignment_grids,
     run_and_export_aligned_rgb_with_audio_segments,
     run_and_export_all_aligned_dataset_segments,
@@ -651,9 +653,11 @@ def main():
         print("82. Align all day/night RGB pairs")
         print("\n--- DAY NIGHT ROBUSTNESS QA ---")
         print("83. Export check_mailbox aligned day/night RGB frames at 1 FPS")
+        print("84. Visualize check_mailbox native day/night RGB cut plan")
+        print("85. Export check_mailbox native day/night RGB segments")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-83 or action id): ").strip()
+        choice = input("\nEnter choice (1-85 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1471,6 +1475,35 @@ def main():
             print(f"Night frames: {summary.get('night_frame_folder')}")
             print(f"Day frames: {summary.get('day_frame_folder')}")
             print(f"Side-by-side frames: {summary.get('side_by_side_frame_folder')}")
+            print(f"Manifest JSON: {summary.get('manifest_json')}")
+            print(f"Manifest CSV: {summary.get('manifest_csv')}")
+
+        elif choice == "84":
+            print("\n" + "-" * 60)
+            print("Running: check_mailbox native day/night RGB cut-plan visualization")
+            print("-" * 60)
+            print("Uses reliable matched start/end anchors to plan variable-length native clips.")
+            print("Each day and night interval is longer than 20 seconds; 30 seconds is only a soft target.")
+            print("Writes an SVG timeline and JSON plan without modifying or retiming video.\n")
+            summary = create_check_mailbox_native_rgb_cut_plan(
+                dataset_folder="dataset",
+                alignment_folder="day_night_alignment/check_mailbox_split",
+                segment_seconds=30.0,
+            )
+            print(f"Planned cut pairs: {summary.get('cut_count', 0)}")
+            print(f"Timeline SVG: {summary.get('timeline_svg')}")
+            print(f"Cut-plan JSON: {summary.get('plan_json')}")
+
+        elif choice == "85":
+            print("\n" + "-" * 60)
+            print("Running: check_mailbox native day/night RGB segment export")
+            print("-" * 60)
+            print("Consumes option 84's exact cut plan and preserves native playback timing.\n")
+            summary = export_check_mailbox_native_rgb_segments(
+                plan_path="day_night_alignment/check_mailbox_split/native_rgb_cut_plan/cut_plan.json",
+            )
+            print(f"Exported segment pairs: {summary.get('exported_segment_count', 0)}")
+            print(f"Output folder: {summary.get('output_folder')}")
             print(f"Manifest JSON: {summary.get('manifest_json')}")
             print(f"Manifest CSV: {summary.get('manifest_csv')}")
 

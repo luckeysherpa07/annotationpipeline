@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import cv2
@@ -16,6 +17,9 @@ FEATURE_FPS = 5.0
 COARSE_STRIDE = 5
 PREVIEW_FPS = 10.0
 LOW_CONFIDENCE_THRESHOLD = 0.35
+NATIVE_SEGMENT_SECONDS = 30.0
+NATIVE_MIN_SEGMENT_SECONDS = 20.0
+NATIVE_BOUNDARY_CONFIDENCE = 0.65
 _CLIP_RUNTIME: tuple[Any, Any, Any] | None = None
 
 
@@ -749,6 +753,325 @@ def export_check_mailbox_day_night_robustness_qa_1fps_frames(
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(manifest_rows)
+    return summary
+
+
+def _file_fingerprint(path: Path) -> dict[str, Any]:
+    stat = path.stat()
+    return {"path": str(path.resolve()), "size": stat.st_size, "mtime_ns": stat.st_mtime_ns}
+
+
+def _native_cut_plan_svg(plan: dict[str, Any]) -> str:
+    width, height = 1400, 360
+    left, right = 130.0, 1340.0
+    track_width = right - left
+    day_duration = float(plan["sources"]["day"]["duration_seconds"])
+    night_duration = float(plan["sources"]["night"]["duration_seconds"])
+    maximum_duration = max(day_duration, night_duration, 1e-6)
+
+    def x_at(seconds: float) -> float:
+        return left + track_width * seconds / maximum_duration
+
+    def esc(value: Any) -> str:
+        return (str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        '<rect width="100%" height="100%" fill="#f8fafc"/>',
+        '<text x="40" y="42" font-family="sans-serif" font-size="24" font-weight="700" fill="#172033">check_mailbox native RGB cut plan</text>',
+        '<text x="40" y="68" font-family="sans-serif" font-size="13" fill="#526174">DTW supplies timestamp anchors only; exported videos retain native timing.</text>',
+    ]
+    for label, y, duration in (("DAY", 130.0, day_duration), ("NIGHT", 245.0, night_duration)):
+        parts.extend([
+            f'<text x="40" y="{y + 22:.1f}" font-family="sans-serif" font-size="16" font-weight="700" fill="#26364a">{label}</text>',
+            f'<rect x="{left:.1f}" y="{y:.1f}" width="{x_at(duration) - left:.1f}" height="42" rx="4" fill="#d9e1ea"/>',
+            f'<text x="{x_at(duration):.1f}" y="{y + 64:.1f}" text-anchor="end" font-family="sans-serif" font-size="11" fill="#526174">{duration:.2f}s</text>',
+        ])
+    for item in plan["cuts"]:
+        confidence = float(item["boundary_confidence"])
+        color = "#e3a126" if item.get("review") else "#299764"
+        day_x = x_at(float(item["day_start_seconds"]))
+        night_x = x_at(float(item["night_start_seconds"]))
+        day_width = max(2.0, x_at(float(item["day_end_seconds"])) - day_x)
+        night_width = max(2.0, x_at(float(item["night_end_seconds"])) - night_x)
+        parts.extend([
+            f'<line x1="{day_x:.1f}" y1="172" x2="{night_x:.1f}" y2="245" stroke="{color}" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.75"/>',
+            f'<line x1="{day_x + day_width:.1f}" y1="172" x2="{night_x + night_width:.1f}" y2="245" stroke="{color}" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.75"/>',
+            f'<rect x="{day_x:.1f}" y="130" width="{day_width:.1f}" height="42" rx="3" fill="{color}" opacity="0.82"/>',
+            f'<rect x="{night_x:.1f}" y="245" width="{night_width:.1f}" height="42" rx="3" fill="{color}" opacity="0.82"/>',
+            f'<text x="{day_x + 5:.1f}" y="146" font-family="sans-serif" font-size="11" font-weight="700" fill="white">Cut {item["cut_index"]}</text>',
+            f'<text x="{day_x + 5:.1f}" y="164" font-family="sans-serif" font-size="10" fill="white">{float(item["day_start_seconds"]):.2f}–{float(item["day_end_seconds"]):.2f}s ({float(item["day_duration_seconds"]):.2f}s)</text>',
+            f'<text x="{night_x + 5:.1f}" y="261" font-family="sans-serif" font-size="11" font-weight="700" fill="white">Cut {item["cut_index"]}</text>',
+            f'<text x="{night_x + 5:.1f}" y="279" font-family="sans-serif" font-size="10" fill="white">{float(item["night_start_seconds"]):.2f}–{float(item["night_end_seconds"]):.2f}s ({float(item["night_duration_seconds"]):.2f}s)</text>',
+        ])
+    for side, y in (("day", 130.0), ("night", 245.0)):
+        for interval in plan["diagnostics"][f"{side}_unmatched_ranges"]:
+            start, end = float(interval["start_seconds"]), float(interval["end_seconds"])
+            parts.append(f'<rect x="{x_at(start):.1f}" y="{y:.1f}" width="{max(2, x_at(end)-x_at(start)):.1f}" height="42" fill="#c94040" opacity="0.38"/>')
+        for interval in plan["diagnostics"][f"{side}_low_confidence_ranges"]:
+            start, end = float(interval["start_seconds"]), float(interval["end_seconds"])
+            parts.append(f'<rect x="{x_at(start):.1f}" y="{y:.1f}" width="{max(2, x_at(end)-x_at(start)):.1f}" height="42" fill="#c94040" opacity="0.55"/>')
+    parts.extend([
+        '<rect x="40" y="322" width="14" height="14" fill="#299764"/><text x="60" y="334" font-family="sans-serif" font-size="12" fill="#526174">high confidence</text>',
+        '<rect x="205" y="322" width="14" height="14" fill="#e3a126"/><text x="225" y="334" font-family="sans-serif" font-size="12" fill="#526174">accepted confidence</text>',
+        '<rect x="395" y="322" width="14" height="14" fill="#c94040" opacity="0.5"/><text x="415" y="334" font-family="sans-serif" font-size="12" fill="#526174">unmatched / low confidence</text>',
+        f'<text x="{right:.1f}" y="334" text-anchor="end" font-family="sans-serif" font-size="11" fill="#526174">{esc(len(plan["cuts"]))} planned cut pair(s)</text>',
+        '</svg>',
+    ])
+    return "\n".join(parts)
+
+
+def _mapping_issue_ranges(rows: list[dict[str, Any]], side: str) -> list[dict[str, float]]:
+    """Collapse internal unmatched/low-confidence mapping rows into timeline ranges."""
+    time_key = "source_time_seconds" if side == "night" else "target_time_seconds"
+    flagged = [
+        float(row[time_key])
+        for row in rows
+        if row[time_key] != "" and (row["status"] != "matched" or row["confidence"] < LOW_CONFIDENCE_THRESHOLD)
+    ]
+    if not flagged:
+        return []
+    ranges: list[dict[str, float]] = []
+    start = previous = flagged[0]
+    for value in flagged[1:]:
+        if value - previous > 1.0:
+            ranges.append({"start_seconds": round(start, 6), "end_seconds": round(previous, 6)})
+            start = value
+        previous = value
+    ranges.append({"start_seconds": round(start, 6), "end_seconds": round(previous, 6)})
+    return ranges
+
+
+def _smooth_mapping_confidence(rows: list[dict[str, Any]], window_seconds: float = 1.0) -> np.ndarray:
+    """Return a centered moving-average confidence, treating non-matches as zero."""
+    if not rows:
+        return np.asarray([], dtype=np.float32)
+    times = np.asarray([float(row["source_time_seconds"]) for row in rows], dtype=np.float64)
+    positive_steps = np.diff(times)
+    positive_steps = positive_steps[positive_steps > 1e-9]
+    step = float(np.median(positive_steps)) if positive_steps.size else window_seconds
+    window = max(1, int(round(window_seconds / max(step, 1e-6))))
+    if window % 2 == 0:
+        window += 1
+    values = np.asarray([
+        float(row["confidence"])
+        if row["status"] == "matched" and row["target_frame"] != ""
+        else 0.0
+        for row in rows
+    ], dtype=np.float32)
+    return np.convolve(values, np.ones(window, dtype=np.float32) / window, mode="same")
+
+
+def _select_native_boundary_anchors(
+    rows: list[dict[str, Any]],
+    target_seconds: float,
+    minimum_seconds: float,
+    confidence_threshold: float,
+) -> tuple[list[dict[str, Any]], np.ndarray]:
+    """Select reliable anchors with a soft target and a hard minimum on both timelines."""
+    smoothed = _smooth_mapping_confidence(rows)
+    reliable = [
+        {**row, "smoothed_confidence": float(smoothed[index])}
+        for index, row in enumerate(rows)
+        if row["status"] == "matched"
+        and row["target_frame"] != ""
+        and float(smoothed[index]) >= confidence_threshold
+    ]
+    if len(reliable) < 2:
+        raise ValueError(
+            f"The alignment mapping has fewer than two reliable boundary anchors at confidence {confidence_threshold:.2f}."
+        )
+    first, last = reliable[0], reliable[-1]
+
+    def elapsed(start: dict[str, Any], end: dict[str, Any], side: str) -> float:
+        key = "source_time_seconds" if side == "night" else "target_time_seconds"
+        return float(end[key]) - float(start[key])
+
+    if elapsed(first, last, "night") <= minimum_seconds or elapsed(first, last, "day") <= minimum_seconds:
+        raise ValueError("The reliably aligned interval is not longer than the minimum segment duration on both timelines.")
+
+    anchors = [first]
+    while True:
+        current = anchors[-1]
+        night_to_last = elapsed(current, last, "night")
+        day_to_last = elapsed(current, last, "day")
+        if night_to_last <= target_seconds * 1.5 or day_to_last <= target_seconds * 1.5:
+            anchors.append(last)
+            break
+        candidates = [
+            candidate for candidate in reliable
+            if elapsed(current, candidate, "night") > minimum_seconds
+            and elapsed(current, candidate, "day") > minimum_seconds
+            and elapsed(candidate, last, "night") > minimum_seconds
+            and elapsed(candidate, last, "day") > minimum_seconds
+        ]
+        if not candidates:
+            anchors.append(last)
+            break
+        anchor = min(
+            candidates,
+            key=lambda candidate: (
+                abs(elapsed(current, candidate, "night") - target_seconds)
+                + abs(elapsed(current, candidate, "day") - target_seconds)
+                - 10.0 * float(candidate["smoothed_confidence"])
+            ),
+        )
+        if anchor["source_frame"] == current["source_frame"]:
+            anchors.append(last)
+            break
+        anchors.append(anchor)
+    return anchors, smoothed
+
+
+def create_check_mailbox_native_rgb_cut_plan(
+    dataset_folder: Path | str = "dataset",
+    alignment_folder: Path | str = "day_night_alignment/check_mailbox_split",
+    segment_seconds: float = NATIVE_SEGMENT_SECONDS,
+) -> dict[str, Any]:
+    """Create a variable-length, endpoint-aligned native RGB cut plan and SVG."""
+    if segment_seconds <= 0:
+        raise ValueError("segment_seconds must be positive.")
+    dataset_folder, alignment_folder = Path(dataset_folder), Path(alignment_folder)
+    split = dataset_folder / "check_mailbox_split"
+    day_path = split / "check_mailbox_day_rgb.mp4"
+    night_path = split / "check_mailbox_night_rgb.mp4"
+    mapping_path = alignment_folder / "check_mailbox_night_to_day_frames.csv"
+    for path in (day_path, night_path, mapping_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"Required native cut-plan input does not exist: {path}")
+
+    day_meta, night_meta = _video_metadata(day_path), _video_metadata(night_path)
+    rows = _read_mapping_csv(mapping_path, "night", "day")
+    anchors, smoothed_confidence = _select_native_boundary_anchors(
+        rows, segment_seconds, NATIVE_MIN_SEGMENT_SECONDS, NATIVE_BOUNDARY_CONFIDENCE
+    )
+    cuts = []
+    for index, (start_anchor, end_anchor) in enumerate(zip(anchors, anchors[1:]), start=1):
+        night_start = float(start_anchor["source_time_seconds"])
+        night_end = float(end_anchor["source_time_seconds"])
+        day_start = float(start_anchor["target_time_seconds"])
+        day_end = float(end_anchor["target_time_seconds"])
+        night_duration = night_end - night_start
+        day_duration = day_end - day_start
+        if night_duration <= NATIVE_MIN_SEGMENT_SECONDS or day_duration <= NATIVE_MIN_SEGMENT_SECONDS:
+            raise ValueError("Boundary selection produced a segment that is not longer than 20 seconds on both timelines.")
+        interior = [
+            row for row in rows
+            if night_start <= float(row["source_time_seconds"]) <= night_end
+        ]
+        weak_count = sum(row["status"] != "matched" or row["confidence"] < LOW_CONFIDENCE_THRESHOLD for row in interior)
+        weak_fraction = weak_count / max(1, len(interior))
+        start_confidence = float(start_anchor["smoothed_confidence"])
+        end_confidence = float(end_anchor["smoothed_confidence"])
+        cuts.append({
+            "cut_index": index,
+            "start_confidence": round(start_confidence, 6),
+            "end_confidence": round(end_confidence, 6),
+            "boundary_confidence": round(min(start_confidence, end_confidence), 6),
+            "review": weak_fraction > 0.25,
+            "interior_low_confidence_fraction": round(weak_fraction, 6),
+            "night_start_seconds": round(night_start, 6),
+            "night_end_seconds": round(night_end, 6),
+            "night_duration_seconds": round(night_duration, 6),
+            "day_start_seconds": round(day_start, 6),
+            "day_end_seconds": round(day_end, 6),
+            "day_duration_seconds": round(day_duration, 6),
+        })
+    if not cuts:
+        raise ValueError("No native RGB cut windows fit within both source videos.")
+
+    output_folder = alignment_folder / "native_rgb_cut_plan"
+    output_folder.mkdir(parents=True, exist_ok=True)
+    json_path, svg_path = output_folder / "cut_plan.json", output_folder / "cut_plan.svg"
+    plan = {
+        "manifest_type": "native_day_night_rgb_cut_plan_v2",
+        "sample": "check_mailbox",
+        "target_segment_seconds": segment_seconds,
+        "minimum_segment_seconds": NATIVE_MIN_SEGMENT_SECONDS,
+        "boundary_confidence_threshold": NATIVE_BOUNDARY_CONFIDENCE,
+        "confidence_smoothing_seconds": 1.0,
+        "inputs": {"mapping": _file_fingerprint(mapping_path), "day": _file_fingerprint(day_path), "night": _file_fingerprint(night_path)},
+        "sources": {"day": day_meta, "night": night_meta},
+        "diagnostics": {
+            "day_unmatched_ranges": _unmatched_ranges(float(anchors[0]["target_time_seconds"]), float(anchors[-1]["target_time_seconds"]), float(day_meta["duration_seconds"])),
+            "night_unmatched_ranges": _unmatched_ranges(float(anchors[0]["source_time_seconds"]), float(anchors[-1]["source_time_seconds"]), float(night_meta["duration_seconds"])),
+            "day_low_confidence_ranges": _mapping_issue_ranges(rows, "day"),
+            "night_low_confidence_ranges": _mapping_issue_ranges(rows, "night"),
+            "low_confidence_row_count": sum(row["status"] != "matched" or row["confidence"] < LOW_CONFIDENCE_THRESHOLD for row in rows),
+            "smoothed_confidence_max": round(float(np.max(smoothed_confidence)), 6),
+        },
+        "cuts": cuts,
+        "cut_count": len(cuts),
+        "plan_json": str(json_path),
+        "timeline_svg": str(svg_path),
+    }
+    with open(json_path, "w", encoding="utf-8") as handle:
+        json.dump(plan, handle, indent=2, ensure_ascii=False)
+    svg_path.write_text(_native_cut_plan_svg(plan), encoding="utf-8")
+    return plan
+
+
+def export_check_mailbox_native_rgb_segments(
+    plan_path: Path | str = "day_night_alignment/check_mailbox_split/native_rgb_cut_plan/cut_plan.json",
+) -> dict[str, Any]:
+    """Export native-speed RGB clips using exactly the bounds in an option 84 plan."""
+    plan_path = Path(plan_path)
+    if not plan_path.is_file():
+        raise FileNotFoundError(f"Native RGB cut plan does not exist; run option 84 first: {plan_path}")
+    with open(plan_path, encoding="utf-8") as handle:
+        plan = json.load(handle)
+    if plan.get("manifest_type") != "native_day_night_rgb_cut_plan_v2":
+        raise ValueError(f"Unsupported or old native RGB cut plan; run option 84 again: {plan_path}")
+    for label in ("mapping", "day", "night"):
+        expected = plan["inputs"][label]
+        current = _file_fingerprint(Path(expected["path"]))
+        if current != expected:
+            raise ValueError(f"Native RGB cut plan is stale because its {label} input changed; run option 84 again.")
+
+    output_folder = plan_path.parent / "native_rgb_segments_v2"
+    records: list[dict[str, Any]] = []
+    for cut in plan["cuts"]:
+        cut_index = int(cut["cut_index"])
+        segment_folder = output_folder / f"Seg{cut_index}"
+        segment_folder.mkdir(parents=True, exist_ok=True)
+        record: dict[str, Any] = {
+            "cut_index": cut_index,
+            "start_confidence": cut["start_confidence"],
+            "end_confidence": cut["end_confidence"],
+            "boundary_confidence": cut["boundary_confidence"],
+            "review": cut["review"],
+        }
+        for side in ("day", "night"):
+            source = Path(plan["inputs"][side]["path"])
+            output = segment_folder / f"check_mailbox_{side}_rgb.mp4"
+            start = float(cut[f"{side}_start_seconds"])
+            duration = float(cut[f"{side}_duration_seconds"])
+            temporary = output.with_name(f"{output.stem}.tmp{output.suffix}")
+            temporary.unlink(missing_ok=True)
+            command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", f"{start:.6f}", "-t", f"{duration:.6f}", "-i", str(source), "-an", "-c:v", "libx264", "-preset", "medium", "-pix_fmt", "yuv420p", "-vsync", "0", "-movflags", "+faststart", str(temporary)]
+            completed = subprocess.run(command, check=False, capture_output=True, text=True)
+            if completed.returncode != 0:
+                temporary.unlink(missing_ok=True)
+                raise RuntimeError(f"Failed to export cut {cut_index} {side} RGB: {completed.stderr.strip()}")
+            temporary.replace(output)
+            actual = _video_metadata(output)
+            record.update({
+                f"{side}_source": str(source), f"{side}_output": str(output),
+                f"{side}_start_seconds": start, f"{side}_requested_duration_seconds": duration,
+                f"{side}_actual_duration_seconds": round(float(actual["duration_seconds"]), 6),
+                f"{side}_fps": actual["fps"],
+            })
+        records.append(record)
+
+    manifest_json, manifest_csv = output_folder / "manifest.json", output_folder / "manifest.csv"
+    summary = {"manifest_type": "native_day_night_rgb_segment_export_v2", "cut_plan": str(plan_path), "output_folder": str(output_folder), "exported_segment_count": len(records), "segments": records, "manifest_json": str(manifest_json), "manifest_csv": str(manifest_csv)}
+    with open(manifest_json, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    fieldnames = list(records[0].keys()) if records else []
+    with open(manifest_csv, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(records)
     return summary
 
 
