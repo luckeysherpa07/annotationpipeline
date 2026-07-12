@@ -762,7 +762,10 @@ def _file_fingerprint(path: Path) -> dict[str, Any]:
 
 
 def _native_cut_plan_svg(plan: dict[str, Any]) -> str:
-    width, height = 1400, 360
+    width = 1400
+    table_top = 410
+    table_row_height = 24
+    height = table_top + 48 + table_row_height * len(plan["cuts"])
     left, right = 130.0, 1340.0
     track_width = right - left
     day_duration = float(plan["sources"]["day"]["duration_seconds"])
@@ -811,13 +814,53 @@ def _native_cut_plan_svg(plan: dict[str, Any]) -> str:
         for interval in plan["diagnostics"][f"{side}_low_confidence_ranges"]:
             start, end = float(interval["start_seconds"]), float(interval["end_seconds"])
             parts.append(f'<rect x="{x_at(start):.1f}" y="{y:.1f}" width="{max(2, x_at(end)-x_at(start)):.1f}" height="42" fill="#c94040" opacity="0.55"/>')
+    boundaries = [{
+        "day_seconds": float(plan["cuts"][0]["day_start_seconds"]),
+        "night_seconds": float(plan["cuts"][0]["night_start_seconds"]),
+    }]
+    boundaries.extend({
+        "day_seconds": float(item["day_end_seconds"]),
+        "night_seconds": float(item["night_end_seconds"]),
+    } for item in plan["cuts"])
+    for split_index, boundary in enumerate(boundaries):
+        day_x = x_at(boundary["day_seconds"])
+        night_x = x_at(boundary["night_seconds"])
+        if split_index == 0:
+            split_label = "START Seg 1"
+        elif split_index == len(boundaries) - 1:
+            split_label = f"END Seg {len(plan['cuts'])}"
+        else:
+            split_label = f"END Seg {split_index} / START Seg {split_index + 1}"
+        parts.extend([
+            f'<line x1="{day_x:.1f}" y1="105" x2="{day_x:.1f}" y2="178" stroke="#172033" stroke-width="2.5"/>',
+            f'<circle cx="{day_x:.1f}" cy="130" r="4" fill="#172033"/>',
+            f'<text x="{day_x:.1f}" y="98" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#172033">Split {split_index}: {boundary["day_seconds"]:.2f}s</text>',
+            f'<line x1="{night_x:.1f}" y1="222" x2="{night_x:.1f}" y2="294" stroke="#172033" stroke-width="2.5"/>',
+            f'<circle cx="{night_x:.1f}" cy="245" r="4" fill="#172033"/>',
+            f'<text x="{night_x:.1f}" y="309" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#172033">Split {split_index}: {boundary["night_seconds"]:.2f}s</text>',
+            f'<text x="{(day_x + night_x) / 2:.1f}" y="207" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#526174">{split_label}</text>',
+        ])
     parts.extend([
-        '<rect x="40" y="322" width="14" height="14" fill="#299764"/><text x="60" y="334" font-family="sans-serif" font-size="12" fill="#526174">high confidence</text>',
-        '<rect x="205" y="322" width="14" height="14" fill="#e3a126"/><text x="225" y="334" font-family="sans-serif" font-size="12" fill="#526174">accepted confidence</text>',
-        '<rect x="395" y="322" width="14" height="14" fill="#c94040" opacity="0.5"/><text x="415" y="334" font-family="sans-serif" font-size="12" fill="#526174">unmatched / low confidence</text>',
-        f'<text x="{right:.1f}" y="334" text-anchor="end" font-family="sans-serif" font-size="11" fill="#526174">{esc(len(plan["cuts"]))} planned cut pair(s)</text>',
-        '</svg>',
+        '<rect x="40" y="370" width="14" height="14" fill="#299764"/><text x="60" y="382" font-family="sans-serif" font-size="12" fill="#526174">high confidence</text>',
+        '<rect x="205" y="370" width="14" height="14" fill="#e3a126"/><text x="225" y="382" font-family="sans-serif" font-size="12" fill="#526174">review segment</text>',
+        '<rect x="365" y="370" width="14" height="14" fill="#c94040" opacity="0.5"/><text x="385" y="382" font-family="sans-serif" font-size="12" fill="#526174">unmatched / low confidence</text>',
+        f'<text x="{right:.1f}" y="382" text-anchor="end" font-family="sans-serif" font-size="11" fill="#526174">{esc(len(plan["cuts"]))} planned segment pair(s), {esc(len(boundaries))} shared splits</text>',
+        f'<text x="40" y="{table_top + 20}" font-family="sans-serif" font-size="16" font-weight="700" fill="#172033">Segment lengths</text>',
+        f'<text x="250" y="{table_top + 20}" font-family="sans-serif" font-size="12" font-weight="700" fill="#526174">DAY duration</text>',
+        f'<text x="430" y="{table_top + 20}" font-family="sans-serif" font-size="12" font-weight="700" fill="#526174">NIGHT duration</text>',
+        f'<text x="625" y="{table_top + 20}" font-family="sans-serif" font-size="12" font-weight="700" fill="#526174">Paired boundaries (day ↔ night)</text>',
     ])
+    for row_index, item in enumerate(plan["cuts"]):
+        y = table_top + 45 + row_index * table_row_height
+        if row_index % 2 == 0:
+            parts.append(f'<rect x="35" y="{y - 17}" width="1305" height="{table_row_height}" fill="#eef2f6" rx="2"/>')
+        parts.extend([
+            f'<text x="45" y="{y}" font-family="sans-serif" font-size="12" font-weight="700" fill="#26364a">Segment {item["cut_index"]}</text>',
+            f'<text x="250" y="{y}" font-family="sans-serif" font-size="12" fill="#26364a">{float(item["day_duration_seconds"]):.3f} seconds</text>',
+            f'<text x="430" y="{y}" font-family="sans-serif" font-size="12" fill="#26364a">{float(item["night_duration_seconds"]):.3f} seconds</text>',
+            f'<text x="625" y="{y}" font-family="sans-serif" font-size="11" fill="#526174">day {float(item["day_start_seconds"]):.3f}–{float(item["day_end_seconds"]):.3f}s ↔ night {float(item["night_start_seconds"]):.3f}–{float(item["night_end_seconds"]):.3f}s</text>',
+        ])
+    parts.append('</svg>')
     return "\n".join(parts)
 
 

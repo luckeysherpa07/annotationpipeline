@@ -267,6 +267,12 @@ class DayNightPairAlignmentTests(unittest.TestCase):
             self.assertTrue(all(item["end_confidence"] >= 0.65 for item in plan["cuts"]))
             svg = Path(plan["timeline_svg"]).read_text(encoding="utf-8")
             self.assertIn("Cut 1", svg)
+            self.assertIn("Split 0: 10.00s", svg)
+            self.assertIn("END Seg 1 / START Seg 2", svg)
+            self.assertIn("2 planned segment pair(s), 3 shared splits", svg)
+            self.assertIn("Segment lengths", svg)
+            self.assertIn("30.000 seconds", svg)
+            self.assertIn("40.000 seconds", svg)
             self.assertIn("unmatched / low confidence", svg)
             self.assertTrue(Path(plan["plan_json"]).is_file())
 
