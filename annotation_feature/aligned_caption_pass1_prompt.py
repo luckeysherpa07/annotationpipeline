@@ -16,7 +16,15 @@ from types import MappingProxyType
 
 MODALITY_PHYSICAL_GUIDANCE = MappingProxyType({
     "rgb": "### ACTIVE MODALITY GUIDANCE: RGB\n- Supported: Visible color, surface texture, paint and material appearance, visible lighting effects.\n- Avoid: Do not use representation-oriented wording. Do not claim absolute distance or hidden structure.\n- Valid: 'The vehicle is white.' 'The surface is smooth.'\n- Invalid: 'The RGB image captures a white vehicle.'",
-    "event": "### ACTIVE MODALITY GUIDANCE: EVENT\n- Supported: Changes in physical boundaries, object position, and motion. Physical outlines under poor illumination.\n- Avoid: Do not use representation-oriented wording ('event activity', 'response clusters', 'dense event clusters surround').\n- Valid: 'The vehicle outline remains distinguishable.'\n- Invalid: 'The event representation resolves the facade.'",
+    "event": (
+        "### ACTIVE MODALITY GUIDANCE: EVENT\n"
+        "- Conversion policy: When independently supported by the current Event source, infer the strongest defensible physical-world proposition: coarse object presence, changes in position, extent, or orientation, directly supported motion, temporal or spatial relations, coarse physical structure or layout, or visibility under difficult illumination.\n"
+        "- A line, contour, silhouette, outline, boundary, or edge transition is a raw cue, not automatically a valid final atom proposition. Event-local atoms and captions must not describe how such structures are traced, highlighted, defined, resolved, encoded, captured, or represented. Never borrow an object identity from RGB to turn an Event cue into a semantic fact.\n"
+        "- If no reliable physical proposition is supported, place only the segment-specific raw cue in `sensor_specific_cues` or omit it.\n"
+        "- Valid physical facts, only when independently supported: 'Several parked vehicles remain distinguishable along the roadside.' 'The cyclist changes position relative to the parked vehicle.' 'A person moves from the left side of the roadway toward the center.' 'The building facade contains repeated rectangular structural regions.'\n"
+        "- Invalid atom or caption wording: 'The vehicle silhouette is traced by sharp boundaries.' 'Edge transitions define the building facade.' 'The object is outlined against the background.' 'The wall is reduced to a single vertical line.' 'Motion boundaries capture the parked vehicles.'\n"
+        "- Valid raw cue placement in `sensor_specific_cues`: 'A narrow vertical response remains in the final sampled time.' This cue alone does not justify a building or wall atom."
+    ),
     "depth": "### ACTIVE MODALITY GUIDANCE: DEPTH\n- Supported: Relative depth, one entity standing in front of another, surface geometry.\n- Avoid: Do not use representation-oriented wording ('depth map represents'). Do not claim color, material, or exact metric distance unless directly supported.\n- Valid: 'The person stands in front of the wall.'\n- Invalid: 'A depth discontinuity separates the person and wall.'",
     "ir": "### ACTIVE MODALITY GUIDANCE: IR\n- Supported: Relative infrared appearance or contrast (e.g., one physical region being brighter/darker than another).\n- Avoid: Do not guess thermal IR from pixel appearance alone. Do not claim exact temperature or causal thermal conclusions unless metadata explicitly establishes thermal infrared. Do not use representation-oriented wording.\n- Valid: 'The person is brighter than the surrounding background.'\n- Invalid: 'The infrared channel highlights a warm object.'"
 })
@@ -107,19 +115,19 @@ def _build_prompt_schema_example(task: Any, modality1: str | None = None, modali
         },
         "video2_analysis": {
             "modality": modality2,
-            "detailed_caption": "A concrete barrier has a straight upper boundary and a vertical side face. Individual cobblestones remain structurally distinguishable around the base of the barrier.",
+            "detailed_caption": "A concrete barrier has a flat upper surface and a vertical side face. Individual cobblestones surround the base of the barrier.",
             "information_atoms": [
                 {
                     "atom_id": "v2_atom_001",
                     "frame_keys": [fk],
                     "entity_refs": ["entity_002"],
-                    "fact": "A concrete barrier has a straight upper boundary and a vertical side face."
+                    "fact": "A concrete barrier has a flat upper surface and a vertical side face."
                 },
                 {
                     "atom_id": "v2_atom_002",
                     "frame_keys": [fk],
                     "entity_refs": ["entity_002", "entity_004"],
-                    "fact": "Individual cobblestones remain structurally distinguishable around the base of the barrier."
+                    "fact": "Individual cobblestones surround the base of the barrier."
                 }
             ],
             "sensor_specific_cues": [],

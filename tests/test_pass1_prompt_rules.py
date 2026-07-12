@@ -155,3 +155,47 @@ def test_refactored_system_prompt_stays_materially_shorter():
     prompt = build_pass1_system_prompt()
     assert len(prompt) < 10_000
     assert len(prompt.split()) < 1_400
+
+
+def test_event_guidance_requires_physical_world_conversion():
+    prompt = build_pass1_user_prompt(DummyTask())
+
+    assert "line, contour, silhouette, outline, boundary, or edge transition" in prompt
+    assert "sensor_specific_cues" in prompt
+    assert "Several parked vehicles remain distinguishable along the roadside." in prompt
+    assert "Never borrow an object identity from RGB" in prompt
+
+
+def test_event_guidance_removes_outline_as_preferred_fact():
+    prompt = build_pass1_user_prompt(DummyTask())
+
+    assert "The vehicle outline remains distinguishable." not in prompt
+
+
+def test_event_guidance_contains_invalid_representation_examples():
+    prompt = build_pass1_user_prompt(DummyTask())
+
+    assert "The vehicle silhouette is traced by sharp boundaries." in prompt
+    assert "Edge transitions define the building facade." in prompt
+    assert "The wall is reduced to a single vertical line." in prompt
+
+
+def test_schema_example_event_atoms_use_physical_world_facts():
+    example = _build_prompt_schema_example(DummyTask())
+    event_text = " ".join(
+        atom["fact"]
+        for atom in example["video2_analysis"]["information_atoms"]
+    ).lower()
+
+    forbidden_phrases = [
+        "traced by",
+        "defined by edge",
+        "reduced to a single",
+        "silhouette",
+        "edge transition",
+        "structurally distinguishable",
+        "straight upper boundary",
+    ]
+
+    for phrase in forbidden_phrases:
+        assert phrase not in event_text

@@ -1,0 +1,190 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "architecture": "two_pass",
+    "stage": "pass1",
+    "input": "outputs/temp_bike_input.json",
+    "output": "outputs/test_pass1_bike_night_19_15.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 1,
+    "completed_items": 0,
+    "skipped_items": 1,
+    "gemini_calls": 3
+  },
+  "items": [],
+  "skipped": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000720.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000720.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000720.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        720
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        720,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "failed",
+      "reason": "Semantic Validation Errors: Shared motion attribute 'parked' lacks Entity-bound Atom support in video1_analysis, video2_analysis.",
+      "attempts": 3,
+      "first_attempt_success": false,
+      "final_error_category": "shared_global_source_attribute_leakage",
+      "evidence": null,
+      "validation_warnings": [],
+      "api_calls": 3,
+      "validation_attempts": 3,
+      "transport_retries": 0,
+      "first_validation_attempt_success": false,
+      "retry_history": [
+        {
+          "type": "validation",
+          "category": "registry_source_attribute_leakage",
+          "validation_attempt": 1,
+          "message": "Semantic Validation Errors: Shared headlights attribute 'headlights' lacks Entity-bound Atom support in video2_analysis.; sensor limitation must anchor to a known Entity, frame, or segment region.; se"
+        },
+        {
+          "type": "validation",
+          "category": "missing_entity_reference",
+          "validation_attempt": 2,
+          "message": "Semantic Validation Errors: Atom relation names registered Entity entity_006 ('roadway') but omits it from entity_refs.; Atom relation names registered Entity entity_006 ('roadway') but omits it from "
+        },
+        {
+          "type": "validation",
+          "category": "shared_global_source_attribute_leakage",
+          "validation_attempt": 3,
+          "message": "Semantic Validation Errors: Shared motion attribute 'parked' lacks Entity-bound Atom support in video1_analysis, video2_analysis."
+        }
+      ],
+      "diagnostics": {
+        "api_calls": 3,
+        "validation_attempts": 3,
+        "transport_retries": 0,
+        "first_validation_attempt_success": false,
+        "retry_history": [
+          {
+            "type": "validation",
+            "category": "registry_source_attribute_leakage",
+            "validation_attempt": 1,
+            "message": "Semantic Validation Errors: Shared headlights attribute 'headlights' lacks Entity-bound Atom support in video2_analysis.; sensor limitation must anchor to a known Entity, frame, or segment region.; se"
+          },
+          {
+            "type": "validation",
+            "category": "missing_entity_reference",
+            "validation_attempt": 2,
+            "message": "Semantic Validation Errors: Atom relation names registered Entity entity_006 ('roadway') but omits it from entity_refs.; Atom relation names registered Entity entity_006 ('roadway') but omits it from "
+          },
+          {
+            "type": "validation",
+            "category": "shared_global_source_attribute_leakage",
+            "validation_attempt": 3,
+            "message": "Semantic Validation Errors: Shared motion attribute 'parked' lacks Entity-bound Atom support in video1_analysis, video2_analysis."
+          }
+        ],
+        "key_rotations": 0,
+        "quota_failures": 0,
+        "structural_validation_failures": 0,
+        "semantic_validation_failures": 0
+      },
+      "last_invalid_response": "```json\n{\n  \"global_scene\": {\n    \"scene_summary\": \"A paved street at night is lined with street lamps, trees, parked vehicles including a camper van, and a large building with a prominent facade on the right.\",\n    \"environment\": \"urban\",\n    \"temporal_progression\": \"Forward motion along the paved street progresses past several parked vehicles on both sides and alongside a large building facade before terminating near a vertical surface.\",\n    \"physical_entities\": [\n      {\n        \"entity_id\": \"entity_001\",\n        \"category\": \"roadway\",\n        \"referential_scope\": \"the roadway\"\n      },\n      {\n        \"entity_id\": \"entity_002\",\n        \"category\": \"street_lamp\",\n        \"referential_scope\": \"the street lamps\"\n      },\n      {\n        \"entity_id\": \"entity_003\",\n        \"category\": \"vehicle\",\n        \"referential_scope\": \"the camper van\"\n      },\n      {\n        \"entity_id\": \"entity_004\",\n        \"category\": \"building\",\n        \"referential_scope\": \"the building\"\n      },\n      {\n        \"entity_id\": \"entity_005\",\n        \"category\": \"vehicle\",\n        \"referential_scope\": \"the SUV\"\n      },\n      {\n        \"entity_id\": \"entity_006\",\n        \"category\": \"vehicle\",\n        \"referential_scope\": \"the headlight car\"\n      }\n    ]\n  },\n  \"video1_analysis\": {\n    \"modality\": \"rgb\",\n    \"detailed_caption\": \"Forward motion proceeds along a paved roadway illuminated by street lamps at night. A white SUV is parked on the right, and a large white camper van is parked on the left. The route passes a building facade on the right with a horizontal light fixture, before terminating in darkness near a wall while another vehicle with headlights is visible.\",\n    \"information_atoms\": [\n      {\n        \"atom_id\": \"v1_atom_001\",\n        \"frame_keys\": [\n          \"frame_000000\",\n          \"frame_000120\",\n          \"frame_000240\",\n          \"frame_000360\",\n          \"frame_000510\",\n          \"frame_000630\",\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_001\"\n        ],\n        \"fact\": \"Forward motion proceeds along the roadway at night.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_002\",\n        \"frame_keys\": [\n          \"frame_000000\",\n          \"frame_000120\",\n          \"frame_000240\",\n          \"frame_000360\"\n        ],\n        \"entity_refs\": [\n          \"entity_002\",\n          \"entity_001\"\n        ],\n        \"fact\": \"Multiple street lamps illuminate the left side of the roadway.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_003\",\n        \"frame_keys\": [\n          \"frame_000120\"\n        ],\n        \"entity_refs\": [\n          \"entity_005\",\n          \"entity_001\",\n          \"entity_002\"\n        ],\n        \"fact\": \"A white SUV is parked on the right side of the roadway under a street lamp.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_004\",\n        \"frame_keys\": [\n          \"frame_000240\",\n          \"frame_000360\"\n        ],\n        \"entity_refs\": [\n          \"entity_003\",\n          \"entity_001\"\n        ],\n        \"fact\": \"A large white camper van is parked on the left side of the roadway.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_005\",\n        \"frame_keys\": [\n          \"frame_000510\",\n          \"frame_000630\",\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_004\"\n        ],\n        \"fact\": \"A multi-story building stands on the right.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_006\",\n        \"frame_keys\": [\n          \"frame_000630\"\n        ],\n        \"entity_refs\": [\n          \"entity_004\"\n        ],\n        \"fact\": \"A horizontal light fixture on the building overhang casts light downward.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_007\",\n        \"frame_keys\": [\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_006\",\n          \"entity_001\"\n        ],\n        \"fact\": \"The headlight car is positioned on the left side of the roadway.\"\n      },\n      {\n        \"atom_id\": \"v1_atom_008\",\n        \"frame_keys\": [\n          \"frame_000870\"\n        ],\n        \"entity_refs\": [\n          \"entity_004\"\n        ],\n        \"fact\": \"The immediate environment becomes extremely dark as the forward motion terminates near the building.\"\n      }\n    ],\n    \"sensor_specific_cues\": [\n      \"A distinct optical glare surrounds each street lamp in low light.\",\n      \"Lens flare streaks vertically from a street light in frame_000120.\"\n    ],\n    \"sensor_limitations\": [\n      \"In frame_000000 and frame_000120, low ambient lighting on the far left side of the roadway obscures the detailed profile of the parked camper van.\"\n    ],\n    \"uncertain_observations\": [\n      {\n        \"uncertainty_id\": \"v1_unc_001\",\n        \"entity_id\": \"entity_006\",\n        \"evidence_refs\": [\n          \"v1_atom_007\"\n        ],\n        \"hypotheses\": [\n          {\n            \"candidate\": \"oncoming passenger car\",\n            \"confidence\": \"medium\"\n          },\n          {\n            \"candidate\": \"parked utility vehicle\",\n            \"confidence\": \"low\"\n          }\n        ]\n      }\n    ],\n    \"missing_key_attributes\": []\n  },\n  \"video2_analysis\": {\n    \"modality\": \"event\",\n    \"detailed_caption\": \"Forward motion along the roadway reveals the structural layout of the street. A parked vehicle is located on the right, and a large boxy vehicle is parked on the left. The route continues past a building facade on the right with vertical architectural segments. A vehicle's headlights are visible ahead before the motion stops near a vertical surface.\",\n    \"information_atoms\": [\n      {\n        \"atom_id\": \"v2_atom_001\",\n        \"frame_keys\": [\n          \"frame_000000\",\n          \"frame_000120\",\n          \"frame_000240\",\n          \"frame_000360\",\n          \"frame_000510\",\n          \"frame_000630\",\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_001\"\n        ],\n        \"fact\": \"Forward motion along the roadway reveals the structural layout of the street environment.\"\n      },\n      {\n        \"atom_id\": \"v2_atom_002\",\n        \"frame_keys\": [\n          \"frame_000120\"\n        ],\n        \"entity_refs\": [\n          \"entity_005\",\n          \"entity_001\"\n        ],\n        \"fact\": \"A parked SUV is located on the right side of the roadway.\"\n      },\n      {\n        \"atom_id\": \"v2_atom_003\",\n        \"frame_keys\": [\n          \"frame_000240\",\n          \"frame_000360\"\n        ],\n        \"entity_refs\": [\n          \"entity_003\",\n          \"entity_001\"\n        ],\n        \"fact\": \"A camper van stands parked on the left side of the roadway.\"\n      },\n      {\n        \"atom_id\": \"v2_atom_004\",\n        \"frame_keys\": [\n          \"frame_000510\",\n          \"frame_000630\",\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_004\"\n        ],\n        \"fact\": \"A building with repeated vertical architectural segments is situated on the right.\"\n      },\n      {\n        \"atom_id\": \"v2_atom_005\",\n        \"frame_keys\": [\n          \"frame_000690\",\n          \"frame_000720\",\n          \"frame_000750\"\n        ],\n        \"entity_refs\": [\n          \"entity_006\",\n          \"entity_001\"\n        ],\n        \"fact\": \"The headlight car is visible on the roadway ahead.\"\n      },\n      {\n        \"atom_id\": \"v2_atom_006\",\n        \"frame_keys\": [\n          \"frame_000870\"\n        ],\n        \"entity_refs\": [\n          \"entity_004\"\n        ],\n        \"fact\": \"A vertical surface of the building is positioned extremely close as the motion stops.\"\n      }\n    ],\n    \"sensor_specific_cues\": [\n      \"High-frequency dot patterns trace the outlines of trees and street lamp structures during motion.\",\n      \"A thick vertical line pattern appears when approaching a surface very closely in frame_000870.\"\n    ],\n    \"sensor_limitations\": [\n      \"In frame_000870, the abrupt cessation of forward relative motion near the building prevents transient change generation, causing the structural boundaries of the vertical wall surface to fade from view.\"\n    ],\n    \"uncertain_observations\": [\n      {\n        \"uncertainty_id\": \"v2_unc_001\",\n        \"entity_id\": \"entity_005\",\n        \"evidence_refs\": [\n          \"v2_atom_002\"\n        ],\n        \"hypotheses\": [\n          {\n            \"candidate\": \"SUV\",\n            \"confidence\": \"medium\"\n          },\n          {\n            \"candidate\": \"sedan\",\n            \"confidence\": \"medium\"\n          },\n          {\n            \"candidate\": \"small truck\",\n            \"confidence\": \"low\"\n          }\n        ]\n      }\n    ],\n    \"missing_key_attributes\": [\n      {\n        \"entity_id\": \"entity_005\",\n        \"attribute_type\": \"surface_attribute\",\n        \"missing_attribute\": \"the exterior paint color\",\n        \"why_missing\": \"During the forward movement past the vehicle in frame_000120, only transient boundary changes are registered, which do not provide stable surface color details.\",\n        \"recoverable_evidence_refs\": []\n      }\n    ]\n  }\n}\n```"
+    }
+  ]
+}
