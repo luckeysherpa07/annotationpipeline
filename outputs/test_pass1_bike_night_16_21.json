@@ -1,0 +1,506 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "architecture": "two_pass",
+    "stage": "pass1",
+    "input": "outputs/archive/temp_and_tests/temp_bike_filtered.json",
+    "output": "outputs/test_pass1_bike_night_16_21.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 1,
+    "completed_items": 1,
+    "skipped_items": 0,
+    "gemini_calls": 6
+  },
+  "items": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000720.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000720.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000720.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        720
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        720,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 6,
+      "first_attempt_success": false,
+      "final_error_category": null,
+      "evidence": {
+        "global_scene": {
+          "scene_summary": "A night scene along an urban street flanked by buildings, streetlights, trees, and parked vehicles, showing a transition toward a dark building wall.",
+          "environment": "urban",
+          "temporal_progression": "The street features parked vehicles and streetlights on both sides, leading to a dark building facade on the right side.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "roadway",
+              "referential_scope": "the street"
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "infrastructure",
+              "referential_scope": "the streetlights"
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "vehicle",
+              "referential_scope": "the parked vehicle"
+            },
+            {
+              "entity_id": "entity_004",
+              "category": "vehicle",
+              "referential_scope": "the motorhome"
+            },
+            {
+              "entity_id": "entity_005",
+              "category": "building",
+              "referential_scope": "the building facade"
+            },
+            {
+              "entity_id": "entity_006",
+              "category": "vegetation",
+              "referential_scope": "the trees"
+            },
+            {
+              "entity_id": "entity_007",
+              "category": "vehicle",
+              "referential_scope": "the vehicle with glowing headlights"
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "Multiple streetlights illuminate the dark street at night. A white vehicle is parked on the right under a streetlight, while a white motorhome is parked on the left. Young trees stand along the roadside. A dark building facade is on the right, and another vehicle with headlights is active on the street.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240",
+                "frame_000360",
+                "frame_000510",
+                "frame_000630",
+                "frame_000690",
+                "frame_000720",
+                "frame_000750",
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "Multiple streetlights emit white and yellow light to illuminate the dark street at night."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000120"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "A white vehicle is parked on the right side under a streetlight."
+            },
+            {
+              "atom_id": "v1_atom_003",
+              "frame_keys": [
+                "frame_000240",
+                "frame_000360",
+                "frame_000510"
+              ],
+              "entity_refs": [
+                "entity_004"
+              ],
+              "fact": "A white motorhome is parked on the left side of the street."
+            },
+            {
+              "atom_id": "v1_atom_004",
+              "frame_keys": [
+                "frame_000510",
+                "frame_000630",
+                "frame_000690",
+                "frame_000720",
+                "frame_000750",
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_005"
+              ],
+              "fact": "A dark building facade with illuminated glass panels is located on the right side."
+            },
+            {
+              "atom_id": "v1_atom_005",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_006"
+              ],
+              "fact": "Young trees stand along the side of the road."
+            },
+            {
+              "atom_id": "v1_atom_006",
+              "frame_keys": [
+                "frame_000690",
+                "frame_000720",
+                "frame_000750",
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_007"
+              ],
+              "fact": "A vehicle with headlights is active on the street."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Streetlights create bright, localized halos of light against the pitch-black night sky.",
+            "Vehicle headlights create bright white reflections on the wet asphalt surface in later frames."
+          ],
+          "sensor_limitations": [
+            "Low ambient lighting on parked vehicle entity_003 in frames 000000 to 000240 limits the visibility of its surface texture.",
+            "Bright emission from streetlights entity_002 causes localized overexposure on the wall of building facade entity_005 in frames 000690 to 000870."
+          ],
+          "uncertain_observations": [
+            {
+              "uncertainty_id": "v1_unc_001",
+              "entity_id": "entity_003",
+              "observed_evidence": "A dark boxy silhouette parked on the right side of the road.",
+              "missing_evidence": "Direct illumination or visible headlights/tail lights.",
+              "evidence_refs": [
+                "v1_atom_002"
+              ],
+              "hypotheses": [
+                {
+                  "hypothesis": "A stationary passenger SUV.",
+                  "confidence": "medium"
+                },
+                {
+                  "hypothesis": "A stack of construction pallets or cargo.",
+                  "confidence": "low"
+                }
+              ]
+            }
+          ],
+          "missing_key_attributes": [
+            {
+              "entity_id": "entity_003",
+              "attribute_type": "fine_grained_category",
+              "missing_attribute": "specific make and model of the vehicle",
+              "why_missing": "Low illumination on parked vehicle entity_003 in frames 000000 to 000240 prevents resolving body styling details.",
+              "recoverable_evidence_refs": []
+            },
+            {
+              "entity_id": "entity_004",
+              "attribute_type": "state_attribute",
+              "missing_attribute": "license plate characters",
+              "why_missing": "The rear of motorhome entity_004 is unlit in frames 000240 to 000510, leaving the license plate area in deep shadow.",
+              "recoverable_evidence_refs": []
+            }
+          ]
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "The vertical poles and curved tops of the streetlights display sharp, high-contrast outlines. The parked vehicle and the motorhome have clearly defined rectangular boundaries. Along the roadside, the trees show intricate structures. The building facade has distinct horizontal panel lines, and another vehicle is outlined by its bright circular headlight regions.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240",
+                "frame_000360",
+                "frame_000510",
+                "frame_000630",
+                "frame_000690",
+                "frame_000720",
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The vertical poles and curved tops of the streetlights display sharp, high-contrast outlines."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000120",
+                "frame_000240",
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_003",
+                "entity_004"
+              ],
+              "fact": "The parked vehicle and the motorhome have clearly defined rectangular boundaries."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000510",
+                "frame_000630",
+                "frame_000690",
+                "frame_000720",
+                "frame_000750",
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_005"
+              ],
+              "fact": "The rectangular windows and horizontal panel lines of the building facade are highly distinct."
+            },
+            {
+              "atom_id": "v2_atom_004",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240"
+              ],
+              "entity_refs": [
+                "entity_006"
+              ],
+              "fact": "The thin branches and leafy crowns of the trees show intricate structures."
+            },
+            {
+              "atom_id": "v2_atom_005",
+              "frame_keys": [
+                "frame_000690",
+                "frame_000720",
+                "frame_000750",
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_007"
+              ],
+              "fact": "The vehicle outline is defined by two bright circular headlight regions."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Relative motion produces continuous bright outlines along the edges of static structures like buildings, poles, and parked cars."
+          ],
+          "sensor_limitations": [
+            "The fast panning motion in frame 000870 causes high blur on the edges of building facade entity_005.",
+            "Only the sharp outer boundaries of motorhome entity_004 are resolved in frames 000240 to 000510, with no internal surface details of the vehicle body visible."
+          ],
+          "uncertain_observations": [
+            {
+              "uncertainty_id": "v2_unc_001",
+              "entity_id": "entity_005",
+              "observed_evidence": "A vertical line with a central horizontal projection in the final frame.",
+              "missing_evidence": "Surrounding context of the room or exterior facade.",
+              "evidence_refs": [
+                "v2_atom_003"
+              ],
+              "hypotheses": [
+                {
+                  "hypothesis": "A door frame with a door handle.",
+                  "confidence": "medium"
+                },
+                {
+                  "hypothesis": "A vertical wall panel seam with a mounting bracket.",
+                  "confidence": "low"
+                }
+              ]
+            }
+          ],
+          "missing_key_attributes": []
+        }
+      },
+      "validation_warnings": [
+        "weak_cross_source_recoverability in video2_analysis: target 'license plate characters' for entity_004 lacks an explicit compatible proposition.",
+        "possible_missing_recoverability_target in video2_analysis: Entity entity_003 has explicit paint/color evidence in video1_analysis.",
+        "possible_missing_recoverability_target in video2_analysis: Entity entity_004 has explicit paint/color evidence in video1_analysis."
+      ],
+      "api_calls": 6,
+      "validation_attempts": 2,
+      "transport_retries": 4,
+      "first_validation_attempt_success": false,
+      "retry_history": [
+        {
+          "type": "transport",
+          "category": "transport_other",
+          "validation_attempt": 1,
+          "transport_attempt": 1,
+          "message": "Server disconnected without sending a response."
+        },
+        {
+          "type": "transport",
+          "category": "transport_other",
+          "validation_attempt": 1,
+          "transport_attempt": 2,
+          "message": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        },
+        {
+          "type": "validation",
+          "category": "generic_sensor_theory",
+          "validation_attempt": 1,
+          "message": "Semantic Validation Errors: Generic sensor-theory wording; sensor limitation must anchor to a known Entity, frame, or segment region.; sensor limitation must anchor to a known Entity, frame, or segmen"
+        },
+        {
+          "type": "transport",
+          "category": "transport_other",
+          "validation_attempt": 2,
+          "transport_attempt": 1,
+          "message": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        },
+        {
+          "type": "transport",
+          "category": "transport_other",
+          "validation_attempt": 2,
+          "transport_attempt": 2,
+          "message": "Server disconnected without sending a response."
+        }
+      ],
+      "diagnostics": {
+        "api_calls": 6,
+        "validation_attempts": 2,
+        "transport_retries": 4,
+        "first_validation_attempt_success": false,
+        "retry_history": [
+          {
+            "type": "transport",
+            "category": "transport_other",
+            "validation_attempt": 1,
+            "transport_attempt": 1,
+            "message": "Server disconnected without sending a response."
+          },
+          {
+            "type": "transport",
+            "category": "transport_other",
+            "validation_attempt": 1,
+            "transport_attempt": 2,
+            "message": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+          },
+          {
+            "type": "validation",
+            "category": "generic_sensor_theory",
+            "validation_attempt": 1,
+            "message": "Semantic Validation Errors: Generic sensor-theory wording; sensor limitation must anchor to a known Entity, frame, or segment region.; sensor limitation must anchor to a known Entity, frame, or segmen"
+          },
+          {
+            "type": "transport",
+            "category": "transport_other",
+            "validation_attempt": 2,
+            "transport_attempt": 1,
+            "message": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+          },
+          {
+            "type": "transport",
+            "category": "transport_other",
+            "validation_attempt": 2,
+            "transport_attempt": 2,
+            "message": "Server disconnected without sending a response."
+          }
+        ],
+        "key_rotations": 0,
+        "quota_failures": 0,
+        "structural_validation_failures": 0,
+        "semantic_validation_failures": 1
+      }
+    }
+  ],
+  "skipped": []
+}
