@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from pathlib import Path
 import subprocess
 from typing import Any
@@ -19,6 +20,8 @@ PREVIEW_FPS = 10.0
 LOW_CONFIDENCE_THRESHOLD = 0.35
 NATIVE_SEGMENT_SECONDS = 30.0
 NATIVE_MIN_SEGMENT_SECONDS = 20.0
+NATIVE_MAX_SEGMENT_SECONDS = 45.0
+NATIVE_MIN_SEGMENT_COUNT = 4
 NATIVE_BOUNDARY_CONFIDENCE = 0.65
 _CLIP_RUNTIME: tuple[Any, Any, Any] | None = None
 
@@ -781,8 +784,9 @@ def _native_cut_plan_svg(plan: dict[str, Any]) -> str:
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         '<rect width="100%" height="100%" fill="#f8fafc"/>',
-        '<text x="40" y="42" font-family="sans-serif" font-size="24" font-weight="700" fill="#172033">check_mailbox native RGB cut plan</text>',
+        f'<text x="40" y="42" font-family="sans-serif" font-size="24" font-weight="700" fill="#172033">{esc(plan["sample"])} native RGB cut plan</text>',
         '<text x="40" y="68" font-family="sans-serif" font-size="13" fill="#526174">DTW supplies timestamp anchors only; exported videos retain native timing.</text>',
+        f'<text x="1360" y="68" text-anchor="end" font-family="sans-serif" font-size="12" fill="#526174">segments ≥ {plan["required_segment_count"]} · effective min {float(plan["effective_minimum_seconds"]):.2f}s · max {float(plan["maximum_segment_seconds"]):.2f}s · weak fallback {str(bool(plan["weak_boundary_fallback_used"])).lower()}</text>',
     ]
     for label, y, duration in (("DAY", 130.0, day_duration), ("NIGHT", 245.0, night_duration)):
         parts.extend([
@@ -902,7 +906,9 @@ def _smooth_mapping_confidence(rows: list[dict[str, Any]], window_seconds: float
         else 0.0
         for row in rows
     ], dtype=np.float32)
-    return np.convolve(values, np.ones(window, dtype=np.float32) / window, mode="same")
+    radius = window // 2
+    padded = np.pad(values, (radius, radius), mode="edge")
+    return np.convolve(padded, np.ones(window, dtype=np.float32) / window, mode="valid")
 
 
 def _select_native_boundary_anchors(
@@ -910,82 +916,140 @@ def _select_native_boundary_anchors(
     target_seconds: float,
     minimum_seconds: float,
     confidence_threshold: float,
-) -> tuple[list[dict[str, Any]], np.ndarray]:
-    """Select reliable anchors with a soft target and a hard minimum on both timelines."""
+) -> tuple[list[dict[str, Any]], np.ndarray, dict[str, Any]]:
+    """Select a continuous partition with count/minimum/maximum constraints."""
     smoothed = _smooth_mapping_confidence(rows)
-    reliable = [
+    matched = [
         {**row, "smoothed_confidence": float(smoothed[index])}
         for index, row in enumerate(rows)
         if row["status"] == "matched"
         and row["target_frame"] != ""
-        and float(smoothed[index]) >= confidence_threshold
     ]
-    if len(reliable) < 2:
+    reliable = [row for row in matched if float(row["smoothed_confidence"]) >= confidence_threshold]
+    if len(matched) < 2:
         raise ValueError(
-            f"The alignment mapping has fewer than two reliable boundary anchors at confidence {confidence_threshold:.2f}."
+            "The alignment mapping has fewer than two matched boundary anchors."
         )
-    first, last = reliable[0], reliable[-1]
+    first, last = matched[0], matched[-1]
 
     def elapsed(start: dict[str, Any], end: dict[str, Any], side: str) -> float:
         key = "source_time_seconds" if side == "night" else "target_time_seconds"
         return float(end[key]) - float(start[key])
 
-    if elapsed(first, last, "night") <= minimum_seconds or elapsed(first, last, "day") <= minimum_seconds:
-        raise ValueError("The reliably aligned interval is not longer than the minimum segment duration on both timelines.")
+    if elapsed(first, last, "night") <= 0 or elapsed(first, last, "day") <= 0:
+        raise ValueError("The matched interval has no positive duration on both timelines.")
 
-    anchors = [first]
-    while True:
-        current = anchors[-1]
-        night_to_last = elapsed(current, last, "night")
-        day_to_last = elapsed(current, last, "day")
-        if night_to_last <= target_seconds * 1.5 or day_to_last <= target_seconds * 1.5:
-            anchors.append(last)
-            break
-        candidates = [
-            candidate for candidate in reliable
-            if elapsed(current, candidate, "night") > minimum_seconds
-            and elapsed(current, candidate, "day") > minimum_seconds
-            and elapsed(candidate, last, "night") > minimum_seconds
-            and elapsed(candidate, last, "day") > minimum_seconds
-        ]
-        if not candidates:
-            anchors.append(last)
-            break
-        anchor = min(
-            candidates,
-            key=lambda candidate: (
-                abs(elapsed(current, candidate, "night") - target_seconds)
-                + abs(elapsed(current, candidate, "day") - target_seconds)
-                - 10.0 * float(candidate["smoothed_confidence"])
-            ),
+    total_night = elapsed(first, last, "night")
+    total_day = elapsed(first, last, "day")
+    required_count = max(
+        NATIVE_MIN_SEGMENT_COUNT,
+        int(math.ceil(total_night / NATIVE_MAX_SEGMENT_SECONDS)),
+        int(math.ceil(total_day / NATIVE_MAX_SEGMENT_SECONDS)),
+    )
+
+    def try_partition(segment_count: int, effective_minimum: float) -> tuple[list[dict[str, Any]], bool] | None:
+        anchors = [first]
+        weak_fallback_used = (
+            float(first["smoothed_confidence"]) < confidence_threshold
+            or float(last["smoothed_confidence"]) < confidence_threshold
         )
-        if anchor["source_frame"] == current["source_frame"]:
-            anchors.append(last)
-            break
-        anchors.append(anchor)
-    return anchors, smoothed
+        for boundary_index in range(1, segment_count):
+            previous = anchors[-1]
+            remaining_segments = segment_count - boundary_index
+            target_night = float(first["source_time_seconds"]) + total_night * boundary_index / segment_count
+            target_day = float(first["target_time_seconds"]) + total_day * boundary_index / segment_count
+            feasible = []
+            for candidate in matched:
+                night_duration = elapsed(previous, candidate, "night")
+                day_duration = elapsed(previous, candidate, "day")
+                remaining_night = elapsed(candidate, last, "night")
+                remaining_day = elapsed(candidate, last, "day")
+                if not (
+                    effective_minimum <= night_duration <= NATIVE_MAX_SEGMENT_SECONDS
+                    and effective_minimum <= day_duration <= NATIVE_MAX_SEGMENT_SECONDS
+                    and remaining_segments * effective_minimum <= remaining_night <= remaining_segments * NATIVE_MAX_SEGMENT_SECONDS
+                    and remaining_segments * effective_minimum <= remaining_day <= remaining_segments * NATIVE_MAX_SEGMENT_SECONDS
+                ):
+                    continue
+                feasible.append(candidate)
+            if not feasible:
+                return None
+            preferred = [row for row in feasible if row["smoothed_confidence"] >= confidence_threshold]
+            pool = preferred or feasible
+            if not preferred:
+                weak_fallback_used = True
+            anchor = min(
+                pool,
+                key=lambda candidate: (
+                    abs(float(candidate["source_time_seconds"]) - target_night)
+                    + abs(float(candidate["target_time_seconds"]) - target_day)
+                    + 8.0 * (1.0 - float(candidate["smoothed_confidence"]))
+                ),
+            )
+            anchors.append(anchor)
+        anchors.append(last)
+        durations = [
+            (elapsed(start, end, "day"), elapsed(start, end, "night"))
+            for start, end in zip(anchors, anchors[1:])
+        ]
+        if not all(
+            effective_minimum <= day <= NATIVE_MAX_SEGMENT_SECONDS
+            and effective_minimum <= night <= NATIVE_MAX_SEGMENT_SECONDS
+            for day, night in durations
+        ):
+            return None
+        return anchors, weak_fallback_used
+
+    for segment_count in range(required_count, min(required_count + 50, len(matched))):
+        shortest_average = min(total_night, total_day) / segment_count
+        minimum_attempts = [minimum_seconds] if shortest_average >= minimum_seconds else []
+        adaptive_minimum = max(0.001, shortest_average * 0.5)
+        if not minimum_attempts or abs(adaptive_minimum - minimum_attempts[0]) > 1e-9:
+            minimum_attempts.append(adaptive_minimum)
+        for effective_minimum in minimum_attempts:
+            result = try_partition(segment_count, effective_minimum)
+            if result is None:
+                continue
+            anchors, weak_fallback_used = result
+            return anchors, smoothed, {
+                "required_segment_count": segment_count,
+                "requested_minimum_seconds": minimum_seconds,
+                "effective_minimum_seconds": effective_minimum,
+                "maximum_segment_seconds": NATIVE_MAX_SEGMENT_SECONDS,
+                "weak_boundary_fallback_used": weak_fallback_used,
+            }
+    raise ValueError(
+        "Could not partition the reliably aligned interval into at least four matched segments "
+        "while keeping both day and night durations at or below 45 seconds."
+    )
 
 
-def create_check_mailbox_native_rgb_cut_plan(
+def create_native_rgb_cut_plan(
+    sample_name: str,
     dataset_folder: Path | str = "dataset",
-    alignment_folder: Path | str = "day_night_alignment/check_mailbox_split",
+    alignment_folder: Path | str | None = None,
+    split_folder_name: str | None = None,
     segment_seconds: float = NATIVE_SEGMENT_SECONDS,
 ) -> dict[str, Any]:
     """Create a variable-length, endpoint-aligned native RGB cut plan and SVG."""
+    if not sample_name or any(character in sample_name for character in ("/", "\\")):
+        raise ValueError("sample_name must be a non-empty filename-safe dataset sample name.")
     if segment_seconds <= 0:
         raise ValueError("segment_seconds must be positive.")
-    dataset_folder, alignment_folder = Path(dataset_folder), Path(alignment_folder)
-    split = dataset_folder / "check_mailbox_split"
-    day_path = split / "check_mailbox_day_rgb.mp4"
-    night_path = split / "check_mailbox_night_rgb.mp4"
-    mapping_path = alignment_folder / "check_mailbox_night_to_day_frames.csv"
+    split_folder_name = split_folder_name or f"{sample_name}_split"
+    dataset_folder = Path(dataset_folder)
+    alignment_folder = Path(alignment_folder or f"day_night_alignment/{split_folder_name}")
+    split = dataset_folder / split_folder_name
+    day_path = split / f"{sample_name}_day_rgb.mp4"
+    night_path = split / f"{sample_name}_night_rgb.mp4"
+    mapping_path = alignment_folder / f"{sample_name}_night_to_day_frames.csv"
     for path in (day_path, night_path, mapping_path):
         if not path.is_file():
             raise FileNotFoundError(f"Required native cut-plan input does not exist: {path}")
 
     day_meta, night_meta = _video_metadata(day_path), _video_metadata(night_path)
     rows = _read_mapping_csv(mapping_path, "night", "day")
-    anchors, smoothed_confidence = _select_native_boundary_anchors(
+    anchors, smoothed_confidence, selection = _select_native_boundary_anchors(
         rows, segment_seconds, NATIVE_MIN_SEGMENT_SECONDS, NATIVE_BOUNDARY_CONFIDENCE
     )
     cuts = []
@@ -996,8 +1060,8 @@ def create_check_mailbox_native_rgb_cut_plan(
         day_end = float(end_anchor["target_time_seconds"])
         night_duration = night_end - night_start
         day_duration = day_end - day_start
-        if night_duration <= NATIVE_MIN_SEGMENT_SECONDS or day_duration <= NATIVE_MIN_SEGMENT_SECONDS:
-            raise ValueError("Boundary selection produced a segment that is not longer than 20 seconds on both timelines.")
+        if night_duration > NATIVE_MAX_SEGMENT_SECONDS + 1e-6 or day_duration > NATIVE_MAX_SEGMENT_SECONDS + 1e-6:
+            raise ValueError("Boundary selection produced a segment longer than 45 seconds.")
         interior = [
             row for row in rows
             if night_start <= float(row["source_time_seconds"]) <= night_end
@@ -1006,12 +1070,14 @@ def create_check_mailbox_native_rgb_cut_plan(
         weak_fraction = weak_count / max(1, len(interior))
         start_confidence = float(start_anchor["smoothed_confidence"])
         end_confidence = float(end_anchor["smoothed_confidence"])
+        weak_boundary = start_confidence < NATIVE_BOUNDARY_CONFIDENCE or end_confidence < NATIVE_BOUNDARY_CONFIDENCE
         cuts.append({
             "cut_index": index,
             "start_confidence": round(start_confidence, 6),
             "end_confidence": round(end_confidence, 6),
             "boundary_confidence": round(min(start_confidence, end_confidence), 6),
-            "review": weak_fraction > 0.25,
+            "review": weak_boundary or weak_fraction > 0.25,
+            "weak_boundary": weak_boundary,
             "interior_low_confidence_fraction": round(weak_fraction, 6),
             "night_start_seconds": round(night_start, 6),
             "night_end_seconds": round(night_end, 6),
@@ -1022,15 +1088,26 @@ def create_check_mailbox_native_rgb_cut_plan(
         })
     if not cuts:
         raise ValueError("No native RGB cut windows fit within both source videos.")
+    if len(cuts) < NATIVE_MIN_SEGMENT_COUNT:
+        raise ValueError("Native RGB cut plan must contain at least four segments.")
+    for previous, current in zip(cuts, cuts[1:]):
+        if previous["day_end_seconds"] != current["day_start_seconds"] or previous["night_end_seconds"] != current["night_start_seconds"]:
+            raise ValueError("Native RGB cut plan contains a gap or overlap between consecutive segments.")
 
     output_folder = alignment_folder / "native_rgb_cut_plan"
     output_folder.mkdir(parents=True, exist_ok=True)
     json_path, svg_path = output_folder / "cut_plan.json", output_folder / "cut_plan.svg"
     plan = {
         "manifest_type": "native_day_night_rgb_cut_plan_v2",
-        "sample": "check_mailbox",
+        "sample": sample_name,
+        "split_folder_name": split_folder_name,
         "target_segment_seconds": segment_seconds,
         "minimum_segment_seconds": NATIVE_MIN_SEGMENT_SECONDS,
+        "requested_minimum_seconds": selection["requested_minimum_seconds"],
+        "effective_minimum_seconds": round(float(selection["effective_minimum_seconds"]), 6),
+        "maximum_segment_seconds": selection["maximum_segment_seconds"],
+        "required_segment_count": selection["required_segment_count"],
+        "weak_boundary_fallback_used": selection["weak_boundary_fallback_used"],
         "boundary_confidence_threshold": NATIVE_BOUNDARY_CONFIDENCE,
         "confidence_smoothing_seconds": 1.0,
         "inputs": {"mapping": _file_fingerprint(mapping_path), "day": _file_fingerprint(day_path), "night": _file_fingerprint(night_path)},
@@ -1054,8 +1131,24 @@ def create_check_mailbox_native_rgb_cut_plan(
     return plan
 
 
-def export_check_mailbox_native_rgb_segments(
+def create_check_mailbox_native_rgb_cut_plan(
+    dataset_folder: Path | str = "dataset",
+    alignment_folder: Path | str = "day_night_alignment/check_mailbox_split",
+    segment_seconds: float = NATIVE_SEGMENT_SECONDS,
+) -> dict[str, Any]:
+    """Create the check_mailbox native RGB plan used by menu option 84."""
+    return create_native_rgb_cut_plan(
+        sample_name="check_mailbox",
+        dataset_folder=dataset_folder,
+        alignment_folder=alignment_folder,
+        split_folder_name="check_mailbox_split",
+        segment_seconds=segment_seconds,
+    )
+
+
+def export_native_rgb_segments(
     plan_path: Path | str = "day_night_alignment/check_mailbox_split/native_rgb_cut_plan/cut_plan.json",
+    progress: bool = True,
 ) -> dict[str, Any]:
     """Export native-speed RGB clips using exactly the bounds in an option 84 plan."""
     plan_path = Path(plan_path)
@@ -1065,6 +1158,24 @@ def export_check_mailbox_native_rgb_segments(
         plan = json.load(handle)
     if plan.get("manifest_type") != "native_day_night_rgb_cut_plan_v2":
         raise ValueError(f"Unsupported or old native RGB cut plan; run option 84 again: {plan_path}")
+    sample_name = str(plan.get("sample") or "")
+    if not sample_name or any(character in sample_name for character in ("/", "\\")):
+        raise ValueError(f"Native RGB cut plan has an invalid sample name: {plan_path}")
+    cuts = plan.get("cuts") or []
+    if len(cuts) < NATIVE_MIN_SEGMENT_COUNT:
+        raise ValueError(f"Native RGB cut plan has fewer than four segments; run option 84 again: {plan_path}")
+    for index, cut in enumerate(cuts):
+        for side in ("day", "night"):
+            duration = float(cut[f"{side}_duration_seconds"])
+            start = float(cut[f"{side}_start_seconds"])
+            end = float(cut[f"{side}_end_seconds"])
+            if duration <= 0 or duration > NATIVE_MAX_SEGMENT_SECONDS + 1e-6 or abs((end - start) - duration) > 1e-4:
+                raise ValueError(f"Native RGB cut plan has invalid {side} bounds in segment {index + 1}; run option 84 again.")
+        if index and (
+            cuts[index - 1]["day_end_seconds"] != cut["day_start_seconds"]
+            or cuts[index - 1]["night_end_seconds"] != cut["night_start_seconds"]
+        ):
+            raise ValueError(f"Native RGB cut plan is not continuous at segment {index + 1}; run option 84 again.")
     for label in ("mapping", "day", "night"):
         expected = plan["inputs"][label]
         current = _file_fingerprint(Path(expected["path"]))
@@ -1073,7 +1184,7 @@ def export_check_mailbox_native_rgb_segments(
 
     output_folder = plan_path.parent / "native_rgb_segments_v2"
     records: list[dict[str, Any]] = []
-    for cut in plan["cuts"]:
+    for cut in cuts:
         cut_index = int(cut["cut_index"])
         segment_folder = output_folder / f"Seg{cut_index}"
         segment_folder.mkdir(parents=True, exist_ok=True)
@@ -1086,9 +1197,15 @@ def export_check_mailbox_native_rgb_segments(
         }
         for side in ("day", "night"):
             source = Path(plan["inputs"][side]["path"])
-            output = segment_folder / f"check_mailbox_{side}_rgb.mp4"
+            output = segment_folder / f"{sample_name}_{side}_rgb.mp4"
             start = float(cut[f"{side}_start_seconds"])
             duration = float(cut[f"{side}_duration_seconds"])
+            if progress:
+                print(
+                    f"  [segment {cut_index}/{len(plan['cuts'])}] {side.upper()} "
+                    f"{source} -> {output} | start={start:.3f}s duration={duration:.3f}s",
+                    flush=True,
+                )
             temporary = output.with_name(f"{output.stem}.tmp{output.suffix}")
             temporary.unlink(missing_ok=True)
             command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", f"{start:.6f}", "-t", f"{duration:.6f}", "-i", str(source), "-an", "-c:v", "libx264", "-preset", "medium", "-pix_fmt", "yuv420p", "-vsync", "0", "-movflags", "+faststart", str(temporary)]
@@ -1115,6 +1232,89 @@ def export_check_mailbox_native_rgb_segments(
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(records)
+    return summary
+
+
+def export_check_mailbox_native_rgb_segments(
+    plan_path: Path | str = "day_night_alignment/check_mailbox_split/native_rgb_cut_plan/cut_plan.json",
+) -> dict[str, Any]:
+    """Export the check_mailbox plan used by menu option 85."""
+    return export_native_rgb_segments(plan_path, progress=True)
+
+
+def run_all_native_day_night_rgb_cut_plans_and_exports(
+    dataset_folder: Path | str = "dataset",
+    alignment_folder: Path | str = "day_night_alignment",
+    segment_seconds: float = NATIVE_SEGMENT_SECONDS,
+) -> dict[str, Any]:
+    """Run the option 84/85 workflow for every discovered day/night RGB pair."""
+    dataset_folder, alignment_folder = Path(dataset_folder), Path(alignment_folder)
+    pairs = _discover_day_night_rgb_pairs(dataset_folder)
+    completed: list[dict[str, Any]] = []
+    failed: list[dict[str, str]] = []
+    total_exported_segments = 0
+    for pair_index, pair in enumerate(pairs, start=1):
+        sample_name = pair["sample"]
+        split_folder_name = pair["split_folder_name"]
+        pair_alignment_folder = alignment_folder / split_folder_name
+        print(f"\n[split {pair_index}/{len(pairs)}] {sample_name} ({split_folder_name})", flush=True)
+        print(f"  Planning from: {pair['day_file']} and {pair['night_file']}", flush=True)
+        try:
+            plan = create_native_rgb_cut_plan(
+                sample_name=sample_name,
+                dataset_folder=dataset_folder,
+                alignment_folder=pair_alignment_folder,
+                split_folder_name=split_folder_name,
+                segment_seconds=segment_seconds,
+            )
+            print(f"  Plan ready: {plan['cut_count']} segments", flush=True)
+            print(f"  Cut-plan JSON: {plan['plan_json']}", flush=True)
+            print(f"  Timeline SVG: {plan['timeline_svg']}", flush=True)
+            exported = export_native_rgb_segments(plan["plan_json"], progress=True)
+            total_exported_segments += int(exported["exported_segment_count"])
+            completed.append({
+                "sample": sample_name,
+                "split_folder_name": split_folder_name,
+                "cut_count": plan["cut_count"],
+                "plan_json": plan["plan_json"],
+                "timeline_svg": plan["timeline_svg"],
+                "output_folder": exported["output_folder"],
+                "manifest_json": exported["manifest_json"],
+            })
+            print(
+                f"  Completed {sample_name}: {exported['exported_segment_count']} segment pair(s) -> "
+                f"{exported['output_folder']}",
+                flush=True,
+            )
+        except Exception as exc:
+            failed.append({
+                "sample": sample_name,
+                "split_folder_name": split_folder_name,
+                "reason": str(exc),
+            })
+            print(f"  FAILED {sample_name}: {exc}", flush=True)
+    alignment_folder.mkdir(parents=True, exist_ok=True)
+    summary_path = alignment_folder / "native_rgb_all_splits_summary.json"
+    summary = {
+        "manifest_type": "native_day_night_rgb_all_splits_export_v1",
+        "dataset_folder": str(dataset_folder),
+        "alignment_folder": str(alignment_folder),
+        "discovered_count": len(pairs),
+        "completed_count": len(completed),
+        "failed_count": len(failed),
+        "total_exported_segment_count": total_exported_segments,
+        "completed": completed,
+        "failed": failed,
+        "summary_file": str(summary_path),
+    }
+    with open(summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary, handle, indent=2, ensure_ascii=False)
+    print("\nAll-splits native RGB workflow finished.", flush=True)
+    print(f"  Discovered: {len(pairs)}", flush=True)
+    print(f"  Completed: {len(completed)}", flush=True)
+    print(f"  Failed: {len(failed)}", flush=True)
+    print(f"  Exported segment pairs: {total_exported_segments}", flush=True)
+    print(f"  Summary: {summary_path}", flush=True)
     return summary
 
 

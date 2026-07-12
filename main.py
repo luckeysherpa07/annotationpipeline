@@ -66,6 +66,7 @@ from annotation_feature.temporal_alignment import (
     run_and_export_cut_carrot_aligned_dataset_segments,
     run_and_export_source_rgb_with_audio_segments_for_aligned_dataset,
     run_all_day_night_rgb_pair_alignments,
+    run_all_native_day_night_rgb_cut_plans_and_exports,
     run_check_mailbox_day_night_rgb_alignment,
     run_check_mailbox_day_rgb_event_optical_flow_alignment,
     run_cut_carrot_day_night_rgb_alignment,
@@ -655,9 +656,10 @@ def main():
         print("83. Export check_mailbox aligned day/night RGB frames at 1 FPS")
         print("84. Visualize check_mailbox native day/night RGB cut plan")
         print("85. Export check_mailbox native day/night RGB segments")
+        print("86. Plan and export native day/night RGB segments for all dataset splits")
         print("\n63. Exit")
 
-        choice = input("\nEnter choice (1-85 or action id): ").strip()
+        choice = input("\nEnter choice (1-86 or action id): ").strip()
 
         if choice == "1":
             print("\n" + "-" * 60)
@@ -1506,6 +1508,28 @@ def main():
             print(f"Output folder: {summary.get('output_folder')}")
             print(f"Manifest JSON: {summary.get('manifest_json')}")
             print(f"Manifest CSV: {summary.get('manifest_csv')}")
+
+        elif choice == "86":
+            print("\n" + "-" * 60)
+            print("Running: native day/night RGB planning and export for all dataset splits")
+            print("-" * 60)
+            print("Combines options 84 and 85 for every discovered day/night RGB pair.")
+            print("Requires mappings from option 82; failures are recorded while other splits continue.")
+            print("Native playback timing is preserved for every exported segment.\n")
+            if _confirm():
+                summary = run_all_native_day_night_rgb_cut_plans_and_exports(
+                    dataset_folder="dataset",
+                    alignment_folder="day_night_alignment",
+                    segment_seconds=30.0,
+                )
+                print(f"Discovered pairs: {summary.get('discovered_count', 0)}")
+                print(f"Completed pairs: {summary.get('completed_count', 0)}")
+                print(f"Failed pairs: {summary.get('failed_count', 0)}")
+                print(f"Summary: {summary.get('summary_file')}")
+                for item in summary.get("failed", []):
+                    print(f"- failed {item.get('sample')}: {item.get('reason')}")
+            else:
+                print("Cancelled.")
 
         elif choice == "63":
             print("\nExiting.")

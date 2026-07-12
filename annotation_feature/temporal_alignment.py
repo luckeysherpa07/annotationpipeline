@@ -15,6 +15,7 @@ from .day_night_pair_alignment import (
     create_check_mailbox_native_rgb_cut_plan,
     export_check_mailbox_day_night_robustness_qa_1fps_frames,
     export_check_mailbox_native_rgb_segments,
+    run_all_native_day_night_rgb_cut_plans_and_exports,
     run_all_day_night_rgb_pair_alignments,
     run_check_mailbox_day_night_rgb_alignment,
     run_cut_carrot_day_night_rgb_alignment,

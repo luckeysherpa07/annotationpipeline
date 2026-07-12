@@ -256,23 +256,25 @@ class DayNightPairAlignmentTests(unittest.TestCase):
                 plan = alignment.create_check_mailbox_native_rgb_cut_plan(root / "dataset", alignment_folder, segment_seconds=30.0)
 
             self.assertEqual(plan["manifest_type"], "native_day_night_rgb_cut_plan_v2")
-            self.assertEqual(plan["cut_count"], 2)
-            self.assertEqual([item["night_start_seconds"] for item in plan["cuts"]], [0.0, 30.0])
-            self.assertEqual([item["night_end_seconds"] for item in plan["cuts"]], [30.0, 70.0])
-            self.assertEqual([item["day_start_seconds"] for item in plan["cuts"]], [10.0, 40.0])
-            self.assertEqual([item["day_end_seconds"] for item in plan["cuts"]], [40.0, 80.0])
-            self.assertTrue(all(item["night_duration_seconds"] > 20 for item in plan["cuts"]))
-            self.assertTrue(all(item["day_duration_seconds"] > 20 for item in plan["cuts"]))
+            self.assertEqual(plan["cut_count"], 4)
+            self.assertEqual(plan["required_segment_count"], 4)
+            self.assertEqual(plan["effective_minimum_seconds"], 8.75)
+            self.assertEqual([item["night_start_seconds"] for item in plan["cuts"]], [0.0, 17.0, 35.0, 52.0])
+            self.assertEqual([item["night_end_seconds"] for item in plan["cuts"]], [17.0, 35.0, 52.0, 70.0])
+            self.assertTrue(all(item["night_duration_seconds"] <= 45 for item in plan["cuts"]))
+            self.assertTrue(all(item["day_duration_seconds"] <= 45 for item in plan["cuts"]))
             self.assertTrue(all(item["start_confidence"] >= 0.65 for item in plan["cuts"]))
             self.assertTrue(all(item["end_confidence"] >= 0.65 for item in plan["cuts"]))
             svg = Path(plan["timeline_svg"]).read_text(encoding="utf-8")
             self.assertIn("Cut 1", svg)
             self.assertIn("Split 0: 10.00s", svg)
             self.assertIn("END Seg 1 / START Seg 2", svg)
-            self.assertIn("2 planned segment pair(s), 3 shared splits", svg)
+            self.assertIn("4 planned segment pair(s), 5 shared splits", svg)
+            self.assertIn("effective min 8.75s", svg)
+            self.assertIn("max 45.00s", svg)
             self.assertIn("Segment lengths", svg)
-            self.assertIn("30.000 seconds", svg)
-            self.assertIn("40.000 seconds", svg)
+            self.assertIn("17.000 seconds", svg)
+            self.assertIn("18.000 seconds", svg)
             self.assertIn("unmatched / low confidence", svg)
             self.assertTrue(Path(plan["plan_json"]).is_file())
 
@@ -288,14 +290,16 @@ class DayNightPairAlignmentTests(unittest.TestCase):
                 "confidence": confidence,
                 "status": "matched",
             })
-        anchors, _ = alignment._select_native_boundary_anchors(rows, 30.0, 20.0, 0.65)
+        anchors, _, selection = alignment._select_native_boundary_anchors(rows, 30.0, 20.0, 0.65)
         self.assertEqual(anchors[0]["source_time_seconds"], 0.0)
         self.assertEqual(anchors[-1]["source_time_seconds"], 100.0)
         for start, end in zip(anchors, anchors[1:]):
-            self.assertGreater(end["source_time_seconds"] - start["source_time_seconds"], 20.0)
-            self.assertGreater(end["target_time_seconds"] - start["target_time_seconds"], 20.0)
-        self.assertTrue(any(
-            end["source_time_seconds"] - start["source_time_seconds"] > 40.0
+            self.assertGreaterEqual(end["source_time_seconds"] - start["source_time_seconds"], selection["effective_minimum_seconds"])
+            self.assertGreaterEqual(end["target_time_seconds"] - start["target_time_seconds"], selection["effective_minimum_seconds"])
+        self.assertGreaterEqual(len(anchors) - 1, 4)
+        self.assertTrue(selection["weak_boundary_fallback_used"])
+        self.assertTrue(all(
+            end["source_time_seconds"] - start["source_time_seconds"] <= 45.0
             for start, end in zip(anchors, anchors[1:])
         ))
 
@@ -312,8 +316,14 @@ class DayNightPairAlignmentTests(unittest.TestCase):
             plan_path = plan_folder / "cut_plan.json"
             plan = {
                 "manifest_type": "native_day_night_rgb_cut_plan_v2",
+                "sample": "check_mailbox",
                 "inputs": {label: alignment._file_fingerprint(path) for label, path in (("mapping", mapping), ("day", day), ("night", night))},
-                "cuts": [{"cut_index": 1, "start_confidence": 0.8, "end_confidence": 0.9, "boundary_confidence": 0.8, "review": False, "day_start_seconds": 3.0, "day_duration_seconds": 25.0, "night_start_seconds": 7.0, "night_duration_seconds": 22.0}],
+                "cuts": [
+                    {"cut_index": index + 1, "start_confidence": 0.8, "end_confidence": 0.9, "boundary_confidence": 0.8, "review": False,
+                     "day_start_seconds": 3.0 + index * 25.0, "day_end_seconds": 28.0 + index * 25.0, "day_duration_seconds": 25.0,
+                     "night_start_seconds": 7.0 + index * 22.0, "night_end_seconds": 29.0 + index * 22.0, "night_duration_seconds": 22.0}
+                    for index in range(4)
+                ],
             }
             plan_path.write_text(json.dumps(plan), encoding="utf-8")
 
@@ -322,14 +332,20 @@ class DayNightPairAlignmentTests(unittest.TestCase):
                 return type("Completed", (), {"returncode": 0, "stderr": ""})()
 
             metadata = {"fps": 24.0, "frame_count": 48, "duration_seconds": 2.0, "width": 16, "height": 16}
-            with patch.object(alignment.subprocess, "run", side_effect=run_ffmpeg), patch.object(alignment, "_video_metadata", return_value=metadata):
+            with patch.object(alignment.subprocess, "run", side_effect=run_ffmpeg), patch.object(
+                alignment, "_video_metadata", return_value=metadata
+            ), patch("builtins.print") as print_mock:
                 summary = alignment.export_check_mailbox_native_rgb_segments(plan_path)
-            self.assertEqual(summary["exported_segment_count"], 1)
+            self.assertEqual(summary["exported_segment_count"], 4)
             self.assertEqual(summary["segments"][0]["day_start_seconds"], 3.0)
             self.assertEqual(summary["segments"][0]["night_start_seconds"], 7.0)
             self.assertEqual(summary["segments"][0]["day_requested_duration_seconds"], 25.0)
             self.assertEqual(summary["segments"][0]["night_requested_duration_seconds"], 22.0)
             self.assertEqual(summary["segments"][0]["day_fps"], 24.0)
+            terminal = "\n".join(str(call.args[0]) for call in print_mock.call_args_list if call.args)
+            self.assertIn("[segment 1/4] DAY", terminal)
+            self.assertIn(str(day), terminal)
+            self.assertIn("start=3.000s duration=25.000s", terminal)
             mapping.write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "stale"):
                 alignment.export_check_mailbox_native_rgb_segments(plan_path)
@@ -340,6 +356,50 @@ class DayNightPairAlignmentTests(unittest.TestCase):
             plan_path.write_text(json.dumps({"manifest_type": "native_day_night_rgb_cut_plan_v1"}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "run option 84 again"):
                 alignment.export_check_mailbox_native_rgb_segments(plan_path)
+
+    def test_all_native_rgb_workflow_continues_after_failed_split(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dataset = root / "dataset"
+            for sample in ("alpha", "beta"):
+                split = dataset / f"{sample}_split"
+                split.mkdir(parents=True)
+                (split / f"{sample}_day_rgb.mp4").touch()
+                (split / f"{sample}_night_rgb.mp4").touch()
+
+            def create_plan(*, sample_name, alignment_folder, **kwargs):
+                if sample_name == "beta":
+                    raise ValueError("missing reliable anchors")
+                return {
+                    "cut_count": 4,
+                    "plan_json": str(Path(alignment_folder) / "native_rgb_cut_plan" / "cut_plan.json"),
+                    "timeline_svg": str(Path(alignment_folder) / "native_rgb_cut_plan" / "cut_plan.svg"),
+                }
+
+            def export_plan(plan_path, **kwargs):
+                folder = Path(plan_path).parent / "native_rgb_segments_v2"
+                return {"output_folder": str(folder), "manifest_json": str(folder / "manifest.json"), "exported_segment_count": 4}
+
+            with patch.object(alignment, "create_native_rgb_cut_plan", side_effect=create_plan), patch.object(
+                alignment, "export_native_rgb_segments", side_effect=export_plan
+            ), patch("builtins.print") as print_mock:
+                summary = alignment.run_all_native_day_night_rgb_cut_plans_and_exports(
+                    dataset_folder=dataset,
+                    alignment_folder=root / "alignment",
+                )
+            self.assertEqual(summary["discovered_count"], 2)
+            self.assertEqual(summary["completed_count"], 1)
+            self.assertEqual(summary["failed_count"], 1)
+            self.assertEqual(summary["completed"][0]["sample"], "alpha")
+            self.assertEqual(summary["failed"][0]["sample"], "beta")
+            self.assertEqual(summary["total_exported_segment_count"], 4)
+            self.assertTrue(Path(summary["summary_file"]).is_file())
+            terminal = "\n".join(str(call.args[0]) for call in print_mock.call_args_list if call.args)
+            self.assertIn("[split 1/2] alpha", terminal)
+            self.assertIn("Planning from:", terminal)
+            self.assertIn("Completed alpha: 4 segment pair(s)", terminal)
+            self.assertIn("FAILED beta", terminal)
+            self.assertIn("Exported segment pairs: 4", terminal)
 
     def test_main_menu_contains_option_79_and_heading(self):
         source = (Path(__file__).resolve().parents[1] / "main.py").read_text(encoding="utf-8")
@@ -357,7 +417,8 @@ class DayNightPairAlignmentTests(unittest.TestCase):
         self.assertIn('elif choice == "83":', source)
         self.assertIn("84. Visualize check_mailbox native day/night RGB cut plan", source)
         self.assertIn("85. Export check_mailbox native day/night RGB segments", source)
-        self.assertIn("Enter choice (1-85 or action id)", source)
+        self.assertIn("86. Plan and export native day/night RGB segments for all dataset splits", source)
+        self.assertIn("Enter choice (1-86 or action id)", source)
 
 
 if __name__ == "__main__":
