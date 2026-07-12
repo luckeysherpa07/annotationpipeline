@@ -1,0 +1,327 @@
+{
+  "metadata": {
+    "task": "cross_modal_disambiguation_caption",
+    "architecture": "two_pass",
+    "stage": "pass1",
+    "input": "outputs/temp_bike_input.json",
+    "output": "outputs/test_pass1_bike_night_18_19.json",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "planned_items": 1,
+    "completed_items": 1,
+    "skipped_items": 0,
+    "gemini_calls": 2
+  },
+  "items": [
+    {
+      "caption_id": "ride_a_bike_split__seg1__night__rgb__event",
+      "segment_id": "ride_a_bike_split__Seg1",
+      "split_dir": "ride_a_bike_split",
+      "segment_name": "Seg1",
+      "side": "night",
+      "modality1": "rgb",
+      "modality2": "event",
+      "frame_dir1": "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb",
+      "frame_dir2": "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event",
+      "frames1": [
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000000.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000120.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000240.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000360.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000510.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000630.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000690.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000720.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000750.png",
+        "aligned_dataset/.frames_cache/ride_a_bike_split/Seg1/ride_a_bike_night_rgb/frame_000870.png"
+      ],
+      "frames2": [
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000000.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000120.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000240.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000360.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000510.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000630.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000690.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000720.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000750.png",
+        "aligned_dataset/.frames_cache_event/ride_a_bike_split/Seg1/ride_a_bike_night_event/frame_000870.png"
+      ],
+      "composite_frames": [
+        "frame_000000.png",
+        "frame_000120.png",
+        "frame_000240.png",
+        "frame_000360.png",
+        "frame_000510.png",
+        "frame_000630.png",
+        "frame_000690.png",
+        "frame_000720.png",
+        "frame_000750.png",
+        "frame_000870.png"
+      ],
+      "sampling_strategy": "uniform_adaptive",
+      "uniform_anchor_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        750,
+        870
+      ],
+      "adaptive_frame_indexes": [
+        690,
+        720
+      ],
+      "selected_frame_indexes": [
+        0,
+        120,
+        240,
+        360,
+        510,
+        630,
+        690,
+        720,
+        750,
+        870
+      ],
+      "candidate_frame_indexes": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840,
+        870
+      ],
+      "num_selected_frames": 10,
+      "selection_config_fingerprint": "f3a8df00903c9765",
+      "status": "generated",
+      "reason": null,
+      "attempts": 2,
+      "first_attempt_success": false,
+      "final_error_category": null,
+      "evidence": {
+        "global_scene": {
+          "scene_summary": "An urban street environment at night containing several parked vehicles, a series of street lights, and a multistory building facade lining the dark paved roadway.",
+          "environment": "urban",
+          "temporal_progression": "The parked vehicles, street lights, and building facade transition sequentially from distant to near, concluding with a close-up of a dark flat surface of the building.",
+          "physical_entities": [
+            {
+              "entity_id": "entity_001",
+              "category": "unknown_object",
+              "referential_scope": "the street lights"
+            },
+            {
+              "entity_id": "entity_002",
+              "category": "unknown_object",
+              "referential_scope": "the building facade"
+            },
+            {
+              "entity_id": "entity_003",
+              "category": "vehicle",
+              "referential_scope": "the parked vehicles"
+            },
+            {
+              "entity_id": "entity_004",
+              "category": "roadway",
+              "referential_scope": "the paved roadway"
+            }
+          ]
+        },
+        "video1_analysis": {
+          "modality": "rgb",
+          "detailed_caption": "The scene progresses along a dark street at night under bright street lights. Several parked white vehicles, including an SUV and a camper van, are illuminated along the roadside. A dark multistory building facade with a long horizontal light strip is visible on the right before the view ends directly facing a dark, flat wall.",
+          "information_atoms": [
+            {
+              "atom_id": "v1_atom_001",
+              "frame_keys": [
+                "frame_000120",
+                "frame_000240",
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "Several parked white vehicles, including an SUV and a camper van, are located along the side of the street."
+            },
+            {
+              "atom_id": "v1_atom_002",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240",
+                "frame_000360",
+                "frame_000510",
+                "frame_000690",
+                "frame_000720",
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_001",
+                "entity_004"
+              ],
+              "fact": "Overhead street lights emit a bright glow, illuminating sections of the dark paved roadway."
+            },
+            {
+              "atom_id": "v1_atom_003",
+              "frame_keys": [
+                "frame_000510",
+                "frame_000630",
+                "frame_000720",
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "A multistory building facade on the right features a prominent horizontal strip of light."
+            },
+            {
+              "atom_id": "v1_atom_004",
+              "frame_keys": [
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "A close-up of a dark, flat wall of the building facade covers the field of view."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Halos and lens flare surround the bright street lights under dark conditions."
+          ],
+          "sensor_limitations": [
+            "In frame_000120 and frame_000240, the low ambient lighting on the dark roadway (entity_004) obscures the finer surface details of the parked vehicles (entity_003)."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        },
+        "video2_analysis": {
+          "modality": "event",
+          "detailed_caption": "The structural outlines of street light poles and parked vehicles are traced as the street is traversed. Sharp edge transitions highlight the geometric windows and horizontal lines of the building facade on the right, ending with a single vertical line on a flat structure.",
+          "information_atoms": [
+            {
+              "atom_id": "v2_atom_001",
+              "frame_keys": [
+                "frame_000000",
+                "frame_000120",
+                "frame_000240",
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_001"
+              ],
+              "fact": "The vertical profiles of street light poles are outlined against the dark background."
+            },
+            {
+              "atom_id": "v2_atom_002",
+              "frame_keys": [
+                "frame_000120",
+                "frame_000240",
+                "frame_000360"
+              ],
+              "entity_refs": [
+                "entity_003"
+              ],
+              "fact": "The structural silhouettes of several parked vehicles are traced by their boundaries."
+            },
+            {
+              "atom_id": "v2_atom_003",
+              "frame_keys": [
+                "frame_000510",
+                "frame_000630",
+                "frame_000720",
+                "frame_000750"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The horizontal lines and rectangular window structures of the building facade are defined by edge transitions."
+            },
+            {
+              "atom_id": "v2_atom_004",
+              "frame_keys": [
+                "frame_000870"
+              ],
+              "entity_refs": [
+                "entity_002"
+              ],
+              "fact": "The boundaries of a flat wall of the building facade are reduced to a single vertical line."
+            }
+          ],
+          "sensor_specific_cues": [
+            "Edge contours of structures are traced by contrast transitions caused by relative motion."
+          ],
+          "sensor_limitations": [
+            "In frame_000870, the relative stability against the flat wall of the building facade (entity_002) results in sparse edge definitions, making the surface texture invisible."
+          ],
+          "uncertain_observations": [],
+          "missing_key_attributes": []
+        }
+      },
+      "validation_warnings": [
+        "shared_global_source_attribute_leakage: global_scene.scene_summary: Shared color attribute 'dark' lacks Entity-bound Atom support in video2_analysis.",
+        "shared_global_source_attribute_leakage: global_scene.temporal_progression: Shared color attribute 'dark' lacks Entity-bound Atom support in video2_analysis.",
+        "possible_missing_recoverability_target in video2_analysis: Entity entity_002 has explicit paint/color evidence in video1_analysis.",
+        "possible_missing_recoverability_target in video2_analysis: Entity entity_003 has explicit paint/color evidence in video1_analysis."
+      ],
+      "api_calls": 2,
+      "validation_attempts": 2,
+      "transport_retries": 0,
+      "first_validation_attempt_success": false,
+      "retry_history": [
+        {
+          "type": "validation",
+          "category": "generic_sensor_theory",
+          "validation_attempt": 1,
+          "message": "Semantic Validation Errors: Shared field contains forbidden scene-level terms.; sensor limitation must anchor to a known Entity, frame, or segment region.; sensor limitation must anchor to a known Ent"
+        }
+      ],
+      "diagnostics": {
+        "api_calls": 2,
+        "validation_attempts": 2,
+        "transport_retries": 0,
+        "first_validation_attempt_success": false,
+        "retry_history": [
+          {
+            "type": "validation",
+            "category": "generic_sensor_theory",
+            "validation_attempt": 1,
+            "message": "Semantic Validation Errors: Shared field contains forbidden scene-level terms.; sensor limitation must anchor to a known Entity, frame, or segment region.; sensor limitation must anchor to a known Ent"
+          }
+        ],
+        "key_rotations": 0,
+        "quota_failures": 0,
+        "structural_validation_failures": 0,
+        "semantic_validation_failures": 1
+      }
+    }
+  ],
+  "skipped": []
+}
