@@ -1,0 +1,35 @@
+{
+  "evaluation_set": "pass1_dev_v1",
+  "prompt_version": "pass1_prompt_v1.1",
+  "runs_per_sample": 2,
+  "pipeline": {
+    "generation_mode": "gemini",
+    "model_name": "gemini-3.5-flash",
+    "api_key_source": "list",
+    "dataset_root": "aligned_dataset",
+    "composite_root": "outputs/composite_frames",
+    "num_uniform_frames": 8,
+    "num_adaptive_frames": 2,
+    "max_retries": 3,
+    "max_transport_retries": 5,
+    "delay_between_calls": 0,
+    "checkpoint_every": 1
+  },
+  "samples": [
+    {
+      "sample_id": "bike_night",
+      "input": "outputs/temp_bike_input.json",
+      "tags": [
+        "rgb_event",
+        "night",
+        "multiple_vehicles"
+      ],
+      "pipeline": {
+        "pairs": "rgb+event",
+        "sides": "night",
+        "target_paths": "ride_a_bike_split/Seg1",
+        "limit": 1
+      }
+    }
+  ]
+}
