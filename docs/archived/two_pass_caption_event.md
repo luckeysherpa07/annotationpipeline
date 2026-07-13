@@ -24,10 +24,16 @@ The branch includes:
 
 - the two-pass cross-modal caption pipeline;
 - pass-1 prompt and semantic validation iterations;
+- the fixed Pass 1 development evaluation harness, manifest, and manual-score template;
 - RGB/event frame sampling and evidence handling;
 - representative successful and failed Gemini outputs.
 
-The archive head before this note is commit `b0e764a` (`prompt_v1_2`).
+The final implementation commit before this archive-note update is `12dfb19`
+(`eval: add pass1 development evaluation harness`). No further development is
+planned on this branch unless the experiment is explicitly resumed.
+
+Local files under `outputs/pass1_evaluation/` and unrelated untracked benchmark
+results are not part of the archive. They were intentionally left uncommitted.
 
 ## Representative JSON results
 
