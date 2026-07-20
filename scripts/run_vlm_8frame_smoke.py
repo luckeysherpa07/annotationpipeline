@@ -24,11 +24,11 @@ from annotation_feature.qa_quality.benchmark import (
     DEFAULT_INPUT_PATH,
     DEFAULT_MOLMO2_MODEL_NAME,
     InternVLFrameAnswerAdapter,
-    Molmo2FrameAnswerAdapter,
     QwenVLFrameAnswerAdapter,
     load_valid_qa_items,
     resolve_frame_cache_candidates,
 )
+from scripts.run_vlm_4b_aligned_frame_benchmark import Molmo2FrameAnswerAdapter
 
 try:
     import torch

@@ -333,6 +333,7 @@ def run_model(
     output_dir: Path,
     resume: bool,
     max_items_per_input_modality: int | None,
+    checkpoint_every: int,
 ) -> None:
     safe_model = _safe_name(Path(model_name).name)
     output_json = output_dir / f"{label}_{safe_model}.json"
@@ -358,6 +359,35 @@ def run_model(
             counts[input_modality] += 1
         rows = selected
     rows = _group_rows_by_frame_set(rows)
+    checkpoint_every = max(1, int(checkpoint_every))
+    processed_since_checkpoint = 0
+
+    def save_checkpoint() -> None:
+        metadata = {
+            "benchmark_type": "same_question_cross_modality_8frame_input_v1",
+            "provider": label,
+            "model_name": model_name,
+            "quantization": getattr(adapter, "quantization", "adapter_default"),
+            "input_path": manifest["metadata"]["input_path"],
+            "frame_manifest_path": manifest_path.as_posix(),
+            "frame_manifest_sha256": manifest["metadata"]["manifest_sha256"],
+            "frame_manifest_total_frames": manifest["metadata"]["total_frames"],
+            "frame_manifest_frames_per_side": manifest["metadata"]["frames_per_side"],
+            "frame_manifest_order": manifest["metadata"]["frame_order"],
+            "frame_manifest_sampling_algorithm": manifest["metadata"]["sampling_algorithm"],
+            "total_manifest_items": len(manifest["items"]),
+            "run_item_limit_per_input_modality": max_items_per_input_modality or 0,
+            "run_items": len(rows),
+            "attempted_items": len(results),
+            "status_counts": dict(Counter(row["status"] for row in results.values())),
+            "frame_cache_level": getattr(adapter, "frame_cache_level", "none"),
+            "frame_cache_hits": int(getattr(adapter, "frame_cache_hits", 0)),
+            "frame_cache_misses": int(getattr(adapter, "frame_cache_misses", 0)),
+            "generation_config": dict(GENERATION_CONFIG),
+            "resume": resume,
+            "checkpoint_every": checkpoint_every,
+        }
+        _save_results(output_json, results, metadata)
 
     for entry in rows:
         qa_id = str(entry["qa_id"])
@@ -425,36 +455,17 @@ def run_model(
             "frame_cache_hit": int(getattr(adapter, "frame_cache_hits", 0)) > cache_hits_before,
             "generation_config": dict(GENERATION_CONFIG),
         }
-
-        metadata = {
-            "benchmark_type": "same_question_cross_modality_8frame_input_v1",
-            "provider": label,
-            "model_name": model_name,
-            "quantization": getattr(adapter, "quantization", "adapter_default"),
-            "input_path": manifest["metadata"]["input_path"],
-            "frame_manifest_path": manifest_path.as_posix(),
-            "frame_manifest_sha256": manifest["metadata"]["manifest_sha256"],
-            "frame_manifest_total_frames": manifest["metadata"]["total_frames"],
-            "frame_manifest_frames_per_side": manifest["metadata"]["frames_per_side"],
-            "frame_manifest_order": manifest["metadata"]["frame_order"],
-            "frame_manifest_sampling_algorithm": manifest["metadata"]["sampling_algorithm"],
-            "total_manifest_items": len(manifest["items"]),
-            "run_item_limit_per_input_modality": max_items_per_input_modality or 0,
-            "run_items": len(rows),
-            "attempted_items": len(results),
-            "status_counts": dict(Counter(row["status"] for row in results.values())),
-            "frame_cache_level": getattr(adapter, "frame_cache_level", "none"),
-            "frame_cache_hits": int(getattr(adapter, "frame_cache_hits", 0)),
-            "frame_cache_misses": int(getattr(adapter, "frame_cache_misses", 0)),
-            "generation_config": dict(GENERATION_CONFIG),
-            "resume": resume,
-        }
-        _save_results(output_json, results, metadata)
+        processed_since_checkpoint += 1
+        if processed_since_checkpoint >= checkpoint_every:
+            save_checkpoint()
+            processed_since_checkpoint = 0
         print(
             f"{label} {qa_id}: {status}, source={entry['source_modality']}, "
             f"input={entry['input_modality']}, latency={latency:.2f}s, "
             f"peak={peak_bytes / 1024**3:.2f}GB"
         )
+
+    save_checkpoint()
 
 
 def _parse_modalities(raw: str) -> tuple[str, ...]:
@@ -486,6 +497,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--internvl-model", default="models/internvl/InternVL3_5-4B-Instruct")
     parser.add_argument("--molmo2-model", default="models/molmo2/Molmo2-4B")
     parser.add_argument("--max-items-per-input-modality", type=int, default=0)
+    parser.add_argument(
+        "--checkpoint-every",
+        type=int,
+        default=50,
+        help="Rewrite JSON/CSV checkpoints after this many newly processed items.",
+    )
     parser.add_argument("--no-resume", action="store_true")
     return parser
 
@@ -551,6 +568,7 @@ def main() -> None:
                 output_dir=experiment_dir,
                 resume=not args.no_resume,
                 max_items_per_input_modality=max_items_per_input_modality,
+                checkpoint_every=max(1, args.checkpoint_every),
             )
         finally:
             clear_frame_cache = getattr(adapter, "clear_frame_cache", None)

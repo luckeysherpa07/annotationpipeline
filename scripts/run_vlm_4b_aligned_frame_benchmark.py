@@ -40,13 +40,12 @@ except ImportError:
     Image = None
 
 try:
-    from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
+    from transformers import AutoModelForImageTextToText, AutoProcessor
     from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
     from transformers.processing_utils import ProcessorMixin
 except ImportError:
     AutoModelForImageTextToText = None
     AutoProcessor = None
-    BitsAndBytesConfig = None
     ROPE_INIT_FUNCTIONS = None
     ProcessorMixin = None
 
@@ -425,22 +424,6 @@ def _ensure_molmo2_mask_compatibility(model: Any) -> None:
     module._aligned_benchmark_mask_compat = True
 
 
-def _ensure_molmo2_quantized_vision_dtype(model: Any) -> None:
-    vision_backbone = getattr(model, "vision_backbone", None)
-    if vision_backbone is None or getattr(vision_backbone, "_aligned_benchmark_dtype_compat", False):
-        return
-    current_dtype = getattr(vision_backbone, "dtype", None)
-    if current_dtype not in {getattr(torch, "int8", None), getattr(torch, "uint8", None)}:
-        return
-    vision_class = vision_backbone.__class__
-    compute_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-    try:
-        vision_class.dtype = property(lambda self: compute_dtype)
-    except Exception:
-        return
-    vision_backbone._aligned_benchmark_dtype_compat = True
-
-
 def _model_input_device(model: Any) -> Any:
     """Return a real device for model inputs, avoiding meta devices from device_map loaders."""
     device = getattr(model, "device", None)
@@ -484,33 +467,15 @@ def _load_molmo2_model(model_name: str) -> tuple[Any, str]:
         "trust_remote_code": True,
         "local_files_only": True,
     }
-    if torch.cuda.is_available() and BitsAndBytesConfig is not None:
-        try:
-            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-            model = AutoModelForImageTextToText.from_pretrained(
-                model_name,
-                **common_kwargs,
-                quantization_config=quantization_config,
-                device_map={"": 0},
-                low_cpu_mem_usage=True,
-            ).eval()
-            return model, "8bit;device_map=cuda:0"
-        except Exception as exc:
-            print(
-                "WARNING: Failed to load Molmo2 in 8-bit CUDA mode; "
-                f"falling back to full-precision load. Original error: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-            )
-
-    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
     dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
     model = AutoModelForImageTextToText.from_pretrained(
         model_name,
         **common_kwargs,
         dtype=dtype,
-        low_cpu_mem_usage=False,
-    ).to(device).eval()
-    return model, f"{dtype};device={device}"
+        device_map="auto",
+        low_cpu_mem_usage=True,
+    ).eval()
+    return model, f"{str(dtype).removeprefix('torch.')};device_map=auto"
 
 
 class CachedQwenVLFrameAnswerAdapter(_SingleRGBFrameSetCache, QwenVLFrameAnswerAdapter):
@@ -617,7 +582,6 @@ class Molmo2FrameAnswerAdapter(_SingleRGBFrameSetCache):
         self.processor = _load_molmo2_processor(model_name)
         _ensure_molmo2_rope_compatibility()
         self.model, self.quantization = _load_molmo2_model(model_name)
-        _ensure_molmo2_quantized_vision_dtype(self.model)
         _ensure_molmo2_mask_compatibility(self.model)
         _ensure_molmo2_generation_compatibility(self.model)
 
@@ -845,9 +809,7 @@ def _adapter_for(label: str, model_name: str) -> Any:
         adapter.quantization = "8bit;max_num_tiles_per_frame=1"
         return adapter
     if label == "molmo2":
-        adapter = Molmo2FrameAnswerAdapter(model_name=model_name)
-        adapter.quantization = "bfloat16"
-        return adapter
+        return Molmo2FrameAnswerAdapter(model_name=model_name)
     raise ValueError(f"Unsupported model label: {label}")
 
 
