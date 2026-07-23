@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
@@ -138,10 +139,17 @@ def plot_scaling() -> None:
             ax.text(1.04, values[1], f"{delta * 100:+.1f} pp", va="center", fontsize=10, color=COLORS[family])
         ax.set_xlim(-0.15, 1.42)
         ax.set_xticks((0, 1), ("4B", "8B"))
-        ax.set_ylim(0.43, 0.60)
+        ax.spines["bottom"].set_bounds(0, 1)
+        ax.set_ylim(0.38, 0.60)
         ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
         ax.set_title(title, fontsize=15, fontweight="bold", pad=14)
         style_axis(ax)
+        # Fix: Disable full-width grid and draw manual grid lines that stop at x=1 (8B)
+        ax.grid(False)
+        yticks = ax.get_yticks()
+        for y in yticks:
+            if 0.38 <= y <= 0.60:
+                ax.hlines(y, xmin=-0.15, xmax=1.0, color="#D9D9D9", linewidth=0.8, alpha=0.7, zorder=0)
     axes[0].set_ylabel("LLM-judge strict accuracy", fontsize=12)
     axes[0].legend(frameon=False, loc="upper left")
     fig.suptitle("Effect of Scaling from 4B to 8B", fontsize=21, fontweight="bold", y=1.02)
@@ -274,6 +282,20 @@ def plot_lexical_diagnostics() -> None:
 
 
 def main() -> None:
+    global COMPARISON, OUTPUT, EVALUATION_DIRS
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--comparison", type=Path, default=COMPARISON,
+                        help="Directory containing the comparison CSV files.")
+    parser.add_argument("--output", type=Path,
+                        help="Figure output directory (default: <comparison>/figures).")
+    parser.add_argument("--evaluation-dir", nargs="+", type=Path,
+                        default=list(EVALUATION_DIRS),
+                        help="Evaluation directories containing summary.csv for the efficiency plot.")
+    args = parser.parse_args()
+    COMPARISON = args.comparison
+    OUTPUT = args.output or COMPARISON / "figures"
+    EVALUATION_DIRS = tuple(args.evaluation_dir)
+
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
         "font.size": 11,
