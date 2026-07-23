@@ -1,0 +1,23 @@
+\chapter*{Abstract}
+
+Vision-Language Models (VLMs) have demonstrated exceptional capabilities in
+visual reasoning, yet systematic evaluation of their robustness across
+non-standard sensor modalities remains limited. Furthermore, curating
+multi-sensor benchmarks is bottlenecked by the high cost of manual annotation
+and the hallucination risks inherent to automated generation. This report
+presents an end-to-end automated pipeline for constructing high-quality,
+modality-grounded Question-Answer (QA) benchmarks from multi-sensor video
+streams. By temporally aligning four diverse visual modalities (RGB, Infrared,
+Event, and Marigold Depth), the system utilizes a three-stage LLM prompt chain
+and fine-grained atomic QA splitting to generate modality-specific reasoning
+tasks. To ensure rigorous grounding, we introduce a two-tier quality control
+framework—combining rule-based sanitization with LLM-assisted semantic
+verification—and a late fusion module with category-driven reliability profiles.
+This process yields a high-quality benchmark of 5,465 visual QA items with an
+impressive 74.8\% retention rate of valid atomic candidates. Finally, we
+establish three controlled evaluation protocols (Source-Modality Baseline,
+Modality Replacement, and Native Video Adapter) to evaluate recent 4B and 8B
+open-weight VLMs (Qwen3-VL, InternVL3.5, Molmo2). Our empirical results isolate
+the impact of visual evidence representations from underlying reasoning
+difficulty, revealing critical insights into the architectural adaptability of
+next-generation VLMs across diverse embodied sensing environments.

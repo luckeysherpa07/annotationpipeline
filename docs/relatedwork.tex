@@ -1,0 +1,148 @@
+% !TeX root = thesis.tex
+
+\chapter{Related Work}
+\label{ch:related_work}
+
+This chapter reviews prior work in five areas directly relevant to this
+project: vision-language model benchmarks, multi-sensor datasets and temporal
+alignment, day--night and low-light video understanding, LLM-assisted annotation
+pipelines, and the vision-language models evaluated in this work.
+
+
+\section{Vision-Language Model Benchmarks}
+\label{sec:rw_vlm_benchmarks}
+
+Evaluating Vision-Language Models (VLMs) has attracted substantial interest as
+these models have advanced from image captioning~\cite{chen2015microsoft} to
+complex visual reasoning. Early benchmarks such as VQA~\cite{antol2015vqa} and
+GQA~\cite{hudson2019gqa} established visual question answering as a standard
+evaluation paradigm. Subsequent work extended evaluation to compositional image
+reasoning, including MMBench~\cite{liu2023mmbench} and
+SEED-Bench~\cite{li2023seedbench}, and to video understanding through
+ActivityNet-QA~\cite{yu2019activitynet}, NExT-QA~\cite{xiao2021nextqa},
+Video-MME~\cite{fu2024videomme}, and MVBench~\cite{li2024mvbench}.
+
+Video-based benchmarks evaluate abilities such as action recognition, temporal
+ordering, object movement, state changes, and long-context reasoning. Egocentric
+datasets such as EgoSchema~\cite{mangalam2023egoschema},
+Ego4D~\cite{grauman2022ego4d}, and EgoNight~\cite{egonight2024} extend these
+tasks to first-person recordings and human-object interactions. However, most
+existing benchmarks rely primarily on conventional RGB images or videos and do
+not systematically compare model behaviour across heterogeneous visual sensors.
+
+Our benchmark provides four visual sensor modalities---RGB, infrared, event,
+and depth. The sensor streams are
+synchronized within each recording, while the daytime and nighttime recordings
+represent semantically corresponding repetitions of the same activity. This
+design enables controlled comparison of VLM robustness across sensor modality,
+illumination condition, and input representation.
+
+
+\section{Multi-Sensor Datasets and Temporal Alignment}
+\label{sec:rw_multisensor}
+
+Non-standard visual sensors provide physical properties that complement
+traditional RGB cameras. Event cameras capture asynchronous per-pixel brightness
+changes at very high temporal resolution, making them useful for rapid motion
+and low-light scenes. Canonical event-camera datasets include
+N-Caltech101~\cite{orchard2015converting} and the DAVIS Event
+Dataset~\cite{mueggler2017event}. Infrared datasets such as
+FLIR~\cite{flir2019adas} and KAIST~\cite{hwang2015multispectral} have
+demonstrated the value of non-visible-spectrum sensing under difficult
+illumination and weather conditions.
+
+Depth data contributes information about distance, near--far ordering,
+occlusion, free space, and three-dimensional scene structure. In addition to
+sensor-recorded depth, monocular depth-estimation methods such as
+Marigold~\cite{ke2024repurposing} can generate dense depth maps from RGB
+images.
+
+Temporal alignment is required before these heterogeneous streams can form
+shared evidence units. Dynamic Time Warping
+(DTW)~\cite{berndt1994using}, cross-correlation, and optical flow have been
+used to align sensor streams in robotics, audio-visual learning, and action
+recognition~\cite{arandjelovic2017look}. Our pipeline combines these techniques
+according to the signal characteristics: cross-correlation estimates fixed
+offsets, optical-flow activity provides a common motion representation, and DTW
+models non-linear timing differences before task-level slicing is applied.
+
+
+\section{Day--Night and Low-Light Video Understanding}
+\label{sec:rw_day_night}
+
+Changes in illumination introduce a substantial domain shift for visual
+recognition systems. Nighttime RGB recordings may contain reduced contrast,
+weaker colour information, motion blur, sensor noise, and poorly defined object
+boundaries. Although datasets such as EgoNight~\cite{egonight2024} address
+first-person understanding under low illumination, relatively few benchmarks
+evaluate open-ended video question answering using corresponding daytime and
+nighttime recordings of the same activity.
+
+Nighttime observations should not always be interpreted only as degraded
+versions of daytime scenes. Artificial lights, illuminated displays,
+reflections, and bright regions may become more salient at night. In addition,
+event cameras can preserve motion cues under difficult lighting, while infrared
+sensors may retain object and scene structure when visible-spectrum RGB
+information becomes unreliable.
+
+Our benchmark therefore evaluates four contrastive outcomes: daytime correct
+and nighttime incorrect, nighttime correct and daytime incorrect, both correct,
+and both incorrect. These categories distinguish illumination-specific failures
+from generally difficult questions. They also reveal whether a particular
+sensor provides stronger evidence under specific lighting conditions rather
+than assuming that daytime input is always superior.
+
+
+\section{Automated Dataset Annotation with LLMs}
+\label{sec:rw_auto_annotation}
+
+The availability of instruction-tuned language and vision models has introduced
+a scalable approach to dataset construction, reducing dependence on expensive
+human crowd-sourcing. LLaVA~\cite{liu2023llava} demonstrated that GPT-4-generated
+instruction data could support high-quality visual instruction tuning.
+DataComp~\cite{gadre2023datacomp} showed that dataset curation strategy is as
+important as raw dataset size, while LAION-COCO~\cite{schuhmann2022laion} and
+ShareGPT4V~\cite{chen2023sharegpt4v} illustrated large-scale caption and
+instruction generation.
+
+Multi-sensor annotation requires modality-specific generation strategies because
+different sensors represent different forms of evidence. RGB questions may
+focus on appearance and object identity, event questions on motion and temporal
+change, depth questions on geometry and spatial relations, and infrared questions
+on low-light visibility. A single generic prompt is therefore insufficient for
+constructing a modality-aware benchmark.
+
+Automatically generated annotations may contain hallucinations, vague or
+unanswerable questions, unsupported answers, and contradictions with the
+available evidence. Distillation-based filtering~\cite{west2022symbolic} and
+LLM judges~\cite{zheng2023judging} have been used to improve generated-data
+quality. Our pipeline applies a lightweight semantic verifier based on Gemini
+3.1 Flash Lite, which evaluates each QA candidate using five binary quality
+criteria and a hallucination-risk score. Only candidates that pass all validity
+checks are retained before multimodal evidence fusion.
+
+
+\section{Vision-Language Models Evaluated in This Work}
+\label{sec:rw_vlms}
+
+To demonstrate the utility of the constructed multi-sensor benchmark, we
+evaluate three recent open-weight VLM families at approximately 4B and 8B
+parameter scales. Qwen3-VL~\cite{wang2024qwen2vl} supports dynamic-resolution
+visual processing and detailed spatial and temporal reasoning.
+InternVL3.5~\cite{chen2024internvl} uses a high-resolution InternViT encoder and
+a progressive vision-language alignment strategy, while
+Molmo2~\cite{deitke2024molmo} combines a vision encoder with an efficient
+decoder-only language model and video-processing components.
+
+The models are evaluated using fixed-frame inputs and, where supported by the
+corresponding implementation, native-video inputs. Fixed-frame evaluation
+provides a controlled and computationally predictable representation, whereas
+native-video input allows models to use their internal temporal-processing
+mechanisms. This comparison tests whether native-video processing consistently
+offers an advantage over representative frame sampling.
+
+Evaluating both 4B and 8B variants also allows us to investigate whether a
+larger parameter count produces consistent improvements across RGB, infrared,
+event, and depth inputs. The experiments therefore examine model robustness
+along four dimensions: sensor modality, illumination condition, model scale,
+and evidence-presentation format.

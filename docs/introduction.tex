@@ -1,0 +1,67 @@
+% !TeX root = thesis.tex
+
+\chapter{Introduction}
+\label{ch:introduction}
+
+Vision-Language Models (VLMs) have demonstrated remarkable capabilities across
+a wide range of visual reasoning tasks, yet systematic evaluation across diverse
+sensor modalities remains limited. Most existing benchmarks focus exclusively on
+standard RGB images or video, leaving open questions about how well these models
+generalize to alternative visual representations such as infrared thermal,
+event-based, or depth imagery—modalities that are increasingly central to
+robotics, autonomous driving, and embodied intelligence applications.
+
+Constructing a high-quality benchmark for multi-sensor VLM evaluation faces two
+fundamental challenges. First, manually annotating question--answer (QA) pairs
+for multiple aligned sensor modalities is prohibitively expensive and difficult
+to scale. Second, automatic annotation pipelines risk producing hallucinated,
+unanswerable, or structurally malformed QA items unless rigorous quality control
+is applied throughout the generation process.
+
+This report presents an automated pipeline that addresses both challenges.
+Starting from multi-sensor video recordings spanning four aligned visual modalities
+(RGB, infrared, event, and Marigold depth), the system generates modality-grounded
+QA annotations through a structured three-stage prompt chain, filters and validates them with a two-tier quality control mechanism,
+and integrates them via a late fusion framework governed by category-driven
+reliability profiles.
+The resulting benchmark enables controlled evaluation of VLMs under three
+distinct protocols: a source-modality baseline, a same-question
+modality-replacement experiment, and a native video adapter protocol.
+
+\section{Contributions}
+\label{sec:intro_contributions}
+
+The primary contributions of this report are:
+
+\begin{itemize}
+    \item An end-to-end automated annotation pipeline that processes four aligned
+          visual sensor modalities and produces 5,465 quality-verified QA pairs
+          from raw multi-sensor video streams.
+
+    \item A two-tier quality control framework combining rule-based sanitization
+          with LLM-assisted semantic verification, achieving a 74.8\% retention rate
+          while suppressing hallucinated, unanswerable, and structurally malformed
+          annotations.
+
+    \item A late fusion module with category-driven reliability profiles and
+          relation-aware cross-modal support scoring that integrates modality-specific
+          candidate pools into a coherent, grounded benchmark.
+
+    \item Three controlled VLM benchmarking protocols evaluated across 4B and 8B
+          parameter variants of Qwen3-VL, InternVL3.5, and Molmo2, providing
+          empirical insights into how model architecture and evidence representation
+          influence modality robustness.
+\end{itemize}
+
+\section{Report Structure}
+\label{sec:intro_structure}
+
+The remainder of this report is organized as follows.
+Chapter~\ref{ch:related_work} reviews related work on multimodal datasets,
+automated annotation pipelines, and VLM evaluation benchmarks.
+Chapter~\ref{ch:approach} describes the proposed annotation and benchmarking
+pipeline in detail.
+Chapter~\ref{ch:evaluation} presents the experimental setup, benchmark results,
+and discussion.
+Chapter~\ref{ch:conclusion} summarizes the contributions and outlines directions
+for future work.

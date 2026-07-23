@@ -1,0 +1,75 @@
+% !TeX root = thesis.tex
+
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+
+\section{Summary of Contributions}
+\label{sec:conclusion_contributions}
+
+This report presents an automated end-to-end framework for generating
+modality-grounded question--answer (QA) annotations from multi-sensor streams
+and establishing controlled Vision-Language Model (VLM) benchmarks. The primary
+contributions of this work are three-fold:
+
+\begin{enumerate}
+    \item \textbf{Automated Multi-Sensor Annotation Pipeline:} We designed a
+          structured pipeline that synchronizes four visual sensor modalities (RGB,
+          Infrared, Event, and Marigold Depth) via Dynamic Time Warping (DTW),
+          cross-correlation, and optical flow. Using a three-stage LLM prompt chain (Captioning $\rightarrow$
+          Question Generation $\rightarrow$ Answering) combined with fine-grained
+          atomic QA splitting, the pipeline converts raw multi-sensor recordings into
+          structured QA candidate pools.
+
+    \item \textbf{Two-Tier Quality Control and Late Fusion Framework:} We introduced
+          a rigorous quality assurance mechanism combining rule-based sanitization
+          and LLM-assisted semantic verification across five quality dimensions and
+          hallucination risk estimation. This is coupled with a late fusion module
+          governed by category-driven reliability profiles and relation-aware
+          cross-modal support scoring. From 2,730 initial raw blocks (yielding 7,310
+          atomic candidates), the framework filters out malformed or ungrounded entries
+          and retains 5,465 high-quality visual QA items for the benchmark.
+
+    \item \textbf{Controlled VLM Benchmarking and Empirical Insights:} We established
+          three standardized evaluation protocols—Source-Modality Baseline, Primary
+          Modality Replacement (21,324 evaluations across 5,331 paired questions), and
+          Native Video Adapter. Empirical evaluation across 4B and 8B parameter
+          variants of Qwen3-VL, InternVL3.5, and Molmo2 revealed that model architecture
+          and evidence representation play a more decisive role in modality robustness
+          than parameter scale alone. Notably, Qwen3-VL achieved superior performance
+          across all visual modalities (reaching 57.49\% strict accuracy at 8B scale).
+\end{enumerate}
+
+While these contributions demonstrate the viability of automated multi-sensor
+annotation and controlled VLM benchmarking, the framework remains subject to certain
+scope caveats—such as evaluator LLM bias, single-modality grounding scope, and
+cross-sensor imbalances—which are discussed in detail in Chapter~\ref{ch:evaluation}.
+
+
+\section{Future Directions}
+\label{sec:conclusion_future_work}
+
+Building upon the findings of this project, several promising avenues exist for future research:
+
+\begin{itemize}
+    \item \textbf{Human-in-the-Loop Validation:} Conducting a stratified human
+          validation study across retained, review-recommended, and rejected QA
+          items to quantify agreement between human annotators and the LLM-assisted
+          semantic verifier.
+
+    \item \textbf{Joint Multimodal Fusion Protocols:} Extending the evaluation suite to
+          incorporate dedicated multi-input protocols that evaluate models on
+          cross-modal disambiguation and joint reasoning tasks across simultaneous
+          multi-sensor inputs.
+
+    \item \textbf{Scaling to Larger-Scale Multi-Scene Datasets:} Extending the
+          automated annotation pipeline and benchmarking framework to larger,
+          more diverse egocentric and multi-sensor video datasets to assess
+          scalability, generalize reliability profiles, and calibrate cross-modal
+          support thresholds across varied real-world environments.
+
+    \item \textbf{Enhancing QA Complexity and Reasoning Depth:} Expanding from
+          atomic, short-form QA pairs toward multi-step spatial-temporal reasoning
+          and descriptive open-ended questions to challenge next-generation VLMs
+          beyond surface-level visual recognition.
+\end{itemize}
